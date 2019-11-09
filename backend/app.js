@@ -48,7 +48,9 @@ app.configure(authentication);
 app.configure(services);
 // Set up event channels (see channels.js)
 app.configure(channels);
-
+app.get('*', function(request, response) {
+  response.sendFile(path.join(app.get('public'), 'index.html'));
+});
 // Configure a middleware for 404s and the error handler
 app.use(express.notFound());
 app.use(express.errorHandler({ logger }));
