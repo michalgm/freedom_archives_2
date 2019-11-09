@@ -1,6 +1,13 @@
 const { authenticate } = require('@feathersjs/authentication').hooks;
 const tsquery = require('pg-tsquery')();
 
+const refreshRecordsView = async (context) => {
+  const { Model } = context.service;
+  await Model.raw("drop table unified_records");
+  await Model.raw("create table unified_records as select * from records_view");
+  await Model.raw("CREATE INDEX records_fulltext_index on unified_records using GIN (fulltext)");
+};
+
 module.exports = {
   before: {
     all: [authenticate('jwt')],
@@ -24,7 +31,9 @@ module.exports = {
     create: [],
     update: [],
     patch: [],
-    remove: []
+    remove: [context => {
+      context.service.table = 'records';
+    }]
   },
 
   after: {
@@ -35,13 +44,15 @@ module.exports = {
       if (context.fullText) {
         context.result.fullText = context.fullText;
       }
+      context.service.table = 'unified_records';
+
     }],
     find: [],
     get: [],
-    create: [],
-    update: [],
-    patch: [],
-    remove: []
+    create: [refreshRecordsView],
+    update: [refreshRecordsView],
+    patch: [refreshRecordsView],
+    remove: [refreshRecordsView]
   },
 
   error: {

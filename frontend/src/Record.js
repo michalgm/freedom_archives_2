@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, Redirect } from 'react-router-dom';
 import { app } from './api';
 
 function Record() {
   const [{ record, new_record }, setRecord] = useState({ record: {}, new_record: {} });
+  const [returnHome, set_returnHome] = useState(false)
   const { id } = useParams();
 
   const fetchRecord = async (id) => {
@@ -18,15 +19,25 @@ function Record() {
     setRecord({ record, new_record });
   }
 
+  const deleteRecord = async () => {
+    await app.service('records').remove(id);
+    set_returnHome(true);
+  }
+
   useEffect(() => {
     fetchRecord(id)
   }, [id])
+
+  if (returnHome) {
+    return <Redirect to="/" />
+  }
 
   return (
     <>
       <p>
         {new_record.title}
       </p>
+      <button onClick={() => deleteRecord()}>Delete</button>
       <table border={1}>
         {Object.keys(new_record).map(key =>
           <tr key={key}>

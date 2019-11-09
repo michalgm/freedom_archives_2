@@ -6,7 +6,7 @@ class Records extends Service {
   constructor(options) {
     super({
       ...options,
-      name: 'records_view',
+      name: 'unified_records',
       whitelist: ['$fullText']
     });
   }

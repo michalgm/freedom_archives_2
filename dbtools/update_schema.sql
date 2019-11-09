@@ -300,27 +300,9 @@ SELECT b.record_id,
      JOIN records_to_list_items b USING (list_item_id)
   GROUP BY b.record_id, a.type;
 
-
-drop view if exists records_view_2;
-create view records_view_2 as
-  select a.*,
-    (select array_to_json(array_agg(row_to_json(b))) from instances_view b where record_id = a.record_id) as instances,
-    contributor.firstname || ' ' || contributor.lastname as contributor_name,
-    contributor.username as contributor_username,
-    creator.firstname || ' ' || creator.lastname as creator_name,
-    creator.username as creator_username,
-    (select array_to_json(array_agg(row_to_json(c))) from (select record_id, title from records where parent_record_id = a.record_id) c) as children,
-    (select type from records_list_items_view b where b.type =  'author' and b.record_id = a.record_id) as authors,
-    (select type from records_list_items_view b where b.type =  'subject' and b.record_id = a.record_id) as subjects,
-    (select type from records_list_items_view b where b.type =  'keyword' and b.record_id = a.record_id) as keywords,
-    (select type from records_list_items_view b where b.type =  'producer' and b.record_id = a.record_id) as producers
-  from records a
-  left join users contributor on a.contributor_user_id = contributor.user_id
-  left join users creator on a.creator_user_id = creator.user_id
-;
 /* FIXME collection */
 drop view if exists records_view;
-create materialized view records_view as
+create view records_view as
   select a.*,
     instances.instances as instances,
     contributor.firstname || ' ' || contributor.lastname as contributor_name,
@@ -358,8 +340,8 @@ create materialized view records_view as
   left join records_list_items_view producers on producers.type =  'producer' and producers.record_id = a.record_id
   ;
 
-CREATE INDEX records_fulltext_index on records_view using GIN (fulltext);
-
+create table unified_records as select * from records_view;
+CREATE INDEX records_fulltext_index on unified_records using GIN (fulltext);
 
 drop view if exists unknown_relations;
 create view unknown_relations as      select *
