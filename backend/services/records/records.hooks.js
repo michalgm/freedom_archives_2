@@ -1,4 +1,5 @@
 const { authenticate } = require('@feathersjs/authentication').hooks;
+const tsquery = require('pg-tsquery')();
 
 module.exports = {
   before: {
@@ -9,8 +10,10 @@ module.exports = {
         const { $fullText, ...query } = context.params.query;
         const knex = context.service.createQuery({ ...context.params, query });
         if ($fullText) {
-          knex.select(context.service.Model.raw(`ts_rank_cd(fulltext, websearch_to_tsquery('english', ?)) AS score`, [$fullText]));
-          knex.whereRaw(`fulltext @@ websearch_to_tsquery('english', ?)`, [$fullText]);
+          const fullTextQuery = tsquery($fullText);
+          context.fullText = fullTextQuery;
+          knex.select(context.service.Model.raw(`ts_rank_cd(fulltext, to_tsquery('english', ?)) AS score`, [fullTextQuery]));
+          knex.whereRaw(`fulltext @@ to_tsquery('english', ?)`, [fullTextQuery]);
           knex.orderBy('score', 'desc');
         }
         context.params.knex = knex;
@@ -28,6 +31,9 @@ module.exports = {
     all: [context => {
       if (context.params.knex) {
         context.result.query = context.params.knex.toString();
+      }
+      if (context.fullText) {
+        context.result.fullText = context.fullText;
       }
     }],
     find: [],
