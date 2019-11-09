@@ -8,6 +8,11 @@ const refreshRecordsView = async (context) => {
   await Model.raw("CREATE INDEX records_fulltext_index on unified_records using GIN (fulltext)");
 };
 
+const maskView = context => {
+  context.service.table = 'records';
+  return context;
+};
+
 module.exports = {
   before: {
     all: [authenticate('jwt')],
@@ -28,12 +33,10 @@ module.exports = {
 
     }],
     get: [],
-    create: [],
+    create: [maskView],
     update: [],
-    patch: [],
-    remove: [context => {
-      context.service.table = 'records';
-    }]
+    patch: [maskView],
+    remove: [maskView]
   },
 
   after: {
