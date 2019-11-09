@@ -14,10 +14,12 @@ function Records() {
   const fetchRecords = async ($fullText = "") => {
     setLoading(true)
     const time = new Date();
-    const { total, data: records } = await app.service('records').find({ query: { $select: ['record_id', 'title'], $fullText, $limit: 20 } });
-    setRecords({ total, records });
+    try {
+      const { total, data: records } = await app.service('records').find({ query: { $select: ['record_id', 'title'], $fullText, $limit: 20 } });
+      setRecords({ total, records });
+      setTime((new Date() - time) / 1000)
+    } catch { }
     setLoading(false)
-    setTime((new Date() - time) / 1000)
   }
 
   useEffect(() => {
@@ -31,7 +33,6 @@ function Records() {
         <Formik
           initialValues={{ search }}
           onSubmit={({ search }) => {
-            // fetchRecords(search)
             dispatch('SET_SEARCH', search);
           }}
         >
