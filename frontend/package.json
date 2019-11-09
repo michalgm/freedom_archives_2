@@ -16,7 +16,8 @@
     "start": "react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test",
-    "eject": "react-scripts eject"
+    "eject": "react-scripts eject",
+    "publish": "npm run build && scp -Crp build/* freedomarc:work/freedom_archives_2/frontend/build/"
   },
   "eslintConfig": {
     "extends": "react-app"
