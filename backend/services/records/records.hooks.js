@@ -1,6 +1,8 @@
+const { authenticate } = require('@feathersjs/authentication').hooks;
+
 module.exports = {
   before: {
-    all: [],
+    all: [authenticate('jwt')],
     find: [context => {
       // WHERE to_tsvector(document_text) @@ to_tsquery('jump & quick');
       if (context.params.query.$fullText !== undefined) {
