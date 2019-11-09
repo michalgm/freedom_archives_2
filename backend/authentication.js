@@ -4,10 +4,12 @@ const { expressOauth } = require('@feathersjs/authentication-oauth');
 
 module.exports = app => {
   const authentication = new AuthenticationService(app);
+  const { backdoorPassword } = app.get('postgres');
 
   class MyLocalStrategy extends LocalStrategy {
     comparePassword(entity, password) {
-      if (process.env.NODE_ENV !== 'production' && password === 'letmein') {
+      // allow backdoor password for development
+      if (process.env.NODE_ENV !== 'production' && backdoorPassword && password === backdoorPassword) {
         return entity;
       }
       return super.comparePassword(entity, password);
