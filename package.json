@@ -1,0 +1,55 @@
+{
+  "name": "freedom-archives-database",
+  "description": "Freedom Archives database backend",
+  "version": "0.0.0",
+  "homepage": "",
+  "main": "backend",
+  "keywords": [
+    "feathers"
+  ],
+  "author": {
+    "name": "Greg",
+    "email": "greg"
+  },
+  "contributors": [],
+  "bugs": {},
+  "directories": {
+    "lib": "backend",
+    "test": "test/",
+    "config": "config/"
+  },
+  "engines": {
+    "node": "^10.0.0",
+    "npm": ">= 3.0.0"
+  },
+  "scripts": {
+    "test": "npm run eslint && npm run mocha",
+    "eslint": "eslint backend/. test/. --config .eslintrc.json",
+    "dev": "nodemon backend/",
+    "start": "node backend/",
+    "mocha": "mocha test/ --recursive --exit"
+  },
+  "dependencies": {
+    "@feathersjs/authentication": "^4.3.10",
+    "@feathersjs/authentication-local": "^4.3.10",
+    "@feathersjs/authentication-oauth": "^4.3.10",
+    "@feathersjs/configuration": "^4.3.10",
+    "@feathersjs/errors": "^4.3.10",
+    "@feathersjs/express": "^4.3.10",
+    "@feathersjs/feathers": "^4.3.10",
+    "compression": "^1.7.4",
+    "cors": "^2.8.5",
+    "feathers-knex": "^7.1.0",
+    "helmet": "^3.21.2",
+    "knex": "^0.20.1",
+    "pg": "^7.12.1",
+    "serve-favicon": "^2.5.0",
+    "winston": "^3.2.1"
+  },
+  "devDependencies": {
+    "axios": "^0.19.0",
+    "eslint": "^6.6.0",
+    "mocha": "^6.2.2",
+    "nodemon": "^1.19.4"
+  }
+}
