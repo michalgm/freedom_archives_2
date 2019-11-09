@@ -9,11 +9,9 @@ module.exports = {
         const { $fullText, ...query } = context.params.query;
         const knex = context.service.createQuery({ ...context.params, query });
         if ($fullText) {
-          console.log('HEEEY!', `!${$fullText}!`);
           knex.select(context.service.Model.raw(`ts_rank_cd(fulltext, websearch_to_tsquery('english', ?)) AS score`, [$fullText]));
           knex.whereRaw(`fulltext @@ websearch_to_tsquery('english', ?)`, [$fullText]);
           knex.orderBy('score', 'desc');
-          console.log('###', knex);
         }
         context.params.knex = knex;
       }
