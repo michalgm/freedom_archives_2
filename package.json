@@ -25,7 +25,7 @@
   "scripts": {
     "test": "npm run eslint && npm run mocha",
     "eslint": "eslint backend/. test/. --config .eslintrc.json",
-    "dev": "nodemon backend/",
+    "dev": "nodemon -w config/ -w backend/ -w package.json backend/index.js",
     "start": "node backend/",
     "mocha": "mocha test/ --recursive --exit"
   },
