@@ -8,8 +8,7 @@ const initialState = {
   error: null,
   search: {
     $fullText: '',
-    has_digital: true,
-    filters: {}
+    has_digital: true
   }
 };
 const reducer = (state, action) => {

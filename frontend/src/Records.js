@@ -19,7 +19,7 @@ function Records() {
       try {
         const { $fullText, has_digital, keyword, subject, author } = search;
         const query = {
-          $select: ['record_id', 'title'],
+          $select: ['record_id', 'title', 'description'],
           $limit: 20,
           $fullText: $fullText,
           has_digital: has_digital,
@@ -43,13 +43,23 @@ function Records() {
     dispatch('SET_SEARCH', { ...search, ...newFilter });
   }
 
+  const clearFilters = () => {
+    filters.forEach(({ type }) => {
+      delete search[type];
+    })
+    dispatch('SET_SEARCH', { ...search });
+  }
+
   const renderResults = () => (
     <ul style={{ flexGrow: 2 }}>
       {records.records.map((record) => (
         <li key={record.record_id}>
           <Link to={`/record/${record.record_id}`}>
             {record.title}
-          </Link> {record.score && <span>\({record.score}\)</span>}
+          </Link> {record.score && <span>{`(${record.score})`}</span>}
+          <div>
+            {record.description.slice(0, 100)} {record.description.length > 100 ? '...' : ''}
+          </div>
         </li>
       ))}
     </ul>
@@ -58,6 +68,7 @@ function Records() {
   const renderFilters = () => (
     <div>
       <h5>Filters</h5>
+      <button onClick={() => clearFilters()}>Clear Filters</button>
       {filters.map(renderFilter)}
     </div>
   );
