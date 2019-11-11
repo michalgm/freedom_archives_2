@@ -18,6 +18,32 @@ function Record() {
     ['keywords', 'subjects', 'authors', 'producers'].forEach(key => {
       new_record[key] = (record[key] || []).map(i => i.item).join(', ')
     })
+    new_record.instances = (<table border="1" >
+      <thead><tr>
+        <th>Thumbnail</th>
+        <th>Format</th>
+        <th>Quality</th>
+        <th>Media Type</th>
+        <th>Primary</th>
+        <th>Copies</th>
+        <th>Link</th>
+        <th>Original docid</th></tr>
+      </thead>
+      <tbody>{
+        record.instances.map(instance => (
+          <tr key={instance.instance_id}>
+            <td>{instance.thumbnail ? <img width="20" src={"https://search.freedomarchives.org/" + instance.thumbnail} /> : null}</td>
+            <td>{instance.format_value}</td>
+            <td>{instance.quality_value}</td>
+            <td>{instance.media_type}</td>
+            <td>{instance.is_primary ? 'Y' : ''}</td>
+            <td>{instance.copies}</td>
+            <td>{instance.url ? <a href={instance.url} target="_blank">Link</a> : null}</td>
+            <td>{instance.original_doc_id}</td>
+          </tr>
+        ))}</tbody>
+    </table >
+    )
     setRecord({ record, new_record });
     setLoading(false);
   }
@@ -30,7 +56,8 @@ function Record() {
 
   const updateRecord = async (data) => {
     setLoading(true);
-    const updated = await app.service('records').patch(id, data);
+    await app.service('records').patch(id, data);
+    const updated = await app.service('records').get(id)
     loadRecord(updated);
   }
 
@@ -42,12 +69,12 @@ function Record() {
   if (returnHome) {
     return <Redirect to="/" />
   }
-  if (loading) {
-    return "Loading..."
-  }
+  // if (loading) {
+  //   return "Loading..."
+  // }
 
   return (
-    <>
+    <div className={loading ? 'loading' : null}>
       <p>
         {new_record.title}
       </p>
@@ -57,7 +84,7 @@ function Record() {
           initialValues={{ title: new_record.title }}
           onSubmit={updateRecord}
         >
-          <Form>
+          <Form >
             <Field name='title' placeholder="Set Title" />
             <button type='submit'>Save</button>
           </Form>
@@ -75,7 +102,7 @@ function Record() {
       <pre style={{ textAlign: 'left' }}>
         {JSON.stringify(record, null, 2)}
       </pre>
-    </>
+    </div>
   )
 }
 

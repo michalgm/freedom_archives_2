@@ -5,7 +5,12 @@ const initialState = {
   hooks_initialized: false,
   user: null,
   token: null,
-  error: null
+  error: null,
+  search: {
+    $fullText: '',
+    has_digital: true,
+    filters: {}
+  }
 };
 const reducer = (state, action) => {
   const { type, payload } = action;

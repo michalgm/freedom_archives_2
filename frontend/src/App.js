@@ -14,18 +14,19 @@ function App() {
       <Router>
         <div className="App">
           <header className="App-header">
-            <Link to="/">Hello!</Link>
+            <Link to="/">Home</Link>
             <Logout />
           </header>
           <Main />
         </div>
       </Router>
-    </StateProvider >
+    </StateProvider>
   );
 }
 
 function Logout() {
-  return <Link to="/login" onClick={app.logout}>Logout</Link>
+  const { state: { isAuthenticated } } = useStateValue();
+  return isAuthenticated ? <Link to="/login" onClick={app.logout}>Logout</Link> : '';
 }
 
 function Authentication() {
@@ -68,10 +69,9 @@ function Authentication() {
 
 function Main() {
   const { state: { isAuthenticated, error } } = useStateValue();
-  console.log(isAuthenticated)
-  const title = isAuthenticated ? 'Welcome' : 'Login'
+  // const title = isAuthenticated ? 'Welcome' : 'Login'
+  // <h1>{title}</h1>
   return <>
-    <h1>{title}</h1>
     <Authentication />
     {error && (<h2>{error}</h2>)}
     {isAuthenticated ? (
