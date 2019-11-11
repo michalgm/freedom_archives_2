@@ -92,7 +92,7 @@ module.exports = {
                 using (record_id)
               group by item, type
               order by type
-            )
+            ) a
             group by type;
           `);
           result.filters = filters.rows;
