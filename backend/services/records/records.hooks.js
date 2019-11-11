@@ -15,7 +15,7 @@ const refreshRecordsView = async (context) => {
           .where('record_id', id)
           .select();
         Object.keys(data).forEach(key => {
-          if (data[key] && typeof data[key] === 'object') {
+          if (data[key] && typeof data[key] === 'object' && !key.includes('_search')) {
             data[key] = JSON.stringify(data[key]);
           }
         });
@@ -24,7 +24,10 @@ const refreshRecordsView = async (context) => {
       }
     } catch (err) {
       console.error(err);
+      await trx.rollback();
+      return Promise.reject(err);
     }
+    await trx.commit();
   });
 };
 
