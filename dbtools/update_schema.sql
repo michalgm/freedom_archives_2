@@ -68,9 +68,9 @@ CREATE TABLE records (
   vol_number varchar(50) DEFAULT NULL,
   collection_id integer DEFAULT 1000 REFERENCES collections,
   parent_record_id integer,
-  year varchar(10) NOT NULL DEFAULT '?',
-  month varchar(2) NOT NULL DEFAULT '?',
-  day varchar(2) NOT NULL DEFAULT '?',
+  year int,
+  month int,
+  day int,
   call_number text,
   publisher integer REFERENCES list_items,
   program integer REFERENCES list_items,
@@ -149,7 +149,6 @@ LANGUAGE
 `URL_TEXT` varchar(255) DEFAULT NULL,
 `LENGTH` varchar(50) DEFAULT NULL, */
 
-
 insert into archives VALUES(default, 'The Freedom Archives');
 insert into users (select user_id, 1, username, firstname, lastname, user_type, password, status, email from freedom_archives_old.users);
 insert into list_items(item, type, description) (select item, type, description from freedom_archives_old.list_items);
@@ -159,6 +158,8 @@ insert into collections (select collection_id, parent_id, collection_name, descr
 /* FIXME: Call number relation */
 /* FIXME: list_items missing stuff */
 /* FIXME: year/month/day -> date field */
+/* FIXME: normalize dates: select docid, a.year, a.month, a.day, b.year, b.month, b.day from freedom_archives_old.documents a join records_view b on docid = record_id where a.year != b.year::text or a.month != b.month::text or a.day != b.day::text; */
+
 insert into records (
   select
     docid as record_id,
@@ -170,9 +171,9 @@ insert into records (
     vol_number,
     case collection_id when 112 then 1000 else collection_id end,
     null,
-    year,
-    month,
-    day,
+    nullif(regexp_replace(year, '[^0-9]', '', 'g'), '')::int,
+    nullif(regexp_replace(month, '[^0-9]', '', 'g'), '')::int,
+    nullif(regexp_replace(day, '[^0-9]', '', 'g'), '')::int,
     call_number,
     publisher_lookup.list_item_id,
     program_lookup.list_item_id,
@@ -193,6 +194,37 @@ insert into records (
     left join list_items program_lookup on a.program = program_lookup.item and program_lookup.type = 'program'
     left join list_items generation_lookup on a.generation = generation_lookup.item and generation_lookup.type = 'generation'
 );
+
+/* update records set month = b.value from
+select month, b.value from records a join (
+  select docid, b.value from freedom_archives_old.documents a join (
+    select * from (
+      values
+      ('Ja', 1),
+      ('Fe', 2)
+    ) as i(month, value)
+  ) b using (month)
+) b on a.record_id = b.docid */
+
+update records set month = '1' where record_id in (select docid from freedom_archives_old.documents where month = 'Ja');
+update records set month = '2' where record_id in (select docid from freedom_archives_old.documents where month = 'Fe');
+update records set month = '3' where record_id in (select docid from freedom_archives_old.documents where month = 'Ma');
+update records set month = '4' where record_id in (select docid from freedom_archives_old.documents where month = 'Ap');
+update records set month = '5' where record_id in (select docid from freedom_archives_old.documents where month = 'Ma');
+update records set month = '6' where record_id in (select docid from freedom_archives_old.documents where month = 'Ju');
+update records set month = '7' where record_id in (select docid from freedom_archives_old.documents where month = 'Ju');
+update records set month = '8' where record_id in (select docid from freedom_archives_old.documents where month = 'Au' or month = 'Ag');
+update records set month = '9' where record_id in (select docid from freedom_archives_old.documents where month = 'Se');
+update records set month = '10' where record_id in (select docid from freedom_archives_old.documents where month = 'Oc');
+update records set month = '11' where record_id in (select docid from freedom_archives_old.documents where month = 'No');
+update records set month = '12' where record_id in (select docid from freedom_archives_old.documents where month = 'De');
+
+update records set day = 30 where month = 6 and day = 31;
+update records set year = 2005 where record_id = 28007;
+update records set year = year + 1900 where year > 20 and year < 99;
+update records set year = year + 2000 where year < 20;
+
+update records set year = null where year > 2020;
 
 insert into records_to_list_items (select distinct list_item_id,
   id as record_id from freedom_archives_old.list_items_lookup a join freedom_archives.list_items b on a.item = b.item and a.type = b.type join records on id = record_id where is_doc = 1);
@@ -295,7 +327,8 @@ create view records_list_items_view as
 SELECT b.record_id,
     a.type,
     array_to_json(array_agg(ROW_TO_JSON((select i from (select a.list_item_id, a.item) i )))) AS items,
-    string_agg(a.item, ' ') as items_text
+    string_agg(a.item, ' ') as items_text,
+    array_agg(a.item) as items_search
    FROM list_items a
      JOIN records_to_list_items b USING (list_item_id)
   GROUP BY b.record_id, a.type;
@@ -304,7 +337,11 @@ SELECT b.record_id,
 drop view if exists records_view;
 create view records_view as
   select a.*,
+    coalesce(a.month::text, '??') || '/' || coalesce(a.day::text, '??') || '/' || coalesce(a.year::text, '??') as date_string,
+    (coalesce(a.year::text, '1900')::text || '-' || coalesce(a.month::text, '01')::text || '-' || coalesce(a.day::text, '01')::text)::date as date,
     instances.instances as instances,
+    instances.has_digital as has_digital,
+    instances.instance_count as instance_count,
     contributor.firstname || ' ' || contributor.lastname as contributor_name,
     contributor.username as contributor_username,
     creator.firstname || ' ' || creator.lastname as creator_name,
@@ -318,19 +355,18 @@ create view records_view as
     subjects.items_text as subjects_text,
     keywords.items_text as keywords_text,
     producers.items_text as producers_text,
-    to_tsvector(concat(
-      a.title, ' ',
-      a.title, ' ',
-      a.title, ' ',
-      a.description, ' ',
-      a.description, ' ',
-      authors.items_text, ' ',
-      subjects.items_text, ' ',
-      keywords.items_text, ' ',
-      producers.items_text
-      )) as fulltext
+    authors.items_search as authors_search,
+    subjects.items_search as subjects_search,
+    keywords.items_search as keywords_search,
+    producers.items_search as producers_search,
+
+    setweight(to_tsvector('english', coalesce(a.title, '')), 'A') ||
+      setweight(to_tsvector('english', coalesce(a.description, '')), 'B') ||
+      setweight(to_tsvector('english', coalesce(authors.items_text, '')), 'C') ||
+      setweight(to_tsvector('english', coalesce(subjects.items_text, '')), 'C') ||
+      setweight(to_tsvector('english', coalesce(keywords.items_text, '')), 'C') as fulltext
   from records a
-  left join (select record_id, array_to_json(array_agg(row_to_json(b))) as instances from instances_view b group by record_id) instances using (record_id)
+  left join (select record_id, bool_or(url != '') as has_digital, count(*) as instance_count, array_to_json(array_agg(row_to_json(b) order by b.is_primary)) as instances from instances_view b group by record_id ) instances using (record_id)
   left join users contributor on a.contributor_user_id = contributor.user_id
   left join users creator on a.creator_user_id = creator.user_id
   left join (select parent_record_id, array_to_json(array_agg(row_to_json(b))) as children from (select parent_record_id, title from records) b group by parent_record_id) children on children.parent_record_id = a.record_id
@@ -339,10 +375,10 @@ create view records_view as
   left join records_list_items_view keywords on keywords.type =  'keyword' and keywords.record_id = a.record_id
   left join records_list_items_view producers on producers.type =  'producer' and producers.record_id = a.record_id
   ;
-
+drop table if exists unified_records cascade;
 create table unified_records as select * from records_view;
 CREATE INDEX records_fulltext_index on unified_records using GIN (fulltext);
-
+ALTER TABLE unified_records add PRIMARY KEY(record_id);
 drop view if exists unknown_relations;
 create view unknown_relations as      select *
       from freedom_archives_old.related_records

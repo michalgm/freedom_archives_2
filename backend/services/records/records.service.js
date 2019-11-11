@@ -7,7 +7,7 @@ class Records extends Service {
     super({
       ...options,
       name: 'unified_records',
-      whitelist: ['$fullText']
+      whitelist: ['$fullText', '$overlap']
     });
   }
 }

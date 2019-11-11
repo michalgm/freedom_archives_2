@@ -6,7 +6,7 @@
     "@feathersjs/authentication-client": "^4.3.10",
     "@feathersjs/feathers": "^4.3.10",
     "@feathersjs/rest-client": "^4.3.10",
-    "formik": "^2.0.2",
+    "formik": "^2.0.3",
     "react": "^16.11.0",
     "react-dom": "^16.11.0",
     "react-router-dom": "^5.1.2",

@@ -2,10 +2,30 @@ const { authenticate } = require('@feathersjs/authentication').hooks;
 const tsquery = require('pg-tsquery')();
 
 const refreshRecordsView = async (context) => {
-  const { Model } = context.service;
-  await Model.raw("drop table unified_records");
-  await Model.raw("create table unified_records as select * from records_view");
-  await Model.raw("CREATE INDEX records_fulltext_index on unified_records using GIN (fulltext)");
+  const { id, method, service: { Model } } = context;
+  await Model.transaction(async trx => {
+    try {
+      if (['update', 'patch', 'remove'].includes(method)) {
+        await trx('unified_records')
+          .where('record_id', id)
+          .delete();
+      }
+      if (['update', 'patch', 'create'].includes(method)) {
+        const [data] = await trx('records_view')
+          .where('record_id', id)
+          .select();
+        Object.keys(data).forEach(key => {
+          if (data[key] && typeof data[key] === 'object') {
+            data[key] = JSON.stringify(data[key]);
+          }
+        });
+        await trx('unified_records')
+          .insert(data);
+      }
+    } catch (err) {
+      console.error(err);
+    }
+  });
 };
 
 const maskView = context => {
@@ -17,7 +37,6 @@ module.exports = {
   before: {
     all: [authenticate('jwt')],
     find: [context => {
-      // WHERE to_tsvector(document_text) @@ to_tsquery('jump & quick');
       if (context.params.query.$fullText !== undefined) {
         const { $fullText, ...query } = context.params.query;
         const knex = context.service.createQuery({ ...context.params, query });
@@ -49,13 +68,42 @@ module.exports = {
       }
       context.service.table = 'unified_records';
 
-    }],
-    find: [],
+    }, refreshRecordsView],
+    find: [
+      async context => {
+        const { result, service: { Model } } = context;
+        if (context.params.query.$fullText !== undefined) {
+          const ids = await context.params.knex
+            .clearSelect()
+            .clearOrder()
+            .select('record_id')
+            .toString();
+
+          const filters = await Model.raw(`
+            select
+              type, array_agg(array_to_json(array[item, count::text]) order by count desc) as values
+            from (
+              select
+                item, type, count(*) as count
+              from records_to_list_items a
+              join list_items b
+                using (list_item_id)
+              join (${ids}) c
+                using (record_id)
+              group by item, type
+              order by type
+            )
+            group by type;
+          `);
+          result.filters = filters.rows;
+        }
+      }
+    ],
     get: [],
-    create: [refreshRecordsView],
-    update: [refreshRecordsView],
-    patch: [refreshRecordsView],
-    remove: [refreshRecordsView]
+    create: [],
+    update: [],
+    patch: [],
+    remove: []
   },
 
   error: {
