@@ -74,7 +74,6 @@ CREATE TABLE records (
   call_number text,
   publisher integer REFERENCES list_items,
   program integer REFERENCES list_items,
-  generation integer REFERENCES list_items,
   needs_review bool DEFAULT false,
   is_hidden bool DEFAULT false,
   publish_to_global bool DEFAULT true,
@@ -91,6 +90,7 @@ CREATE TABLE instances (
   format integer REFERENCES list_items,
   no_copies integer DEFAULT '1',
   quality integer REFERENCES list_items,
+  generation integer REFERENCES list_items,
   url varchar(255) NOT NULL DEFAULT '',
   thumbnail varchar(45) DEFAULT NULL,
   media_type varchar(20) NOT NULL DEFAULT '',
@@ -127,7 +127,7 @@ CREATE TABLE instances_to_list_items (
 );
 
 
-
+create table related_records as select * from freedom_archives_old.related_records;
 /*
 DATE_AVAILABLE
 IDENTIFIER
@@ -177,7 +177,6 @@ insert into records (
     call_number,
     publisher_lookup.list_item_id,
     program_lookup.list_item_id,
-    generation_lookup.list_item_id,
     needs_review::bool,
     is_hidden::bool,
     true,
@@ -192,7 +191,6 @@ insert into records (
     left join list_items call_number_lookup on a.call_number = call_number_lookup.item and call_number_lookup.type = 'call_number'
     left join list_items publisher_lookup on a.publisher = publisher_lookup.item and publisher_lookup.type = 'publisher'
     left join list_items program_lookup on a.program = program_lookup.item and program_lookup.type = 'program'
-    left join list_items generation_lookup on a.generation = generation_lookup.item and generation_lookup.type = 'generation'
 );
 
 /* update records set month = b.value from
@@ -247,16 +245,17 @@ date_created timestamp DEFAULT NULL,
 date_modified timestamp DEFAULT NULL,
 original_doc_id integer DEFAULT NULL */
 
-create view duplicate_relations as select id from freedom_archives_old.related_records where docid_1 = docid_2 and title_1 = title_2 and description_1 = description_2 and track_number_1 = track_number_2;
+create table duplicate_relations as select id from freedom_archives_old.related_records where docid_1 = docid_2 and title_1 = title_2 and description_1 = description_2 and track_number_1 = track_number_2;
 
 
-insert into instances (record_id, is_primary, format, no_copies, quality, url, thumbnail, media_type, creator_user_id, contributor_user_id, date_created, date_modified, original_doc_id )
+insert into instances (record_id, is_primary, format, no_copies, quality, generation, url, thumbnail, media_type, creator_user_id, contributor_user_id, date_created, date_modified, original_doc_id )
   select
     docid as record_id,
     true,
     format_lookup.list_item_id,
     no_copies,
     quality_lookup.list_item_id,
+    generation_lookup.list_item_id,
     url,
     thumbnail,
     media_type,
@@ -271,15 +270,17 @@ insert into instances (record_id, is_primary, format, no_copies, quality, url, t
     left join users c on a.contributor = c.username
     left join list_items format_lookup on a.format = format_lookup.item and format_lookup.type = 'format'
     left join list_items quality_lookup on a.quality = quality_lookup.item and quality_lookup.type = 'quality'
+    left join list_items generation_lookup on a.generation = generation_lookup.item and generation_lookup.type = 'generation'
 ;
 
-insert into instances (record_id, is_primary, format, no_copies, quality, url, thumbnail, media_type, creator_user_id, contributor_user_id, date_created, date_modified, original_doc_id )
+insert into instances (record_id, is_primary, format, no_copies, quality, generation, url, thumbnail, media_type, creator_user_id, contributor_user_id, date_created, date_modified, original_doc_id )
   select
     x.docid_1 as record_id,
     false,
     format_lookup.list_item_id,
     no_copies,
     quality_lookup.list_item_id,
+    generation_lookup.list_item_id,
     url,
     thumbnail,
     media_type,
@@ -303,6 +304,7 @@ insert into instances (record_id, is_primary, format, no_copies, quality, url, t
       and format_lookup.type = 'format'
     left join list_items quality_lookup on a.quality = quality_lookup.item
       and quality_lookup.type = 'quality'
+    left join list_items generation_lookup on a.generation = generation_lookup.item and generation_lookup.type = 'generation'
 ;
 
 drop view if exists instances_view;
@@ -311,6 +313,7 @@ create view instances_view as
     a.*,
     format_lookup.item as format_value,
     quality_lookup.item as quality_value,
+    generation_lookup.item as generation_value,
     contributor.firstname || ' ' || contributor.lastname as contributor_name,
     contributor.username as contributor_username,
     creator.firstname || ' ' || creator.lastname as creator_name,
@@ -318,6 +321,7 @@ create view instances_view as
   from instances a
     left join list_items format_lookup on format = format_lookup.list_item_id
     left join list_items quality_lookup on quality = quality_lookup.list_item_id
+    left join list_items generation_lookup on generation = generation_lookup.list_item_id
     left join users contributor on a.contributor_user_id = contributor.user_id
     left join users creator on a.creator_user_id = creator.user_id
 ;
@@ -326,9 +330,15 @@ drop view if exists records_list_items_view;
 create view records_list_items_view as
 SELECT b.record_id,
     a.type,
-    array_to_json(array_agg(ROW_TO_JSON((select i from (select a.list_item_id, a.item) i )))) AS items,
-    string_agg(a.item, ' ') as items_text,
-    array_agg(a.item) as items_search
+    array_to_json(
+      array_agg(
+        ROW_TO_JSON(
+          (select i from (select a.list_item_id, a.item) i )
+        ) order by item
+      )
+    ) AS items,
+    string_agg(a.item, ' ' order by a.item) as items_text,
+    array_agg(a.item order by a.item) as items_search
    FROM list_items a
      JOIN records_to_list_items b USING (list_item_id)
   GROUP BY b.record_id, a.type;
@@ -339,6 +349,9 @@ create view records_view as
   select a.*,
     coalesce(a.month::text, '??') || '/' || coalesce(a.day::text, '??') || '/' || coalesce(a.year::text, '??') as date_string,
     (coalesce(a.year::text, '1900')::text || '-' || coalesce(a.month::text, '01')::text || '-' || coalesce(a.day::text, '01')::text)::date as date,
+    collections.collection_name as collection_value,
+    publisher_lookup.item as publisher_value,
+    program_lookup.item as program_value,
     instances.instances as instances,
     instances.has_digital as has_digital,
     instances.instance_count as instance_count,
@@ -346,7 +359,8 @@ create view records_view as
     contributor.username as contributor_username,
     creator.firstname || ' ' || creator.lastname as creator_name,
     creator.username as creator_username,
-    children.children as children,
+    coalesce(children.children, '[]'::json) as children,
+    jsonb_build_object('title', parent.title, 'record_id', parent.record_id) as parent,
     authors.items as authors,
     subjects.items as subjects,
     keywords.items as keywords,
@@ -359,29 +373,38 @@ create view records_view as
     subjects.items_search as subjects_search,
     keywords.items_search as keywords_search,
     producers.items_search as producers_search,
-
     setweight(to_tsvector('english', coalesce(a.title, '')), 'A') ||
       setweight(to_tsvector('english', coalesce(a.description, '')), 'B') ||
       setweight(to_tsvector('english', coalesce(authors.items_text, '')), 'C') ||
       setweight(to_tsvector('english', coalesce(subjects.items_text, '')), 'C') ||
       setweight(to_tsvector('english', coalesce(keywords.items_text, '')), 'C') as fulltext
   from records a
+  left join collections using(collection_id)
+  left join list_items publisher_lookup on a.publisher = publisher_lookup.list_item_id
+  left join list_items program_lookup on a.program = program_lookup.list_item_id
   left join (select record_id, bool_or(url != '') as has_digital, count(*) as instance_count, array_to_json(array_agg(row_to_json(b) order by b.is_primary)) as instances from instances_view b group by record_id ) instances using (record_id)
   left join users contributor on a.contributor_user_id = contributor.user_id
   left join users creator on a.creator_user_id = creator.user_id
   left join (select parent_record_id, array_to_json(array_agg(row_to_json(b))) as children from (select parent_record_id, title from records) b group by parent_record_id) children on children.parent_record_id = a.record_id
-  left join records_list_items_view authors on authors.type =  'author' and authors.record_id = a.record_id
-  left join records_list_items_view subjects on subjects.type =  'subject' and subjects.record_id = a.record_id
-  left join records_list_items_view keywords on keywords.type =  'keyword' and keywords.record_id = a.record_id
-  left join records_list_items_view producers on producers.type =  'producer' and producers.record_id = a.record_id
+  left join records_list_items_view authors on authors.type = 'author' and authors.record_id = a.record_id
+  left join records_list_items_view subjects on subjects.type = 'subject' and subjects.record_id = a.record_id
+  left join records_list_items_view keywords on keywords.type = 'keyword' and keywords.record_id = a.record_id
+  left join records_list_items_view producers on producers.type = 'producer' and producers.record_id = a.record_id
+  left join records parent on a.parent_record_id = parent.record_id
   ;
 drop table if exists unified_records cascade;
 create table unified_records as select * from records_view;
 CREATE INDEX records_fulltext_index on unified_records using GIN (fulltext);
 ALTER TABLE unified_records add PRIMARY KEY(record_id);
-drop view if exists unknown_relations;
-create view unknown_relations as      select *
-      from freedom_archives_old.related_records
-      where replace(title_1, 'Copy of ', '') != replace(title_2, 'Copy of ', '')
-        and docid_1 != docid_2
-        and id not in (select id from duplicate_relations) and docid_1 in (select docid from freedom_archives_old.documents) and docid_2 in (select docid from freedom_archives_old.documents) order by docid_1;
+
+drop table if exists unknown_relations;
+
+create table unknown_relations as
+  select related_records.*, '' as type
+    from related_records
+    join records a on docid_1 = a.record_id
+    join records b on docid_2 = b.record_id
+    where replace(title_1, 'Copy of ', '') != replace(title_2, 'Copy of ', '')
+      and docid_1 != docid_2
+      and id not in (select id from duplicate_relations)
+    order by docid_1;

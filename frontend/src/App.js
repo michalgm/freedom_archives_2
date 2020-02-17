@@ -5,20 +5,26 @@ import { StateProvider, useStateValue } from './appContext'
 import Records from './Records';
 import Record from './Record';
 import Login from './Login';
+import Relationships from './Relationships';
+import Relationship from './Relationship';
 import { app } from './api';
+import { CssBaseline, Container } from '@material-ui/core';
 
 
 function App() {
   return (
     <StateProvider>
       <Router>
-        <div className="App">
-          <header className="App-header">
-            <Link to="/">Home</Link>
-            <Logout />
-          </header>
-          <Main />
-        </div>
+        <CssBaseline>
+          <div className="App">
+            <header className="App-header">
+              <Link to="/">Search</Link>
+              <Link to="/relationships">Relationships</Link>
+              <Logout />
+            </header>
+            <Main />
+          </div>
+        </CssBaseline>
       </Router>
     </StateProvider>
   );
@@ -71,13 +77,22 @@ function Main() {
   const { state: { isAuthenticated, error } } = useStateValue();
   // const title = isAuthenticated ? 'Welcome' : 'Login'
   // <h1>{title}</h1>
-  return <>
+  return <Container>
     <Authentication />
     {error && (<h2>{error}</h2>)}
     {isAuthenticated ? (
       <>
         <Route exact path="/" component={Records} />
-        <Route exact path="/record/:id" component={Record} />
+        <Route exact path="/record/:id"
+          render={({ match: { params: { id } } }) => <Record id={id} showForm />}
+        />
+        <Route path="/relationship/:id"
+          render={({ match: { params: { id } } }) => <Relationship id={id} />}
+        />
+
+        <Route path="/relationships/:skip?"
+          render={({ match: { params: { skip } } }) => <Relationships skip={skip} />}
+        />
         <Route exact path="/login">
           <Redirect to="/" />
         </Route>
@@ -91,6 +106,6 @@ function Main() {
         <Route exact path="/login" component={Login} />
       </> : <div>Loading...</div>)
     }
-  </>
+  </Container>
 }
 export default App;

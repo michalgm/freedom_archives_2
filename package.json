@@ -30,26 +30,26 @@
     "mocha": "mocha test/ --recursive --exit"
   },
   "dependencies": {
-    "@feathersjs/authentication": "^4.3.10",
-    "@feathersjs/authentication-local": "^4.3.10",
-    "@feathersjs/authentication-oauth": "^4.3.10",
-    "@feathersjs/configuration": "^4.3.10",
-    "@feathersjs/errors": "^4.3.10",
-    "@feathersjs/express": "^4.3.10",
-    "@feathersjs/feathers": "^4.3.10",
+    "@feathersjs/authentication": "^4.5.1",
+    "@feathersjs/authentication-local": "^4.5.1",
+    "@feathersjs/authentication-oauth": "^4.5.1",
+    "@feathersjs/configuration": "^4.5.1",
+    "@feathersjs/errors": "^4.5.1",
+    "@feathersjs/express": "^4.5.1",
+    "@feathersjs/feathers": "^4.5.1",
     "compression": "^1.7.4",
     "cors": "^2.8.5",
     "feathers-knex": "git+https://github.com/michalgm/feathers-knex.git#add-overlap-operator",
     "helmet": "^3.21.2",
-    "knex": "^0.20.1",
-    "pg": "^7.12.1",
-    "pg-tsquery": "^8.0.5",
+    "knex": "^0.20.8",
+    "pg": "^7.18.1",
+    "pg-tsquery": "^8.1.0",
     "serve-favicon": "^2.5.0",
     "winston": "^3.2.1"
   },
   "devDependencies": {
-    "axios": "^0.19.0",
-    "eslint": "^6.6.0",
+    "axios": "^0.19.2",
+    "eslint": "^6.8.0",
     "mocha": "^6.2.2",
     "nodemon": "^1.19.4"
   }

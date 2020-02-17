@@ -111,3 +111,5 @@ lib/
 data/
 backend.bak/
 config/local.json
+public/
+public/index.html

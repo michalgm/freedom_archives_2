@@ -1,0 +1,17 @@
+.form {
+  .buttons {
+    text-align: right;
+  }
+  .select-input {
+    .MuiInputBase-input {
+      // padding: 0;
+      &>div {
+        border: none;
+        background-color: inherit;
+      }
+    }
+    .MuiOutlinedInput-input {
+      height: auto;
+    }
+  }
+}
