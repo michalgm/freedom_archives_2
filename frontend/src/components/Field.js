@@ -1,93 +1,156 @@
-import React from 'react';
-import { Field as FormikField, useFormikContext } from 'formik';
-import {
-  TextField,
-} from '@material-ui/core';
-import { startCase } from 'lodash';
-// import { MultipleSelect } from "react-select-material-ui";
-import Async from 'react-select/async';
-import { app } from '../api';
+import React from "react";
+import { Field as FormikField, useFormikContext } from "formik";
+import { TextField } from "@material-ui/core";
+import { startCase } from "lodash";
+import { Autocomplete, Alert } from "@material-ui/lab";
 
-const fetchItems = type => async value => {
-  const { data } = await app
-    .service('list_items')
-    .find({
-      query: {
-        type,
-        $select: ['list_item_id', 'item'],
-        item: { $ilike: `${value}%` }
+const Select = ({
+  type,
+  isMulti,
+  ro,
+  defaultValue,
+  label,
+  name,
+  onChange,
+  onBlur,
+  loadOptions,
+  setFieldValue,
+  ...props
+}) => {
+  // console.log(defaultValue);
+
+  const [open, setOpen] = React.useState(false);
+  const [inputValue, setInputValue] = React.useState("");
+  const [value, setValue] = React.useState(defaultValue);
+
+  // console.log(value, defaultValue, props)
+  const [options, setOptions] = React.useState([]);
+  const loading = Boolean(open && inputValue);
+
+  React.useEffect(() => {
+    let active = true;
+    // console.log(inputValue)
+
+    if (!loading) {
+      return undefined;
+    }
+
+    (async () => {
+      const response = await loadOptions(inputValue);
+      if (active) {
+        setOptions(response);
       }
-    });
-  return data;
-}
+    })();
 
-const CustomComponent = ({ type, ro, label, name, value, ...props }) => {
-  const labelValue = (label || startCase(name)).replace('_value', '');
-  const context = useFormikContext();
+    return () => {
+      active = false;
+    };
+  }, [inputValue]);
 
-  if (type === 'select') {
-    const { setFieldValue } = context;
-    return <TextField
-      fullWidth
-      className='select-input'
-      variant="outlined"
-      margin='dense'
-      InputLabelProps={{ shrink: true }}
-      disabled={ro}
+  React.useEffect(() => {
+    if (!open) {
+      setOptions([]);
+    }
+  }, [open]);
 
-      label={labelValue}
-      InputProps={{
-        inputComponent: Async
-      }}
-      inputProps={
-        {
-          defaultValue: value,
-          isDisabled: ro,
-          name,
-          value,
-          ...props,
-          onChange: (option) => setFieldValue(name, option)
-        }
-      }
-    />
-  }
-  return <TextField
-    variant={1 || ro ? 'outlined' : 'filled'}
-    disabled={ro}
-    margin='dense'
-    label={labelValue}
-    InputLabelProps={{ shrink: true }}
-    inputProps={{ style: { color: '#000' } }}
-    fullWidth
-    {...{ name, value }}
-    {...props}
-  // onChange={(option) => setFieldValue(name, option)}
+  React.useEffect(() => {
+    setValue(defaultValue);
+  }, [defaultValue]);
 
-  />
-};
-
-
-const Field = ({ raw, ...props }) => {
-  if (raw) {
-    // console.log(props)
-    // return <div>!!!{props.label} {props.value}</div>;
-    return CustomComponent({ ro: true, ...props });
-  }
   return (
-    <FormikField as={CustomComponent} {...props} />
+    <Autocomplete
+      loading={loading}
+      multiple={isMulti}
+      open={open}
+      onOpen={() => {
+        setOpen(true);
+      }}
+      onClose={() => {
+        setOpen(false);
+      }}
+      options={options}
+      renderInput={(params) => (
+        <TextField {...params} label={label} variant="outlined" />
+      )}
+      onChange={(_, option) => {
+        if (onChange && onChange(_, option)) {
+          setFieldValue(name, option);
+        }
+      }}
+      onInputChange={(_, option) => {
+        setInputValue(option);
+      }}
+      value={value}
+      inputValue={inputValue}
+      {...props}
+    />
   );
 };
 
+const CustomComponent = ({
+  type,
+  ro,
+  label,
+  name,
+  value,
+  isMulti,
+  loadOptions,
+  ...props
+}) => {
+  const labelValue = (label || startCase(name)).replace("_value", "");
+  const context = useFormikContext();
+  const error = context.errors[name];
+  let field;
+  if (type === "select") {
+    const { setFieldValue } = context;
+    field = (
+      <Select
+        fullWidth
+        className="select-input"
+        variant="outlined"
+        margin="dense"
+        disabled={ro}
+        label={labelValue}
+        {...{
+          isMulti,
+          defaultValue: value || (isMulti ? [] : ""),
+          value: value || (isMulti ? [] : ""),
+          name,
+          loadOptions,
+          setFieldValue,
+          ...props,
+        }}
+      />
+    );
+  } else {
+    field = (
+      <TextField
+        variant={1 || ro ? "outlined" : "filled"}
+        disabled={ro}
+        margin="dense"
+        label={labelValue}
+        InputLabelProps={{ shrink: true }}
+        autoComplete="off"
+        inputProps={{ style: { color: "#000" } }}
+        fullWidth
+        {...{ name, value }}
+        {...props}
+      />
+    );
+  }
+  return (
+    <>
+      {field}
+      {error && <Alert severity="error">{error}</Alert>}
+    </>
+  );
+};
 
-export const ListItemField = ({ name, ...props }) => {
-  return <Field
-    name={name}
-    type='select'
-    getOptionLabel={item => item.item}
-    getOptionValue={item => item.list_item_id}
-    loadOptions={fetchItems(name.replace(/s$/, ''))}
-    {...props}
-  />
-}
+const Field = ({ raw, ...props }) => {
+  if (raw) {
+    return CustomComponent({ ro: true, ...props });
+  }
+  return <FormikField as={CustomComponent} {...props} />;
+};
 
 export default Field;

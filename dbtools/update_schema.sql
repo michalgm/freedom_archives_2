@@ -400,7 +400,7 @@ ALTER TABLE unified_records add PRIMARY KEY(record_id);
 drop table if exists unknown_relations;
 
 create table unknown_relations as
-  select related_records.*, '' as type
+  select related_records.*, '' as type, '' as notes
     from related_records
     join records a on docid_1 = a.record_id
     join records b on docid_2 = b.record_id

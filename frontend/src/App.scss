@@ -1,0 +1,29 @@
+.App {
+    /* text-align: center; */
+}
+
+.App-header {
+    align-items: center;
+    background-color: #ccc;
+    /* min-height: 100vh; */
+    color: white;
+    display: flex;
+    flex-direction: row;
+    font-size: calc(10px + 2vmin);
+    justify-content: space-around;
+    padding: 5px 10px;
+    margin-bottom: 15px;
+}
+
+.App-header a {
+    display: inline-flex;
+}
+
+.App-link {
+    color: #09d3ac;
+}
+
+.MuiPaper-root {
+    // padding: 8px;
+    box-sizing: border-box;
+}

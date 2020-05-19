@@ -1,14 +1,16 @@
-import React from 'react';
-import { Grid, Typography } from '@material-ui/core';
+import React from "react";
+import { Grid, Typography } from "@material-ui/core";
 
 function FieldRow({ children, ro = false }) {
   const fields = React.Children.toArray(children);
-  const width = (12) / fields.length;
-  return fields.map(element => {
+  const width = 12 / fields.length;
+  return fields.map((element, index) => {
     // const label = (element.props.label || element.props.name).replace('_value', '')
-    return <Grid item key={element.props.name} xs={width}>
-      {React.cloneElement(element, { ro })}
-    </Grid>;
+    return (
+      <Grid item key={element.props.name || index} xs={width}>
+        {React.cloneElement(element, { ro })}
+      </Grid>
+    );
 
     // if (label) {
     //   return [
@@ -25,6 +27,6 @@ function FieldRow({ children, ro = false }) {
     // }
     // return element;
   });
-};
+}
 
 export default FieldRow;

@@ -4,6 +4,8 @@ import { Link } from 'react-router-dom';
 import { Formik, Form, Field } from 'formik';
 import { useStateValue } from './appContext'
 
+import './Records.scss';
+
 function Records() {
   const { state: { search }, dispatch } = useStateValue();
 
@@ -102,39 +104,41 @@ function Records() {
   )
 
   const renderForm = () => (
-    <Formik
-      initialValues={search}
-      onSubmit={(fields) => {
-        dispatch('SET_SEARCH', { ...search, ...fields });
-      }}
-    >
-      {({ values, handleChange, submitForm, isSubmitting }) => {
-        return (
-          <Form style={{ padding: 5, margin: 5 }}>
-            <Field name='$fullText' placeholder="Search Records" />
-            <button type='submit' disabled={isSubmitting}>Search</button>
-            <label>Only Digital</label>
-            <Field
-              name='has_digital'
-              type="checkbox"
-              checked={values.has_digital}
-              onChange={(e) => { handleChange(e); submitForm() }}
-            />
-          </Form>
-        )
-      }}
-    </Formik>
+    <div className='search-form'>
+      <Formik
+        initialValues={search}
+        onSubmit={(fields) => {
+          dispatch('SET_SEARCH', { ...search, ...fields });
+        }}
+      >
+        {({ values, handleChange, submitForm, isSubmitting }) => {
+          return (
+            <Form style={{ padding: 5, margin: 5 }}>
+              <Field name='$fullText' placeholder="Search Records" />
+              <button type='submit' disabled={isSubmitting}>Search</button>
+              <label>Only Digital</label>
+              <Field
+                name='has_digital'
+                type="checkbox"
+                checked={values.has_digital}
+                onChange={(e) => { handleChange(e); submitForm() }}
+              />
+            </Form>
+          )
+        }}
+      </Formik>
+    </div>
   )
 
   return (
-    <div>
+    <div className='records'>
       {renderForm()}
       {
         loading ?
           <div>Searching...</div>
           :
-          <div>
-            <p>{records.total} total results ({time} seconds)</p>
+          <div className='results'>
+            <p className='results-total'>{records.total} total results ({time} seconds)</p>
             <div style={{ textAlign: 'left', margin: 'auto', display: 'flex' }}>
               {renderResults()}
               {renderFilters()}

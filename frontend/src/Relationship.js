@@ -75,4 +75,4 @@ function Relationship({ id }) {
   )
 }
 
-export default Relationship;
+export default React.memo(Relationship);

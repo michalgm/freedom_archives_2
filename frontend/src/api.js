@@ -10,6 +10,7 @@ app.configure(restClient.fetch(window.fetch));
 app.configure(auth({}))
 
 export const records = app.service('records');
+export const relationships = app.service('relationships');
 
 export const authenticate = async (username, password) => {
   return app.authenticate({

@@ -1,12 +1,14 @@
-import React, { useEffect } from 'react';
-import './App.css';
+import React from 'react';
+import './App.scss';
 import { BrowserRouter as Router, Route, Link, Redirect } from 'react-router-dom';
 import { StateProvider, useStateValue } from './appContext'
 import Records from './Records';
 import Record from './Record';
 import Login from './Login';
 import Relationships from './Relationships';
+import Authentication from './Authentication';
 import Relationship from './Relationship';
+import Errors from './components/Errors';
 import { app } from './api';
 import { CssBaseline, Container } from '@material-ui/core';
 
@@ -35,51 +37,13 @@ function Logout() {
   return isAuthenticated ? <Link to="/login" onClick={app.logout}>Logout</Link> : '';
 }
 
-function Authentication() {
-  const { state: { isAuthenticated, hooks_initialized }, dispatch } = useStateValue();
-  useEffect(() => {
-    if (hooks_initialized) {
-      return;
-    }
-    app.hooks({
-      error: {
-        all: (context) => {
-          console.error(`Error in ${context.path} calling ${context.method}  method`, context.error);
-          dispatch('ERROR', { error: context.error.message })
-          return context;
-        }
-      }
-    })
-    app.service('authentication').hooks({
-      after: {
-        create: ({ result: { user } }) => {
-          dispatch('LOGIN', { user })
-        },
-        remove: () => {
-          dispatch('LOGOUT')
-        }
-      }
-    });
-    dispatch('INITIALIZE_HOOKS')
-  }, [dispatch, hooks_initialized]);
-
-  useEffect(() => {
-    if (isAuthenticated === null) {
-      app.reAuthenticate()
-        .catch(() => { dispatch('LOGOUT') });
-    }
-  }, [dispatch, isAuthenticated]);
-
-  return <></>
-}
-
 function Main() {
   const { state: { isAuthenticated, error } } = useStateValue();
   // const title = isAuthenticated ? 'Welcome' : 'Login'
   // <h1>{title}</h1>
-  return <Container>
+  return <Container maxWidth="xl">
     <Authentication />
-    {error && (<h2>{error}</h2>)}
+    <Errors />
     {isAuthenticated ? (
       <>
         <Route exact path="/" component={Records} />
