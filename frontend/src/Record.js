@@ -249,11 +249,11 @@ function Record({ id, showForm }) {
             </FieldRow>
             <FieldRow>
               <ListItemField name="authors" isMulti />
-              {/* <ListItemField name='producers' isMulti /> */}
+              <ListItemField name="producers" isMulti />
             </FieldRow>
             <FieldRow>
-              {/* <ListItemField name='keywords' isMulti />
-              <ListItemField name='subjects' isMulti /> */}
+              <ListItemField name="keywords" isMulti />
+              <ListItemField name="subjects" isMulti />
             </FieldRow>
             <FieldRow>
               <Field name="collection_value" />
