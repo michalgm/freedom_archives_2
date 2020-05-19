@@ -99,7 +99,6 @@ const CustomComponent = ({
 }) => {
   const labelValue = (label || startCase(name)).replace("_value", "");
   const context = useFormikContext();
-  const error = context.errors[name];
   let field;
   if (type === "select") {
     const { setFieldValue } = context;
@@ -138,10 +137,17 @@ const CustomComponent = ({
       />
     );
   }
+
+  const renderError = () => {
+    if (context && context.errors && context.errors[name]) {
+      const error = context.errors[name];
+      return <Alert severity="error">{error}</Alert>;
+    }
+  };
   return (
     <>
       {field}
-      {error && <Alert severity="error">{error}</Alert>}
+      {renderError()}
     </>
   );
 };
