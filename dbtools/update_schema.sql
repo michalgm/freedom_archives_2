@@ -150,7 +150,7 @@ LANGUAGE
 `LENGTH` varchar(50) DEFAULT NULL, */
 
 insert into archives VALUES(default, 'The Freedom Archives');
-insert into users (select user_id, 1, username, firstname, lastname, user_type, password, status, email from freedom_archives_old.users);
+insert into users (select user_id, 1, lower(username), firstname, lastname, user_type, password, status, email from freedom_archives_old.users);
 insert into list_items(item, type, description) (select item, type, description from freedom_archives_old.list_items);
 insert into collections (collection_id, collection_name, display_order) values (0, 'Uncategorized', 0);
 
