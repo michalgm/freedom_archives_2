@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { app } from './api';
+import { relationships } from './api';
 
 import Record from './Record';
 import Field from './components/Field';
@@ -16,7 +16,7 @@ function Relationship({ id }) {
 
   useEffect(() => {
     const fetchRelations = async () => {
-      const relation = await app.service('relationships').get(id)
+      const relation = await relationships.get(id)
       setRelation(relation || {});
     }
     fetchRelations();

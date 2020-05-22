@@ -1,11 +1,11 @@
-import React, { useState, useEffect } from "react";
-import { Redirect } from "react-router-dom";
-import { app } from "./api";
-import FieldRow from "./components/FieldRow";
-import Field from "./components/Field";
-import ListItemField from "./components/ListItemField";
-import Form from "./components/Form";
-import Link from "./components/Link";
+import React, { useState, useEffect } from 'react';
+import { Redirect } from 'react-router-dom';
+import { records, relationships } from './api';
+import FieldRow from './components/FieldRow';
+import Field from './components/Field';
+import ListItemField from './components/ListItemField';
+import Form from './components/Form';
+import Link from './components/Link';
 import {
   Table,
   TableBody,
@@ -13,9 +13,9 @@ import {
   TableHead,
   TableRow,
   Paper,
-} from "@material-ui/core/";
+} from '@material-ui/core/';
 
-import "./Record.scss";
+import './Record.scss';
 
 function Children({ children = [] }) {
   return (
@@ -28,7 +28,7 @@ function Children({ children = [] }) {
         </TableRow>
       </TableHead>
       <TableBody>
-        {children.map((child) => (
+        {children.map(child => (
           <TableRow key={child.record_id}>
             <TableCell>{child.title}</TableCell>
             <TableCell>
@@ -57,7 +57,7 @@ function Instances({ instances = [] }) {
         </TableRow>
       </TableHead>
       <TableBody>
-        {instances.map((instance) => (
+        {instances.map(instance => (
           <TableRow key={instance.instance_id}>
             <TableCell>
               {instance.url ? (
@@ -66,7 +66,7 @@ function Instances({ instances = [] }) {
                     <img
                       width="20"
                       src={
-                        "https://search.freedomarchives.org/" +
+                        'https://search.freedomarchives.org/' +
                         instance.thumbnail
                       }
                     />
@@ -78,7 +78,7 @@ function Instances({ instances = [] }) {
             <TableCell>{instance.format_value}</TableCell>
             <TableCell>{instance.quality_value}</TableCell>
             <TableCell>{instance.media_type}</TableCell>
-            <TableCell>{instance.is_primary ? "Y" : ""}</TableCell>
+            <TableCell>{instance.is_primary ? 'Y' : ''}</TableCell>
             <TableCell>{instance.copies}</TableCell>
             <TableCell>
               <Link to={`/record/${instance.original_doc_id}`}>
@@ -144,27 +144,27 @@ function Record({ id, showForm }) {
   const loadRecord = async (record_data, relationships) => {
     const record = {};
     [
-      "title",
-      "description",
-      "call_number",
-      "location",
-      "publisher_value",
-      "program_value",
-      "collection_value",
-      "date_string",
-      "vol_number",
-      "location",
-      "keywords",
-      "subjects",
-      "authors",
-      "producers",
-    ].forEach((key) => {
+      'title',
+      'description',
+      'call_number',
+      'location',
+      'publisher_value',
+      'program_value',
+      'collection_value',
+      'date_string',
+      'vol_number',
+      'location',
+      'keywords',
+      'subjects',
+      'authors',
+      'producers',
+    ].forEach(key => {
       record[key] = record_data[key];
     });
     // ['subjects', 'authors', 'producers'].forEach(key => {
     //   record[key] = (record_data[key] || []).map(i => i.item).join(', ')
     // })
-    // const keywords = await app.service('list_items').find({ query: { type: 'keyword', $select: ['list_item_id', 'item'] } })
+    // const keywords = await list_items.find({ query: { type: 'keyword', $select: ['list_item_id', 'item'] } })
     // setKeywords(keywords.map(item => ({ label: item.item, value: item })));
     // record.keywords = record_data.keywords;
     record.notes = record_data.notes;
@@ -179,32 +179,32 @@ function Record({ id, showForm }) {
 
   const deleteRecord = async () => {
     setLoading(true);
-    await app.service("records").remove(id);
+    await records.remove(id);
     set_returnHome(true);
   };
 
-  const updateRecord = async (data) => {
+  const updateRecord = async data => {
     console.log(data);
     setLoading(true);
     try {
-      await app.service("records").patch(id, data);
-      const updated = await app.service("records").get(id);
+      await records.patch(id, data);
+      const updated = await records.get(id);
       loadRecord(updated);
-    } catch {}
+    } catch { }
     setLoading(false);
   };
 
   useEffect(() => {
     const fetchRecord = async () => {
       const [record, { data }] = await Promise.all([
-        app.service("records").get(id),
-        app
-          .service("relationships")
-          .find({ query: { $or: [{ docid_1: id }, { docid_2: id }] } }),
+        records.get(id),
+        relationships.find({
+          query: { $or: [{ docid_1: id }, { docid_2: id }] },
+        }),
       ]);
       console.log(data);
       return loadRecord(record, data);
-      // return app.service('records').get(id)
+      // return records.get(id)
       //   .then(loadRecord);
     };
     fetchRecord();
@@ -216,19 +216,19 @@ function Record({ id, showForm }) {
 
   const buttons = edit
     ? [
-        { label: "Save", type: "submit", color: "primary" },
-        { label: "Delete", onClick: deleteRecord, color: "secondary" },
-        {
-          label: "Cancel",
-          onClick: () => setEdit(false),
-          variant: "outlined",
-          type: "reset",
-        },
-      ]
-    : [{ label: "Edit", onClick: () => setEdit(true), type: "button" }];
+      { label: 'Save', type: 'submit', color: 'primary' },
+      { label: 'Delete', onClick: deleteRecord, color: 'secondary' },
+      {
+        label: 'Cancel',
+        onClick: () => setEdit(false),
+        variant: 'outlined',
+        type: 'reset',
+      },
+    ]
+    : [{ label: 'Edit', onClick: () => setEdit(true), type: 'button' }];
 
   return (
-    <div className={`record ${loading ? "loading" : null}`}>
+    <div className={`record ${loading ? 'loading' : null}`}>
       {record.title && (
         <Paper>
           <Form

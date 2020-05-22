@@ -5,8 +5,8 @@ import { Formik, Form, Field } from "formik";
 function Login() {
   return (
     <Formik
-      // initialValues={{ username: 'greg', password: 'letmein' }}
-      initialValues={{}}
+      initialValues={{ username: "greg", password: "letmein" }}
+      // initialValues={{}}
       onSubmit={({ username, password }) => {
         authenticate(username, password);
       }}

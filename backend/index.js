@@ -1,8 +1,8 @@
 /* eslint-disable no-console */
 const logger = require('./logger');
-const app = require('./app');
-const hostname = app.get('host');
-const port = app.get('port');
+const {app,api} = require('./app');
+const hostname = api.get('host');
+const port = api.get('port');
 const server = app.listen(port, hostname);
 
 process.on('unhandledRejection', (reason, p) =>
@@ -12,3 +12,5 @@ process.on('unhandledRejection', (reason, p) =>
 server.on('listening', () =>
   logger.info('Feathers application started on http://%s:%d', hostname, port)
 );
+
+api.setup(server);

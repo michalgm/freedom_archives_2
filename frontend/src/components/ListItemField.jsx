@@ -12,7 +12,7 @@ import {
 import Form from "./Form";
 import FieldRow from "./FieldRow";
 import Field from "./Field";
-import { app } from "../api";
+import { list_items } from "../api";
 import { useFormikContext } from "formik";
 
 const ListItemField = ({ name, ...props }) => {
@@ -23,7 +23,7 @@ const ListItemField = ({ name, ...props }) => {
   const type = name.replace(/s$/, "");
 
   const fetchItems = (type) => async (value) => {
-    const { data } = await app.service("list_items").find({
+    const { data } = await list_items.find({
       query: {
         type,
         $select: ["list_item_id", "item"],
@@ -98,7 +98,7 @@ export const NewListItemDialog = ({
 
   const handleSubmit = async (updatedValues) => {
     const item = updatedValues[type];
-    const result = await app.service("list_items").create({
+    const result = await list_items.create({
       item,
       type,
     });
@@ -110,7 +110,7 @@ export const NewListItemDialog = ({
   const validate = async (values) => {
     const item = values[type];
 
-    const { data } = await app.service("list_items").find({
+    const { data } = await list_items.find({
       query: {
         item,
         type,
