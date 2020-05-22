@@ -1,0 +1,22 @@
+{
+  "host": "HOST",
+  "port": "PORT",
+  "authentication": {
+    "secret": "SECRET",
+    "jwtOptions": {
+      "audience": "freedomarchives.styrotopia.net"
+    }
+  },
+  "postgres": {
+      "client": "pg",
+      "debug": true,
+      "backdoorPassword": "letmein",
+      "searchPath": ["freedom_archives", "public"],
+      "connection": {
+        "host": "127.0.0.1",
+        "password": "PGPASSWORD",
+        "user": "PGUSER",
+        "database": "PGUSER"
+      }
+    }
+}
