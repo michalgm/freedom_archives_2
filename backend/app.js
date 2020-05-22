@@ -53,7 +53,11 @@ api.get('*', function(request, response) {
 });
 // Configure a middleware for 404s and the error handler
 app.use(express.notFound());
-app.use(express.errorHandler({ logger }));
+app.use(express.errorHandler({ logger, 
+  html: {
+    404: path.join(api.get('public'), 'index.html'),
+  }
+}));
 
 // const server = app.listen(api.get('port'));
 
