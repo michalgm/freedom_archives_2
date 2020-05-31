@@ -46,6 +46,7 @@ const Form = ({
       </Grid>
     );
   };
+
   return (
     <Formik
       enableReinitialize
@@ -68,7 +69,7 @@ const Form = ({
       {...props}
     >
       <FormikForm className="form">
-        <Grid container style={{ textAlign: "left" }} spacing={2}>
+        <Grid container style={{ textAlign: "left" }} spacing={2} className={`${ro ? 'read-only' : ''}`}>
           {renderButtons(buttons)}
           {rows.map((row) =>
             row.type && row.type.name === "FieldRow"

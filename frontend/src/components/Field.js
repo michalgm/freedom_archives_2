@@ -70,7 +70,8 @@ const Select = ({
       }}
       options={options}
       renderInput={(params) => (
-        <TextField {...params} label={label} variant="outlined" />
+        <TextField {...params} InputLabelProps={{ shrink: true }}
+          label={label} variant="outlined" />
       )}
       onChange={(_, option) => {
         if (onChange && onChange(_, option)) {

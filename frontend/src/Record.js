@@ -132,13 +132,13 @@ function Relationships({ id, relationships = [] }) {
   );
 }
 
-function Record({ id, showForm }) {
+function Record({ id, showForm, ro = false }) {
   const [record, setRecord] = useState({});
   // const [relationships, setRelationships] = useState([]);
 
   const [returnHome, set_returnHome] = useState(false);
   const [loading, setLoading] = useState(true);
-  const [edit, setEdit] = useState(true);
+  const [edit, setEdit] = useState(ro);
   // const [keywords, setKeywords] = useState([]);
 
   const loadRecord = async (record_data, relationships) => {

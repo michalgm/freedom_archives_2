@@ -14,4 +14,15 @@
       height: auto;
     }
   }
+  .read-only {
+    .MuiChip-root.Mui-disabled {
+      opacity: 1;
+    }
+    .MuiAutocomplete-hasPopupIcon .MuiAutocomplete-inputRoot[class*="MuiOutlinedInput-root"] {
+      padding-right: 9px;
+    }
+    .MuiAutocomplete-endAdornment, .MuiChip-deleteIcon {
+      display: none;
+    }
+  }
 }
