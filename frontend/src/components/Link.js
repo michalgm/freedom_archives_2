@@ -9,7 +9,11 @@ const CollisionLink = React.forwardRef((props, ref) => (
 ));
 
 function Link(props) {
-  return <MUILink component={CollisionLink} {...props} />
+  if (props.to) {
+    return <MUILink component={CollisionLink} {...props} />
+  } else {
+    return <MUILink {...props} />
+  }
 }
 
 export default Link;

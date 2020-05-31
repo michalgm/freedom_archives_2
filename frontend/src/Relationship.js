@@ -40,7 +40,10 @@ function Relationship({ id }) {
                 <Typography variant="subtitle1">
                   <Link to={`/record/${relation[`docid_${num}`]}`}>
                     (ID {relation[`docid_${num}`]})
-                </Link>
+                  </Link>
+                  <Link target="_blank" href={`https://search.freedomarchives.org/admin/#/documents/${relation[`docid_${num}`]}`}>
+                    (Live DB Link)
+                  </Link>
                 </Typography>
                 <Field
                   raw
