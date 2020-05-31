@@ -6,6 +6,7 @@ const initialState = {
   user: null,
   token: null,
   error: null,
+  loading: false,
   search: {
     $fullText: '',
     has_digital: true
@@ -33,6 +34,8 @@ const reducer = (state, action) => {
       return { ...state, search: payload }
     case "ERROR":
       return { ...state, error: payload.error }
+    case "LOADING":
+      return { ...state, loading: payload }
     default:
       return state;
   }

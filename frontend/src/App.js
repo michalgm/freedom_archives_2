@@ -8,6 +8,7 @@ import Login from './Login';
 import Relationships from './Relationships';
 import Authentication from './Authentication';
 import Relationship from './Relationship';
+import Loading from './Loading';
 import Errors from './components/Errors';
 import { app } from './api';
 import { CssBaseline, Container } from '@material-ui/core';
@@ -38,11 +39,12 @@ function Logout() {
 }
 
 function Main() {
-  const { state: { isAuthenticated, error } } = useStateValue();
+  const { state: { isAuthenticated } } = useStateValue();
   // const title = isAuthenticated ? 'Welcome' : 'Login'
   // <h1>{title}</h1>
   return <Container maxWidth="xl">
     <Authentication />
+    <Loading />
     <Errors />
     {isAuthenticated ? (
       <>
