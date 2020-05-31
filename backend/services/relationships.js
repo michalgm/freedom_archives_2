@@ -15,7 +15,7 @@ module.exports = function(app) {
   const options = {
     id: 'id',
     Model: app.get('knexClient'),
-    paginate: app.get('paginate')
+    paginate: {...app.get('paginate'), max: false}
   };
 
   // Initialize our service with any options it requires
