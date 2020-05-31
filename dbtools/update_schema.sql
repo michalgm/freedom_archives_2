@@ -385,7 +385,7 @@ create view records_view as
   left join (select record_id, bool_or(url != '') as has_digital, count(*) as instance_count, array_to_json(array_agg(row_to_json(b) order by b.is_primary)) as instances from instances_view b group by record_id ) instances using (record_id)
   left join users contributor on a.contributor_user_id = contributor.user_id
   left join users creator on a.creator_user_id = creator.user_id
-  left join (select parent_record_id, array_to_json(array_agg(row_to_json(b))) as children from (select parent_record_id, title from records) b group by parent_record_id) children on children.parent_record_id = a.record_id
+  left join (select parent_record_id, array_to_json(array_agg(row_to_json(b))) as children from (select parent_record_id, record_id, title from records) b group by parent_record_id) children on children.parent_record_id = a.record_id
   left join records_list_items_view authors on authors.type = 'author' and authors.record_id = a.record_id
   left join records_list_items_view subjects on subjects.type = 'subject' and subjects.record_id = a.record_id
   left join records_list_items_view keywords on keywords.type = 'keyword' and keywords.record_id = a.record_id
@@ -400,10 +400,21 @@ ALTER TABLE unified_records add PRIMARY KEY(record_id);
 drop table if exists unknown_relations;
 
 create table unknown_relations as
-  select related_records.*, '' as type, '' as notes
+  select related_records.*,
+      '' as type,
+      '' as notes,
+      a.call_number as call_number_1,
+      b.call_number as call_number_2,
+      c.generation as generation_1,
+      d.generation as generation_2,
+      c.format as format_1,
+      d.format as format_2
     from related_records
     join records a on docid_1 = a.record_id
     join records b on docid_2 = b.record_id
+    join freedom_archives_old.documents c on docid_1 = c.docid
+    join freedom_archives_old.documents d on docid_2 = d.docid
+
     where replace(title_1, 'Copy of ', '') != replace(title_2, 'Copy of ', '')
       and docid_1 != docid_2
       and id not in (select id from duplicate_relations)

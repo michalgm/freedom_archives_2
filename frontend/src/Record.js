@@ -22,7 +22,6 @@ function Children({ children = [] }) {
     <Table size="small">
       <TableHead>
         <TableRow>
-          <TableCell></TableCell>
           <TableCell>Title</TableCell>
           <TableCell>ID</TableCell>
         </TableRow>
@@ -32,7 +31,7 @@ function Children({ children = [] }) {
           <TableRow key={child.record_id}>
             <TableCell>{child.title}</TableCell>
             <TableCell>
-              <a href={`/record/${child.record_id}`}>{child.record_id}</a>
+              <Link to={`/record/${child.record_id}`}>{child.record_id}</Link>
             </TableCell>
           </TableRow>
         ))}
@@ -93,42 +92,57 @@ function Instances({ instances = [] }) {
 }
 
 function Relationships({ id, relationships = [] }) {
-  console.log(id, relationships);
   return (
     <Table size="small">
       <TableHead>
         <TableRow>
           <TableCell>Number</TableCell>
           <TableCell>Title</TableCell>
-          <TableCell>Description</TableCell>
+          <TableCell>Generation</TableCell>
+          <TableCell>Call No.</TableCell>
+          <TableCell>Format</TableCell>
+          <TableCell>Track</TableCell>
           <TableCell>Type</TableCell>
           <TableCell>Link</TableCell>
         </TableRow>
       </TableHead>
       <TableBody>
-        {relationships.map((relation, index) => {
-          console.log(relation);
-          const side = relation.docid_1 === id ? 2 : 1;
-          const doc_id = relation[`docid_${side}`];
-          console.log(side, doc_id);
-          return (
-            <TableRow key={doc_id}>
-              <TableCell>{index + 1}</TableCell>
-              <TableCell>
-                <Link to={`/record/${doc_id}`}>
-                  {relation[`title_${side}`]}
-                </Link>
-              </TableCell>
-              <TableCell>{relation[`description_${side}`]}</TableCell>
-              <TableCell>{relation.type}</TableCell>
-              <TableCell>
-                <Link to={`/relationship/${relation.id}`}>View</Link>
-              </TableCell>
-            </TableRow>
-          );
-        })}
+        {relationships
+          .map((relation, index) => {
+            const side = relation.docid_1 === id ? 2 : 1;
+
+            const doc_id = relation[`docid_${side}`];
+            // if (doc_id === `${id}`) {
+            //   return null;
+            // }
+            return (
+              <React.Fragment key={`${relation.docid_1}_${relation.docid_2}_${relation.track_number_1}_${relation.track_number_2}`}>
+                <TableRow>
+                  <TableCell rowSpan={2}>{index + 1}</TableCell>
+                  <TableCell>
+                    <Link to={`/record/${doc_id}`}>
+                      {relation[`title_${side}`]}
+                    </Link>
+                  </TableCell>
+                  <TableCell>{relation[`generation_${side}`]}</TableCell>
+                  <TableCell>{relation[`call_number_${side}`]}</TableCell>
+                  <TableCell>{relation[`format_${side}`]}</TableCell>
+                  <TableCell>{relation[`track_number_${side}`]} {doc_id} </TableCell>
+                  <TableCell>{relation.type}</TableCell>
+                  <TableCell>
+                    <Link to={`/relationship/${relation.id}`}>View</Link>
+                  </TableCell>
+                </TableRow>
+                <TableRow>
+                  <TableCell colSpan={7}>
+                    {relation[`description_${side}`]}
+                  </TableCell>
+                </TableRow>
+              </React.Fragment>
+            );
+          })}
       </TableBody>
-    </Table>
+    </Table >
   );
 }
 
@@ -138,7 +152,7 @@ function Record({ id, showForm, ro = false }) {
 
   const [returnHome, set_returnHome] = useState(false);
   const [loading, setLoading] = useState(true);
-  const [edit, setEdit] = useState(ro);
+  const [edit, setEdit] = useState(!ro);
   // const [keywords, setKeywords] = useState([]);
 
   const loadRecord = async (record_data, relationships) => {
@@ -168,8 +182,8 @@ function Record({ id, showForm, ro = false }) {
     // setKeywords(keywords.map(item => ({ label: item.item, value: item })));
     // record.keywords = record_data.keywords;
     record.notes = record_data.notes;
-    record.instances = <Instances instances={record_data.instances} />;
-    record.children = <Children children={record_data.children} />;
+    record.instances = <Instances instances={record_data.instances || []} />;
+    record.children = <Children children={record_data.children || []} />;
     record.relationships = (
       <Relationships id={record_data.record_id} relationships={relationships} />
     );
@@ -184,7 +198,6 @@ function Record({ id, showForm, ro = false }) {
   };
 
   const updateRecord = async data => {
-    console.log(data);
     setLoading(true);
     try {
       await records.patch(id, data);
@@ -199,10 +212,9 @@ function Record({ id, showForm, ro = false }) {
       const [record, { data }] = await Promise.all([
         records.get(id),
         relationships.find({
-          query: { $or: [{ docid_1: id }, { docid_2: id }] },
+          query: { $or: [{ docid_1: id }, { docid_2: id }], $sort: { docid_1: 1, docid_2: 1, track_number_1: 1, track_number_2: 1 } },
         }),
       ]);
-      console.log(data);
       return loadRecord(record, data);
       // return records.get(id)
       //   .then(loadRecord);
