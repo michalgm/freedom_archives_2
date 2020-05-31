@@ -127,7 +127,7 @@ function Relationships({ id, relationships = [] }) {
                   <TableCell>{relation[`generation_${side}`]}</TableCell>
                   <TableCell>{relation[`call_number_${side}`]}</TableCell>
                   <TableCell>{relation[`format_${side}`]}</TableCell>
-                  <TableCell>{relation[`track_number_${side}`]} {doc_id} </TableCell>
+                  <TableCell>{relation[`track_number_${side}`]}</TableCell>
                   <TableCell>{relation.type}</TableCell>
                   <TableCell>
                     <Link to={`/relationship/${relation.id}`}>View</Link>
