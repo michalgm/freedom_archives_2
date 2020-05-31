@@ -29,43 +29,46 @@ function Relationship({ id }) {
   return (
     <div>
       <Grid container spacing={2}>
-        {[1, 2].map(num => (
-          <Grid item xs={6} key={num}>
-            <Paper>
-              <Typography variant="h4">
-                Record {num}
-              </Typography>
-              <Typography variant="subtitle1">
-                <Link to={`/record/${relation[`docid_${num}`]}`}>
-                  (ID {relation[`docid_${num}`]})
+        {[1, 2].map(num => {
+          const other_num = num === 1 ? 2 : 1;
+          return (
+            <Grid item xs={6} key={num}>
+              <Paper>
+                <Typography variant="h4">
+                  Record {num}
+                </Typography>
+                <Typography variant="subtitle1">
+                  <Link to={`/record/${relation[`docid_${num}`]}`}>
+                    (ID {relation[`docid_${num}`]})
                 </Link>
-              </Typography>
-              <Field
-                raw
-                label='Relation Title'
-                value={relation[`title_${num}`]}
-              />
-              <Field
-                raw
-                multiline
-                label='Relation description'
-                value={relation[`description_${num}`]}
-              />
-              <Field
-                raw
-                label='Relation Track Number'
-                value={relation[`track_number_${num}`]}
-              />
-              <Divider />
-            </Paper>
-          </Grid>
-        ))}
+                </Typography>
+                <Field
+                  raw
+                  label='Relation Title'
+                  value={relation[`title_${other_num}`]}
+                />
+                <Field
+                  raw
+                  multiline
+                  label='Relation description'
+                  value={relation[`description_${other_num}`]}
+                />
+                <Field
+                  raw
+                  label='Relation Track Number'
+                  value={relation[`track_number_${other_num}`]}
+                />
+                <Divider />
+              </Paper>
+            </Grid>
+          )
+        })}
 
         {[1, 2].map(num => (
           <Grid item xs={6} key={num}>
             <Paper>
               <div style={{ padding: 4 }}>
-                <Record id={relation[`docid_${num}`]} />
+                <Record id={relation[`docid_${num}`]} ro />
               </div>
             </Paper>
           </Grid>
