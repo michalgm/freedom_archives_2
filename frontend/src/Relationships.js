@@ -1,9 +1,18 @@
-import React, { useState, useEffect } from "react";
-import { relationships } from "./api";
-import ButtonLink from "./components/ButtonLink";
-import Relationship from "./Relationship";
-import { Button, Grid, TextField, Paper, MenuItem, LinearProgress, Typography, Box } from "@material-ui/core";
-import "./Relationships.scss";
+import React, { useState, useEffect } from 'react';
+import { relationships } from './api';
+import ButtonLink from './components/ButtonLink';
+import Relationship from './Relationship';
+import {
+  Button,
+  Grid,
+  TextField,
+  Paper,
+  MenuItem,
+  LinearProgress,
+  Typography,
+  Box,
+} from '@material-ui/core';
+import './Relationships.scss';
 
 function LinearProgressWithLabel(props) {
   return (
@@ -13,7 +22,7 @@ function LinearProgressWithLabel(props) {
       </Box>
       <Box minWidth={35}>
         <Typography variant="body2" color="textSecondary">{`${Math.round(
-          props.value,
+          props.value
         )}%`}</Typography>
       </Box>
     </Box>
@@ -25,52 +34,65 @@ function Relationships({ skip = 1 }) {
   const [idList, setIdList] = useState([]);
   const [complete, setComplete] = useState(0);
   const [relation, setRelation] = useState({});
-  const [notes, setNotes] = useState("");
-  const [type, setType] = useState("");
-  const [nextUnreviewed, setNextUnreviewed] = useState("");
+  const [notes, setNotes] = useState('');
+  const [type, setType] = useState('');
+  const [nextUnreviewed, setNextUnreviewed] = useState('');
   // const [excludeReviewed, setExcludeReviewed] = useState(false);
 
   const info = {
     original: {
-      desc: "All instances of Record 2 will become instances of Record 1, and Record 2 will be deleted",
-      option: "Record 1 is the original record for record 2"
+      desc:
+        'All instances of Record 2 will become instances of Record 1, and Record 2 will be deleted',
+      option: 'Record 1 is the original record for record 2',
     },
     instance: {
-      desc: "All instances of Record 1 will become instances of Record 2, and Record 1 will be deleted",
-      option: "Record 2 is the original record for record 1"
+      desc:
+        'All instances of Record 1 will become instances of Record 2, and Record 1 will be deleted',
+      option: 'Record 2 is the original record for record 1',
     },
     child: {
-      desc: "Record 2 will become a child record of Record 1",
-      option: "Record 1 is a child of record 2"
+      desc: 'Record 1 will become a child record of Record 2',
+      option: 'Record 1 is a child of record 2',
     },
     parent: {
-      desc: "Record 1 will become a child record of Record 2",
-      option: "Record 2 is a child of record 1"
+      desc: 'Record 2 will become a child record of Record 1',
+      option: 'Record 2 is a child of record 1',
     },
     sibling: {
       desc: "Record 2 will become a child record of Record 1's parent",
-      option: "Record 1 and record 2 are siblings"
+      option: 'Record 1 and record 2 are siblings',
+    },
+    continuation_parent: {
+      desc: 'Record 2 will become a continuation of record 1',
+      option: 'Record 2 is a continuation of record 1',
+    },
+    continuation_child: {
+      desc: 'Record 1 will become a continuation of record 2',
+      option: 'Record 1 is a continuation of record 2',
     },
     unknown: {
-      desc: "The relationship between these documents will require further review",
-      option: "Unkown relationship"
+      desc:
+        'The relationship between these documents will require further review',
+      option: 'Unkown relationship',
     },
   };
 
-  const fetchNextUnreviewed = async (idList) => {
+  const fetchNextUnreviewed = async idList => {
     if (!idList.length) {
-      return
+      return;
     }
     const query = {
       $sort: { docid_2: 1, docid_1: 1 },
-      type: "",
+      type: '',
       $limit: 1,
-      $select: ['id']
-    }
+      $select: ['id'],
+    };
     const { data, total } = await relationships.find({ query });
-    setNextUnreviewed(data.length ? idList.indexOf(data[0].id) + 1 : null)
-    setComplete(100 - (total / idList.length * 100))
-  }
+    console.log(data, idList.indexOf(data[0].id));
+    console.log(idList);
+    setNextUnreviewed(data.length ? idList.indexOf(data[0].id) + 1 : null);
+    setComplete(100 - (total / idList.length) * 100);
+  };
 
   useEffect(() => {
     const fetchIDs = async () => {
@@ -78,30 +100,29 @@ function Relationships({ skip = 1 }) {
         query: {
           $sort: { docid_2: 1, docid_1: 1 },
           $limit: 100000,
-          $select: ['id']
-        }
-      })
+          $select: ['id'],
+        },
+      });
       const idList = data.map(r => r.id);
-      setIdList(idList)
-      await fetchNextUnreviewed(idList)
-    }
+      setIdList(idList);
+      await fetchNextUnreviewed(idList);
+    };
 
-    fetchIDs()
-  }, [])
+    fetchIDs();
+  }, []);
 
   useEffect(() => {
     if (!idList.length) {
-      return
+      return;
     }
     const fetchRelation = async () => {
-      const id = idList[$skip];
+      const id = idList[$skip - 1];
       if (id) {
         const relation = await relationships.get(id);
         setRelation(relation);
         setType(relation.type);
         setNotes(relation.notes);
       } else {
-
       }
     };
     fetchRelation();
@@ -113,10 +134,10 @@ function Relationships({ skip = 1 }) {
 
   const setRelationType = async () => {
     await relationships.patch(relation.id, { type, notes });
-    fetchNextUnreviewed(idList)
+    fetchNextUnreviewed(idList);
   };
 
-  const updateNotes = (event) => {
+  const updateNotes = event => {
     setNotes(event.target.value);
   };
 
@@ -169,13 +190,13 @@ function Relationships({ skip = 1 }) {
                     label="Relationship Type"
                     placeholder="Relationship Type"
                     style={{ width: '60%' }}
-                    onChange={(event) => setType(event.target.value)}
+                    onChange={event => setType(event.target.value)}
                   >
-                    {
-                      Object.keys(info).map(value =>
-                        <MenuItem key={value} value={value}>{info[value].option}</MenuItem>
-                      )
-                    }
+                    {Object.keys(info).map(value => (
+                      <MenuItem key={value} value={value}>
+                        {info[value].option}
+                      </MenuItem>
+                    ))}
                   </TextField>
                 </div>
                 {info[type]?.desc}
@@ -199,6 +220,13 @@ function Relationships({ skip = 1 }) {
                 >
                   Save Relation Type
                 </Button>
+                {relation.user && (
+                  <p>
+                    Updated at{' '}
+                    <b>{new Date(relation.updated_at).toLocaleString()} </b>
+                    by <b>{relation.user}</b>
+                  </p>
+                )}
               </Grid>
             </Grid>
           </Grid>
@@ -207,7 +235,7 @@ function Relationships({ skip = 1 }) {
           <Relationship id={relation.id} />
         </Grid>
       </Grid>
-    </div >
+    </div>
   );
 }
 

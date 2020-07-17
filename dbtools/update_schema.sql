@@ -403,6 +403,8 @@ create table unknown_relations as
   select related_records.*,
       '' as type,
       '' as notes,
+      '' as user,
+      NULL::timestamp as updated_at, 
       a.call_number as call_number_1,
       b.call_number as call_number_2,
       c.generation as generation_1,

@@ -53,10 +53,17 @@ module.exports = function(app) {
     return context;
   };
 
+  const setUser = context => {
+    const {data, service: {Model}, params: {user: {username}}} = context;
+    data.user = username;
+    data.updated_at = Model.raw('now()');
+    return context;
+  };
+
   service.hooks({
     before: {
       all: [authenticate('jwt')],
-      patch: [transaction.start()]
+      patch: [transaction.start(), setUser]
     },
     after: {
       patch: [updateRelations, transaction.end()]
