@@ -113,3 +113,5 @@ backend.bak/
 config/local.json
 public/
 public/index.html
+
+dbtools/bak/
