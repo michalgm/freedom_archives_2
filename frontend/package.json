@@ -3,14 +3,16 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
-    "@feathersjs/authentication-client": "^4.5.4",
-    "@feathersjs/feathers": "^4.5.3",
-    "@feathersjs/rest-client": "^4.5.4",
-    "@material-ui/core": "^4.9.14",
+    "@data-driven-forms/mui-component-mapper": "^2.7.0",
+    "@data-driven-forms/react-form-renderer": "^2.7.0",
+    "@feathersjs/authentication-client": "^4.5.6",
+    "@feathersjs/feathers": "^4.5.5",
+    "@feathersjs/rest-client": "^4.5.6",
+    "@material-ui/core": "^4.11.0",
     "@material-ui/icons": "^4.9.1",
-    "@material-ui/lab": "^4.0.0-alpha.53",
+    "@material-ui/lab": "^4.0.0-alpha.56",
     "deep-object-diff": "^1.1.0",
-    "formik": "^2.1.4",
+    "formik": "^2.1.5",
     "lodash-es": "^4.17.15",
     "node-sass": "^4.14.1",
     "react": "^16.13.1",
@@ -18,7 +20,7 @@
     "react-router-dom": "^5.2.0",
     "react-scripts": "^3.4.1",
     "react-select": "^3.1.0",
-    "react-select-material-ui": "^6.5.0"
+    "react-select-material-ui": "^6.6.3"
   },
   "scripts": {
     "start": "react-scripts start",
