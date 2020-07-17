@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useHistory } from 'react-router-dom';
 import { relationships } from './api';
 import ButtonLink from './components/ButtonLink';
 import Relationship from './Relationship';
@@ -37,6 +38,8 @@ function Relationships({ skip = 1 }) {
   const [notes, setNotes] = useState('');
   const [type, setType] = useState('');
   const [nextUnreviewed, setNextUnreviewed] = useState('');
+  const history = useHistory();
+
   // const [excludeReviewed, setExcludeReviewed] = useState(false);
 
   const info = {
@@ -73,7 +76,7 @@ function Relationships({ skip = 1 }) {
     unknown: {
       desc:
         'The relationship between these documents will require further review',
-      option: 'Unkown relationship',
+      option: 'Unknown relationship',
     },
   };
 
@@ -88,10 +91,10 @@ function Relationships({ skip = 1 }) {
       $select: ['id'],
     };
     const { data, total } = await relationships.find({ query });
-    console.log(data, idList.indexOf(data[0].id));
-    console.log(idList);
-    setNextUnreviewed(data.length ? idList.indexOf(data[0].id) + 1 : null);
+    const nextUnreviewed = data.length ? idList.indexOf(data[0].id) + 1 : null;
+    setNextUnreviewed(nextUnreviewed);
     setComplete(100 - (total / idList.length) * 100);
+    return nextUnreviewed;
   };
 
   useEffect(() => {
@@ -134,7 +137,8 @@ function Relationships({ skip = 1 }) {
 
   const setRelationType = async () => {
     await relationships.patch(relation.id, { type, notes });
-    fetchNextUnreviewed(idList);
+    const next = await fetchNextUnreviewed(idList);
+    history.push(`/relationships/${next}`);
   };
 
   const updateNotes = event => {
@@ -201,14 +205,15 @@ function Relationships({ skip = 1 }) {
                 </div>
                 {info[type]?.desc}
               </Grid>
-              <Grid item xs={4}>
+              <Grid item xs={6}>
                 <TextField
                   variant="outlined"
                   value={notes}
                   label="Relationship Notes"
-                  rows={4}
+                  rows={5}
                   multiline={true}
                   onChange={updateNotes}
+                  fullWidth
                 />
               </Grid>
               <Grid item xs={4}>
