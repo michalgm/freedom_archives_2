@@ -3,8 +3,8 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
-    "@data-driven-forms/mui-component-mapper": "^2.7.0",
-    "@data-driven-forms/react-form-renderer": "^2.7.0",
+    "@data-driven-forms/mui-component-mapper": "^2.8.0",
+    "@data-driven-forms/react-form-renderer": "^2.8.0",
     "@feathersjs/authentication-client": "^4.5.6",
     "@feathersjs/feathers": "^4.5.5",
     "@feathersjs/rest-client": "^4.5.6",
