@@ -7,6 +7,13 @@ import {
   ListItemIcon,
   ListItemText,
 } from '@material-ui/core';
+import {
+  getDrawerSidebar,
+  getSidebarContent,
+  getCollapseBtn,
+} from '@mui-treasury/layout';
+
+import styled from 'styled-components';
 import { useRouteMatch } from 'react-router-dom';
 
 const sideBarConfig = {
@@ -24,30 +31,37 @@ const sideBarConfig = {
   Admin: [{ label: 'Manage Users' }, { label: 'Publish/Restore Live Site' }],
 };
 
+const DrawerSidebar = getDrawerSidebar(styled);
+const SidebarContent = getSidebarContent(styled);
+const CollapseBtn = getCollapseBtn(styled);
+
 function Sidebar() {
   return (
-    <>
-      {Object.keys(sideBarConfig).map(title => {
-        return (
-          <div key={title}>
-            <Divider />
-            <List>
-              <ListItem>
-                <Typography variant="h5">{title}</Typography>
-              </ListItem>
-              {sideBarConfig[title].map(({ label, href, icon }) => (
-                <SidebarItem
-                  key={label}
-                  label={label}
-                  href={href}
-                  icon={icon}
-                />
-              ))}
-            </List>
-          </div>
-        );
-      })}
-    </>
+    <DrawerSidebar sidebarId={'primarySidebar'}>
+      <SidebarContent>
+        {Object.keys(sideBarConfig).map(title => {
+          return (
+            <div key={title}>
+              <Divider />
+              <List>
+                <ListItem>
+                  <Typography variant="h5">{title}</Typography>
+                </ListItem>
+                {sideBarConfig[title].map(({ label, href, icon }) => (
+                  <SidebarItem
+                    key={label}
+                    label={label}
+                    href={href}
+                    icon={icon}
+                  />
+                ))}
+              </List>
+            </div>
+          );
+        })}
+      </SidebarContent>
+      <CollapseBtn />
+    </DrawerSidebar>
   );
 }
 

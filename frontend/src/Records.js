@@ -117,9 +117,8 @@ function Records() {
   );
 
   const renderForm = () => (
-    <Grid container>
-      <Grid item md={false} lg={2} xl={4} />
-      <Grid item md={12} lg={8} xl={4} className="search-form">
+    <Grid container justify="center">
+      <Grid item xs={12} md={8} lg={6} xl={4} className="search-form">
         <Form
           initialValues={search}
           onSubmit={fields => {
@@ -132,12 +131,14 @@ function Records() {
               label="Search"
               placeholder="Search Records"
               autoSubmit={300}
+              width={8}
             />
             <Field
               name="has_digital"
               label="Only Digital"
               type="checkbox"
               autoSubmit
+              width={4}
             />
           </FieldRow>
         </Form>

@@ -1,11 +1,6 @@
 import React from 'react';
 import './App.scss';
-import {
-  BrowserRouter as Router,
-  Route,
-  Link,
-  Redirect,
-} from 'react-router-dom';
+import { BrowserRouter as Router, Route, Redirect } from 'react-router-dom';
 import { StateProvider, useStateValue } from './appContext';
 import Records from './Records';
 import Record from './Record';
@@ -20,29 +15,22 @@ import { app } from './api';
 import {
   CssBaseline,
   Container,
-  AppBar,
   Toolbar,
   Button,
   Typography,
 } from '@material-ui/core';
-import Layout, {
+import {
   Root,
   getMuiTreasuryScheme,
   getHeader,
-  getDrawerSidebar,
   getSidebarTrigger,
-  getSidebarContent,
-  getCollapseBtn,
   getContent,
 } from '@mui-treasury/layout';
 import styled from 'styled-components';
 
 const Header = getHeader(styled);
-const DrawerSidebar = getDrawerSidebar(styled);
 const SidebarTrigger = getSidebarTrigger(styled);
 const Content = getContent(styled);
-const SidebarContent = getSidebarContent(styled);
-const CollapseBtn = getCollapseBtn(styled);
 
 const scheme = getMuiTreasuryScheme();
 // scheme.configureHeader(builder => {
@@ -74,22 +62,32 @@ function App() {
       <Router>
         <Root scheme={scheme}>
           <CssBaseline>
-            <div className="App">
-              <NavBar />
-              <DrawerSidebar sidebarId={'primarySidebar'}>
-                <SidebarContent>
-                  <Sidebar />
-                </SidebarContent>
-                <CollapseBtn />
-              </DrawerSidebar>
-              <Content>
-                <Main />
-              </Content>
-            </div>
+            <Layout />
           </CssBaseline>
         </Root>
       </Router>
     </StateProvider>
+  );
+}
+
+function Layout() {
+  const {
+    state: { isAuthenticated },
+  } = useStateValue();
+  const style = isAuthenticated
+    ? {}
+    : {
+        marginLeft: 0,
+        width: '100%',
+      };
+  return (
+    <div className="App">
+      <NavBar />
+      {isAuthenticated && <Sidebar />}
+      <Content style={style}>
+        <Main />
+      </Content>
+    </div>
   );
 }
 

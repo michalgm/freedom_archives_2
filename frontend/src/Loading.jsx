@@ -35,7 +35,7 @@ export default function Loading() {
 
   return (
     <Backdrop open={loading} style={{ zIndex: 10000 }}>
-      {loading && <CircularProgress color="inherit" />}
+      {loading && <CircularProgress color="primary" size={100} />}
     </Backdrop>
   );
 }

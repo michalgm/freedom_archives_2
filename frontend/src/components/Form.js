@@ -1,12 +1,12 @@
-import React from "react";
-import { Formik, Form as FormikForm, useFormikContext } from "formik";
-import { Grid, Button } from "@material-ui/core";
-import "./Form.scss";
+import React from 'react';
+import { Formik, Form as FormikForm, useFormikContext } from 'formik';
+import { Grid, Button } from '@material-ui/core';
+import './Form.scss';
 
 const FormButton = ({ label, onClick, ...props }) => {
   const { handleReset } = useFormikContext();
-  const click = (e) => {
-    if (props.type === "reset") {
+  const click = e => {
+    if (props.type === 'reset') {
       handleReset(e);
     }
     if (onClick) {
@@ -28,6 +28,7 @@ const Form = ({
   initialValues,
   noUpdateCheck = false,
   buttons = [],
+  buttonsBelow,
   ...props
 }) => {
   const rows = React.Children.toArray(children);
@@ -49,7 +50,7 @@ const Form = ({
   return (
     <Formik
       enableReinitialize
-      onSubmit={(values) => {
+      onSubmit={values => {
         if (noUpdateCheck) {
           return onSubmit(values);
         }
@@ -68,13 +69,19 @@ const Form = ({
       {...props}
     >
       <FormikForm className="form">
-        <Grid container style={{ textAlign: "left" }} spacing={2} className={`${ro ? 'read-only' : ''}`}>
-          {renderButtons(buttons)}
-          {rows.map((row) =>
-            row.type && row.type.name === "FieldRow"
+        <Grid
+          container
+          style={{ textAlign: 'left' }}
+          spacing={2}
+          className={`${ro ? 'read-only' : ''}`}
+        >
+          {!buttonsBelow && renderButtons(buttons)}
+          {rows.map(row =>
+            row.type && row.type.name === 'FieldRow'
               ? React.cloneElement(row, { ro })
               : row
           )}
+          {buttonsBelow && renderButtons(buttons)}
         </Grid>
       </FormikForm>
     </Formik>

@@ -1,5 +1,8 @@
 .App {
-  .MuiContainer-root .MuiPaper-root {
-    padding: 10px;
+  .MuiContainer-root {
+    padding-top: 10px;
+    .MuiPaper-root {
+      padding: 10px;
+    }
   }
 }
