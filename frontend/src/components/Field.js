@@ -80,7 +80,8 @@ const CustomComponent = ({
         autoComplete="off"
         inputProps={{ style: { color: '#000' } }}
         fullWidth
-        {...{ name, value }}
+        type={type || 'text'}
+        {...{ name, value: value || '' }}
         {...props}
       />
     );
