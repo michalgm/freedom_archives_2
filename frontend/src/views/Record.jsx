@@ -1,12 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { Redirect } from 'react-router-dom';
-import { records, relationships } from './api';
-import FieldRow from './components/FieldRow';
-import Field from './components/Field';
-import ListItemField from './components/ListItemField';
-import Form from './components/Form';
-import Link from './components/Link';
-import GridBlock from './components/GridBlock';
+import { records, relationships } from '../api';
+import FieldRow from '../components/FieldRow';
+import Field from '../components/Field';
+import ListItemField from '../components/ListItemField';
+import Form from '../components/Form';
+import Link from '../components/Link';
+import GridBlock from '../components/GridBlock';
 import {
   Grid,
   Table,

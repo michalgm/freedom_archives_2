@@ -72,8 +72,8 @@ CREATE TABLE records (
   month int,
   day int,
   call_number text,
-  publisher integer REFERENCES list_items,
-  program integer REFERENCES list_items,
+  publisher_id integer REFERENCES list_items,
+  program_id integer REFERENCES list_items,
   needs_review bool DEFAULT false,
   is_hidden bool DEFAULT false,
   publish_to_global bool DEFAULT true,
@@ -343,15 +343,61 @@ SELECT b.record_id,
      JOIN records_to_list_items b USING (list_item_id)
   GROUP BY b.record_id, a.type;
 
+drop view if exists collections_list_items_view;
+create view collections_list_items_view as
+SELECT b.collection_id,
+    a.type,
+    array_to_json(
+      array_agg(
+        ROW_TO_JSON(
+          (select i from (select a.list_item_id, a.item) i )
+        ) order by item
+      )
+    ) AS items,
+    string_agg(a.item, ' ' order by a.item) as items_text,
+    array_agg(a.item order by a.item) as items_search
+   FROM list_items a
+     JOIN collections_to_list_items b USING (list_item_id)
+  GROUP BY b.collection_id, a.type;
+
+drop view if exists collections_view;
+create view collections_view as
+  select a.*,
+    jsonb_build_object('collection_name', parent.collection_name, 'collection_id', parent.collection_id) as parent,
+    contributor.firstname || ' ' || contributor.lastname as contributor_name,
+    contributor.username as contributor_username,
+    creator.firstname || ' ' || creator.lastname as creator_name,
+    creator.username as creator_username,
+    coalesce(children.children, '[]'::json) as children,
+    subjects.items as subjects,
+    keywords.items as keywords,
+    subjects.items_text as subjects_text,
+    keywords.items_text as keywords_text,
+    subjects.items_search as subjects_search,
+    keywords.items_search as keywords_search
+  FROM collections a
+  LEFT JOIN collections parent on a.parent_id = parent.collection_id
+  left join users contributor on a.contributor_user_id = contributor.user_id
+  left join users creator on a.creator_user_id = creator.user_id
+  left join collections_list_items_view subjects on subjects.type = 'subject' and subjects.collection_id = a.collection_id
+  left join collections_list_items_view keywords on keywords.type = 'keyword' and keywords.collection_id = a.collection_id
+  left join (select parent_id, array_to_json(array_agg(row_to_json(b))) as children from (select parent_id, collection_id, collection_name from collections) b group by parent_id) children on children.parent_id = a.collection_id
+  ;
+
+drop table if exists unified_collections cascade;
+create table unified_collections as select * from collections_view;
+-- CREATE INDEX collections_fulltext_index on unified_collections using GIN (fulltext);
+ALTER TABLE unified_collections add PRIMARY KEY(collection_id);
+
 /* FIXME collection */
 drop view if exists records_view;
 create view records_view as
   select a.*,
     coalesce(a.month::text, '??') || '/' || coalesce(a.day::text, '??') || '/' || coalesce(a.year::text, '??') as date_string,
     (coalesce(a.year::text, '1900')::text || '-' || coalesce(a.month::text, '01')::text || '-' || coalesce(a.day::text, '01')::text)::date as date,
-    collections.collection_name as collection_value,
-    publisher_lookup.item as publisher_value,
-    program_lookup.item as program_value,
+    jsonb_build_object('collection_name', collections.collection_name, 'collection_id', collections.collection_id) as collection,
+    jsonb_build_object('item', publisher_lookup.item, 'list_item_id', publisher_lookup.list_item_id) as publisher,
+    jsonb_build_object('item', program_lookup.item, 'list_item_id', program_lookup.list_item_id) as program,
     instances.instances as instances,
     instances.has_digital as has_digital,
     instances.instance_count as instance_count,
@@ -380,8 +426,8 @@ create view records_view as
       setweight(to_tsvector('english', coalesce(keywords.items_text, '')), 'C') as fulltext
   from records a
   left join collections using(collection_id)
-  left join list_items publisher_lookup on a.publisher = publisher_lookup.list_item_id
-  left join list_items program_lookup on a.program = program_lookup.list_item_id
+  left join list_items publisher_lookup on a.publisher_id = publisher_lookup.list_item_id
+  left join list_items program_lookup on a.program_id = program_lookup.list_item_id
   left join (select record_id, bool_or(url != '') as has_digital, count(*) as instance_count, array_to_json(array_agg(row_to_json(b) order by b.is_primary)) as instances from instances_view b group by record_id ) instances using (record_id)
   left join users contributor on a.contributor_user_id = contributor.user_id
   left join users creator on a.creator_user_id = creator.user_id

@@ -1,7 +1,7 @@
 import React from 'react';
-import { authenticate } from './api';
-import Field from './components/Field';
-import Form from './components/Form';
+import { authenticate } from '../api';
+import Field from '../components/Field';
+import Form from '../components/Form';
 import { Grid, Typography, Paper } from '@material-ui/core/';
 function Login() {
   const buttons = [{ label: 'Log In', type: 'submit', color: 'primary' }];

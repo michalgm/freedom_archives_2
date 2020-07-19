@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { records as recordsService } from './api';
+import { records as recordsService } from '../api';
 import { Link } from 'react-router-dom';
 // import { Formik, Form, Field } from 'formik';
-import { useStateValue } from './appContext';
-import Form from './components/Form';
-import Field from './components/Field';
-import FieldRow from './components/FieldRow';
+import { useStateValue } from '../appContext';
+import Form from '../components/Form';
+import Field from '../components/Field';
+import FieldRow from '../components/FieldRow';
 import { Link as MULink, Typography, Button, Grid } from '@material-ui/core';
 import './Records.scss';
 

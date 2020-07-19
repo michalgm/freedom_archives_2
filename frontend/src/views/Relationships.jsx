@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useHistory } from 'react-router-dom';
-import { relationships } from './api';
-import ButtonLink from './components/ButtonLink';
+import { relationships } from '../api';
+import ButtonLink from '../components/ButtonLink';
 import Relationship from './Relationship';
 import {
   Button,

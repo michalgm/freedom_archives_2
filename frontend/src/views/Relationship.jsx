@@ -1,26 +1,21 @@
 import React, { useState, useEffect } from 'react';
-import { relationships } from './api';
+import { relationships } from '../api';
 
 import Record from './Record';
-import Field from './components/Field';
-import Link from './components/Link';
-import {
-  Grid,
-  Paper,
-  Divider,
-  Typography
-} from '@material-ui/core';
+import Field from '../components/Field';
+import Link from '../components/Link';
+import { Grid, Paper, Divider, Typography } from '@material-ui/core';
 
 function Relationship({ id }) {
   const [relation, setRelation] = useState({});
 
   useEffect(() => {
     const fetchRelations = async () => {
-      const relation = await relationships.get(id)
+      const relation = await relationships.get(id);
       setRelation(relation || {});
-    }
+    };
     fetchRelations();
-  }, [id])
+  }, [id]);
 
   if (!relation.docid_1) {
     return null;
@@ -34,37 +29,40 @@ function Relationship({ id }) {
           return (
             <Grid item xs={6} key={num}>
               <Paper>
-                <Typography variant="h4">
-                  Record {num}
-                </Typography>
+                <Typography variant="h4">Record {num}</Typography>
                 <Typography variant="subtitle1">
                   <Link to={`/record/${relation[`docid_${num}`]}`}>
                     (ID {relation[`docid_${num}`]})
                   </Link>
-                  <Link target="_blank" href={`https://search.freedomarchives.org/admin/#/documents/${relation[`docid_${num}`]}`}>
+                  <Link
+                    target="_blank"
+                    href={`https://search.freedomarchives.org/admin/#/documents/${
+                      relation[`docid_${num}`]
+                    }`}
+                  >
                     (Live DB Link)
                   </Link>
                 </Typography>
                 <Field
                   raw
-                  label='Relation Title'
+                  label="Relation Title"
                   value={relation[`title_${other_num}`]}
                 />
                 <Field
                   raw
                   multiline
-                  label='Relation description'
+                  label="Relation description"
                   value={relation[`description_${other_num}`]}
                 />
                 <Field
                   raw
-                  label='Relation Track Number'
+                  label="Relation Track Number"
                   value={relation[`track_number_${other_num}`]}
                 />
                 <Divider />
               </Paper>
             </Grid>
-          )
+          );
         })}
 
         {[1, 2].map(num => (
@@ -78,7 +76,7 @@ function Relationship({ id }) {
         ))}
       </Grid>
     </div>
-  )
+  );
 }
 
 export default React.memo(Relationship);

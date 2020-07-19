@@ -1,7 +1,7 @@
 import React from 'react';
 import { Backdrop, CircularProgress } from '@material-ui/core';
-import { useStateValue } from './appContext';
-import { app } from './api';
+import { useStateValue } from '../appContext';
+import { app } from '../api';
 
 import { debounce } from 'lodash';
 
