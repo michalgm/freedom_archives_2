@@ -1,6 +1,6 @@
 import React from 'react';
 import { Backdrop, CircularProgress } from '@material-ui/core';
-import { useStateValue } from './appContext'
+import { useStateValue } from './appContext';
 import { app } from './api';
 
 import { debounce } from 'lodash';
@@ -8,27 +8,34 @@ import { debounce } from 'lodash';
 let loaded = false;
 
 export default function Loading() {
-  const { state: { loading }, dispatch } = useStateValue();
+  const {
+    state: { loading },
+    dispatch,
+  } = useStateValue();
   if (!loaded) {
-    const debouncedLoaded = debounce(() => dispatch('LOADING', false), 100)
+    const debouncedLoaded = debounce(() => dispatch('LOADING', false), 100);
     app.hooks({
       before: {
-        all: () => {
-          dispatch('LOADING', true);
-          debouncedLoaded.cancel()
-        }
+        all: context => {
+          if (!(context.arguments[0] && context.arguments[0].noLoading)) {
+            dispatch('LOADING', true);
+            debouncedLoaded.cancel();
+          }
+        },
       },
       after: {
-        all: () => debouncedLoaded()
+        all: () => debouncedLoaded(),
       },
       error: {
-        all: () => debouncedLoaded()
-      }
-    })
+        all: () => debouncedLoaded(),
+      },
+    });
     loaded = true;
   }
 
-  return <Backdrop open={loading} style={{ zIndex: 10000 }}>
-    <CircularProgress color="inherit" />
-  </Backdrop>
-} 
+  return (
+    <Backdrop open={loading} style={{ zIndex: 10000 }}>
+      {loading && <CircularProgress color="inherit" />}
+    </Backdrop>
+  );
+}

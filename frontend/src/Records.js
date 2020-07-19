@@ -1,9 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { records as recordsService } from './api';
 import { Link } from 'react-router-dom';
-import { Formik, Form, Field } from 'formik';
+// import { Formik, Form, Field } from 'formik';
 import { useStateValue } from './appContext';
-
+import Form from './components/Form';
+import Field from './components/Field';
+import FieldRow from './components/FieldRow';
+import { Link as MULink, Typography, Button, Grid } from '@material-ui/core';
 import './Records.scss';
 
 function Records() {
@@ -75,15 +78,21 @@ function Records() {
 
   const renderFilters = () => (
     <div>
-      <h5>Filters</h5>
-      <button onClick={() => clearFilters()}>Clear Filters</button>
+      <Typography variant="h5">Filters</Typography>
+      <Button
+        color="primary"
+        variant="contained"
+        onClick={() => clearFilters()}
+      >
+        Clear Filters
+      </Button>
       {filters.map(renderFilter)}
     </div>
   );
 
   const renderFilter = ({ type, values }) => (
     <div key={type} style={{ flexGrow: 1 }}>
-      <h6>{type}</h6>
+      <Typography variant="h6">{type}</Typography>
       <ul>
         {values
           .slice(0, 5)
@@ -96,47 +105,44 @@ function Records() {
 
   const renderFilterItem = ({ value, count, i, type }) => (
     <li key={i} onClick={() => addFilter({ type, value })}>
-      <a
+      <MULink
         href=""
         onClick={e => e.preventDefault()}
         style={{ fontWeight: (search[type] || []).includes(value) ? 800 : 400 }}
       >
         {value}
-      </a>{' '}
-      &nbsp; ({count})
+      </MULink>{' '}
+      &nbsp;({count})
     </li>
   );
 
   const renderForm = () => (
-    <div className="search-form">
-      <Formik
-        initialValues={search}
-        onSubmit={fields => {
-          dispatch('SET_SEARCH', { ...search, ...fields });
-        }}
-      >
-        {({ values, handleChange, submitForm, isSubmitting }) => {
-          return (
-            <Form style={{ padding: 5, margin: 5 }}>
-              <Field name="$fullText" placeholder="Search Records" />
-              <button type="submit" disabled={isSubmitting}>
-                Search
-              </button>
-              <label>Only Digital</label>
-              <Field
-                name="has_digital"
-                type="checkbox"
-                checked={values.has_digital}
-                onChange={e => {
-                  handleChange(e);
-                  submitForm();
-                }}
-              />
-            </Form>
-          );
-        }}
-      </Formik>
-    </div>
+    <Grid container>
+      <Grid item md={false} lg={2} xl={4} />
+      <Grid item md={12} lg={8} xl={4} className="search-form">
+        <Form
+          initialValues={search}
+          onSubmit={fields => {
+            dispatch('SET_SEARCH', { ...search, ...fields });
+          }}
+        >
+          <FieldRow>
+            <Field
+              name="$fullText"
+              label="Search"
+              placeholder="Search Records"
+              autoSubmit={300}
+            />
+            <Field
+              name="has_digital"
+              label="Only Digital"
+              type="checkbox"
+              autoSubmit
+            />
+          </FieldRow>
+        </Form>
+      </Grid>
+    </Grid>
   );
 
   return (
