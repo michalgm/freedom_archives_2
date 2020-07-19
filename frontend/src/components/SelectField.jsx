@@ -66,7 +66,8 @@ const SelectField = ({
     };
 
     fetchRecord();
-  }, [inputValue, loading, loadOptions]);
+  }, [inputValue]);
+  // }, [inputValue, loading, loadOptions]);
 
   React.useEffect(() => {
     if (!open) {

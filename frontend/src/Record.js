@@ -28,6 +28,13 @@ function Children({ children = [] }) {
         </TableRow>
       </TableHead>
       <TableBody>
+        {children.length === 0 && (
+          <TableRow>
+            <TableCell align="center" colSpan={15}>
+              No Child Records
+            </TableCell>
+          </TableRow>
+        )}
         {children.map(child => (
           <TableRow key={child.record_id}>
             <TableCell>{child.title}</TableCell>
@@ -57,6 +64,13 @@ function Instances({ instances = [] }) {
         </TableRow>
       </TableHead>
       <TableBody>
+        {instances.length === 0 && (
+          <TableRow>
+            <TableCell align="center" colSpan={15}>
+              No Instances
+            </TableCell>
+          </TableRow>
+        )}
         {instances.map(instance => (
           <TableRow key={instance.instance_id}>
             <TableCell>
@@ -113,6 +127,13 @@ function Relationships({ id, relationships = [] }) {
         </TableRow>
       </TableHead>
       <TableBody>
+        {relationships.length === 0 && (
+          <TableRow>
+            <TableCell align="center" colSpan={15}>
+              No Related Records
+            </TableCell>
+          </TableRow>
+        )}
         {relationships.map((relation, index) => {
           const side = relation.docid_1 === id ? 2 : 1;
 
@@ -169,9 +190,9 @@ function Record({ id, showForm, ro = false }) {
       'description',
       'call_number',
       'location',
-      'publisher_value',
-      'program_value',
-      'collection_value',
+      'publisher',
+      'program',
+      'collection',
       'date_string',
       'vol_number',
       'location',
@@ -179,20 +200,10 @@ function Record({ id, showForm, ro = false }) {
       'subjects',
       'authors',
       'producers',
+      'notes',
     ].forEach(key => {
       record[key] = record_data[key];
     });
-    // ['subjects', 'authors', 'producers'].forEach(key => {
-    //   record[key] = (record_data[key] || []).map(i => i.item).join(', ')
-    // })
-    // const keywords = await list_items.find({ query: { type: 'keyword', $select: ['list_item_id', 'item'] } })
-    // setKeywords(keywords.map(item => ({ label: item.item, value: item })));
-    // record.keywords = record_data.keywords;
-    record.collection = {
-      collection_id: record_data.collection_id,
-      collection_name: record_data.collection_value,
-    };
-    record.notes = record_data.notes;
     record.instances = <Instances instances={record_data.instances || []} />;
     record.children = <Children children={record_data.children || []} />;
     record.relationships = (
@@ -210,7 +221,6 @@ function Record({ id, showForm, ro = false }) {
 
   const updateRecord = async data => {
     setLoading(true);
-    console.log(data);
     try {
       await records.patch(id, data);
       const updated = await records.get(id);
@@ -297,7 +307,7 @@ function Record({ id, showForm, ro = false }) {
             </FieldRow>
             <FieldRow>
               <Field name="location" />
-              <Field name="program" />
+              <ListItemField listType="program" name="program" />
             </FieldRow>
             <FieldRow>
               <Field name="notes" multiline rows={4} />

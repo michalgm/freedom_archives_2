@@ -13,12 +13,12 @@ import Field from './Field';
 import { list_items } from '../api';
 import { useFormikContext } from 'formik';
 
-const ListItemField = ({ name, ...props }) => {
+const ListItemField = ({ name, listType, ...props }) => {
   const [open, toggleOpen] = React.useState(false);
   const [newValue, setNewValue] = React.useState('');
 
   // const filter = createFilterOptions();
-  const type = name.replace(/s$/, '');
+  const type = listType || name.replace(/s$/, '');
 
   const validateChange = (_, item) => {
     const lastItem = item[item.length - 1];
@@ -36,7 +36,7 @@ const ListItemField = ({ name, ...props }) => {
         name={name}
         type="select"
         // getOptionLabel={item => item.item}
-        isMulti
+        isMulti={props.isMulti || false}
         // loadOptions={async value => await type(value)}
         searchType="list_items"
         searchParams={{ type }}
