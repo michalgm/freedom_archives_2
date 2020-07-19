@@ -6,13 +6,14 @@ import Field from './components/Field';
 import ListItemField from './components/ListItemField';
 import Form from './components/Form';
 import Link from './components/Link';
+import GridBlock from './components/GridBlock';
 import {
+  Grid,
   Table,
   TableBody,
   TableCell,
   TableHead,
   TableRow,
-  Paper,
 } from '@material-ui/core/';
 
 import './Record.scss';
@@ -60,9 +61,14 @@ function Instances({ instances = [] }) {
           <TableRow key={instance.instance_id}>
             <TableCell>
               {instance.url ? (
-                <a href={instance.url} target="_blank">
+                <a
+                  href={instance.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
                   {instance.thumbnail ? (
                     <img
+                      alt=""
                       width="20"
                       src={
                         'https://search.freedomarchives.org/' +
@@ -107,42 +113,43 @@ function Relationships({ id, relationships = [] }) {
         </TableRow>
       </TableHead>
       <TableBody>
-        {relationships
-          .map((relation, index) => {
-            const side = relation.docid_1 === id ? 2 : 1;
+        {relationships.map((relation, index) => {
+          const side = relation.docid_1 === id ? 2 : 1;
 
-            const doc_id = relation[`docid_${side}`];
-            // if (doc_id === `${id}`) {
-            //   return null;
-            // }
-            return (
-              <React.Fragment key={`${relation.docid_1}_${relation.docid_2}_${relation.track_number_1}_${relation.track_number_2}`}>
-                <TableRow>
-                  <TableCell rowSpan={2}>{index + 1}</TableCell>
-                  <TableCell>
-                    <Link to={`/record/${doc_id}`}>
-                      {relation[`title_${side}`]}
-                    </Link>
-                  </TableCell>
-                  <TableCell>{relation[`generation_${side}`]}</TableCell>
-                  <TableCell>{relation[`call_number_${side}`]}</TableCell>
-                  <TableCell>{relation[`format_${side}`]}</TableCell>
-                  <TableCell>{relation[`track_number_${side}`]}</TableCell>
-                  <TableCell>{relation.type}</TableCell>
-                  <TableCell>
-                    <Link to={`/relationship/${relation.id}`}>View</Link>
-                  </TableCell>
-                </TableRow>
-                <TableRow>
-                  <TableCell colSpan={7}>
-                    {relation[`description_${side}`]}
-                  </TableCell>
-                </TableRow>
-              </React.Fragment>
-            );
-          })}
+          const doc_id = relation[`docid_${side}`];
+          // if (doc_id === `${id}`) {
+          //   return null;
+          // }
+          return (
+            <React.Fragment
+              key={`${relation.docid_1}_${relation.docid_2}_${relation.track_number_1}_${relation.track_number_2}`}
+            >
+              <TableRow>
+                <TableCell rowSpan={2}>{index + 1}</TableCell>
+                <TableCell>
+                  <Link to={`/record/${doc_id}`}>
+                    {relation[`title_${side}`]}
+                  </Link>
+                </TableCell>
+                <TableCell>{relation[`generation_${side}`]}</TableCell>
+                <TableCell>{relation[`call_number_${side}`]}</TableCell>
+                <TableCell>{relation[`format_${side}`]}</TableCell>
+                <TableCell>{relation[`track_number_${side}`]}</TableCell>
+                <TableCell>{relation.type}</TableCell>
+                <TableCell>
+                  <Link to={`/relationship/${relation.id}`}>View</Link>
+                </TableCell>
+              </TableRow>
+              <TableRow>
+                <TableCell colSpan={7}>
+                  {relation[`description_${side}`]}
+                </TableCell>
+              </TableRow>
+            </React.Fragment>
+          );
+        })}
       </TableBody>
-    </Table >
+    </Table>
   );
 }
 
@@ -181,6 +188,10 @@ function Record({ id, showForm, ro = false }) {
     // const keywords = await list_items.find({ query: { type: 'keyword', $select: ['list_item_id', 'item'] } })
     // setKeywords(keywords.map(item => ({ label: item.item, value: item })));
     // record.keywords = record_data.keywords;
+    record.collection = {
+      collection_id: record_data.collection_id,
+      collection_name: record_data.collection_value,
+    };
     record.notes = record_data.notes;
     record.instances = <Instances instances={record_data.instances || []} />;
     record.children = <Children children={record_data.children || []} />;
@@ -199,11 +210,12 @@ function Record({ id, showForm, ro = false }) {
 
   const updateRecord = async data => {
     setLoading(true);
+    console.log(data);
     try {
       await records.patch(id, data);
       const updated = await records.get(id);
       loadRecord(updated);
-    } catch { }
+    } catch {}
     setLoading(false);
   };
 
@@ -212,7 +224,15 @@ function Record({ id, showForm, ro = false }) {
       const [record, { data }] = await Promise.all([
         records.get(id),
         relationships.find({
-          query: { $or: [{ docid_1: id }, { docid_2: id }], $sort: { docid_1: 1, docid_2: 1, track_number_1: 1, track_number_2: 1 } },
+          query: {
+            $or: [{ docid_1: id }, { docid_2: id }],
+            $sort: {
+              docid_1: 1,
+              docid_2: 1,
+              track_number_1: 1,
+              track_number_2: 1,
+            },
+          },
         }),
       ]);
       return loadRecord(record, data);
@@ -228,21 +248,25 @@ function Record({ id, showForm, ro = false }) {
 
   const buttons = edit
     ? [
-      { label: 'Save', type: 'submit', color: 'primary' },
-      { label: 'Delete', onClick: deleteRecord, color: 'secondary' },
-      {
-        label: 'Cancel',
-        onClick: () => setEdit(false),
-        variant: 'outlined',
-        type: 'reset',
-      },
-    ]
+        { label: 'Save', type: 'submit', color: 'primary' },
+        { label: 'Delete', onClick: deleteRecord, color: 'secondary' },
+        {
+          label: 'Cancel',
+          onClick: () => setEdit(false),
+          variant: 'outlined',
+          type: 'reset',
+        },
+      ]
     : [{ label: 'Edit', onClick: () => setEdit(true), type: 'button' }];
 
   return (
-    <div className={`record ${loading ? 'loading' : null}`}>
+    <Grid
+      spacing={4}
+      container
+      className={`record ${loading ? 'loading' : ''}`}
+    >
       {record.title && (
-        <Paper>
+        <GridBlock title={record.title}>
           <Form
             initialValues={record}
             onSubmit={updateRecord}
@@ -268,7 +292,7 @@ function Record({ id, showForm, ro = false }) {
               <ListItemField name="subjects" isMulti />
             </FieldRow>
             <FieldRow>
-              <Field name="collection_value" />
+              <Field type="select" searchType="collections" name="collection" />
               <Field name="date_string" label="Date" />
             </FieldRow>
             <FieldRow>
@@ -279,24 +303,13 @@ function Record({ id, showForm, ro = false }) {
               <Field name="notes" multiline rows={4} />
             </FieldRow>
           </Form>
-        </Paper>
+        </GridBlock>
       )}
-      <Paper>
-        <h4>Instances</h4>
-        {record.instances}
-      </Paper>
-      <Paper>
-        <h4>Children</h4>
-        {record.children}
-      </Paper>
-      <Paper>
-        <h4>Relationships</h4>
-        {record.relationships}
-      </Paper>
-      {/* <pre style={{ textAlign: 'left' }}>
-        {JSON.stringify(record, null, 2)}
-      </pre> */}
-    </div>
+      <GridBlock title="Instances">{record.instances}</GridBlock>
+      <GridBlock title="Children">{record.children}</GridBlock>
+      <GridBlock title="Relationships">{record.relationships}</GridBlock>
+      {/* <pre style={{ textAlign: 'left' }}>{JSON.stringify(record, null, 2)}</pre> */}
+    </Grid>
   );
 }
 

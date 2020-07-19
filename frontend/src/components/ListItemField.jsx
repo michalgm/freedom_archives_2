@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState } from 'react';
 import {
   Dialog,
   DialogTitle,
@@ -6,61 +6,49 @@ import {
   Button,
   DialogActions,
   Grid,
-} from "@material-ui/core";
-// import { createFilterOptions } from "@material-ui/lab";
-
-import Form from "./Form";
-import FieldRow from "./FieldRow";
-import Field from "./Field";
-import { list_items } from "../api";
-import { useFormikContext } from "formik";
+} from '@material-ui/core';
+import Form from './Form';
+import FieldRow from './FieldRow';
+import Field from './Field';
+import { list_items } from '../api';
+import { useFormikContext } from 'formik';
 
 const ListItemField = ({ name, ...props }) => {
   const [open, toggleOpen] = React.useState(false);
-  const [newValue, setNewValue] = React.useState("");
+  const [newValue, setNewValue] = React.useState('');
 
   // const filter = createFilterOptions();
-  const type = name.replace(/s$/, "");
+  const type = name.replace(/s$/, '');
 
-  const fetchItems = (type) => async (value) => {
-    const { data } = await list_items.find({
-      query: {
-        type,
-        $select: ["list_item_id", "item"],
-        item: { $ilike: `%${value}%` },
-      },
-    });
-    return data;
-  };
-
-  const onChange = (_, item) => {
+  const validateChange = (_, item) => {
     const lastItem = item[item.length - 1];
     if (lastItem && !lastItem.list_item_id) {
       toggleOpen(true);
-      setNewValue(lastItem.item.replace(/^Add "(.+)"$/, "$1"));
+      setNewValue(lastItem.item.replace(/^Add "(.+)"$/, '$1'));
     } else {
       return true;
     }
   };
+
   return (
     <>
       <Field
         name={name}
         type="select"
-        getOptionLabel={(item) => item.item}
-        loadOptions={async (value) => await fetchItems(type)(value)}
-        getOptionSelected={(option, value) =>
-          option.list_item_id === value.list_item_id
-        }
+        // getOptionLabel={item => item.item}
+        isMulti
+        // loadOptions={async value => await type(value)}
+        searchType="list_items"
+        searchParams={{ type }}
         selectOnFocus
         clearOnBlur
         handleHomeEndKeys
         filterSelectedOptions
-        onChange={onChange}
+        validateChange={validateChange}
         filterOptions={(options, params) => {
           if (
-            params.inputValue !== "" &&
-            !options.find((o) => o.item === params.inputValue)
+            params.inputValue !== '' &&
+            !options.find(o => o.item === params.inputValue)
           ) {
             options.push({
               value: params.inputValue,
@@ -96,7 +84,7 @@ export const NewListItemDialog = ({
     setListItem({ [type]: initialValue });
   }, [initialValue, type]);
 
-  const handleSubmit = async (updatedValues) => {
+  const handleSubmit = async updatedValues => {
     const item = updatedValues[type];
     const result = await list_items.create({
       item,
@@ -107,7 +95,7 @@ export const NewListItemDialog = ({
     handleClose(result);
   };
 
-  const validate = async (values) => {
+  const validate = async values => {
     const item = values[type];
 
     const { data } = await list_items.find({

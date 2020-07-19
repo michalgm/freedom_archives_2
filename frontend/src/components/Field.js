@@ -1,92 +1,18 @@
-import React from "react";
-import { Field as FormikField, useFormikContext } from "formik";
-import { TextField } from "@material-ui/core";
-import { startCase } from "lodash";
-import { Autocomplete, Alert } from "@material-ui/lab";
+import React from 'react';
+import { Field as FormikField, useFormikContext } from 'formik';
+import {
+  TextField,
+  FormGroup,
+  FormControl,
+  FormControlLabel,
+  Checkbox,
+} from '@material-ui/core';
+import { startCase } from 'lodash';
+import { Alert } from '@material-ui/lab';
+import SelectField from './SelectField';
+// import { ConsoleTransportOptions } from 'winston/lib/winston/transports';
 
-const Select = ({
-  type,
-  isMulti,
-  ro,
-  defaultValue,
-  label,
-  name,
-  onChange,
-  onBlur,
-  loadOptions,
-  setFieldValue,
-  ...props
-}) => {
-  // console.log(defaultValue);
-
-  const [open, setOpen] = React.useState(false);
-  const [inputValue, setInputValue] = React.useState("");
-  const [value, setValue] = React.useState(defaultValue);
-
-  // console.log(value, defaultValue, props)
-  const [options, setOptions] = React.useState([]);
-  const loading = Boolean(open && inputValue);
-
-  React.useEffect(() => {
-    let active = true;
-    // console.log(inputValue)
-
-    if (!loading) {
-      return undefined;
-    }
-
-    (async () => {
-      const response = await loadOptions(inputValue);
-      if (active) {
-        setOptions(response);
-      }
-    })();
-
-    return () => {
-      active = false;
-    };
-  }, [inputValue]);
-
-  React.useEffect(() => {
-    if (!open) {
-      setOptions([]);
-    }
-  }, [open]);
-
-  React.useEffect(() => {
-    setValue(defaultValue);
-  }, [defaultValue]);
-
-  return (
-    <Autocomplete
-      loading={loading}
-      multiple={isMulti}
-      open={open}
-      onOpen={() => {
-        setOpen(true);
-      }}
-      onClose={() => {
-        setOpen(false);
-      }}
-      options={options}
-      renderInput={(params) => (
-        <TextField {...params} InputLabelProps={{ shrink: true }}
-          label={label} variant="outlined" />
-      )}
-      onChange={(_, option) => {
-        if (onChange && onChange(_, option)) {
-          setFieldValue(name, option);
-        }
-      }}
-      onInputChange={(_, option) => {
-        setInputValue(option);
-      }}
-      value={value}
-      inputValue={inputValue}
-      {...props}
-    />
-  );
-};
+let submitTimeout;
 
 const CustomComponent = ({
   type,
@@ -95,16 +21,27 @@ const CustomComponent = ({
   name,
   value,
   isMulti,
-  loadOptions,
+  autoSubmit,
   ...props
 }) => {
-  const labelValue = (label || startCase(name)).replace("_value", "");
+  // console.log(props.onChange);
+  const labelValue = (label || startCase(name)).replace('_value', '');
   const context = useFormikContext();
   let field;
-  if (type === "select") {
+  if (autoSubmit) {
+    props.onChange = event => {
+      context.handleChange(event);
+      submitTimeout && clearTimeout(submitTimeout);
+      submitTimeout = setTimeout(
+        () => context.submitForm(event),
+        autoSubmit === true ? 0 : autoSubmit
+      );
+    };
+  }
+  if (type === 'select') {
     const { setFieldValue } = context;
     field = (
-      <Select
+      <SelectField
         fullWidth
         className="select-input"
         variant="outlined"
@@ -113,25 +50,35 @@ const CustomComponent = ({
         label={labelValue}
         {...{
           isMulti,
-          defaultValue: value || (isMulti ? [] : ""),
-          value: value || (isMulti ? [] : ""),
+          defaultValue: value || (isMulti ? [] : ''),
+          value: value || (isMulti ? [] : ''),
           name,
-          loadOptions,
           setFieldValue,
           ...props,
         }}
       />
     );
+  } else if (type === 'checkbox') {
+    field = (
+      <FormControl component="fieldset" disabled={ro}>
+        <FormGroup>
+          <FormControlLabel
+            control={<Checkbox {...{ name, value }} {...props} />}
+            label={labelValue}
+          />
+        </FormGroup>
+      </FormControl>
+    );
   } else {
     field = (
       <TextField
-        variant={1 || ro ? "outlined" : "filled"}
+        variant={1 || ro ? 'outlined' : 'filled'}
         disabled={ro}
         margin="dense"
         label={labelValue}
         InputLabelProps={{ shrink: true }}
         autoComplete="off"
-        inputProps={{ style: { color: "#000" } }}
+        inputProps={{ style: { color: '#000' } }}
         fullWidth
         {...{ name, value }}
         {...props}
