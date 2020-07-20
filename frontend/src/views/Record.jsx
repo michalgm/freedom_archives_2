@@ -3,8 +3,8 @@ import { Redirect } from 'react-router-dom';
 import { records, relationships } from '../api';
 import FieldRow from '../components/FieldRow';
 import Field from '../components/Field';
-import ListItemField from '../components/ListItemField';
 import Form from '../components/Form';
+import ListItemField from '../components/ListItemField';
 import Link from '../components/Link';
 import GridBlock from '../components/GridBlock';
 import {
@@ -17,6 +17,7 @@ import {
 } from '@material-ui/core/';
 
 import './Record.scss';
+import Footer from '../components/Footer';
 
 function Children({ children = [] }) {
   return (
@@ -184,26 +185,27 @@ function Record({ id, showForm, ro = false }) {
   // const [keywords, setKeywords] = useState([]);
 
   const loadRecord = async (record_data, relationships) => {
-    const record = {};
-    [
-      'title',
-      'description',
-      'call_number',
-      'location',
-      'publisher',
-      'program',
-      'collection',
-      'date_string',
-      'vol_number',
-      'location',
-      'keywords',
-      'subjects',
-      'authors',
-      'producers',
-      'notes',
-    ].forEach(key => {
-      record[key] = record_data[key];
-    });
+    const record = record_data;
+
+    // [
+    //   'title',
+    //   'description',
+    //   'call_number',
+    //   'location',
+    //   'publisher',
+    //   'program',
+    //   'collection',
+    //   'date_string',
+    //   'vol_number',
+    //   'location',
+    //   'keywords',
+    //   'subjects',
+    //   'authors',
+    //   'producers',
+    //   'notes',
+    // ].forEach(key => {
+    //   record[key] = record_data[key];
+    // });
     record.instances = <Instances instances={record_data.instances || []} />;
     record.children = <Children children={record_data.children || []} />;
     record.relationships = (
@@ -318,6 +320,7 @@ function Record({ id, showForm, ro = false }) {
       <GridBlock title="Instances">{record.instances}</GridBlock>
       <GridBlock title="Children">{record.children}</GridBlock>
       <GridBlock title="Relationships">{record.relationships}</GridBlock>
+      <Footer item={record} />
       {/* <pre style={{ textAlign: 'left' }}>{JSON.stringify(record, null, 2)}</pre> */}
     </Grid>
   );
