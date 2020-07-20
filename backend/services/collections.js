@@ -3,12 +3,13 @@ const { authenticate } = require('@feathersjs/authentication').hooks;
 const {
   hooks: { transaction },
 } = require('feathers-knex');
+const {setUser, updateListItemRelations, maskView, unMaskView, refreshView} = require('./common_hooks');
 
 class Collections extends Service {
   constructor(options) {
     super({
       ...options,
-      name: 'collections',
+      name: 'unified_collections',
     });
   }
 }
@@ -26,16 +27,25 @@ module.exports = function (app) {
   // Get our initialized service so that we can register hooks
   const service = app.service('collections');
 
+  
   service.hooks({
     before: {
       all: [authenticate('jwt')],
-      patch: [transaction.start()],
+      create: [transaction.start(), maskView, setUser, updateListItemRelations],
+      patch: [transaction.start(), maskView, setUser, updateListItemRelations],
+      remove: [transaction.start(), maskView],
     },
     after: {
-      patch: [transaction.end()],
+      all: [ unMaskView ],
+      create: [refreshView, transaction.end()],
+      patch: [refreshView, transaction.end()],
+      remove: [refreshView, transaction.end()],
     },
     error: {
+      all: [ unMaskView ],
+      create: [transaction.rollback()],
       patch: [transaction.rollback()],
+      remove: [transaction.rollback()],
     },
   });
 };
