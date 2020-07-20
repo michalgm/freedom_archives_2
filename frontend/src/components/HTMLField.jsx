@@ -20,19 +20,25 @@ function HTMLField({ defaultValue, value, setFieldValue, name, ...props }) {
           'CKFinderUploadAdapter',
           // 'Image',
         ],
-        toolbar: [
-          'heading',
-          'bold',
-          'italic',
-          'bulletedList',
-          'numberedList',
-          'indent',
-          'outdent',
-          'link',
-          'blockQuote',
-          'undo',
-          'redo',
-        ],
+        toolbar: {
+          items: [
+            'heading',
+            '|',
+            'bold',
+            'italic',
+            'link',
+            '|',
+            'bulletedList',
+            'numberedList',
+            'indent',
+            'outdent',
+            '|',
+            'blockQuote',
+            '|',
+            'undo',
+            'redo',
+          ],
+        },
       }}
       data={value}
       onChange={(event, editor) => {
