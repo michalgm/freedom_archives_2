@@ -7,6 +7,8 @@ import Form from '../components/Form';
 import Field from '../components/Field';
 import FieldRow from '../components/FieldRow';
 import { Link as MULink, Typography, Button, Grid } from '@material-ui/core';
+import { startCase } from 'lodash';
+
 import './Records.scss';
 
 function Records() {
@@ -25,16 +27,26 @@ function Records() {
       setLoading(true);
       const time = new Date();
       try {
-        const { $fullText, has_digital, keyword, subject, author } = search;
+        const { $fullText, has_digital } = search;
         const query = {
           $select: ['record_id', 'title', 'description'],
           $limit: 20,
           $fullText: $fullText,
           has_digital: has_digital,
-          keywords_search: { $contains: keyword },
-          subjects_search: { $contains: subject },
-          authors_search: { $contains: author },
         };
+        ['keyword', 'subject', 'author', 'producer'].forEach(type => {
+          if (search[type]) {
+            query[`${type}s_search`] = { $contains: search[type] };
+          }
+        });
+        ['year', 'title'].forEach(type => {
+          if (search[type]) {
+            query[type] = { $in: search[type] };
+          }
+        });
+        if (search.collection) {
+          query.collection_id = { $in: search.collection };
+        }
         const {
           total,
           data: records,
@@ -92,25 +104,25 @@ function Records() {
 
   const renderFilter = ({ type, values }) => (
     <div key={type} style={{ flexGrow: 1 }}>
-      <Typography variant="h6">{type}</Typography>
+      <Typography variant="h6">{startCase(type)}</Typography>
       <ul>
         {values
           .slice(0, 5)
-          .map(([value, count], i) =>
-            renderFilterItem({ value, count, type, i })
+          .map(([label, count, value], i) =>
+            renderFilterItem({ value: value || label, label, count, type, i })
           )}
       </ul>
     </div>
   );
 
-  const renderFilterItem = ({ value, count, i, type }) => (
+  const renderFilterItem = ({ value, label, count, i, type }) => (
     <li key={i} onClick={() => addFilter({ type, value })}>
       <MULink
         href=""
         onClick={e => e.preventDefault()}
         style={{ fontWeight: (search[type] || []).includes(value) ? 800 : 400 }}
       >
-        {value}
+        {label || '???'}
       </MULink>{' '}
       &nbsp;({count})
     </li>
