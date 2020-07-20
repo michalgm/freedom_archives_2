@@ -4,7 +4,6 @@ import {
   List,
   ListItem,
   Typography,
-  ListItemIcon,
   ListItemText,
 } from '@material-ui/core';
 import {
@@ -12,13 +11,12 @@ import {
   getSidebarContent,
   getCollapseBtn,
 } from '@mui-treasury/layout';
-
 import styled from 'styled-components';
-import { useRouteMatch } from 'react-router-dom';
+import { useRouteMatch, Link } from 'react-router-dom';
 
 const sideBarConfig = {
   Collections: [
-    { label: 'Manage Collections', icon: '', href: '' },
+    { label: 'Manage Collections', icon: '', href: '/collections' },
     { label: 'New Collection', icon: '', href: '' },
     { label: 'Manage Featured Collections', icon: '', href: '' },
   ],
@@ -79,7 +77,8 @@ function ListItemLink(props) {
     <ListItem
       button
       disabled={!Boolean(props.href)}
-      component={props.href ? 'a' : 'div'}
+      component={props.href ? Link : 'div'}
+      to={props.href}
       {...props}
     />
   );
