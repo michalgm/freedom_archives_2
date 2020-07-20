@@ -36,8 +36,8 @@ CREATE TABLE collections (
   publish_to_global bool DEFAULT true,
   creator_user_id integer REFERENCES users,
   contributor_user_id integer REFERENCES users,
-  date_created timestamp DEFAULT NULL,
-  date_modified timestamp DEFAULT NULL
+  date_created timestamptz DEFAULT NULL,
+  date_modified timestamptz DEFAULT NULL
 );
 /* call_number
 generation
@@ -79,8 +79,8 @@ CREATE TABLE records (
   publish_to_global bool DEFAULT true,
   creator_user_id integer REFERENCES users,
   contributor_user_id integer REFERENCES users,
-  date_created timestamp DEFAULT NULL,
-  date_modified timestamp DEFAULT NULL
+  date_created timestamptz DEFAULT NULL,
+  date_modified timestamptz DEFAULT NULL
 );
 
 CREATE TABLE instances (
@@ -96,8 +96,8 @@ CREATE TABLE instances (
   media_type varchar(20) NOT NULL DEFAULT '',
   creator_user_id integer REFERENCES users,
   contributor_user_id integer REFERENCES users,
-  date_created timestamp DEFAULT NULL,
-  date_modified timestamp DEFAULT NULL,
+  date_created timestamptz DEFAULT NULL,
+  date_modified timestamptz DEFAULT NULL,
   original_doc_id integer DEFAULT NULL
 );
 
@@ -450,7 +450,7 @@ create table unknown_relations as
       '' as type,
       '' as notes,
       '' as "user",
-      NULL::timestamp as updated_at, 
+      NULL::timestamptz as updated_at, 
       a.call_number as call_number_1,
       b.call_number as call_number_2,
       c.generation as generation_1,
