@@ -1,20 +1,34 @@
 import React from 'react';
-import { Grid } from '@material-ui/core';
-
+import { Grid, Paper } from '@material-ui/core';
+import { startCase } from 'lodash';
 function Footer({ item }) {
-  return (
-    <Grid container>
-      <Grid item xs={6}>
-        Created at{' '}
-        {item.date_created
-          ? new Date(item.date_created).toLocaleString()
+  const renderTime = type => {
+    return (
+      <div>
+        {startCase(type)} at{' '}
+        {item[`date_${type}`]
+          ? new Date(item[`date_${type}`]).toLocaleString()
           : '???'}{' '}
-        by {item.creator_name || 'Unknown'}
-      </Grid>
-      <Grid item xs={6}>
-        Updated at {new Date(item.date_modified).toLocaleString()} by{' '}
-        {item.contributor_name}
-      </Grid>
+        by{' '}
+        {item[`${type === 'created' ? 'creator' : 'contributor'}_name`] ||
+          'Unknown'}
+      </div>
+    );
+  };
+
+  return (
+    <Grid item xs={12}>
+      <Paper>
+        <Grid
+          container
+          alignContent="center"
+          alignItems="center"
+          justify="space-between"
+        >
+          {renderTime('created')}
+          {renderTime('modified')}
+        </Grid>
+      </Paper>
     </Grid>
   );
 }

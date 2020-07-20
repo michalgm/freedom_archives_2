@@ -7,6 +7,7 @@ import Form from '../components/Form';
 import { Grid } from '@material-ui/core';
 import GridBlock from '../components/GridBlock';
 import ListItemField from '../components/ListItemField';
+import Footer from '../components/Footer';
 
 function Collection() {
   const [collection, setCollection] = useState({});
@@ -42,7 +43,13 @@ function Collection() {
     : [{ label: 'Edit', onClick: () => setEdit(true), type: 'button' }];
 
   return (
-    <Grid container justify="center" alignItems="center" alignContent="center">
+    <Grid
+      container
+      justify="center"
+      alignItems="center"
+      alignContent="center"
+      spacing={4}
+    >
       <GridBlock>
         <Form
           initialValues={collection}
@@ -83,17 +90,7 @@ function Collection() {
           </FieldRow>
         </Form>
       </GridBlock>
-      <Grid item xs={6}>
-        Created at{' '}
-        {collection.date_created
-          ? new Date(collection.date_created).toLocaleString()
-          : '???'}{' '}
-        by {collection.creator_name || 'Unknown'}
-      </Grid>
-      <Grid item xs={6}>
-        Updated at {new Date(collection.date_modified).toLocaleString()} by{' '}
-        {collection.contributor_name}
-      </Grid>
+      <Footer item={collection} />
       {/* <Grid item xs={12}>
         <pre style={{ textAlign: 'left' }}>
           {JSON.stringify(collection, null, 2)}
