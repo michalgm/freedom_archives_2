@@ -84,6 +84,7 @@ const SelectField = ({
       loading={loading}
       multiple={isMulti}
       open={open}
+      autoHighlight
       onOpen={() => {
         setOpen(true);
       }}
