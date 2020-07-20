@@ -35,9 +35,7 @@ const ListItemField = ({ name, listType, ...props }) => {
       <Field
         name={name}
         type="select"
-        // getOptionLabel={item => item.item}
         isMulti={props.isMulti || false}
-        // loadOptions={async value => await type(value)}
         searchType="list_items"
         searchParams={{ type }}
         selectOnFocus
@@ -48,7 +46,9 @@ const ListItemField = ({ name, listType, ...props }) => {
         filterOptions={(options, params) => {
           if (
             params.inputValue !== '' &&
-            !options.find(o => o.item === params.inputValue)
+            !options.find(
+              o => o.item.toLowerCase() === params.inputValue.toLowerCase()
+            )
           ) {
             options.push({
               value: params.inputValue,
