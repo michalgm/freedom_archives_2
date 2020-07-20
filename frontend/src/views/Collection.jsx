@@ -80,7 +80,7 @@ function Collection() {
             <ListItemField name="subjects" isMulti />
           </FieldRow>
           <FieldRow>
-            <Field name="description" multiline />
+            <Field name="description" type="html" />
           </FieldRow>
           <FieldRow>
             <Field name="summary" multiline />

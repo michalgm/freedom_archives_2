@@ -10,6 +10,7 @@ import {
 import { startCase } from 'lodash';
 import { Alert } from '@material-ui/lab';
 import SelectField from './SelectField';
+import HTMLField from './HTMLField';
 // import { ConsoleTransportOptions } from 'winston/lib/winston/transports';
 
 let submitTimeout;
@@ -69,6 +70,9 @@ const CustomComponent = ({
         </FormGroup>
       </FormControl>
     );
+  } else if (type === 'html') {
+    const { setFieldValue } = context;
+    field = <HTMLField {...{ name, value, setFieldValue }} {...props} />;
   } else {
     field = (
       <TextField

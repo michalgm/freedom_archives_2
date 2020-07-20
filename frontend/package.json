@@ -3,6 +3,8 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
+    "@ckeditor/ckeditor5-build-classic": "^20.0.0",
+    "@ckeditor/ckeditor5-react": "^2.1.0",
     "@data-driven-forms/mui-component-mapper": "^2.8.0",
     "@data-driven-forms/react-form-renderer": "^2.8.0",
     "@feathersjs/authentication-client": "^4.5.6",
