@@ -1,13 +1,17 @@
 import React from 'react';
+import ReactDOM from 'react-dom';
 import { Formik, Form as FormikForm, useFormikContext } from 'formik';
 import { Grid, Button } from '@material-ui/core';
 import './Form.scss';
 
 const FormButton = ({ label, onClick, ...props }) => {
-  const { handleReset } = useFormikContext();
+  const { handleReset, handleSubmit } = useFormikContext();
   const click = e => {
     if (props.type === 'reset') {
       handleReset(e);
+    } else if (props.type === 'submit') {
+      e.preventDefault();
+      handleSubmit(e);
     }
     if (onClick) {
       e.preventDefault();
@@ -29,6 +33,7 @@ const Form = ({
   noUpdateCheck = false,
   buttons = [],
   buttonsBelow,
+  buttonRef,
   ...props
 }) => {
   const rows = React.Children.toArray(children);
@@ -39,9 +44,11 @@ const Form = ({
     }
 
     return (
-      <Grid item className="buttons" xs={12}>
+      <Grid container className="buttons" spacing={1} justify="flex-end">
         {buttons.map(({ ...props }, key) => (
-          <FormButton key={key} {...props} />
+          <Grid item key={key}>
+            <FormButton {...props} />
+          </Grid>
         ))}
       </Grid>
     );
@@ -75,14 +82,16 @@ const Form = ({
           spacing={2}
           className={`${ro ? 'read-only' : ''}`}
         >
-          {!buttonsBelow && renderButtons(buttons)}
+          {!buttonsBelow && !buttonRef && renderButtons(buttons)}
           {rows.map(row =>
             row.type && row.type.name === 'FieldRow'
               ? React.cloneElement(row, { ro })
               : row
           )}
-          {buttonsBelow && renderButtons(buttons)}
+          {buttonsBelow && !buttonRef && renderButtons(buttons)}
         </Grid>
+        {buttonRef &&
+          ReactDOM.createPortal(renderButtons(buttons), buttonRef.current)}
       </FormikForm>
     </Formik>
   );

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Redirect } from 'react-router-dom';
 import { records, relationships } from '../api';
 import FieldRow from '../components/FieldRow';
@@ -8,16 +8,15 @@ import ListItemField from '../components/ListItemField';
 import Link from '../components/Link';
 import GridBlock from '../components/GridBlock';
 import {
-  Grid,
   Table,
   TableBody,
   TableCell,
   TableHead,
   TableRow,
 } from '@material-ui/core/';
+import ViewContainer from '../components/ViewContainer';
 
 import './Record.scss';
-import Footer from '../components/Footer';
 
 function Children({ children = [] }) {
   return (
@@ -177,12 +176,13 @@ function Relationships({ id, relationships = [] }) {
 
 function Record({ id, showForm, ro = false }) {
   const [record, setRecord] = useState({});
-  // const [relationships, setRelationships] = useState([]);
-
   const [returnHome, set_returnHome] = useState(false);
-  const [loading, setLoading] = useState(true);
   const [edit, setEdit] = useState(!ro);
-  // const [keywords, setKeywords] = useState([]);
+  const buttonRef = useRef();
+
+  if (!buttonRef.current) {
+    buttonRef.current = document.createElement('div');
+  }
 
   const loadRecord = async (record_data, relationships) => {
     const record = record_data;
@@ -212,23 +212,19 @@ function Record({ id, showForm, ro = false }) {
       <Relationships id={record_data.record_id} relationships={relationships} />
     );
     setRecord(record);
-    setLoading(false);
   };
 
   const deleteRecord = async () => {
-    setLoading(true);
     await records.remove(id);
     set_returnHome(true);
   };
 
   const updateRecord = async data => {
-    setLoading(true);
     try {
       await records.patch(id, data);
       const updated = await records.get(id);
       loadRecord(updated);
     } catch {}
-    setLoading(false);
   };
 
   useEffect(() => {
@@ -272,11 +268,7 @@ function Record({ id, showForm, ro = false }) {
     : [{ label: 'Edit', onClick: () => setEdit(true), type: 'button' }];
 
   return (
-    <Grid
-      spacing={4}
-      container
-      className={`record ${loading ? 'loading' : ''}`}
-    >
+    <ViewContainer item={record} buttonRef={showForm && buttonRef}>
       {record.title && (
         <GridBlock title={record.title}>
           <Form
@@ -284,6 +276,7 @@ function Record({ id, showForm, ro = false }) {
             onSubmit={updateRecord}
             ro={!edit}
             buttons={showForm && buttons}
+            buttonRef={buttonRef}
           >
             <FieldRow>
               <Field name="title" />
@@ -320,9 +313,7 @@ function Record({ id, showForm, ro = false }) {
       <GridBlock title="Instances">{record.instances}</GridBlock>
       <GridBlock title="Children">{record.children}</GridBlock>
       <GridBlock title="Relationships">{record.relationships}</GridBlock>
-      <Footer item={record} />
-      {/* <pre style={{ textAlign: 'left' }}>{JSON.stringify(record, null, 2)}</pre> */}
-    </Grid>
+    </ViewContainer>
   );
 }
 

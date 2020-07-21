@@ -1,18 +1,22 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useParams } from 'react-router-dom';
 import { collections as collectionsService } from '../api';
 import FieldRow from '../components/FieldRow';
 import Field from '../components/Field';
 import Form from '../components/Form';
-import { Grid } from '@material-ui/core';
 import GridBlock from '../components/GridBlock';
 import ListItemField from '../components/ListItemField';
-import Footer from '../components/Footer';
+import ViewContainer from '../components/ViewContainer';
 
 function Collection() {
   const [collection, setCollection] = useState({});
   const [edit, setEdit] = useState(true);
   const { id } = useParams();
+  const buttonRef = useRef();
+
+  if (!buttonRef.current) {
+    buttonRef.current = document.createElement('div');
+  }
 
   useEffect(() => {
     const fetchCollection = async () => {
@@ -31,7 +35,11 @@ function Collection() {
 
   const buttons = edit
     ? [
-        { label: 'Save', type: 'submit', color: 'primary' },
+        {
+          label: 'Save',
+          type: 'submit',
+          color: 'primary',
+        },
         { label: 'Delete', onClick: deleteCollection, color: 'secondary' },
         {
           label: 'Cancel',
@@ -43,19 +51,14 @@ function Collection() {
     : [{ label: 'Edit', onClick: () => setEdit(true), type: 'button' }];
 
   return (
-    <Grid
-      container
-      justify="center"
-      alignItems="center"
-      alignContent="center"
-      spacing={4}
-    >
+    <ViewContainer item={collection} buttonRef={buttonRef}>
       <GridBlock>
         <Form
           initialValues={collection}
           onSubmit={updateCollection}
           ro={!edit}
           buttons={buttons}
+          buttonRef={buttonRef}
         >
           <FieldRow>
             <Field name="collection_name" />
@@ -90,13 +93,12 @@ function Collection() {
           </FieldRow>
         </Form>
       </GridBlock>
-      <Footer item={collection} />
-      {/* <Grid item xs={12}>
-        <pre style={{ textAlign: 'left' }}>
-          {JSON.stringify(collection, null, 2)}
-        </pre>
-      </Grid> */}
-    </Grid>
+    </ViewContainer>
+    // {/* <Grid item xs={12}>
+    //   <pre style={{ textAlign: 'left' }}>
+    //     {JSON.stringify(collection, null, 2)}
+    //   </pre>
+    // </Grid> */}
   );
 }
 
