@@ -25,14 +25,14 @@ module.exports = function(app) {
   const service = app.service('relationships');
 
   const updateRelations = async (context) => {
-    const { data: { type }, app, result } = context;
+    const { data: { type }, app, result, params: {user} } = context;
     if (type === 'unknown') {} else if (type === 'parent') {
-      await app.service('records').patch(result.docid_2, { parent_record_id: result.docid_1 });
-      await app.service('records').patch(result.docid_1, {});
+      await app.service('records').patch(result.docid_2, { parent_record_id: result.docid_1 }, {user});
+      await app.service('records').patch(result.docid_1, {}, {user});
 
     } else if (type === 'child') {
-      await app.service('records').patch(result.docid_1, { parent_record_id: result.docid_2 });
-      await app.service('records').patch(result.docid_2, {});
+      await app.service('records').patch(result.docid_1, { parent_record_id: result.docid_2 }, {user});
+      await app.service('records').patch(result.docid_2, {}, {user});
     } else if (type === 'sibling') {
       const record1 = await app.service('records').get(result.docid_1);
       let parent_id = record1.parent_record_id;
@@ -41,13 +41,13 @@ module.exports = function(app) {
         parent_id = record2.parent_record_id;
       }
       if (parent_id) {
-        await app.service('records').patch(result.docid_1, { parent_record_id: parent_id });
-        await app.service('records').patch(result.docid_2, { parent_record_id: parent_id });
+        await app.service('records').patch(result.docid_1, { parent_record_id: parent_id }, {user});
+        await app.service('records').patch(result.docid_2, { parent_record_id: parent_id }, {user});
       }
     } else if (type === 'original') {
-      await app.service('instances').patch(null, { record_id: result.docid_1 }, { query: { record_id: result.docid_2 } });
+      await app.service('instances').patch(null, { record_id: result.docid_1 }, {user, query: { record_id: result.docid_2 } });
     } else if (type === 'instance') {
-      await app.service('instances').patch(null, { record_id: result.docid_2 }, { query: { record_id: result.docid_1 } });
+      await app.service('instances').patch(null, { record_id: result.docid_2 }, {user, query: { record_id: result.docid_1 } });
     }
     // console.log('####', type, result);
     return context;
