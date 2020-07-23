@@ -26,8 +26,8 @@ module.exports = function(app) {
   const service = app.service('instances');
 
   const updateView = async (context) => {
-    const { app, data } = context;
-    await app.service('records').patch(data.record_id, {});
+    const { app, data, params: {user} } = context;
+    await app.service('records').patch(data.record_id, {}, {user});
   };
 
   service.hooks({
