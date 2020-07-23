@@ -336,7 +336,7 @@ SELECT b.record_id,
           (select i from (select a.list_item_id, a.item) i )
         ) order by item
       )
-    ) AS items,
+    )::jsonb AS items,
     string_agg(a.item, ' ' order by a.item) as items_text,
     array_agg(a.item order by a.item) as items_search
    FROM list_items a
@@ -353,7 +353,7 @@ SELECT b.collection_id,
           (select i from (select a.list_item_id, a.item) i )
         ) order by item
       )
-    ) AS items,
+    )::jsonb AS items,
     string_agg(a.item, ' ' order by a.item) as items_text,
     array_agg(a.item order by a.item) as items_search
    FROM list_items a
@@ -441,6 +441,16 @@ create view records_view as
 drop table if exists unified_records cascade;
 create table unified_records as select * from records_view;
 CREATE INDEX records_fulltext_index on unified_records using GIN (fulltext);
+CREATE INDEX records_year on unified_records (year);
+CREATE INDEX records_title on unified_records (title);
+CREATE INDEX records_has_digital on unified_records (has_digital);
+CREATE INDEX records_collection_id on unified_records (collection_id);
+CREATE INDEX records_parent_record_id on unified_records (parent_record_id);
+CREATE INDEX records_authors_search on unified_records using GIN (authors_search);
+CREATE INDEX records_subjects_search on unified_records using GIN (subjects_search);
+CREATE INDEX records_keywords_search on unified_records using GIN (keywords_search);
+CREATE INDEX records_producers_search on unified_records using GIN (producers_search);
+
 ALTER TABLE unified_records add PRIMARY KEY(record_id);
 
 drop table if exists unknown_relations;
