@@ -92,7 +92,8 @@ function Layout() {
       <NavBar />
       {isAuthenticated && <Sidebar />}
       <Content style={style}>
-        <Main />
+        <Loading></Loading>
+          <Main />
       </Content>
     </div>
   );
@@ -135,7 +136,6 @@ function Main() {
   return (
     <Container maxWidth="xl">
       <Authentication />
-      <Loading />
       <Errors />
       {isAuthenticated ? (
         <>

@@ -1,13 +1,36 @@
 import React from 'react';
-import { Backdrop, CircularProgress } from '@material-ui/core';
+import { LinearProgress } from '@material-ui/core';
 import { useStateValue } from '../appContext';
 import { app } from '../api';
+import { makeStyles } from '@material-ui/core/styles';
 
 import { debounce } from 'lodash';
 
+const useStyles = makeStyles({
+  loadingContainer: {
+    height: '100%',
+    width: '100%',
+    position: 'fixed',
+    zIndex: 1000000,
+  },
+  progress: {
+    width: '100%',
+  },
+  backdrop: {
+    backdropFilter: 'blur(2px)',
+    height: '100%',
+    width: '100%',
+    zIndex: 1000,
+    marginTop: 4
+  },
+});
+
+
 let loaded = false;
 
-export default function Loading() {
+export default function Loading({children}) {
+  const classes = useStyles();
+
   const {
     state: { loading },
     dispatch,
@@ -32,10 +55,11 @@ export default function Loading() {
     });
     loaded = true;
   }
-
-  return (
-    <Backdrop open={loading} style={{ zIndex: 10000 }}>
-      {loading && <CircularProgress color="primary" size={100} />}
-    </Backdrop>
+  
+    return loading && (
+    <div className={classes.loadingContainer}>
+      <LinearProgress className={classes.progress} color="secondary" size={100} />
+      <div className={classes.backdrop}></div>
+    </div>
   );
 }
