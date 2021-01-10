@@ -25,6 +25,7 @@ import {
   Toolbar,
   Button,
   Typography,
+  Icon
 } from '@material-ui/core';
 import {
   Root,
@@ -102,12 +103,18 @@ function Layout() {
 
 function Logout() {
   const {
-    state: { isAuthenticated },
+    state: { isAuthenticated, user },
   } = useStateValue();
   return isAuthenticated ? (
-    <Button color="inherit" component={Link} to="/login" onClick={app.logout}>
-      Logout
-    </Button>
+    <div className='logout'>
+      <Typography variant="caption">
+        <Icon>person</Icon>
+        {user.firstname} {user.lastname}
+      </Typography>
+      <Button color="inherit" component={Link} to="/login" onClick={app.logout}>
+        Logout
+      </Button>
+    </div>
   ) : (
     ''
   );
@@ -116,7 +123,7 @@ function Logout() {
 function NavBar() {
   return (
     <Header color="primary">
-      <Toolbar>
+      <Toolbar className='topnav'>
         <SidebarTrigger sidebarId="primarySidebar" color="inherit" />
         <Typography variant="h6" style={{ flexGrow: 1 }}>
           Freedom Archives Admin
