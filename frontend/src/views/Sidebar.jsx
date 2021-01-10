@@ -24,9 +24,23 @@ const sideBarConfig = {
     { label: 'Manage Records', icon: '', href: '/records' },
     { label: 'New Record', icon: '', href: '' },
     { label: 'Manage Featured Records', icon: '', href: '' },
-    { label: 'Update Unknown Relationships', icon: '', href: '/relationships' },
   ],
-  Admin: [{ label: 'Manage Users' }, { label: 'Publish/Restore Live Site' }],
+  'Site Management': [
+    { label: 'Edit site header text', icon: '', href: ''},
+    { label: 'Edit Lists', icon: '', href: ''},
+    { label: 'Export Collections', icon: '', href: ''},
+    { label: 'Find Duplicate Records', icon: '', href: ''},
+    { label: 'Review Changes', icon: '', href: ''},
+
+  ],
+  Admin: [
+    { label: 'Update Unknown Relationships', icon: '', href: '/relationships' },
+    { label: 'Update Thumbnails', icon: '', href: ''},
+    { label: 'Update Keywords', icon: '', href: ''},
+    { label: 'Backup Database', icon: '', href: ''},
+    { label: 'Manage Users' },
+    { label: 'Publish/Restore Live Site' }
+  ],
 };
 
 const DrawerSidebar = getDrawerSidebar(styled);
