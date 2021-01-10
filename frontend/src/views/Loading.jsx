@@ -7,24 +7,18 @@ import { makeStyles } from '@material-ui/core/styles';
 import { debounce } from 'lodash';
 
 const useStyles = makeStyles({
-  loadingContainer: {
-    height: '100%',
-    width: '100%',
-    position: 'fixed',
-    zIndex: 1000000,
-  },
   progress: {
     width: '100%',
   },
-  backdrop: {
-    backdropFilter: 'blur(2px)',
-    height: '100%',
-    width: '100%',
-    zIndex: 1000,
-    marginTop: 4
+  loadingContainer: {
+    opacity: 1,
+    transition: 'opacity 0.3s',
+    '&.loading': {
+      marginTop: -4,
+      opacity: 0.6,
+    }
   },
 });
-
 
 let loaded = false;
 
@@ -56,10 +50,13 @@ export default function Loading({children}) {
     loaded = true;
   }
   
-    return loading && (
-    <div className={classes.loadingContainer}>
-      <LinearProgress className={classes.progress} color="secondary" size={100} />
-      <div className={classes.backdrop}></div>
-    </div>
+    // return true && (
+    return (
+      <>
+        {loading && <LinearProgress className={classes.progress} color="secondary" size={100} />}
+        <div className={`${classes.loadingContainer} ${loading ? 'loading' : ''}`}>
+          {children}
+        </div>
+      </>
   );
 }

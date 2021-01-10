@@ -92,8 +92,9 @@ function Layout() {
       <NavBar />
       {isAuthenticated && <Sidebar />}
       <Content style={style}>
-        <Loading></Loading>
+        <Loading>
           <Main />
+        </Loading>
       </Content>
     </div>
   );
