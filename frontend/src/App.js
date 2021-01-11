@@ -2,22 +2,14 @@ import React from 'react';
 import './App.scss';
 import {
   BrowserRouter as Router,
-  Route,
-  Redirect,
   Link,
 } from 'react-router-dom';
 import { StateProvider, useStateValue } from './appContext';
-import Records from './views/Records';
-import Record from './views/Record';
-import Login from './views/Login';
-import Relationships from './views/Relationships';
 import Authentication from './Authentication';
-import Relationship from './views/Relationship';
-import Collections from './views/Collections';
-import Collection from './views/Collection';
 import Loading from './views/Loading';
 import Sidebar from './views/Sidebar';
 import Errors from './components/Errors';
+import Routes from './Routes'
 import { app } from './api';
 import {
   CssBaseline,
@@ -145,60 +137,7 @@ function Main() {
     <Container maxWidth="xl">
       <Authentication />
       <Errors />
-      {isAuthenticated ? (
-        <>
-          <Route exact path="/" component={Records} />
-          <Route exact path="/collections" component={Collections} />
-          <Route
-            path="/collections/:id"
-            render={({
-              match: {
-                params: { id },
-              },
-            }) => <Collection id={id} />}
-          />
-          <Route exact path="/records" component={Records} />
-          <Route
-            exact
-            path="/record/:id"
-            render={({
-              match: {
-                params: { id },
-              },
-            }) => <Record id={id} showForm />}
-          />
-          <Route
-            path="/relationship/:id"
-            render={({
-              match: {
-                params: { id },
-              },
-            }) => <Relationship id={id} />}
-          />
-
-          <Route
-            path="/relationships/:skip?"
-            render={({
-              match: {
-                params: { skip },
-              },
-            }) => <Relationships skip={skip} />}
-          />
-          <Route exact path="/login">
-            <Redirect to="/" />
-          </Route>
-        </>
-      ) : isAuthenticated === false ? (
-        <>
-          <Route exact path="/">
-            <Redirect to="/login" />
-          </Route>
-          <Redirect to="/login" />
-          <Route exact path="/login" component={Login} />
-        </>
-      ) : (
-        <div>Loading...</div>
-      )}
+      <Routes isAuthenticated={isAuthenticated}/>
     </Container>
   );
 }
