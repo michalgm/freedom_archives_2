@@ -80,7 +80,7 @@ function Collections() {
                 secondaryTypographyProps={{ component: 'div' }}
                 secondary={
                   <>
-                    <Typography variant="subtitle2">
+                    <Typography variant="subtitle2" gutterBottom>
                       Parent Collection: {collection.parent.collection_name}
                     </Typography>
                     <Typography

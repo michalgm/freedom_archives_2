@@ -21,6 +21,7 @@ const sideBarConfig = {
     { label: 'Manage Featured Collections', icon: '', href: '' },
   ],
   Records: [
+    { label: 'Search Records', icon: '', href: '/search' },
     { label: 'Manage Records', icon: '', href: '/records' },
     { label: 'New Record', icon: '', href: '' },
     { label: 'Manage Featured Records', icon: '', href: '' },

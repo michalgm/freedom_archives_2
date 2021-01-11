@@ -43,7 +43,7 @@ function ViewContainer({ children, item, buttonRef, ...props }) {
               {section.map((item, index) => (
                 <Grid
                   item
-                  // xs
+                  xs
                   key={`${type}-${index}`}
                   // style={{ textAlign: 'center' }}
                 >

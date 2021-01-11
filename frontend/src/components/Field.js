@@ -23,6 +23,7 @@ const CustomComponent = ({
   value,
   isMulti,
   autoSubmit,
+  margin,
   ...props
 }) => {
   // console.log(props.onChange);
@@ -42,26 +43,34 @@ const CustomComponent = ({
   if (type === 'select') {
     const { setFieldValue } = context;
     field = (
-      <SelectField
-        fullWidth
-        className="select-input"
-        variant="outlined"
-        margin="dense"
-        disabled={ro}
-        label={labelValue}
-        {...{
-          isMulti,
-          defaultValue: value || (isMulti ? [] : ''),
-          value: value || (isMulti ? [] : ''),
-          name,
-          setFieldValue,
-          ...props,
-        }}
-      />
+      <FormControl disabled={ro} margin="dense" fullWidth>
+        <FormGroup>
+          <SelectField
+            fullWidth
+            className="select-input"
+            variant="outlined"
+            margin={margin || "dense"}
+            disabled={ro}
+            label={labelValue}
+            {...{
+              isMulti,
+              defaultValue: value || (isMulti ? [] : ''),
+              value: value || (isMulti ? [] : ''),
+              name,
+              setFieldValue,
+              ...props,
+            }}
+          />
+        </FormGroup>
+      </FormControl>
     );
   } else if (type === 'checkbox') {
     field = (
-      <FormControl component="fieldset" disabled={ro}>
+      <FormControl
+        component="fieldset"
+        disabled={ro}
+        margin={margin || "dense"}
+      >
         <FormGroup>
           <FormControlLabel
             control={<Checkbox {...{ name, value }} {...props} />}
@@ -78,7 +87,7 @@ const CustomComponent = ({
       <TextField
         variant={1 || ro ? 'outlined' : 'filled'}
         disabled={ro}
-        margin="dense"
+        margin={margin || "dense"}
         label={labelValue}
         InputLabelProps={{ shrink: true }}
         autoComplete="off"

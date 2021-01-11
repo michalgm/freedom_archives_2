@@ -25,6 +25,14 @@ const FormButton = ({ label, onClick, ...props }) => {
   );
 };
 
+const HandleChangeComponent = ({onChange}) => {
+  const {values} = useFormikContext()
+  React.useEffect(() => {
+    onChange(values)
+  }, [values, onChange])
+  return null
+}
+
 const Form = ({
   ro,
   children,
@@ -34,6 +42,7 @@ const Form = ({
   buttons = [],
   buttonsBelow,
   buttonRef,
+  onChange,
   ...props
 }) => {
   const rows = React.Children.toArray(children);
@@ -76,6 +85,7 @@ const Form = ({
       {...props}
     >
       <FormikForm className="form">
+        {onChange && <HandleChangeComponent onChange={onChange}/>}
         <Grid
           container
           style={{ textAlign: 'left' }}
