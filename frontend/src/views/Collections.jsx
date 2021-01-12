@@ -9,9 +9,9 @@ import {
   Avatar,
 } from '@material-ui/core';
 import { BrokenImage } from '@material-ui/icons';
-import { Pagination } from '@material-ui/lab';
 import { Link } from 'react-router-dom';
 import ViewContainer from '../components/ViewContainer';
+import PaginationFooter from '../components/PaginationFooter'
 
 const page_size = 10;
 
@@ -35,22 +35,8 @@ function Collections() {
     fetchCollections();
   }, [offset]);
 
-  const renderPagination = () => {
-    return (
-      <Pagination
-        count={Math.round(total / page_size)}
-        onChange={(_, page) => setOffset((page - 1) * page_size)}
-        showFirstButton
-        showLastButton
-        size="large"
-        color="primary"
-        variant="outlined"
-      />
-    );
-  };
-
   return (
-    <ViewContainer footerElements={[renderPagination()]}>
+    <ViewContainer footerElements={[<PaginationFooter total={total} offset={offset} page_size={page_size} setOffset={setOffset}/>]} >
       <List>
         {collections.map(collection => {
           return (

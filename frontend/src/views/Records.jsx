@@ -11,11 +11,12 @@ import {
   Paper,
 } from '@material-ui/core';
 import { BrokenImage } from '@material-ui/icons';
-import { Pagination } from '@material-ui/lab';
 import { Link } from 'react-router-dom';
 import ViewContainer from '../components/ViewContainer';
 import Field from '../components/Field';
 import Form from '../components/Form';
+import PaginationFooter from '../components/PaginationFooter'
+import Thumbnail from '../components/Thumbnail'
 
 const page_size = 10;
 
@@ -40,6 +41,7 @@ function Records() {
         needs_review: needs_review ? needs_review : undefined,
         collection_id: collection ? collection.collection_id : undefined,
         $skip: offset,
+        $limit: page_size,
         $sort: { title: 1 },
         $select: [
           'record_id',
@@ -64,54 +66,49 @@ function Records() {
       const { data, total } = await recordsService.find({ query });
       setRecords(data);
       setTotal(total);
-      setOffset(0)
     };
     fetchRecords();
   }, [offset, filter]);
-
-  const renderPagination = () => {
-    return (
-      <Pagination
-        count={Math.round(total / page_size)}
-        onChange={(_, page) => setOffset((page - 1) * page_size)}
-        showFirstButton
-        showLastButton
-        size="large"
-        color="primary"
-        variant="outlined"
-      />
-    );
-  };
 
   const defaultImage = event => {
     event.target.src = `https://search.freedomarchives.org/images/fileicons/webpage.png`
   }
 
   const renderFilterBar = () => {
-    return (<Form initialValues={filter} onChange={(values) => setFilter(values)}>
-      <Grid item xs={3}>
-        <Field name="search" label="Quick Search"/>
-      </Grid>
-      <Grid item xs={5}>
-        <Field
-          name='collection'
-          type="select"
-          searchType="collections"
-          size="small"
-        />
-      </Grid>
-      <Grid item xs={4}>
-        <div style={{display: 'flex', flexDirection: 'column'}}>
-          <Field type='checkbox' name="non_digitized" label="Include non-digitized" margin="none" size="small" style={{paddingBottom: 4, paddingTop: 4}}/>
-          <Field type='checkbox' name="hidden" label="Include Hidden" margin="none" size="small"  style={{paddingBottom: 4, paddingTop: 4}}/>
-          <Field type='checkbox' name="needs_review" label="Needs Review" margin="none" size="small" style={{paddingBottom: 4, paddingTop: 4}}/>
-        </div>
-      </Grid>
-    </Form>)
+    return (
+      <Form initialValues={filter} onChange={(values) => {
+        if (values !== filter) {
+          setFilter(values)
+          setOffset(0);
+        } 
+      }}>
+        <Grid item xs={3}>
+          <Field name="search" label="Quick Search"/>
+        </Grid>
+        <Grid item xs={5}>
+          <Field
+            name='collection'
+            type="select"
+            searchType="collections"
+            size="small"
+          />
+        </Grid>
+        <Grid item xs={4}>
+          <div style={{display: 'flex', flexDirection: 'column'}}>
+            <Field type='checkbox' name="non_digitized" label="Include non-digitized" margin="none" size="small" style={{paddingBottom: 4, paddingTop: 4}}/>
+            <Field type='checkbox' name="hidden" label="Include Hidden" margin="none" size="small"  style={{paddingBottom: 4, paddingTop: 4}}/>
+            <Field type='checkbox' name="needs_review" label="Needs Review" margin="none" size="small" style={{paddingBottom: 4, paddingTop: 4}}/>
+          </div>
+        </Grid>
+      </Form>
+    )
   }
 
   return (
-    <ViewContainer footerElements={[renderPagination()]} headerElements={[renderFilterBar()]}>
+    <ViewContainer
+      footerElements={[<PaginationFooter total={total} offset={offset} page_size={page_size} setOffset={setOffset}/>]}
+      headerElements={[renderFilterBar()]}
+    >
       <Paper>
         <List>
           {records.map(record => {
@@ -125,18 +122,11 @@ function Records() {
                 to={`/record/${record.record_id}`}
               >
                 <ListItemAvatar>
-                  {record.has_digital ? (
-                    <img
-                      src={`https://search.freedomarchives.org/images/thumbnails/${record.record_id}.jpg`}
-                      alt={`${record.title} Thumbnail`}
-                      width={40}
-                      onError={defaultImage}
-                    />
-                  ) : (
-                    <Avatar>
-                      <BrokenImage />
-                    </Avatar>
-                  )}
+                  <Thumbnail
+                    src={record.has_digital ? `https://search.freedomarchives.org/images/thumbnails/${record.record_id}.jpg` : ''}
+                    alt={`${record.title} Thumbnail`}
+                    width={40}
+                  />
                 </ListItemAvatar>
                 <ListItemText
                   primary={
