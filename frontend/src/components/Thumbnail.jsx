@@ -11,7 +11,7 @@ const onError = (event)=> {
 export default function Thumbnail({src, type, width=75, alt=''}) {
   if (src) {
     return (
-      <div style={{width, minWidth: width, marginRight: 10}}>
+      <span style={{width, minWidth: width, display: 'block', marginRight: 10}}>
         <img
           style={{
             maxWidth: '100%',
@@ -20,7 +20,7 @@ export default function Thumbnail({src, type, width=75, alt=''}) {
           onError={onError}
           alt={alt}
         />
-      </div>
+      </span>
     )
   } else {
     return <Avatar>
