@@ -9,7 +9,7 @@ const initialState = {
   loading: false,
   search: {
     $fullText: '',
-    has_digital: true,
+    only_digitized: true,
   },
 };
 const reducer = (state, action) => {

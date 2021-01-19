@@ -1,15 +1,122 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { records as recordsService } from '../api';
-import { Link } from 'react-router-dom';
-// import { Formik, Form, Field } from 'formik';
 import { useStateValue } from '../appContext';
 import Form from '../components/Form';
 import Field from '../components/Field';
 import FieldRow from '../components/FieldRow';
-import { Link as MULink, Typography, Button, Grid } from '@material-ui/core';
+import Thumbnail from '../components/Thumbnail';
+import ViewContainer from '../components/ViewContainer';
+import { Link as MULink, Box, Card, Chip, Typography, Button, Grid, Icon, Paper, Divider } from '@material-ui/core';
 import { startCase } from 'lodash';
+import PaginationFooter from '../components/PaginationFooter'
+import { Skeleton } from '@material-ui/lab';
+
+import { makeStyles, useTheme } from '@material-ui/core/styles';
 
 import './Search.scss';
+
+const descriptionMaxLines = 5;
+
+const useStyles = makeStyles({
+  descriptionContainer: {
+    width: '100%'
+  },
+  description: props => ({
+    transition: '0.4s',
+  }), 
+  descriptionClosed:  props => ({
+    maxHeight: `${descriptionMaxLines * props.typography.body2.lineHeight}em`,
+    overflow: 'hidden',
+  }),
+  descriptionOpen: {
+    maxHeight: 800,
+    
+  },
+  openControl: {
+    textAlign: 'right',
+    display: 'flex',
+    alignItems: 'center',
+    flexWrap: 'wrap',
+    float: 'right',
+    cursor: 'pointer',
+    '& .MuiIcon-root': {
+      transition: 'transform 400ms cubic-bezier(0.4, 0, 0.2, 1) 0ms',
+    },
+    '& .MuiIcon-root.open': {
+      transform: 'rotate(180deg)'
+    }
+  }
+});
+
+
+const page_size = 10;
+
+function Description({text}) {
+  const theme = useTheme();
+  const classes = useStyles(theme);
+  const [open, setopen] = useState(false)
+  const [height, setHeight] = useState(0)
+  const ref = useRef(null)
+
+  useEffect(() => {
+    const size = parseFloat(getComputedStyle(ref.current.parentElement).fontSize)
+    setHeight(ref.current.clientHeight /size)
+  }, [setHeight])
+
+  return (
+    <div className={classes.descriptionContainer}>
+      <div className={[classes.description, open ? classes.descriptionOpen : classes.descriptionClosed].join(' ')}>
+        <div ref={ref}>
+          {text}
+        </div>
+      </div>
+      {height > (descriptionMaxLines * theme.typography.body2.lineHeight) &&
+        <Typography variant="caption" className={classes.openControl} onClick={e => setopen(!open)}>
+          <Icon className={open ? 'open' : ''}>expand_more</Icon> View {open ? 'Less' : 'More'}
+        </Typography>
+      }
+    </div>
+  )
+}
+
+function Filter({ type, values=[], addFilter, search }) {
+  const [limit, setlimit] = useState(5)
+
+  const renderFilterItem = ({ value, label, count, i, type }) => (
+    <div key={i} onClick={() => addFilter({ type, value })}>
+      <MULink
+        href=""
+        onClick={e => e.preventDefault()}
+        style={{ fontWeight: (search || []).includes(value) ? 800 : 400 }}
+      >
+        {label || '???'}
+      </MULink>{' '}
+      &nbsp;({count})
+    </div>
+  );
+
+  return (
+    
+    <div key={type} style={{ flexGrow: 1, marginBottom: 10 }}>
+      <Typography variant="h6" gutterBottom>{startCase(type)}</Typography>
+      <div style={{paddingLeft: 10}}>
+        <div>
+          {(values || [])
+            .slice(0, limit)
+            .map(([label, count, value], i) =>
+              renderFilterItem({ value: value || label, label, count, type, i })
+            )}
+        </div>
+        {(values && values.length > limit) && 
+          <Button size="small" color="default" startIcon={<Icon>add</Icon>} onClick={e => setlimit(limit + 5)} style={{display: 'flex', cursor: 'pointer'}}>
+            Show More...
+          </Button>
+        }
+      </div>
+      <Divider></Divider>
+    </div>
+  );
+}
 
 function Search() {
   const {
@@ -20,20 +127,29 @@ function Search() {
   const [records, setRecords] = useState({ count: 0, records: [] });
   const [filters, setFilters] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [total, setTotal] = useState(0);
+  const [offset, setOffset] = useState(0);
   const [time, setTime] = useState(0);
+
+  useEffect(() => {
+    setOffset(0)
+  }, [search])
 
   useEffect(() => {
     const fetchRecords = async () => {
       setLoading(true);
       const time = new Date();
       try {
-        const { $fullText, has_digital } = search;
+        const { $fullText, only_digitized } = search;
         const query = {
-          $select: ['record_id', 'title', 'description'],
-          $limit: 20,
+          $select: ['record_id', 'title', 'description', 'year', 'call_number', 'publisher', 'producers', 'authors'],
+          $limit: page_size,
           $fullText: $fullText,
-          has_digital: has_digital,
+          $skip: offset,
         };
+        if (only_digitized) {
+          query.has_digital = true
+        }
         ['keyword', 'subject', 'author', 'producer'].forEach(type => {
           if (search[type]) {
             query[`${type}s_search`] = { $contains: search[type] };
@@ -52,18 +168,43 @@ function Search() {
           data: records,
           filters = [],
         } = await recordsService.find({ query });
-        setRecords({ total, records });
+        setRecords({ total, records: records.map(record => {
+          const keys =  ['year', 'call_number', 'producers', 'publisher', 'authors']
+          record.details = []
+          keys.forEach(key => {
+            let value = record[key]
+            if (value) {
+              if (Array.isArray(value)) {
+                if (value.length) {
+                  value = value.map(({item}) => item).join(', ')
+                }
+              } else if (typeof value === 'object') {
+                value = value.item
+              } 
+            }
+            if (value && value.toString().trim()) {
+              record.details.push([key, value])
+            }
+          })
+          return record
+        }) });
         setFilters(filters);
         setTime((new Date() - time) / 1000);
+        setTotal(total);
       } catch {}
       setLoading(false);
     };
     fetchRecords();
-  }, [search]);
+  }, [search, offset]);
 
   const addFilter = ({ type, value }) => {
-    const newFilter = { [type]: [...(search[type] || []), value] };
-    dispatch('SET_SEARCH', { ...search, ...newFilter });
+    let newFilter = search[type] || [];
+    if (newFilter.includes(value)) {
+      newFilter = newFilter.filter(v => v !== value)
+    } else {
+      newFilter.push(value)
+    }
+    dispatch('SET_SEARCH', { ...search, ...{[type]: newFilter} });
   };
 
   const clearFilters = () => {
@@ -73,19 +214,38 @@ function Search() {
     dispatch('SET_SEARCH', { ...search });
   };
 
-  const renderResults = () => (
-    <ul style={{ flexGrow: 2 }}>
-      {records.records.map(record => (
-        <li key={record.record_id}>
-          <Link to={`/record/${record.record_id}`}>{record.title}</Link>{' '}
-          {record.score && <span>{`(${record.score})`}</span>}
-          <div>
-            {record.description.slice(0, 100)}{' '}
-            {record.description.length > 100 ? '...' : ''}
+  const renderResult = (record={}) => {
+    return (
+      <Grid item xs={12} key={record.record_id}>
+        <Card style={{display: 'flex'}}>
+          <Thumbnail
+            src={`https://search.freedomarchives.org/images/thumbnails/${record.record_id}.jpg`}
+            width={75}
+          />
+          <div style={{width: '100%'}}>
+            <Typography variant='h5'>
+              {record.title }
+            </Typography>
+            <Typography variant='caption'>
+              <Grid container spacing={1}  style={{marginBottom: 3, marginTop: 3}}>
+                {(record.details || []).map(([key, value]) => <Grid item key={key}>
+                  <Chip variant="outlined" size="small" label={`${startCase(key)} - ${value}`}/>
+                </Grid>)}
+              </Grid>
+            </Typography>
+            <Description text={record.description}/>
           </div>
-        </li>
-      ))}
-    </ul>
+        </Card>
+      </Grid>
+    )
+  }
+
+  const renderResults = () => (
+    <Grid container spacing={2}>
+
+      {/* {Array.from(new Array(3)).map(renderResult)} */}
+      {records.records.map(renderResult)}
+    </Grid>
   );
 
   const renderFilters = () => (
@@ -93,87 +253,90 @@ function Search() {
       <Typography variant="h5">Filters</Typography>
       <Button
         color="primary"
+        size="small"
         variant="contained"
         onClick={() => clearFilters()}
       >
         Clear Filters
       </Button>
-      {filters.map(renderFilter)}
+      {filters.map(({type, values}) => {
+        return <Filter
+          key={type}
+          type={type}
+          values={values}
+          addFilter={addFilter}
+          search={search[type]}
+        />
+      })}
     </div>
   );
 
-  const renderFilter = ({ type, values }) => (
-    <div key={type} style={{ flexGrow: 1 }}>
-      <Typography variant="h6">{startCase(type)}</Typography>
-      <ul>
-        {values
-          .slice(0, 5)
-          .map(([label, count, value], i) =>
-            renderFilterItem({ value: value || label, label, count, type, i })
-          )}
-      </ul>
-    </div>
-  );
-
-  const renderFilterItem = ({ value, label, count, i, type }) => (
-    <li key={i} onClick={() => addFilter({ type, value })}>
-      <MULink
-        href=""
-        onClick={e => e.preventDefault()}
-        style={{ fontWeight: (search[type] || []).includes(value) ? 800 : 400 }}
+  const SearchForm = ({children}) => (
+    <Paper>
+      <Form
+        initialValues={{
+          search: search.$fullText,
+          include_non_digitized: !search.only_digitized
+        }}
+        onSubmit={fields => {
+          dispatch('SET_SEARCH', { 
+            ...search, 
+            $fullText: 'search' in fields ? fields.search : search.$fullText,
+            only_digitized: 'include_non_digitized' in fields ? !fields.include_non_digitized : search.only_digitized });
+        }}
       >
-        {label || '???'}
-      </MULink>{' '}
-      &nbsp;({count})
-    </li>
-  );
-
-  const renderForm = () => (
-    <Grid container justify="center">
-      <Grid item xs={12} md={8} lg={6} xl={4} className="search-form">
-        <Form
-          initialValues={search}
-          onSubmit={fields => {
-            dispatch('SET_SEARCH', { ...search, ...fields });
-          }}
-        >
-          <FieldRow>
-            <Field
-              name="$fullText"
-              label="Search"
-              placeholder="Search Records"
-              autoSubmit={300}
-              width={8}
+        <Grid item xs={12}>
+          <Field
+            name="search"
+            label="Search"
+            placeholder="Search Records"
+            autoSubmit={300}
+            width={12}
             />
-            <Field
-              name="has_digital"
-              label="Only Digital"
-              type="checkbox"
-              autoSubmit
-              width={4}
+          <Field
+            name="include_non_digitized"
+            label="Include non-digitized documents"
+            type="checkbox"
+            autoSubmit
+            width={12}
             />
-          </FieldRow>
-        </Form>
-      </Grid>
-    </Grid>
+        </Grid>
+        <Grid item xs={12}>
+          {renderFilters()}
+        </Grid>
+      </Form>
+    </Paper>
   );
 
   return (
     <div className="records">
-      {renderForm()}
-      {loading ? (
-        <div>Searching...</div>
-      ) : (
-        <div className="results">
-          <p className="results-total">
-            {records.total} total results ({time} seconds)
-          </p>
-          <div style={{ textAlign: 'left', margin: 'auto', display: 'flex' }}>
-            {renderResults()}
-            {renderFilters()}
-          </div>
-        </div>
-      )}
+      <Grid container spacing={2}>
+        <Grid item xs={4} lg={3} xl={2}>
+          <Paper>
+            <SearchForm/>
+          </Paper>
+        </Grid>
+        <Grid item xs={8} lg={9}  xl={10}>
+          <Grid container spacing={2}>
+            <Grid item xs={12}>
+              <Paper>
+                <Box justifyContent="center" display="flex">
+                  <PaginationFooter offset={offset} total={total} page_size={page_size} setOffset={setOffset} size="small"/>
+                </Box>
+                <Box mt={2} textAlign="center">
+                  {records.total} total results ({time} seconds)
+                </Box>
+
+              </Paper>
+            </Grid>
+            <Grid item xs={12}>
+              {
+               renderResults()
+              }
+            </Grid>
+          </Grid>
+        </Grid>
+      </Grid>
     </div>
   );
 }
