@@ -1,7 +1,7 @@
 import React from 'react';
 import { Pagination } from '@material-ui/lab';
 
-function PaginationFooter({total, offset, page_size, setOffset}) {
+function PaginationFooter({total, offset, page_size, setOffset, ...props}) {
 
   return (
     <Pagination
@@ -13,6 +13,7 @@ function PaginationFooter({total, offset, page_size, setOffset}) {
       size="large"
       color="primary"
       variant="outlined"
+      {...props}
     />
   );
 }
