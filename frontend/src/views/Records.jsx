@@ -6,11 +6,9 @@ import {
   ListItemText,
   Typography,
   ListItemAvatar,
-  Avatar,
   Grid,
   Paper,
 } from '@material-ui/core';
-import { BrokenImage } from '@material-ui/icons';
 import { Link } from 'react-router-dom';
 import ViewContainer from '../components/ViewContainer';
 import Field from '../components/Field';
@@ -69,10 +67,6 @@ function Records() {
     };
     fetchRecords();
   }, [offset, filter]);
-
-  const defaultImage = event => {
-    event.target.src = `https://search.freedomarchives.org/images/fileicons/webpage.png`
-  }
 
   const renderFilterBar = () => {
     return (
