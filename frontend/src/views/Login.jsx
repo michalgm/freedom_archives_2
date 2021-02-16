@@ -1,10 +1,29 @@
-import React from 'react';
-import { authenticate } from '../api';
+import { Grid, Paper, Typography } from '@material-ui/core/';
+import {
+  useHistory,
+  useLocation
+} from 'react-router-dom'
+
 import Field from '../components/Field';
 import Form from '../components/Form';
-import { Grid, Typography, Paper } from '@material-ui/core/';
+import React from 'react';
+import { authenticate } from '../api';
+
 function Login() {
   const buttons = [{ label: 'Log In', type: 'submit', color: 'primary' }];
+  const location = useLocation();
+  const history = useHistory();
+
+  const login = async({ username, password }) => {
+    await authenticate(username, password);
+    const {state} = location;
+    if (state && state.referrer && state.referrer.pathname !== '/login') {
+      history.replace(state.referrer.pathname, state.referrer.state)
+    } else {
+      history.replace('/')
+    }
+  }
+
   return (
     <Grid container justify="center">
       <Grid item md={7} lg={5}>
@@ -14,9 +33,7 @@ function Login() {
           </Typography>
           <Form
             initialValues={{ username: 'greg', password: 'letmein' }}
-            onSubmit={({ username, password }) => {
-              authenticate(username, password);
-            }}
+            onSubmit={login}
             noUpdateCheck
             buttonsBelow
             buttons={buttons}

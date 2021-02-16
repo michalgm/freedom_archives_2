@@ -1,4 +1,7 @@
+const {updateThumbnail} = require('./thumbnailer');
+
 module.exports = {
+  updateThumbnail,
   setUser: context => {
     const {data, method, service: {Model}, params: {user: {user_id}}} = context;
     if (method === 'create') {
@@ -10,17 +13,17 @@ module.exports = {
     }
     return context;
   },
-  
+    
   maskView: context => {
     context.service.table = context.path;
     return context;
   },
-
+  
   unMaskView: context => {
     context.service.table = `unified_${context.path}`;
     return context;
   },
-
+  
   updateListItemRelations: async context => {
     const {
       id,
@@ -34,7 +37,7 @@ module.exports = {
     for (const type of ['subjects', 'keywords', 'producers', 'authors']) {
       if (data[type] !== undefined) {
         // console.log('UPDATE', data);
-  
+    
         const ids = trx
           .from(`${table}s_to_list_items`)
           .join(
@@ -45,9 +48,9 @@ module.exports = {
           .where('type', type.replace(/s$/, ''))
           .andWhere(`${table}_id`, id)
           .select(`${table}s_to_list_items.list_item_id`);
-  
+    
         await trx(`${table}s_to_list_items`).whereIn('list_item_id', ids).delete();
-  
+    
         await trx(`${table}s_to_list_items`).insert(
           data[type].map(({ list_item_id }) => ({ list_item_id, [`${table}_id`]: id }))
         );
@@ -55,7 +58,7 @@ module.exports = {
         // console.log('UPDATE', context.data);
       }
     }
-  
+    
     if (!Object.keys(data).length) {
       context.result = await trx('records').where('record_id', id).select();
     }
@@ -66,7 +69,7 @@ module.exports = {
     // console.log('UPDATE DONE', context.result);
     return context;
   },
-
+  
   refreshView: async (context) => {
     const {
       id,
@@ -76,9 +79,9 @@ module.exports = {
         transaction: { trx },
       },
     } = context;
-
+  
     const table = path.slice(0, -1);
-
+  
     if (['update', 'patch', 'remove'].includes(method)) {
       await trx(`unified_${table}s`).where(`${table}_id`, id).delete();
     }
@@ -88,8 +91,8 @@ module.exports = {
       Object.keys(data).forEach(key => {
         if (
           data[key] &&
-          typeof data[key] === 'object' &&
-          !key.includes('_search')
+            typeof data[key] === 'object' &&
+            !key.includes('_search')
         ) {
           encoded[key] = JSON.stringify(data[key]);
         } else {
@@ -101,5 +104,6 @@ module.exports = {
       return context;
     }
   }
-  
+    
 };
+  

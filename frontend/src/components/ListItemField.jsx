@@ -1,27 +1,29 @@
-import React, { useState } from 'react';
 import {
-  Dialog,
-  DialogTitle,
-  DialogContent,
   Button,
+  Dialog,
   DialogActions,
+  DialogContent,
+  DialogTitle,
   Grid,
 } from '@material-ui/core';
-import Form from './Form';
-import FieldRow from './FieldRow';
+import React, {useState} from 'react';
+
 import Field from './Field';
+import FieldRow from './FieldRow';
+import Form from './Form';
+import {createFilterOptions} from '@material-ui/lab'
 import { list_items } from '../api';
 import { useFormikContext } from 'formik';
 
-const ListItemField = ({ name, listType, ...props }) => {
+const ListItemField = ({name, listType, isMulti, ...props}) => {
   const [open, toggleOpen] = React.useState(false);
   const [newValue, setNewValue] = React.useState('');
-
-  // const filter = createFilterOptions();
+  
+  const filter = createFilterOptions();
   const type = listType || name.replace(/s$/, '');
-
+  
   const validateChange = (_, item) => {
-    const lastItem = item[item.length - 1];
+    const lastItem = isMulti ? item && item[item.length - 1] : item;
     if (lastItem && !lastItem.list_item_id) {
       toggleOpen(true);
       setNewValue(lastItem.item.replace(/^Add "(.+)"$/, '$1'));
@@ -35,31 +37,30 @@ const ListItemField = ({ name, listType, ...props }) => {
       <Field
         name={name}
         type="select"
-        isMulti={props.isMulti || false}
+        isMulti={isMulti || false}
         searchType="list_items"
         searchParams={{ type }}
         selectOnFocus
         clearOnBlur
         handleHomeEndKeys
-        filterSelectedOptions
         validateChange={validateChange}
         filterOptions={(options, params) => {
+          const filtered = filter(options, params)
           if (
             params.inputValue !== '' &&
-            !options.find(
-              o => o.item.toLowerCase() === params.inputValue.toLowerCase()
-            )
+            !filtered.some(({item}) => item.toLowerCase() === params.inputValue.toLowerCase())
           ) {
-            options.push({
+            filtered.push({
               value: params.inputValue,
               item: `Add "${params.inputValue}"`,
             });
           }
-          return options;
+          return filtered
         }}
+        size="small"
         {...props}
       />
-      <NewListItemDialog
+       <NewListItemDialog
         handleClose={(...args) => {
           toggleOpen(false);
         }}
@@ -128,13 +129,11 @@ export const NewListItemDialog = ({
       >
         <Grid item xs={12}>
           <DialogTitle id="form-dialog-title">Add a new {type}</DialogTitle>
-        </Grid>
-        <DialogContent>
-          <FieldRow>
-            <Field name={type} />
-          </FieldRow>
-        </DialogContent>
-        <Grid item xs={12}>
+          <DialogContent>
+            <FieldRow>
+              <Field name={type} />
+            </FieldRow>
+          </DialogContent>
           <DialogActions>
             <Button onClick={handleClose} color="primary">
               Cancel

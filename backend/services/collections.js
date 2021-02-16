@@ -3,7 +3,7 @@ const { authenticate } = require('@feathersjs/authentication').hooks;
 const {
   hooks: { transaction },
 } = require('feathers-knex');
-const {setUser, updateListItemRelations, maskView, unMaskView, refreshView} = require('./common_hooks');
+const {setUser, updateListItemRelations, maskView, unMaskView, refreshView} = require('./common_hooks/');
 
 class Collections extends Service {
   constructor(options) {

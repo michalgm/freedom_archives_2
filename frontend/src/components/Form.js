@@ -1,8 +1,10 @@
+import './Form.scss';
+
+import { Button, Grid } from '@material-ui/core';
+import { Formik, Form as FormikForm, useFormikContext } from 'formik';
+
 import React from 'react';
 import ReactDOM from 'react-dom';
-import { Formik, Form as FormikForm, useFormikContext } from 'formik';
-import { Grid, Button } from '@material-ui/core';
-import './Form.scss';
 
 const FormButton = ({ label, onClick, ...props }) => {
   const { handleReset, handleSubmit } = useFormikContext();

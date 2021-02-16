@@ -9,7 +9,8 @@ const {
   maskView,
   unMaskView,
   refreshView,
-} = require('../common_hooks');
+  updateThumbnail
+} = require('../common_hooks/');
 
 const fullTextSearch = context => {
   if (context.params.query.$fullText !== undefined) {
@@ -39,7 +40,7 @@ const lookupFilters = async ({
   result,
   service: { Model },
 }) => {
-  console.log('AFTER FIND');
+  // console.log('AFTER FIND');
 
   if ($fullText !== undefined) {
     const ids = await knex
@@ -103,7 +104,9 @@ const lookupFilters = async ({
 const updateRelations = async context => {
   const {
     id,
+    app,
     params: {
+      user,
       transaction: { trx },
     },
     data,
@@ -112,6 +115,27 @@ const updateRelations = async context => {
   if (!Object.keys(data).length) {
     context.result = await trx('records').where('record_id', id).select();
   }
+  if (data.date_string) {
+    const [month, day, year] = data.date_string.split("/");
+    data.month = month;
+    data.day = day;
+    data.year = year;
+    delete data.date_string;
+  }
+  if (data.instances !== undefined) {
+    await Promise.all(
+      data.instances.filter(({instance_id}) => instance_id).map(instance => {
+        return app.service('instances').patch(instance.instance_id, instance, {user});
+      })
+    );
+    delete data.instances;
+  }
+  ['program', 'publisher'].forEach(key => {
+    if (key in data) {
+      data[`${key}_id`] = data[key] ? data[key].list_item_id : null;
+      delete data[key];
+    }
+  });
   if ('collection' in data) {
     data.collection_id = data.collection ? data.collection.collection_id : null;
     delete data.collection;
@@ -138,6 +162,7 @@ module.exports = {
       setUser,
       updateListItemRelations,
       updateRelations,
+      updateThumbnail,
     ],
     remove: [transaction.start(), maskView],
   },

@@ -1,16 +1,19 @@
-import React from 'react';
-import { Field as FormikField, useFormikContext } from 'formik';
 import {
-  TextField,
-  FormGroup,
+  Checkbox,
   FormControl,
   FormControlLabel,
-  Checkbox,
+  FormGroup,
+  Radio,
+  TextField,
 } from '@material-ui/core';
-import { startCase } from 'lodash';
+import {Field as FormikField, useFormikContext} from 'formik';
+
 import { Alert } from '@material-ui/lab';
-import SelectField from './SelectField';
 import HTMLField from './HTMLField';
+import React from 'react';
+import SelectField from './SelectField';
+import {startCase} from 'lodash';
+
 // import { ConsoleTransportOptions } from 'winston/lib/winston/transports';
 
 let submitTimeout;
@@ -26,9 +29,11 @@ const CustomComponent = ({
   margin,
   ...props
 }) => {
-  // console.log(props.onChange);
   const labelValue = (label || startCase(name)).replace('_value', '');
   const context = useFormikContext();
+  const {setFieldValue} = context;
+
+  const variant = props.variant || ro ? 'filled' : 'outlined'
   let field;
   if (autoSubmit) {
     props.onChange = event => {
@@ -41,14 +46,12 @@ const CustomComponent = ({
     };
   }
   if (type === 'select') {
-    const { setFieldValue } = context;
     field = (
       <FormControl disabled={ro} margin="dense" fullWidth>
         <FormGroup>
           <SelectField
             fullWidth
             className="select-input"
-            variant="outlined"
             margin={margin || "dense"}
             disabled={ro}
             label={labelValue}
@@ -60,6 +63,7 @@ const CustomComponent = ({
               setFieldValue,
               ...props,
             }}
+            variant={variant}
           />
         </FormGroup>
       </FormControl>
@@ -75,17 +79,23 @@ const CustomComponent = ({
           <FormControlLabel
             control={<Checkbox {...{ name, value }} {...props} />}
             label={labelValue}
+            variant={variant}
           />
         </FormGroup>
       </FormControl>
     );
+  } else if (type === 'radio') {
+    field = <Radio
+      disabled={ro}
+      {...{name, value: value || ''}}
+      {...props}
+    />
   } else if (type === 'html') {
-    const { setFieldValue } = context;
     field = <HTMLField {...{ name, value, setFieldValue }} {...props} />;
   } else {
     field = (
       <TextField
-        variant={1 || ro ? 'outlined' : 'filled'}
+        variant={variant}
         disabled={ro}
         margin={margin || "dense"}
         label={labelValue}

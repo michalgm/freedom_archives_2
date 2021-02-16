@@ -1,7 +1,6 @@
 const { Service } = require('feathers-knex');
 const { authenticate } = require('@feathersjs/authentication').hooks;
-const { hooks: { transaction } } = require('feathers-knex');
-
+const {hooks: {transaction}} = require('feathers-knex');
 class Instances extends Service {
   constructor(options) {
     super({
@@ -26,14 +25,39 @@ module.exports = function(app) {
   const service = app.service('instances');
 
   const updateView = async (context) => {
-    const { app, data, params: {user} } = context;
-    await app.service('records').patch(data.record_id, {}, {user});
+    const {id, app, data, params: {user}} = context;
+    if (!id) {
+      await app.service('records').patch(data.record_id, {}, {user});
+    }
+  };
+
+  const cleanupMeta = (context) => {
+    const {data} = context;
+    [
+      'format',
+      'quality',
+      'generation'
+    ].forEach(key => {
+      if (data[`${key}_item`] !== undefined) {
+        data[key] = data[`${key}_item`].list_item_id;
+        delete data[`${key}_item`];
+      }
+    });
+
+    [
+      'contributor_name',
+      'contributor_username',
+      'creator_name',
+      'creator_username',
+      'is_primary'
+    ].forEach(key => delete data[key]);
+    return context;
   };
 
   service.hooks({
     before: {
       all: [authenticate('jwt')],
-      patch: [transaction.start()]
+      patch: [transaction.start(), cleanupMeta]
     },
     after: {
       create: [updateView, transaction.end()],

@@ -68,6 +68,7 @@ CREATE TABLE records (
   vol_number varchar(50) DEFAULT NULL,
   collection_id integer DEFAULT 1000 REFERENCES collections,
   parent_record_id integer,
+  primary_instance_id integer,
   year int,
   month int,
   day int,
@@ -86,7 +87,7 @@ CREATE TABLE records (
 CREATE TABLE instances (
   instance_id serial PRIMARY KEY,
   record_id integer NOT NULL REFERENCES records ON DELETE CASCADE,
-  is_primary bool DEFAULT false,
+  -- is_primary bool DEFAULT false,
   format integer REFERENCES list_items,
   no_copies integer DEFAULT '1',
   quality integer REFERENCES list_items,
@@ -171,6 +172,7 @@ insert into records (
     vol_number,
     case collection_id when 112 then 1000 else collection_id end,
     null,
+    null,
     nullif(regexp_replace(year, '[^0-9]', '', 'g'), '')::int,
     nullif(regexp_replace(month, '[^0-9]', '', 'g'), '')::int,
     nullif(regexp_replace(day, '[^0-9]', '', 'g'), '')::int,
@@ -248,10 +250,9 @@ original_doc_id integer DEFAULT NULL */
 create table duplicate_relations as select id from freedom_archives_old.related_records where docid_1 = docid_2 and title_1 = title_2 and description_1 = description_2 and track_number_1 = track_number_2;
 
 
-insert into instances (record_id, is_primary, format, no_copies, quality, generation, url, thumbnail, media_type, creator_user_id, contributor_user_id, date_created, date_modified, original_doc_id )
+insert into instances (record_id, format, no_copies, quality, generation, url, thumbnail, media_type, creator_user_id, contributor_user_id, date_created, date_modified, original_doc_id )
   select
     docid as record_id,
-    true,
     format_lookup.list_item_id,
     no_copies,
     quality_lookup.list_item_id,
@@ -273,10 +274,11 @@ insert into instances (record_id, is_primary, format, no_copies, quality, genera
     left join list_items generation_lookup on a.generation = generation_lookup.item and generation_lookup.type = 'generation'
 ;
 
-insert into instances (record_id, is_primary, format, no_copies, quality, generation, url, thumbnail, media_type, creator_user_id, contributor_user_id, date_created, date_modified, original_doc_id )
+update records a set primary_instance_id = b.instance_id from instances b where a.record_id = b.record_id;
+
+insert into instances (record_id, format, no_copies, quality, generation, url, thumbnail, media_type, creator_user_id, contributor_user_id, date_created, date_modified, original_doc_id )
   select
     x.docid_1 as record_id,
-    false,
     format_lookup.list_item_id,
     no_copies,
     quality_lookup.list_item_id,
@@ -311,13 +313,14 @@ drop view if exists instances_view;
 create view instances_view as
   select
     a.*,
-    format_lookup.item as format_value,
-    quality_lookup.item as quality_value,
-    generation_lookup.item as generation_value,
+    jsonb_build_object('item', format_lookup.item, 'list_item_id', format_lookup.list_item_id) as format_item,
+    jsonb_build_object('item', quality_lookup.item, 'list_item_id', quality_lookup.list_item_id) as quality_item,
+    jsonb_build_object('item', generation_lookup.item, 'list_item_id', generation_lookup.list_item_id) as generation_item,
     contributor.firstname || ' ' || contributor.lastname as contributor_name,
     contributor.username as contributor_username,
     creator.firstname || ' ' || creator.lastname as creator_name,
-    creator.username as creator_username
+    creator.username as creator_username,
+    exists(select record_id from records where instance_id = records.primary_instance_id) as is_primary
   from instances a
     left join list_items format_lookup on format = format_lookup.list_item_id
     left join list_items quality_lookup on quality = quality_lookup.list_item_id
@@ -401,6 +404,8 @@ create view records_view as
     instances.instances as instances,
     instances.has_digital as has_digital,
     instances.instance_count as instance_count,
+    -- primary_instance.instance_id as primary_instance_id,
+    primary_instance.thumbnail as primary_instance_thumbnail,
     contributor.firstname || ' ' || contributor.lastname as contributor_name,
     contributor.username as contributor_username,
     creator.firstname || ' ' || creator.lastname as creator_name,
@@ -428,7 +433,16 @@ create view records_view as
   left join collections using(collection_id)
   left join list_items publisher_lookup on a.publisher_id = publisher_lookup.list_item_id
   left join list_items program_lookup on a.program_id = program_lookup.list_item_id
-  left join (select record_id, bool_or(url != '') as has_digital, count(*) as instance_count, array_to_json(array_agg(row_to_json(b) order by b.is_primary)) as instances from instances_view b group by record_id ) instances using (record_id)
+  left join 
+    (select record_id,
+      bool_or(url != '') as has_digital,
+      count(*) as instance_count,
+      array_to_json(array_agg(row_to_json(b)
+      order by b.is_primary desc, b.instance_id)) as instances
+      from instances_view b
+      group by record_id
+    ) instances using (record_id)
+  left join instances primary_instance on a.primary_instance_id = primary_instance.instance_id
   left join users contributor on a.contributor_user_id = contributor.user_id
   left join users creator on a.creator_user_id = creator.user_id
   left join (select parent_record_id, array_to_json(array_agg(row_to_json(b))) as children from (select parent_record_id, record_id, title from records) b group by parent_record_id) children on children.parent_record_id = a.record_id

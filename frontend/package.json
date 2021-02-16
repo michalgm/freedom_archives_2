@@ -24,7 +24,8 @@
     "react-select": "^3.1.1",
     "react-select-material-ui": "^6.7.0",
     "sass": "^1.32.0",
-    "styled-components": "^5.2.1"
+    "styled-components": "^5.2.1",
+    "use-deep-compare-effect": "^1.6.1"
   },
   "scripts": {
     "start": "PORT=4040 react-scripts start",

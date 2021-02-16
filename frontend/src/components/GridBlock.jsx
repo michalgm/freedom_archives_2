@@ -1,12 +1,17 @@
-import React from 'react';
-import { Grid, Paper, Typography } from '@material-ui/core/';
+import {Grid, Paper, Typography} from '@material-ui/core/';
 
-function GridBlock({ children = [], title = '', width = 12 }) {
+import React from 'react';
+
+function GridBlock({children = [], title = '', width = 12, spacing}) {
   return (
     <Grid item xs={width}>
       <Paper>
         {title && <Typography variant="h6">{title}</Typography>}
-        {children}
+        {spacing ?
+          (<Grid container spacing={spacing}>
+            {children}
+          </Grid>) : children
+        }
       </Paper>
     </Grid>
   );

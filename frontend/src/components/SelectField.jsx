@@ -1,7 +1,8 @@
+import {Autocomplete} from '@material-ui/lab';
 import React from 'react';
-import { TextField } from '@material-ui/core';
-import { Autocomplete } from '@material-ui/lab';
+import {TextField} from '@material-ui/core';
 import { services } from '../api';
+import useDeepCompareEffect from 'use-deep-compare-effect'
 
 const searchTypes = {
   list_items: {
@@ -17,7 +18,6 @@ const searchTypes = {
 let active = false;
 
 const SelectField = ({
-  type,
   isMulti,
   ro,
   defaultValue,
@@ -26,58 +26,59 @@ const SelectField = ({
   validateChange,
   onChange,
   onBlur,
-  loadOptions,
   searchType,
   setFieldValue,
   searchParams,
+  fetchAll,
+  autoHighlight,
+  loadOptions: inputLoadOptions,
   ...props
 }) => {
+  const {id: typeId, label: typeLabel} = searchTypes[searchType]
   const [open, setOpen] = React.useState(false);
   const [inputValue, setInputValue] = React.useState('');
-  const [value, setValue] = React.useState(defaultValue);
   const [options, setOptions] = React.useState([]);
   const loading = Boolean(open && inputValue);
+  
+  const value = inputValue || ((defaultValue && defaultValue[typeLabel]) ? defaultValue[typeLabel] : "")
+  const query = {
+    $select: [typeId, typeLabel],
+    $sort: {[typeLabel]: 1},
+    $limit: 100,
+    ...searchParams,
+  }
 
-  if (searchType && !loadOptions) {
-    const type = searchTypes[searchType];
-    loadOptions = async value => {
-      const { data } = await services[searchType].find({
-        noLoading: true,
-        query: {
-          $select: [type.id, type.label],
-          [type.label]: { $ilike: `%${value}%` },
-          ...searchParams,
-        },
-      });
-      return data;
-    };
+  if (!fetchAll) {
+    query[typeLabel] = {$ilike: `%${value}%`}
   }
 
   React.useEffect(() => {
-    if (!loading || active) {
+    const value = defaultValue && defaultValue[typeLabel] ? defaultValue[typeLabel] : ''
+    setInputValue(value)
+  }, [defaultValue, typeLabel])
+
+  useDeepCompareEffect(() => {
+    if (
+      (fetchAll && options.length) ||
+      (!fetchAll && (
+        !loading
+        || active
+        || !value
+      ))
+    ) {
       return undefined;
     }
     active = true;
-
     const fetchRecord = async () => {
-      const response = await loadOptions(inputValue);
-      setOptions(response);
+      const {data: options} = await services[searchType].find({
+        noLoading: true,
+        query,
+      });
+      setOptions(options)
       active = false;
     };
-
     fetchRecord();
-  }, [inputValue]);
-  // }, [inputValue, loading, loadOptions]);
-
-  React.useEffect(() => {
-    if (!open) {
-      setOptions([]);
-    }
-  }, [open]);
-
-  React.useEffect(() => {
-    setValue(defaultValue);
-  }, [defaultValue]);
+  }, [query, searchType, fetchAll, value, loading])
 
   return (
     <Autocomplete
@@ -91,9 +92,10 @@ const SelectField = ({
       onClose={() => {
         setOpen(false);
       }}
-      getOptionLabel={item => item[searchTypes[searchType].label] || ''}
-      getOptionSelected={(option, value) =>
-        option[searchTypes[searchType].id] === value[searchTypes[searchType].id]
+      getOptionLabel={item => item[typeLabel] || ''}
+      getOptionSelected={(option, value) => {
+        return value[typeLabel] ? option[typeLabel] === value[typeLabel] : option[typeLabel] === value
+      }
       }
       options={options}
       renderInput={params => (
@@ -101,20 +103,20 @@ const SelectField = ({
           {...params}
           InputLabelProps={{ shrink: true }}
           label={label}
-          variant="outlined"
+          variant={props.variant || "outlined"}
         />
       )}
       onChange={(_, option) => {
         if (!validateChange || validateChange(_, option)) {
-          // onChange(_);
           setFieldValue(name, option);
         }
       }}
       onInputChange={(_, option) => {
         setInputValue(option);
       }}
-      value={value}
+      value={defaultValue}
       inputValue={inputValue}
+      blurOnSelect
       {...props}
     />
   );
@@ -124,4 +126,5 @@ SelectField.defaultProps = {
   searchParams: {},
 };
 
-export default SelectField;
+
+export default React.memo(SelectField);
