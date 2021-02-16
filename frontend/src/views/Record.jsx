@@ -118,9 +118,10 @@ function Instance({instance = {}, record, index, edit}) {
           value={`${instance.instance_id}`}
         />
       </TableCell>
-      <TableCell><Field type='number' inputProps={{min: 0}} label=" " name={`instances[${index}].no_copies`} /></TableCell>
       <TableCell>
-
+        <Field type='number' fullWidth={false} inputProps={{min: 0}} label=" " name={`instances[${index}].no_copies`} />
+      </TableCell>
+      <TableCell>
         <Link to={`/record/${instance.original_doc_id}`}>
           {instance.original_doc_id}
         </Link>
@@ -333,9 +334,11 @@ function Record({id, showForm, ro = false}) {
       },
     ]
     : [{label: 'Edit', onClick: () => setEdit(true), type: 'button'}];
-
+  
+  const {has_digital} = record;
   return (
-    <ViewContainer item={record} buttonRef={showForm && buttonRef}>
+    <div className='record'>
+      <ViewContainer item={record} buttonRef={showForm && buttonRef}>
       {record.title && (
         <Form
           initialValues={record}
@@ -346,12 +349,34 @@ function Record({id, showForm, ro = false}) {
         >
           <Grid container spacing={2}>
             <GridBlock title={record.title} spacing={2}>
-              <FieldRow>
-                <Field name="title" />
+                <Grid item xs={has_digital ? 11 : 12}>
+                  <Grid container spacing={2}>
+                    <Grid item xs={12}>
+                    <Field name="title" />
+                    </Grid>
+                    <Grid item xs={12}>
+                      <Field name="description" multiline rows={4} />
+                    </Grid>
+                  </Grid>
+                </Grid>
+                {has_digital &&
+                  <Grid item xs={1} className='record-thumbnail'>
+                    {/* <img src={record.primary_instance_thumbnail} /> */}
+                    <img
+                      alt=""
+                      // width="100"
+                      src={
+                        'https://search.freedomarchives.org/' +
+                        record.primary_instance_thumbnail
+                      }
+                    />
+                    {/* <div style={{width: 50, height: 200, background: 'blue'}} /> */}
+                  </Grid>
+                }
+                {/* <FieldRow>
               </FieldRow>
               <FieldRow>
-                <Field name="description" multiline rows={4} />
-              </FieldRow>
+              </FieldRow> */}
               <FieldRow>
                 <Field name="call_number" />
                 <Field name="vol_number" />
@@ -383,6 +408,8 @@ function Record({id, showForm, ro = false}) {
         </Form>
       )}
     </ViewContainer>
+    </div>
+
   );
 }
 
