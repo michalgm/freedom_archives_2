@@ -29,7 +29,7 @@ const CustomComponent = ({
   margin,
   ...props
 }) => {
-  const labelValue = (label || startCase(name)).replace('_value', '');
+  const labelValue = label === " " ? null : (label || startCase(name)).replace('_value', '');
   const context = useFormikContext();
   const {setFieldValue} = context;
 

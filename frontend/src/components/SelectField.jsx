@@ -74,7 +74,7 @@ const SelectField = ({
         noLoading: true,
         query,
       });
-      setOptions(options)
+      setOptions([{[typeId]: null, [typeLabel]: ''}, ...options.filter(o => o[typeLabel].trim())])
       active = false;
     };
     fetchRecord();
@@ -94,6 +94,9 @@ const SelectField = ({
       }}
       getOptionLabel={item => item[typeLabel] || ''}
       getOptionSelected={(option, value) => {
+        if (!value[typeId] && !option[typeId]) {
+          return true;
+        }
         return value[typeLabel] ? option[typeLabel] === value[typeLabel] : option[typeLabel] === value
       }
       }

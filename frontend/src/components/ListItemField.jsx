@@ -24,7 +24,7 @@ const ListItemField = ({name, listType, isMulti, ...props}) => {
   
   const validateChange = (_, item) => {
     const lastItem = isMulti ? item && item[item.length - 1] : item;
-    if (lastItem && !lastItem.list_item_id) {
+    if (lastItem && !lastItem.list_item_id && lastItem.item) {
       toggleOpen(true);
       setNewValue(lastItem.item.replace(/^Add "(.+)"$/, '$1'));
     } else {
