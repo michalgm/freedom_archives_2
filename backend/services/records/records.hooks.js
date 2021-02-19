@@ -124,8 +124,14 @@ const updateRelations = async context => {
   }
   if (data.instances !== undefined) {
     await Promise.all(
-      data.instances.filter(({instance_id}) => instance_id).map(instance => {
-        return app.service('instances').patch(instance.instance_id, instance, {user});
+      data.instances.map(instance => {
+        if (instance.delete) {
+          return app.service('instances').remove(instance.instance_id);
+        } else if (instance.instance_id) {
+          return app.service('instances').patch(instance.instance_id, instance, {user});
+        }
+        delete instance.instance_id;
+        return app.service('instances').create(instance, {user});
       })
     );
     delete data.instances;

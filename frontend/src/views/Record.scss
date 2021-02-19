@@ -3,12 +3,23 @@
     padding: 4px;
   }
   .MuiButton-root {
-    margin:0 4px;
+    margin: 0 4px;
   }
   .record-thumbnail {
     text-align: center;
     img {
       margin: auto;
+    }
+  }
+  .deleted {
+    td:not(.instance-action) {
+      opacity: 0.3;
+      background: #eee;
+    }
+  }
+  .instance {
+    & > *:not(.instance-action) {
+      border-bottom: unset;
     }
   }
 }

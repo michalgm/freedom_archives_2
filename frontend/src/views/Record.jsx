@@ -1,18 +1,22 @@
 import './Record.scss';
 
 import {
+  Button,
   Grid,
+  Icon,
+  IconButton,
+  Tab,
   Table,
   TableBody,
   TableCell,
   TableHead,
   TableRow
 } from '@material-ui/core/';
+import {FieldArray, useFormikContext} from 'formik'
 import React, {useEffect, useRef, useState} from 'react';
 import {records, relationships} from '../api';
 
 import Field from '../components/Field';
-import {FieldArray} from 'formik'
 import FieldRow from '../components/FieldRow';
 import Form from '../components/Form';
 import GridBlock from '../components/GridBlock';
@@ -52,6 +56,7 @@ function Children({children = []}) {
 }
 
 function Instance({instance = {}, record, index, edit}) {
+  const context = useFormikContext();
 
   // Column        |           Type           | Collation | Nullable |                    Default                     
   // ---------------------+--------------------------+-----------+----------+------------------------------------------------
@@ -71,113 +76,130 @@ function Instance({instance = {}, record, index, edit}) {
   //  date_modified       | timestamp with time zone |           |          | 
   //  original_doc_id     | integer                  |           |          | 
 
-  // <Form
-  //   initialValues={instance}
-  //   // onSubmit={updateRecord}
-  //   // ro={!edit}
-  //   // buttons={showForm && buttons}
-  //   // buttonRef={buttonRef}
-  // >
-  // </Form>
-  // const [edit, setedit] = useState(false)
+  if (instance.delete) {
+    edit = false
+  }
   return (
-    <TableRow>
-      {/* <TableCell>
-        < IconButton size="small" onClick={() => setedit(!edit)}><Icon>edit</Icon></IconButton>
-        < IconButton size="small" onClick={() => setedit(!edit)}><Icon>delete</Icon></IconButton>
-      </TableCell> */}
-      <TableCell>
-        {instance.url ? (
-          <a
-            href={instance.url}
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            {instance.thumbnail ? (
-              <img
-                alt=""
-                width="20"
-                src={
-                  'https://search.freedomarchives.org/' +
-                  instance.thumbnail
-                }
-              />
-            ) : null}
-          </a>
-        ) : null}
-      </TableCell>
-      <TableCell><ListItemField fetchAll label=" " name={`instances[${index}].generation_item`} listType="generation" variant="standard" /></TableCell>
-      <TableCell><ListItemField fetchAll label=" " name={`instances[${index}].format_item`} listType="format" variant="standard" /></TableCell>
-      <TableCell><ListItemField fetchAll label=" " name={`instances[${index}].quality_item`} listType="quality" variant="standard" /></TableCell>
-      <TableCell>{instance.media_type}</TableCell>
-      <TableCell
-      ><Field
-          type='radio'
-          radioGroup='primary_instance_id'
-          name='primary_instance_id'
-          value={`${instance.instance_id}`}
-        />
-      </TableCell>
-      <TableCell>
-        <Field type='number' fullWidth={false} inputProps={{min: 0}} label=" " name={`instances[${index}].no_copies`} />
-      </TableCell>
-      <TableCell>
+    <>
+      <TableRow className={`instance ${instance.delete ? 'deleted' : ''}`}>
+        <TableCell className='instance-action' rowSpan={2}>
+          <IconButton onClick={() => context.setFieldValue(`instances[${index}].delete`, !instance.delete)}>
+            <Icon>{instance.delete ? 'restore' : 'delete'}</Icon>
+          </IconButton>
+        </TableCell>
+        <TableCell className='instance-action' rowSpan={2}>
+          {instance.url ? (
+            <a
+              href={instance.url}
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              {instance.thumbnail ? (
+                <img
+                  alt=""
+                  width="60"
+                  src={
+                    'https://search.freedomarchives.org/' +
+                    instance.thumbnail
+                  }
+                />
+              ) : null}
+            </a>
+          ) : null}
+
+        </TableCell>
+        <TableCell>
+          <Field
+            ro={!edit}
+            type='radio'
+            radioGroup='primary_instance_id'
+            name='primary_instance_id'
+            value={`${instance.instance_id}`}
+          />
+        </TableCell>
+        <TableCell><ListItemField fetchAll ro={!edit} label=" " name={`instances[${index}].generation_item`} listType="generation" variant="standard" /></TableCell>
+        <TableCell><ListItemField fetchAll ro={!edit} label=" " name={`instances[${index}].format_item`} listType="format" variant="standard" /></TableCell>
+        <TableCell><ListItemField fetchAll ro={!edit} label=" " name={`instances[${index}].quality_item`} listType="quality" variant="standard" /></TableCell>
+        <TableCell>{instance.media_type}</TableCell>
+        <TableCell>
+          <Field ro={!edit} type='number' inputProps={{min: 0, style: {width: 40}}} label=" " name={`instances[${index}].no_copies`} />
+        </TableCell>
+
+        {/* <TableCell>
         <Link to={`/record/${instance.original_doc_id}`}>
           {instance.original_doc_id}
         </Link>
-      </TableCell>
-      {/* <TableCell>
-        {instance.instance_id}
-        <pre>
-          {JSON.stringify(instance, null, ' ')}
-        </pre>
       </TableCell> */}
-    </TableRow>
-
+      </TableRow>
+      <TableRow className={instance.delete ? 'deleted' : ''}>
+        <TableCell />
+        <TableCell colSpan={5}>
+          <Field ro={!edit} label="URL" name={`instances[${index}].url`} />
+        </TableCell>
+        {/* <TableCell colSpan={2}>
+        <pre>
+            {JSON.stringify(instance, null, ' ')}
+        </pre>
+        </TableCell> */}
+      </TableRow>
+    </>
   )
 }
 
-function Instances({instances = [], edit}) {
+function Instances({record, instances = [], edit}) {
+  const {values} = useFormikContext();
+
   return (
-    // <Form initialValues={instances}>
-    <Table size="small">
-      <TableHead>
-        <TableRow>
-          {/* <TableCell></TableCell> */}
-          <TableCell></TableCell>
-          <TableCell>Generation</TableCell>
-          <TableCell>Format</TableCell>
-          <TableCell>Quality</TableCell>
-          <TableCell>Media Type</TableCell>
-          <TableCell>Primary</TableCell>
-          <TableCell>Copies</TableCell>
-          <TableCell>ID</TableCell>
-        </TableRow>
-      </TableHead>
-      <TableBody>
-        {instances.length === 0 && (
-          <TableRow>
-            <TableCell align="center" colSpan={15}>
-              No Instances
-              </TableCell>
-          </TableRow>
-        )}
-        <FieldArray
-          name='instances'
-          render={arrayHelpers => {
-            return instances.map((instance, index) => (
-              <Instance edit={edit} instance={instance} key={instance.instance_id} index={index} />
-            ))
-          }}
-        />
-      </TableBody>
-    </Table>
-    // </Form>
+    <FieldArray
+      name='instances'
+      render={({push}) => {
+        return (
+          <>
+            <Table size="small" className='instances' >
+              <TableHead>
+                <TableRow>
+                  <TableCell style={{width: 50}}></TableCell>
+                  <TableCell style={{width: 100}}></TableCell>
+                  <TableCell style={{width: 60}}>Primary</TableCell>
+                  <TableCell>Generation</TableCell>
+                  <TableCell>Format</TableCell>
+                  <TableCell>Quality</TableCell>
+                  <TableCell style={{width: 100}} >Media Type</TableCell>
+                  <TableCell style={{width: 60}} > Copies</TableCell>
+                  {/* <TableCell>URL</TableCell> */}
+                  {/* <TableCell>ID</TableCell> */}
+                </TableRow>
+              </TableHead>
+              <TableBody>
+                {values.instances.length === 0 && (
+                  <TableRow>
+                    <TableCell align="center" colSpan={15}>
+                      No Instances
+                    </TableCell>
+                  </TableRow>
+                )}
+                {
+                  values.instances.map((instance, index) => (
+                    <Instance key={index} edit={edit} instance={instance} index={index} />
+                  ))
+                }
+              </TableBody>
+            </Table>
+            <Button
+              variant="contained"
+              onClick={() => push({record_id: record.record_id, no_copies: 1})}
+              startIcon={<Icon>add</Icon>}
+            >Add New Media</Button>
+          </>
+        )
+      }}
+    />
   );
 }
 
 function Relationships({id, relationships = []}) {
   return (
+
     <Table size="small">
       <TableHead>
         <TableRow>
@@ -334,25 +356,25 @@ function Record({id, showForm, ro = false}) {
       },
     ]
     : [{label: 'Edit', onClick: () => setEdit(true), type: 'button'}];
-  
+
   const {has_digital} = record;
   return (
     <div className='record'>
       <ViewContainer item={record} buttonRef={showForm && buttonRef}>
-      {record.title && (
-        <Form
-          initialValues={record}
-          onSubmit={updateRecord}
-          ro={!edit}
-          buttons={showForm && buttons}
-          buttonRef={buttonRef}
-        >
-          <Grid container spacing={2}>
-            <GridBlock title={record.title} spacing={2}>
+        {record.title && (
+          <Form
+            initialValues={record}
+            onSubmit={updateRecord}
+            ro={!edit}
+            buttons={showForm && buttons}
+            buttonRef={buttonRef}
+          >
+            <Grid container spacing={2}>
+              <GridBlock title={record.title} spacing={2}>
                 <Grid item xs={has_digital ? 11 : 12}>
                   <Grid container spacing={2}>
                     <Grid item xs={12}>
-                    <Field name="title" />
+                      <Field name="title" />
                     </Grid>
                     <Grid item xs={12}>
                       <Field name="description" multiline rows={4} />
@@ -373,41 +395,37 @@ function Record({id, showForm, ro = false}) {
                     {/* <div style={{width: 50, height: 200, background: 'blue'}} /> */}
                   </Grid>
                 }
-                {/* <FieldRow>
-              </FieldRow>
-              <FieldRow>
-              </FieldRow> */}
-              <FieldRow>
-                <Field name="call_number" />
-                <Field name="vol_number" />
-              </FieldRow>
-              <FieldRow>
-                <ListItemField name="authors" isMulti />
-                <ListItemField name="producers" isMulti />
-              </FieldRow>
-              <FieldRow>
-                <ListItemField name="keywords" isMulti />
-                <ListItemField name="subjects" isMulti />
-              </FieldRow>
-              <FieldRow>
-                <Field type="select" searchType="collections" name="collection" />
-                <Field name="date_string" label="Date" />
-              </FieldRow>
-              <FieldRow>
-                <Field name="location" />
-                <ListItemField listType="program" name="program" />
-              </FieldRow>
-              <FieldRow>
-                <Field name="notes" multiline rows={4} />
-              </FieldRow>
-            </GridBlock>
-            <GridBlock title="Media"><Instances edit={edit} instances={record.instances || []} /></GridBlock>
-            <GridBlock title="Children">{record.children}</GridBlock>
-            <GridBlock title="Relationships">{record.relationships}</GridBlock>
-          </Grid>
-        </Form>
-      )}
-    </ViewContainer>
+                <FieldRow>
+                  <Field name="call_number" />
+                  <Field name="vol_number" />
+                </FieldRow>
+                <FieldRow>
+                  <ListItemField name="authors" isMulti />
+                  <ListItemField name="producers" isMulti />
+                </FieldRow>
+                <FieldRow>
+                  <ListItemField name="keywords" isMulti />
+                  <ListItemField name="subjects" isMulti />
+                </FieldRow>
+                <FieldRow>
+                  <Field type="select" searchType="collections" name="collection" />
+                  <Field name="date_string" label="Date" />
+                </FieldRow>
+                <FieldRow>
+                  <Field name="location" />
+                  <ListItemField listType="program" name="program" />
+                </FieldRow>
+                <FieldRow>
+                  <Field name="notes" multiline rows={4} />
+                </FieldRow>
+              </GridBlock>
+              <GridBlock title="Media"><Instances edit={edit} record={record} instances={record.instances || []} /></GridBlock>
+              <GridBlock title="Children">{record.children}</GridBlock>
+              <GridBlock title="Relationships">{record.relationships}</GridBlock>
+            </Grid>
+          </Form>
+        )}
+      </ViewContainer>
     </div>
 
   );

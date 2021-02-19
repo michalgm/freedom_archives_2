@@ -49,7 +49,8 @@ module.exports = function(app) {
       'contributor_username',
       'creator_name',
       'creator_username',
-      'is_primary'
+      'is_primary',
+      'delete'
     ].forEach(key => delete data[key]);
     return context;
   };
@@ -57,7 +58,8 @@ module.exports = function(app) {
   service.hooks({
     before: {
       all: [authenticate('jwt')],
-      patch: [transaction.start(), cleanupMeta]
+      create: [transaction.start(), cleanupMeta],
+      patch: [transaction.start(), cleanupMeta],
     },
     after: {
       create: [updateView, transaction.end()],
