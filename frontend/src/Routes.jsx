@@ -78,4 +78,4 @@ function Routes({isAuthenticated}) {
   return <div>Loading...</div>
 }
 
-export default Routes
+export default React.memo(Routes)

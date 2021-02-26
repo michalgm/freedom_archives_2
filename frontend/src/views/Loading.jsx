@@ -1,10 +1,9 @@
+import {LinearProgress} from '@material-ui/core';
 import React from 'react';
-import { LinearProgress } from '@material-ui/core';
-import { useStateValue } from '../appContext';
-import { app } from '../api';
-import { makeStyles } from '@material-ui/core/styles';
-
-import { debounce } from 'lodash';
+import {app} from '../api';
+import {debounce} from 'lodash';
+import {makeStyles} from '@material-ui/core/styles';
+import {useStateValue} from '../appContext';
 
 const useStyles = makeStyles({
   progress: {
@@ -26,7 +25,7 @@ export default function Loading({children}) {
   const classes = useStyles();
 
   const {
-    state: { loading },
+    state: {loading},
     dispatch,
   } = useStateValue();
   if (!loaded) {
@@ -49,14 +48,14 @@ export default function Loading({children}) {
     });
     loaded = true;
   }
-  
-    // return true && (
-    return (
-      <>
-        {loading && <LinearProgress className={classes.progress} color="secondary" size={100} />}
-        <div className={`${classes.loadingContainer} ${loading ? 'loading' : ''}`}>
-          {children}
-        </div>
-      </>
+
+  // return true && (
+  return (
+    <>
+      {loading && <LinearProgress className={classes.progress} color="secondary" size={100} />}
+      <div className={`${classes.loadingContainer} ${loading ? 'loading' : ''}`}>
+        {children}
+      </div>
+    </>
   );
 }

@@ -16,7 +16,6 @@ import {startCase} from 'lodash';
 
 // import { ConsoleTransportOptions } from 'winston/lib/winston/transports';
 
-let submitTimeout;
 
 const CustomComponent = ({
   type,
@@ -26,25 +25,16 @@ const CustomComponent = ({
   value,
   isMulti,
   autoSubmit,
+  debounce,
   margin,
   ...props
 }) => {
   const labelValue = label === " " ? null : (label || startCase(name)).replace('_value', '');
   const context = useFormikContext();
-  const {setFieldValue} = context;
 
   const variant = props.variant || ro ? 'filled' : 'outlined'
   let field;
-  if (autoSubmit) {
-    props.onChange = event => {
-      context.handleChange(event);
-      submitTimeout && clearTimeout(submitTimeout);
-      submitTimeout = setTimeout(
-        () => context.submitForm(event),
-        autoSubmit === true ? 0 : autoSubmit
-      );
-    };
-  }
+
   if (type === 'select') {
     field = (
       <FormControl disabled={ro} margin="dense" fullWidth>
@@ -60,7 +50,7 @@ const CustomComponent = ({
               defaultValue: value || (isMulti ? [] : ''),
               value: value || (isMulti ? [] : ''),
               name,
-              setFieldValue,
+              setFieldValue: context.setFieldValue,
               ...props,
             }}
             variant={variant}
@@ -91,7 +81,7 @@ const CustomComponent = ({
       {...props}
     />
   } else if (type === 'html') {
-    field = <HTMLField {...{ name, value, setFieldValue }} {...props} />;
+    field = <HTMLField {...{name, value, setFieldValue: context.setFieldValue}} {...props} />;
   } else {
     field = (
       <TextField
