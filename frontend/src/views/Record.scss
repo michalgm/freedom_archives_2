@@ -18,8 +18,10 @@
     }
   }
   .instance {
-    & > *:not(.instance-action) {
+    & > * {
       border-bottom: unset;
     }
+    // & > *:not(.instance-action) {
+    // }
   }
 }

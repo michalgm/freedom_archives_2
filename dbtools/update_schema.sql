@@ -72,7 +72,6 @@ CREATE TABLE records (
   year int,
   month int,
   day int,
-  call_number text,
   publisher_id integer REFERENCES list_items,
   program_id integer REFERENCES list_items,
   needs_review bool DEFAULT false,
@@ -86,6 +85,7 @@ CREATE TABLE records (
 
 CREATE TABLE instances (
   instance_id serial PRIMARY KEY,
+  call_number text,
   record_id integer NOT NULL REFERENCES records ON DELETE CASCADE,
   -- is_primary bool DEFAULT false,
   format integer REFERENCES list_items,
@@ -176,7 +176,6 @@ insert into records (
     nullif(regexp_replace(year, '[^0-9]', '', 'g'), '')::int,
     nullif(regexp_replace(month, '[^0-9]', '', 'g'), '')::int,
     nullif(regexp_replace(day, '[^0-9]', '', 'g'), '')::int,
-    call_number,
     publisher_lookup.list_item_id,
     program_lookup.list_item_id,
     needs_review::bool,
@@ -250,9 +249,10 @@ original_doc_id integer DEFAULT NULL */
 create table duplicate_relations as select id from freedom_archives_old.related_records where docid_1 = docid_2 and title_1 = title_2 and description_1 = description_2 and track_number_1 = track_number_2;
 
 
-insert into instances (record_id, format, no_copies, quality, generation, url, thumbnail, media_type, creator_user_id, contributor_user_id, date_created, date_modified, original_doc_id )
+insert into instances (record_id, call_number, format, no_copies, quality, generation, url, thumbnail, media_type, creator_user_id, contributor_user_id, date_created, date_modified, original_doc_id )
   select
     docid as record_id,
+    call_number,
     format_lookup.list_item_id,
     no_copies,
     quality_lookup.list_item_id,
@@ -276,9 +276,10 @@ insert into instances (record_id, format, no_copies, quality, generation, url, t
 
 update records a set primary_instance_id = b.instance_id from instances b where a.record_id = b.record_id;
 
-insert into instances (record_id, format, no_copies, quality, generation, url, thumbnail, media_type, creator_user_id, contributor_user_id, date_created, date_modified, original_doc_id )
+insert into instances (record_id, call_number, format, no_copies, quality, generation, url, thumbnail, media_type, creator_user_id, contributor_user_id, date_created, date_modified, original_doc_id )
   select
     x.docid_1 as record_id,
+    a.call_number as call_number,
     format_lookup.list_item_id,
     no_copies,
     quality_lookup.list_item_id,
@@ -475,8 +476,8 @@ create table unknown_relations as
       '' as notes,
       '' as "user",
       NULL::timestamptz as updated_at, 
-      a.call_number as call_number_1,
-      b.call_number as call_number_2,
+      c.call_number as call_number_1,
+      d.call_number as call_number_2,
       c.generation as generation_1,
       d.generation as generation_2,
       c.format as format_1,

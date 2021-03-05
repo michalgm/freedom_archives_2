@@ -1,20 +1,21 @@
-import React, { useState, useEffect } from 'react';
-import { records as recordsService } from '../api';
 import {
+  Grid,
   List,
   ListItem,
-  ListItemText,
-  Typography,
   ListItemAvatar,
-  Grid,
+  ListItemText,
   Paper,
+  Typography,
 } from '@material-ui/core';
-import { Link } from 'react-router-dom';
-import ViewContainer from '../components/ViewContainer';
+import React, { useEffect, useState } from 'react';
+
 import Field from '../components/Field';
 import Form from '../components/Form';
+import { Link } from 'react-router-dom';
 import PaginationFooter from '../components/PaginationFooter'
 import Thumbnail from '../components/Thumbnail'
+import ViewContainer from '../components/ViewContainer';
+import { records as recordsService } from '../api';
 
 const page_size = 10;
 
@@ -45,7 +46,7 @@ function Records() {
           'record_id',
           'title',
           'collection',
-          'call_number',
+          // 'call_number',
           'has_digital',
           'description',
         ]
@@ -57,7 +58,6 @@ function Records() {
           {producers_text: {$ilike}},
           {title: {$ilike}},
           {description: {$ilike}},
-          {call_number: search},
           {record_id: parseInt(search, 10) || undefined},
         ]
       }

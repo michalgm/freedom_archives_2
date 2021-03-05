@@ -143,7 +143,7 @@ function Search() {
       try {
         const {$fullText, include_non_digitized} = search;
         const query = {
-          $select: ['record_id', 'title', 'description', 'year', 'call_number', 'publisher', 'producers', 'authors'],
+          $select: ['record_id', 'title', 'description', 'year', 'publisher', 'producers', 'authors'],
           $limit: page_size,
           $fullText: $fullText,
           $skip: offset,
@@ -172,7 +172,7 @@ function Search() {
         unstable_batchedUpdates(() => {
           setRecords({
             total, records: records.map(record => {
-              const keys = ['year', 'call_number', 'producers', 'publisher', 'authors']
+              const keys = ['year', 'producers', 'publisher', 'authors']
               record.details = []
               keys.forEach(key => {
                 let value = record[key]

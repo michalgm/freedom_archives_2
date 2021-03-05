@@ -1,29 +1,28 @@
-import './Record.scss';
+import "./Record.scss";
 
 import {
   Button,
   Grid,
   Icon,
   IconButton,
-  Tab,
   Table,
   TableBody,
   TableCell,
   TableHead,
-  TableRow
-} from '@material-ui/core/';
-import {FieldArray, useFormikContext} from 'formik'
-import React, {useEffect, useRef, useState} from 'react';
-import {records, relationships} from '../api';
+  TableRow,
+} from "@material-ui/core/";
+import {FieldArray, useFormikContext} from "formik";
+import React, {useEffect, useRef, useState} from "react";
+import {records, relationships} from "../api";
 
-import Field from '../components/Field';
-import FieldRow from '../components/FieldRow';
-import Form from '../components/Form';
-import GridBlock from '../components/GridBlock';
-import Link from '../components/Link';
-import ListItemField from '../components/ListItemField';
-import {Redirect} from 'react-router-dom';
-import ViewContainer from '../components/ViewContainer';
+import Field from "../components/Field";
+import FieldRow from "../components/FieldRow";
+import Form from "../components/Form";
+import GridBlock from "../components/GridBlock";
+import Link from "../components/Link";
+import ListItemField from "../components/ListItemField";
+import {Redirect} from "react-router-dom";
+import ViewContainer from "../components/ViewContainer";
 
 function Children({children = []}) {
   return (
@@ -42,7 +41,7 @@ function Children({children = []}) {
             </TableCell>
           </TableRow>
         )}
-        {children.map(child => (
+        {children.map((child) => (
           <TableRow key={child.record_id}>
             <TableCell>{child.title}</TableCell>
             <TableCell>
@@ -58,36 +57,43 @@ function Children({children = []}) {
 function Instance({instance = {}, record, index, edit}) {
   const context = useFormikContext();
 
-  // Column        |           Type           | Collation | Nullable |                    Default                     
+  // Column        |           Type           | Collation | Nullable |                    Default
   // ---------------------+--------------------------+-----------+----------+------------------------------------------------
   //  instance_id         | integer                  |           | not null | nextval('instances_instance_id_seq'::regclass)
-  //  record_id           | integer                  |           | not null | 
+  //  record_id           | integer                  |           | not null |
   //  is_primary          | boolean                  |           |          | false
-  //  format              | integer                  |           |          | 
+  //  format              | integer                  |           |          |
   //  no_copies           | integer                  |           |          | 1
-  //  quality             | integer                  |           |          | 
-  //  generation          | integer                  |           |          | 
+  //  quality             | integer                  |           |          |
+  //  generation          | integer                  |           |          |
   //  url                 | character varying(255)   |           | not null | ''::character varying
   //  thumbnail           | character varying(45)    |           |          | NULL::character varying
   //  media_type          | character varying(20)    |           | not null | ''::character varying
-  //  creator_user_id     | integer                  |           |          | 
-  //  contributor_user_id | integer                  |           |          | 
-  //  date_created        | timestamp with time zone |           |          | 
-  //  date_modified       | timestamp with time zone |           |          | 
-  //  original_doc_id     | integer                  |           |          | 
+  //  creator_user_id     | integer                  |           |          |
+  //  contributor_user_id | integer                  |           |          |
+  //  date_created        | timestamp with time zone |           |          |
+  //  date_modified       | timestamp with time zone |           |          |
+  //  original_doc_id     | integer                  |           |          |
 
   if (instance.delete) {
-    edit = false
+    edit = false;
   }
   return (
     <>
-      <TableRow className={`instance ${instance.delete ? 'deleted' : ''}`}>
-        <TableCell className='instance-action' rowSpan={2}>
-          <IconButton onClick={() => context.setFieldValue(`instances[${index}].delete`, !instance.delete)}>
-            <Icon>{instance.delete ? 'restore' : 'delete'}</Icon>
+      <TableRow className={`instance ${instance.delete ? "deleted" : ""}`}>
+        <TableCell className="instance-action">
+          <IconButton
+            onClick={() =>
+              context.setFieldValue(
+                `instances[${index}].delete`,
+                !instance.delete
+              )
+            }
+          >
+            <Icon>{instance.delete ? "restore" : "delete"}</Icon>
           </IconButton>
         </TableCell>
-        <TableCell className='instance-action' rowSpan={2}>
+        {/* <TableCell className='instance-action' rowSpan={2}>
           {instance.url ? (
             <a
               href={instance.url}
@@ -107,22 +113,62 @@ function Instance({instance = {}, record, index, edit}) {
             </a>
           ) : null}
 
+        </TableCell> */}
+        <TableCell>
+          <Field
+            ro={!edit}
+            type="radio"
+            radioGroup="primary_instance_id"
+            name="primary_instance_id"
+            value={`${instance.instance_id}`}
+          />
         </TableCell>
         <TableCell>
           <Field
             ro={!edit}
-            type='radio'
-            radioGroup='primary_instance_id'
-            name='primary_instance_id'
-            value={`${instance.instance_id}`}
+            fullWidth={false}
+            label=" "
+            name={`instances[${index}].call_number`}
           />
         </TableCell>
-        <TableCell><ListItemField fetchAll ro={!edit} label=" " name={`instances[${index}].generation_item`} listType="generation" variant="standard" /></TableCell>
-        <TableCell><ListItemField fetchAll ro={!edit} label=" " name={`instances[${index}].format_item`} listType="format" variant="standard" /></TableCell>
-        <TableCell><ListItemField fetchAll ro={!edit} label=" " name={`instances[${index}].quality_item`} listType="quality" variant="standard" /></TableCell>
-        <TableCell>{instance.media_type}</TableCell>
         <TableCell>
-          <Field ro={!edit} type='number' inputProps={{min: 0, style: {width: 40}}} label=" " name={`instances[${index}].no_copies`} />
+          <ListItemField
+            fetchAll
+            ro={!edit}
+            label=" "
+            name={`instances[${index}].generation_item`}
+            listType="generation"
+            variant="standard"
+          />
+        </TableCell>
+        <TableCell>
+          <ListItemField
+            fetchAll
+            ro={!edit}
+            label=" "
+            name={`instances[${index}].format_item`}
+            listType="format"
+            variant="standard"
+          />
+        </TableCell>
+        <TableCell>
+          <ListItemField
+            fetchAll
+            ro={!edit}
+            label=" "
+            name={`instances[${index}].quality_item`}
+            listType="quality"
+            variant="standard"
+          />
+        </TableCell>
+        <TableCell>
+          <Field
+            ro={!edit}
+            type="number"
+            inputProps={{min: 0, style: {width: 40}}}
+            label=" "
+            name={`instances[${index}].no_copies`}
+          />
         </TableCell>
 
         {/* <TableCell>
@@ -131,8 +177,23 @@ function Instance({instance = {}, record, index, edit}) {
         </Link>
       </TableCell> */}
       </TableRow>
-      <TableRow className={instance.delete ? 'deleted' : ''}>
+      <TableRow className={instance.delete ? "deleted" : ""}>
         <TableCell />
+        <TableCell>
+          {
+            instance.url &&
+            <Link
+              href={instance.url}
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              <Icon>open_in_new</Icon>
+            </Link>
+          }
+        </TableCell>
+        <TableCell>
+          {instance.media_type}
+        </TableCell>
         <TableCell colSpan={5}>
           <Field ro={!edit} label="URL" name={`instances[${index}].url`} />
         </TableCell>
@@ -143,7 +204,7 @@ function Instance({instance = {}, record, index, edit}) {
         </TableCell> */}
       </TableRow>
     </>
-  )
+  );
 }
 
 function Instances({record, instances = [], edit}) {
@@ -151,21 +212,21 @@ function Instances({record, instances = [], edit}) {
 
   return (
     <FieldArray
-      name='instances'
+      name="instances"
       render={({push}) => {
         return (
           <>
-            <Table size="small" className='instances' >
+            <Table size="small" className="instances">
               <TableHead>
                 <TableRow>
                   <TableCell style={{width: 50}}></TableCell>
-                  <TableCell style={{width: 100}}></TableCell>
+                  {/* <TableCell style={{width: 100}}></TableCell> */}
                   <TableCell style={{width: 60}}>Primary</TableCell>
+                  <TableCell style={{width: 120}}>Call Number</TableCell>
                   <TableCell>Generation</TableCell>
                   <TableCell>Format</TableCell>
                   <TableCell>Quality</TableCell>
-                  <TableCell style={{width: 100}} >Media Type</TableCell>
-                  <TableCell style={{width: 60}} > Copies</TableCell>
+                  <TableCell style={{width: 60}}>Copies</TableCell>
                   {/* <TableCell>URL</TableCell> */}
                   {/* <TableCell>ID</TableCell> */}
                 </TableRow>
@@ -178,20 +239,27 @@ function Instances({record, instances = [], edit}) {
                     </TableCell>
                   </TableRow>
                 )}
-                {
-                  values.instances.map((instance, index) => (
-                    <Instance key={index} edit={edit} instance={instance} index={index} />
-                  ))
-                }
+                {values.instances.map((instance, index) => (
+                  <Instance
+                    key={index}
+                    edit={edit}
+                    instance={instance}
+                    index={index}
+                  />
+                ))}
               </TableBody>
             </Table>
             <Button
               variant="contained"
-              onClick={() => push({record_id: record.record_id, no_copies: 1})}
+              onClick={() =>
+                push({record_id: record.record_id, no_copies: 1})
+              }
               startIcon={<Icon>add</Icon>}
-            >Add New Media</Button>
+            >
+              Add New Media
+            </Button>
           </>
-        )
+        );
       }}
     />
   );
@@ -199,7 +267,6 @@ function Instances({record, instances = [], edit}) {
 
 function Relationships({id, relationships = []}) {
   return (
-
     <Table size="small">
       <TableHead>
         <TableRow>
@@ -268,7 +335,7 @@ function Record({id, showForm, ro = false}) {
   const buttonRef = useRef();
 
   if (!buttonRef.current) {
-    buttonRef.current = document.createElement('div');
+    buttonRef.current = document.createElement("div");
   }
 
   const loadRecord = async (record_data, relationships) => {
@@ -293,12 +360,12 @@ function Record({id, showForm, ro = false}) {
     // ].forEach(key => {
     //   record[key] = record_data[key];
     // });
-    record.instances = record_data.instances
+    record.instances = record_data.instances;
     record.children = <Children children={record_data.children || []} />;
     record.relationships = (
       <Relationships id={record_data.record_id} relationships={relationships} />
     );
-    record.primary_instance_id = `${record.primary_instance_id}`
+    record.primary_instance_id = `${record.primary_instance_id}`;
     // console.log(record.primary_instance_id)
     setRecord(record);
   };
@@ -308,8 +375,7 @@ function Record({id, showForm, ro = false}) {
     set_returnHome(true);
   };
 
-  const updateRecord = async data => {
-    console.log(data)
+  const updateRecord = async (data) => {
     try {
       await records.patch(id, data);
       const updated = await records.get(id);
@@ -346,20 +412,21 @@ function Record({id, showForm, ro = false}) {
 
   const buttons = edit
     ? [
-      {label: 'Save', type: 'submit', color: 'primary'},
-      {label: 'Delete', onClick: deleteRecord, color: 'secondary'},
+      {label: "Save", type: "submit", color: "primary"},
+      {label: "Delete", onClick: deleteRecord, color: "secondary"},
       {
-        label: 'Cancel',
+        label: "Cancel",
         onClick: () => setEdit(false),
-        variant: 'outlined',
-        type: 'reset',
+        variant: "outlined",
+        type: "reset",
       },
     ]
-    : [{label: 'Edit', onClick: () => setEdit(true), type: 'button'}];
+    : [{label: "Edit", onClick: () => setEdit(true), type: "button"}];
 
-  const {has_digital} = record;
+  // const {has_digital} = record;
+
   return (
-    <div className='record'>
+    <div className="record">
       <ViewContainer item={record} buttonRef={showForm && buttonRef}>
         {record.title && (
           <Form
@@ -371,7 +438,7 @@ function Record({id, showForm, ro = false}) {
           >
             <Grid container spacing={2}>
               <GridBlock title={record.title} spacing={2}>
-                <Grid item xs={has_digital ? 11 : 12}>
+                <Grid item xs={10}>
                   <Grid container spacing={2}>
                     <Grid item xs={12}>
                       <Field name="title" />
@@ -381,22 +448,32 @@ function Record({id, showForm, ro = false}) {
                     </Grid>
                   </Grid>
                 </Grid>
-                {has_digital &&
-                  <Grid item xs={1} className='record-thumbnail'>
+                {(
+                  <Grid item xs={2} className="record-thumbnail">
+                    <Button
+                      variant="contained"
+                      href={`https://search.freedomarchives.org/admin/#/documents/${record.record_id}`}
+                      target="_blank"
+                    >
+                      Old Admin Link
+                    </Button>
                     {/* <img src={record.primary_instance_thumbnail} /> */}
-                    <img
-                      alt=""
-                      // width="100"
-                      src={
-                        'https://search.freedomarchives.org/' +
-                        record.primary_instance_thumbnail
-                      }
-                    />
+                    <p>
+                      <img
+                        alt=""
+                        // width="100"
+                        src={
+                          "https://search.freedomarchives.org/" +
+                          record.primary_instance_thumbnail
+                        }
+                      />
+
+                    </p>
                     {/* <div style={{width: 50, height: 200, background: 'blue'}} /> */}
                   </Grid>
-                }
+                )}
                 <FieldRow>
-                  <Field name="call_number" />
+                  {/* <Field name="call_number" /> */}
                   <Field name="vol_number" />
                 </FieldRow>
                 <FieldRow>
@@ -408,7 +485,12 @@ function Record({id, showForm, ro = false}) {
                   <ListItemField name="subjects" isMulti />
                 </FieldRow>
                 <FieldRow>
-                  <Field type="select" searchType="collections" name="collection" />
+                  <Field
+                    type="select"
+                    searchType="collections"
+                    name="collection"
+                    size="small"
+                  />
                   <Field name="date_string" label="Date" />
                 </FieldRow>
                 <FieldRow>
@@ -419,15 +501,22 @@ function Record({id, showForm, ro = false}) {
                   <Field name="notes" multiline rows={4} />
                 </FieldRow>
               </GridBlock>
-              <GridBlock title="Media"><Instances edit={edit} record={record} instances={record.instances || []} /></GridBlock>
+              <GridBlock title="Media">
+                <Instances
+                  edit={edit}
+                  record={record}
+                  instances={record.instances || []}
+                />
+              </GridBlock>
               <GridBlock title="Children">{record.children}</GridBlock>
-              <GridBlock title="Relationships">{record.relationships}</GridBlock>
+              <GridBlock title="Relationships">
+                {record.relationships}
+              </GridBlock>
             </Grid>
           </Form>
         )}
       </ViewContainer>
     </div>
-
   );
 }
 
