@@ -1,19 +1,21 @@
-import React, { useState, useEffect } from 'react';
-import { useHistory } from 'react-router-dom';
-import { relationships } from '../api';
-import ButtonLink from '../components/ButtonLink';
-import Relationship from './Relationship';
+import './Relationships.scss';
+
 import {
+  Box,
   Button,
   Grid,
-  TextField,
-  Paper,
-  MenuItem,
   LinearProgress,
+  MenuItem,
+  Paper,
+  TextField,
   Typography,
-  Box,
 } from '@material-ui/core';
-import './Relationships.scss';
+import React, { useEffect, useState } from 'react';
+
+import ButtonLink from '../components/ButtonLink';
+import Relationship from './Relationship';
+import { relationships } from '../api';
+import { useHistory } from 'react-router-dom';
 
 function LinearProgressWithLabel(props) {
   return (

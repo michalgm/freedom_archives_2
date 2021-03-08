@@ -1,18 +1,22 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { useParams } from 'react-router-dom';
-import { collections as collectionsService } from '../api';
-import FieldRow from '../components/FieldRow';
+import React, {useEffect, useRef, useState} from 'react';
+
 import Field from '../components/Field';
+import FieldRow from '../components/FieldRow';
 import Form from '../components/Form';
 import GridBlock from '../components/GridBlock';
 import ListItemField from '../components/ListItemField';
 import ViewContainer from '../components/ViewContainer';
+import {collections as collectionsService} from '../api';
+import {useParams} from 'react-router-dom';
+import {useTitle} from '../appContext'
 
 function Collection() {
   const [collection, setCollection] = useState({});
   const [edit, setEdit] = useState(true);
   const { id } = useParams();
   const buttonRef = useRef();
+  const setTitle = React.useRef(useTitle()).current
+
 
   if (!buttonRef.current) {
     buttonRef.current = document.createElement('div');
@@ -22,9 +26,10 @@ function Collection() {
     const fetchCollection = async () => {
       const collection = await collectionsService.get(id);
       setCollection(collection);
+      setTitle(collection.collection_name)
     };
     fetchCollection();
-  }, [id]);
+  }, [id, setTitle]);
 
   const updateCollection = async data => {
     const updated = await collectionsService.patch(id, data);

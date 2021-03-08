@@ -37,7 +37,7 @@ function Routes({isAuthenticated}) {
         <Route exact path="/records" component={Records} />
         <Route
           exact
-          path="/record/:id"
+          path="/records/:id"
           render={({
             match: {
               params: { id },

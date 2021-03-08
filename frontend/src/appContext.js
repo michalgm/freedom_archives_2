@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useReducer } from 'react';
+import React, {createContext, useContext, useReducer} from 'react';
 export const StateContext = createContext();
 const initialState = {
   isAuthenticated: null,
@@ -11,6 +11,7 @@ const initialState = {
     $fullText: '',
     only_digitized: true,
   },
+  title: ''
 };
 const reducer = (state, action) => {
   const { type, payload } = action;
@@ -36,7 +37,8 @@ const reducer = (state, action) => {
     case 'ERROR':
       return { ...state, error: payload.error };
     case 'LOADING':
-      return { ...state, loading: payload };
+    case 'TITLE':
+      return {...state, [type.toLowerCase()]: payload};
     default:
       return state;
   }
@@ -66,3 +68,20 @@ export const useStateValue = () => {
     },
   };
 };
+
+export const useTitle = () => {
+  const {dispatch} = useContext(StateContext);
+  return title => {
+    dispatch({type: 'TITLE', payload: title})
+  }
+}
+
+// export const useTitle = title => {
+//   const {dispatch} = useContext(StateContext);
+//   console.log('use', title)
+//   useEffect(() => {
+//     console.log('dis', title)
+//     dispatch({type: 'TITLE', payload: title})
+//   }, title)
+//   return null
+// }

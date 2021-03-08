@@ -1,31 +1,34 @@
-import React from 'react';
 import './App.scss';
+
 import {
-  BrowserRouter as Router,
-  Link,
-} from 'react-router-dom';
-import { StateProvider, useStateValue } from './appContext';
-import Authentication from './Authentication';
-import Loading from './views/Loading';
-import Sidebar from './views/Sidebar';
-import Errors from './components/Errors';
-import Routes from './Routes'
-import { app } from './api';
-import {
-  CssBaseline,
-  Container,
-  Toolbar,
   Button,
-  Typography,
-  Icon
+  Container,
+  CssBaseline,
+  Icon,
+  Toolbar,
+  Typography
 } from '@material-ui/core';
 import {
+  Link,
+  BrowserRouter as Router,
+} from 'react-router-dom';
+import {
   Root,
-  getMuiTreasuryScheme,
-  getHeader,
-  getSidebarTrigger,
   getContent,
+  getHeader,
+  getMuiTreasuryScheme,
+  getSidebarTrigger,
 } from '@mui-treasury/layout';
+import {StateProvider, useStateValue} from './appContext';
+
+import Authentication from './Authentication';
+import Breadcrumbs from './components/Breadcrumbs';
+import Errors from './components/Errors';
+import Loading from './views/Loading';
+import React from 'react';
+import Routes from './Routes'
+import Sidebar from './views/Sidebar';
+import {app} from './api';
 import styled from 'styled-components';
 
 const Header = getHeader(styled);
@@ -117,9 +120,7 @@ function NavBar() {
     <Header color="primary">
       <Toolbar className='topnav'>
         <SidebarTrigger sidebarId="primarySidebar" color="inherit" />
-        <Typography variant="h6" style={{ flexGrow: 1 }}>
-          Freedom Archives Admin
-        </Typography>
+        <Breadcrumbs />
         <Logout />
       </Toolbar>
     </Header>

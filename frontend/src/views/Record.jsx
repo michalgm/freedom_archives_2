@@ -23,6 +23,7 @@ import Link from "../components/Link";
 import ListItemField from "../components/ListItemField";
 import {Redirect} from "react-router-dom";
 import ViewContainer from "../components/ViewContainer";
+import {useTitle} from '../appContext'
 
 function Children({children = []}) {
   return (
@@ -328,12 +329,12 @@ function Relationships({id, relationships = []}) {
   );
 }
 
-function Record({id, showForm, ro = false}) {
+function Record({id, showForm, ro = false, embedded = false}) {
   const [record, setRecord] = useState({});
   const [returnHome, set_returnHome] = useState(false);
   const [edit, setEdit] = useState(!ro);
   const buttonRef = useRef();
-
+  const setTitle = useTitle()
   if (!buttonRef.current) {
     buttonRef.current = document.createElement("div");
   }
@@ -368,6 +369,9 @@ function Record({id, showForm, ro = false}) {
     record.primary_instance_id = `${record.primary_instance_id}`;
     // console.log(record.primary_instance_id)
     setRecord(record);
+    if (!embedded) {
+      setTitle(record.title)
+    }
   };
 
   const deleteRecord = async () => {
@@ -376,6 +380,7 @@ function Record({id, showForm, ro = false}) {
   };
 
   const updateRecord = async (data) => {
+    console.log(data);
     try {
       await records.patch(id, data);
       const updated = await records.get(id);
@@ -437,7 +442,7 @@ function Record({id, showForm, ro = false}) {
             buttonRef={buttonRef}
           >
             <Grid container spacing={2}>
-              <GridBlock title={record.title} spacing={2}>
+              <GridBlock title='' spacing={2}>
                 <Grid item xs={10}>
                   <Grid container spacing={2}>
                     <Grid item xs={12}>

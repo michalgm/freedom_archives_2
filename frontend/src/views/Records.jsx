@@ -113,7 +113,7 @@ function Records() {
                 button
                 alignItems="flex-start"
                 component={Link}
-                to={`/record/${record.record_id}`}
+                to={`/records/${record.record_id}`}
               >
                 <ListItemAvatar>
                   <Thumbnail

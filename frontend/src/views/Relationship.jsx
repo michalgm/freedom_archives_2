@@ -1,10 +1,10 @@
-import React, { useState, useEffect } from 'react';
-import { relationships } from '../api';
+import { Divider, Grid, Paper, Typography } from '@material-ui/core';
+import React, { useEffect, useState } from 'react';
 
-import Record from './Record';
 import Field from '../components/Field';
 import Link from '../components/Link';
-import { Grid, Paper, Divider, Typography } from '@material-ui/core';
+import Record from './Record';
+import { relationships } from '../api';
 
 function Relationship({ id }) {
   const [relation, setRelation] = useState({});
@@ -69,7 +69,7 @@ function Relationship({ id }) {
           <Grid item xs={6} key={num}>
             <Paper>
               <div style={{ padding: 4 }}>
-                <Record id={relation[`docid_${num}`]} ro />
+                <Record id={relation[`docid_${num}`]} ro embedded />
               </div>
             </Paper>
           </Grid>
