@@ -1,12 +1,12 @@
 import {
   Breadcrumbs as Crumbs,
   Icon,
-  Link,
   Typography
 } from '@material-ui/core'
 import {useStateValue, useTitle} from '../appContext'
 
 import {Helmet} from 'react-helmet'
+import Link from './Link';
 import React from 'react'
 import {makeStyles} from '@material-ui/core/styles';
 import {startCase} from 'lodash';
@@ -63,7 +63,7 @@ function Breadcrumbs() {
         {
           paths.map(({link, title}) => {
             return <Typography variant="h6" key={link}>
-              <Link color="inherit" href={`${link}`}>{title}</Link>
+              <Link color="inherit" to={`${link}`}>{title}</Link>
             </Typography>
           })
         }
