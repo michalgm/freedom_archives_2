@@ -119,7 +119,7 @@ function Instance({instance = {}, record, index, edit}) {
           <Field
             ro={!edit}
             type="radio"
-            radioGroup="primary_instance_id"
+            // radioGroup="primary_instance_id"
             name="primary_instance_id"
             value={`${instance.instance_id}`}
           />

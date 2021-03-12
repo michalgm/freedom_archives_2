@@ -9,13 +9,11 @@ import {
 import {Field as FormikField, useFormikContext} from 'formik';
 
 import { Alert } from '@material-ui/lab';
+import {Autocomplete} from '@material-ui/lab';
 import HTMLField from './HTMLField';
 import React from 'react';
 import SelectField from './SelectField';
 import {startCase} from 'lodash';
-
-// import { ConsoleTransportOptions } from 'winston/lib/winston/transports';
-
 
 const CustomComponent = ({
   type,
@@ -58,6 +56,43 @@ const CustomComponent = ({
         </FormGroup>
       </FormControl>
     );
+  } else if (type === 'simpleSelect') {
+    const {onChange, ...selectProps} = props;
+    field = (
+      <FormControl disabled={ro} margin="dense" fullWidth>
+        <FormGroup>
+          <Autocomplete
+            fullWidth
+            autoHighlight
+            blurOnSelect
+            className="select-input"
+            margin={margin || "dense"}
+            disabled={ro}
+            label={labelValue}
+            variant={variant}
+            renderInput={(params) => (
+              <TextField
+                {...params}
+                InputLabelProps={{shrink: true}}
+                label={label}
+                variant={props.variant || "outlined"}
+                {...props.inputProps}
+              />
+            )}
+            onChange={(event, option) => {
+              context.setFieldValue(name, option);
+              props.onChange && props.onChange(event, option);
+            }}
+            {...{
+              defaultValue: value || '',
+              value: value || '',
+              name,
+              ...selectProps
+            }}
+          />
+        </FormGroup>
+      </FormControl>
+    )
   } else if (type === 'checkbox') {
     field = (
       <FormControl

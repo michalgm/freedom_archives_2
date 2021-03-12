@@ -429,7 +429,12 @@ create view records_view as
       setweight(to_tsvector('english', coalesce(a.description, '')), 'B') ||
       setweight(to_tsvector('english', coalesce(authors.items_text, '')), 'C') ||
       setweight(to_tsvector('english', coalesce(subjects.items_text, '')), 'C') ||
-      setweight(to_tsvector('english', coalesce(keywords.items_text, '')), 'C') as fulltext
+      setweight(to_tsvector('english', coalesce(keywords.items_text, '')), 'C') as fulltext,
+    array(select distinct call_number from instances where instances.record_id = a.record_id and call_number is not null) as call_numbers,
+    array(select distinct format from instances where instances.record_id = a.record_id and format is not null) as formats,
+    array(select distinct quality from instances where instances.record_id = a.record_id and quality is not null) as qualitys,
+    array(select distinct generation from instances where instances.record_id = a.record_id and generation is not null) as generations,
+    array(select distinct media_type from instances where instances.record_id = a.record_id and media_type is not null) as media_types
   from records a
   left join collections using(collection_id)
   left join list_items publisher_lookup on a.publisher_id = publisher_lookup.list_item_id
