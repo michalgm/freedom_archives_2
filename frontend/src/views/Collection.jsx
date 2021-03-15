@@ -56,7 +56,7 @@ function Collection() {
     : [{ label: 'Edit', onClick: () => setEdit(true), type: 'button' }];
 
   return (
-    <ViewContainer item={collection} buttonRef={buttonRef}>
+    <ViewContainer item={collection} buttonRef={buttonRef} neighborService='collection'>
       <GridBlock>
         <Form
           initialValues={collection}

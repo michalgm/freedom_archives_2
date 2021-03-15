@@ -1,90 +1,105 @@
-import React, { useState, useEffect } from 'react';
-import { collections as collectionsService } from '../api';
 import {
-  List,
-  ListItem,
+  Avatar,
+  ListItemAvatar,
   ListItemText,
   Typography,
-  ListItemAvatar,
-  Avatar,
 } from '@material-ui/core';
-import { BrokenImage } from '@material-ui/icons';
-import { Link } from 'react-router-dom';
-import ViewContainer from '../components/ViewContainer';
-import PaginationFooter from '../components/PaginationFooter'
 
-const page_size = 10;
+import { BrokenImage } from '@material-ui/icons';
+import Manage from '../components/Manage';
+import React from 'react';
+
+const filter_types = {
+  collection_name: {input: 'text', match: 'fuzzy'},
+  call_number: {input: 'text', match: 'fuzzy'},
+  description: {input: 'text', match: 'fuzzy'},
+  summary: {input: 'text', match: 'fuzzy'},
+  notes: {input: 'text', match: 'fuzzy'},
+  publisher: {input: 'text', match: 'fuzzy'},
+  'keywords': {input: 'listitem', match: 'listitem'},
+  'subjects': {input: 'listitem', match: 'listitem'},
+};
 
 function Collections() {
-  const [collections, setCollections] = useState([]);
-  const [total, setTotal] = useState(0);
-  const [offset, setOffset] = useState(0);
+  const defaultFilter = {
+    hidden: false,
+    filters: [],
+    needs_review: '',
+    search: ''
+  }
 
-  useEffect(() => {
-    const fetchCollections = async () => {
-      const { data, total } = await collectionsService.find({
-        query: {
-          $skip: offset,
-          $sort: { display_order: 1, collection_name: 1 },
-          is_hidden: false,
-        },
-      });
-      setCollections(data);
-      setTotal(total);
-    };
-    fetchCollections();
-  }, [offset]);
+  const createQuery = filter => {
+    const {search, hidden, needs_review} = filter
+    const query = {
+      is_hidden: hidden ? undefined : false,
+      needs_review: needs_review ? needs_review : undefined,
+      $sort: { display_order: 1, collection_name: 1 },
+      $select: [
+        'collection_id',
+        'collection_name',
+        'description',
+        'thumbnail',
+        'parent'
+      ]
+    }
+    if (search) {
+      const $ilike = `%${search}%`
+      query.$or = [
+        {subjects_text: {$ilike}},
+        {keywords_text: {$ilike}},
+        {collection_name: {$ilike}},
+        {description: {$ilike}},
+        {collection_id: parseInt(search, 10) || undefined},
+      ]
+    }
+    return query;
+  }
 
-  return (
-    <ViewContainer footerElements={[<PaginationFooter total={total} offset={offset} page_size={page_size} setOffset={setOffset}/>]} >
-      <List>
-        {collections.map(collection => {
-          return (
-            <ListItem
-              key={collection.collection_id}
-              divider
-              button
-              alignItems="flex-start"
-              component={Link}
-              to={`/collections/${collection.collection_id}`}
-            >
-              <ListItemAvatar>
-                {collection.thumbnail ? (
-                  <img
-                    src={`https://search.freedomarchives.org/${collection.thumbnail}`}
-                    alt={`${collection.collection_name} Thumbnail`}
-                    width={40}
-                  />
-                ) : (
-                  <Avatar>
-                    <BrokenImage />
-                  </Avatar>
-                )}
-              </ListItemAvatar>
-              <ListItemText
-                primary={collection.collection_name}
-                secondaryTypographyProps={{ component: 'div' }}
-                secondary={
-                  <>
-                    <Typography variant="subtitle2" gutterBottom>
-                      Parent Collection: {collection.parent.collection_name}
-                    </Typography>
-                    <Typography
-                      style={{ maxHeight: 100, overflowX: 'auto' }}
-                      variant="body2"
-                      dangerouslySetInnerHTML={{
-                        __html: collection.description,
-                      }}
-                    ></Typography>
-                  </>
-                }
-              ></ListItemText>
-            </ListItem>
-          );
-        })}
-      </List>
-    </ViewContainer>
-  );
+  const renderItem = (collection) => {
+    return (
+      <>
+      <ListItemAvatar>
+        {collection.thumbnail ? (
+          <img
+            src={`https://search.freedomarchives.org/${collection.thumbnail}`}
+            alt={`${collection.collection_name} Thumbnail`}
+            width={40}
+          />
+        ) : (
+          <Avatar>
+            <BrokenImage />
+          </Avatar>
+        )}
+      </ListItemAvatar>
+      <ListItemText
+        primary={collection.collection_name}
+        secondaryTypographyProps={{ component: 'div' }}
+        secondary={
+          <>
+            <Typography variant="subtitle2" gutterBottom>
+              Parent Collection: {collection.parent.collection_name}
+            </Typography>
+            <Typography
+              style={{ maxHeight: 100, overflowX: 'auto' }}
+              variant="body2"
+              dangerouslySetInnerHTML={{
+                __html: collection.description,
+              }}
+            ></Typography>
+          </>
+        }
+      ></ListItemText>
+      </>
+    )
+  }
+
+  return <Manage
+    renderItem={renderItem}
+    defaultFilter={defaultFilter}
+    createQuery={createQuery}
+    filterTypes={filter_types}
+    service='collection'
+  />
 }
 
 export default Collections;

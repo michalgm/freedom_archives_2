@@ -432,7 +432,7 @@ function Record({id, showForm, ro = false, embedded = false}) {
 
   return (
     <div className="record">
-      <ViewContainer item={record} buttonRef={showForm && buttonRef}>
+      <ViewContainer item={record} buttonRef={showForm && buttonRef} neighborService='record'>
         {record.title && (
           <Form
             initialValues={record}

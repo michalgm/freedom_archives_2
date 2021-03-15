@@ -8,9 +8,13 @@ const initialState = {
   error: null,
   loading: false,
   search: {
-    $fullText: '',
-    only_digitized: true,
+    type: '',
+    query: {},
+    total: 0,
+    index: 0,
+    ids: []
   },
+  search_index: 0,
   title: ''
 };
 const reducer = (state, action) => {
@@ -32,12 +36,13 @@ const reducer = (state, action) => {
       return { ...state, isAuthenticated: false, user: null };
     case 'INITIALIZE_HOOKS':
       return { ...state, hooks_initialized: true };
-    case 'SET_SEARCH':
+    case 'SEARCH':
       return { ...state, search: payload };
     case 'ERROR':
       return { ...state, error: payload.error };
     case 'LOADING':
     case 'TITLE':
+    case 'SEARCH_INDEX':
       return {...state, [type.toLowerCase()]: payload};
     default:
       return state;
