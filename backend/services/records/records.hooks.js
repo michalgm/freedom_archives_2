@@ -136,6 +136,21 @@ const updateRelations = async context => {
     );
     delete data.instances;
   }
+
+  if (data.children !== undefined) {
+    await Promise.all(
+      data.children.map(child => {
+        if (child.delete) {
+          return app.service('records').patch(child.record_id, {parent_record_id: null}, {user});
+        } else if (child.record_id && !child.parent_record_id) {
+          console.log(child, id);
+          return app.service('records').patch(child.record_id, {parent_record_id: id}, {user});
+        }
+      })
+    );
+    delete data.children;
+  }
+
   ['program', 'publisher'].forEach(key => {
     if (key in data) {
       data[`${key}_id`] = data[key] ? data[key].list_item_id : null;

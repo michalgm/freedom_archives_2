@@ -13,6 +13,11 @@ const searchTypes = {
     id: 'collection_id',
     label: 'collection_name',
   },
+  records: {
+    id: 'record_id',
+    label: 'title',
+  },
+
 };
 
 let active = false;
@@ -112,6 +117,7 @@ const SelectField = ({
       onChange={(_, option) => {
         if (!validateChange || validateChange(_, option)) {
           setFieldValue(name, option);
+          onChange && onChange(_, option);
         }
       }}
       onInputChange={(_, option) => {

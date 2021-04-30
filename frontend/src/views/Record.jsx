@@ -26,33 +26,68 @@ import ViewContainer from "../components/ViewContainer";
 import {useTitle} from '../appContext'
 
 function Children({children = []}) {
+  const {values, setFieldValue} = useFormikContext();
   return (
-    <Table size="small">
-      <TableHead>
-        <TableRow>
-          <TableCell>Title</TableCell>
-          <TableCell>ID</TableCell>
-        </TableRow>
-      </TableHead>
-      <TableBody>
-        {children.length === 0 && (
-          <TableRow>
-            <TableCell align="center" colSpan={15}>
-              No Child Records
-            </TableCell>
-          </TableRow>
-        )}
-        {children.map((child) => (
-          <TableRow key={child.record_id}>
-            <TableCell>{child.title}</TableCell>
-            <TableCell>
-              <Link to={`/record/${child.record_id}`}>{child.record_id}</Link>
-            </TableCell>
-          </TableRow>
-        ))}
-      </TableBody>
-    </Table>
-  );
+    <FieldArray
+      name="children"
+      render={({push}) => {
+        return (
+          <>
+            <Table size="small">
+              <TableHead>
+                <TableRow>
+                  <TableCell></TableCell>
+                  <TableCell>Title</TableCell>
+                  <TableCell>ID</TableCell>
+                </TableRow>
+              </TableHead>
+              <TableBody>
+                {values.children.length === 0 && (
+                  <TableRow>
+                    <TableCell align="center" colSpan={15}>
+                      No Child Records
+                  </TableCell>
+                  </TableRow>
+                )}
+                {values.children.map((child, index) => (
+                  <TableRow key={child.record_id}>
+                    <TableCell className="instance-action">
+                      <IconButton
+                        onClick={() =>
+                          setFieldValue(
+                            `children[${index}].delete`,
+                            !child.delete
+                          )
+                        }
+                      >
+                        <Icon>{child.delete ? "restore" : "delete"}</Icon>
+                      </IconButton>
+                    </TableCell>
+                    <TableCell>{child.title}</TableCell>
+                    <TableCell>
+                      <Link to={`/records/${child.record_id}`}>{child.record_id}</Link>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+            <Field
+              name='new_child'
+              type="select"
+              searchType="records"
+              size="small"
+              onChange={(_, child) => {
+                console.log(child)
+                push(child);
+                console.log(values)
+                delete values.new_child
+              }}
+            />
+          </>
+        );
+      }}
+    />
+  )
 }
 
 function Instance({instance = {}, record, index, edit}) {
@@ -362,7 +397,7 @@ function Record({id, showForm, ro = false, embedded = false}) {
     //   record[key] = record_data[key];
     // });
     record.instances = record_data.instances;
-    record.children = <Children children={record_data.children || []} />;
+    record.children = record_data.children; //<Children children={record_data.children || []} />;
     record.relationships = (
       <Relationships id={record_data.record_id} relationships={relationships} />
     );
@@ -381,6 +416,7 @@ function Record({id, showForm, ro = false, embedded = false}) {
 
   const updateRecord = async (data) => {
     console.log(data);
+    delete data.new_child
     try {
       await records.patch(id, data);
       const updated = await records.get(id);
@@ -513,8 +549,14 @@ function Record({id, showForm, ro = false, embedded = false}) {
                   instances={record.instances || []}
                 />
               </GridBlock>
-              <GridBlock title="Children">{record.children}</GridBlock>
-              <GridBlock title="Relationships">
+              <GridBlock title="Children">
+                <Children
+                  edit={edit}
+                  record={record}
+                  children={record.children || []}
+                />
+              </GridBlock>
+              <GridBlock title="Old Relationships">
                 {record.relationships}
               </GridBlock>
             </Grid>

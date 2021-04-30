@@ -91,8 +91,9 @@ module.exports = {
       Object.keys(data).forEach(key => {
         if (
           data[key] &&
-            typeof data[key] === 'object' &&
-            !key.includes('_search')
+          typeof data[key] === 'object' &&
+          !key.includes('_search') &&
+          !['call_numbers', 'formats', 'qualitys', 'generations', 'media_types'].includes(key)
         ) {
           encoded[key] = JSON.stringify(data[key]);
         } else {
