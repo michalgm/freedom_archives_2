@@ -49,7 +49,7 @@ function ViewContainer({children, item, buttonRef, neighborService, ...props}) {
     const offset = type === 'prev' ? -1 : 1
     if (neighborService) {
       return (
-        <Grid item xs component={Box} textAlign={type === 'prev' ? 'left' : 'right'}>
+        <Grid item xs component={Box} textAlign={type === 'prev' ? 'left' : 'right'} style={{flex: '0 0 auto'}}>
           <ButtonLink
             disabled={!neighbors[type]}
             to={`/${neighborService}s/${neighbors[type]}`}
@@ -85,7 +85,7 @@ function ViewContainer({children, item, buttonRef, neighborService, ...props}) {
               {type === 'footer' && item && (
                 <>
                   {renderNeighborLink('prev')}
-                  <Grid item xs>
+                  <Grid item xs style={{textAlign: 'center'}}>
                     {renderTime(item, 'created')}
                   </Grid>
                 </>
@@ -105,7 +105,7 @@ function ViewContainer({children, item, buttonRef, neighborService, ...props}) {
               )}
               {type === 'footer' && item && (
                 <>
-                  <Grid item xs style={{textAlign: 'right'}}>
+                  <Grid item xs style={{textAlign: 'center'}}>
                     {renderTime(item, 'modified')}
                   </Grid>
                   {renderNeighborLink('next')}

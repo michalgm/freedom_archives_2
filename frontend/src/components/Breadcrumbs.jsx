@@ -16,9 +16,30 @@ import {
 
 const useStyles = makeStyles({
   breadcrumbs: {
-    flexGrow: 1,
+    flex: '1 1 auto',
+    // width: '100%',
+    minWidth: 0,
     "& > .MuiTypography-root": {
       color: 'white'
+    },
+    "& > .MuiTypography-root ol": {
+      flexWrap: "nowrap",
+      flex: "1 1 auto"
+    },
+    "& > .MuiTypography-root ol li": {
+      minWidth: 0,
+      flexWrap: "nowrap",
+      flex: "0 0 auto"
+    },
+    "& > .MuiTypography-root ol li:last-child": {
+      flex: "1 1 auto"
+    },
+    "& > .MuiTypography-root ol h6": {
+      whiteSpace: 'nowrap',
+      overflow: 'hidden',
+      textOverflow: 'ellipsis',
+      minWidth: 0,
+      flexWrap: "nowrap",
     }
   },
 });
