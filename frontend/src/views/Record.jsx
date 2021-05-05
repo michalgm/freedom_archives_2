@@ -364,6 +364,31 @@ function Relationships({id, relationships = []}) {
   );
 }
 
+function RecordParent({parent}) {
+  const {setFieldValue} = useFormikContext();
+  return (
+    <Grid container justify="center" alignItems="center" spacing={4}>
+      <Grid item xs={8}>
+        <Field
+          name='parent'
+          type="select"
+          searchType="records"
+          size="small"
+          onChange={(_, record) => {
+            setFieldValue('parent_record_id', record.record_id);
+            setFieldValue('parent', {...record});
+          }}
+        />
+      </Grid>
+      <Grid item>
+        {parent.record_id && <Link to={`/records/${parent.record_id}`}><Icon>pageview</Icon></Link>}
+      </Grid>
+
+    </Grid>
+  )
+
+}
+
 function Record({id, showForm, ro = false, embedded = false}) {
   const [record, setRecord] = useState({});
   const [returnHome, set_returnHome] = useState(false);
@@ -515,7 +540,6 @@ function Record({id, showForm, ro = false, embedded = false}) {
                 )}
                 <FieldRow>
                   {/* <Field name="call_number" /> */}
-                  <Field name="vol_number" />
                 </FieldRow>
                 <FieldRow>
                   <ListItemField name="authors" isMulti />
@@ -532,11 +556,15 @@ function Record({id, showForm, ro = false, embedded = false}) {
                     name="collection"
                     size="small"
                   />
-                  <Field name="date_string" label="Date" />
+                  <Field name="vol_number" />
+                </FieldRow>
+                <FieldRow>
+                  <ListItemField listType="program" name="program" />
+                  <ListItemField listType="publisher" name="publisher" />
                 </FieldRow>
                 <FieldRow>
                   <Field name="location" />
-                  <ListItemField listType="program" name="program" />
+                  <Field name="date_string" label="Date" />
                 </FieldRow>
                 <FieldRow>
                   <Field name="notes" multiline rows={4} />
@@ -549,12 +577,48 @@ function Record({id, showForm, ro = false, embedded = false}) {
                   instances={record.instances || []}
                 />
               </GridBlock>
-              <GridBlock title="Children">
+              <GridBlock title="Parent Record">
+                <RecordParent
+                  edit={edit}
+                  record={record}
+                  parent={record.parent || {}}
+                />
+              </GridBlock>
+              <GridBlock title="Child Records">
                 <Children
                   edit={edit}
                   record={record}
                   children={record.children || []}
                 />
+              </GridBlock>
+              <GridBlock title="Sibling Records">
+                <Table size="small">
+                  <TableHead>
+                    <TableRow>
+                      <TableCell></TableCell>
+                      <TableCell>Title</TableCell>
+                      <TableCell>ID</TableCell>
+                    </TableRow>
+                  </TableHead>
+                  <TableBody>
+                    {record.siblings.length === 0 && (
+                      <TableRow>
+                        <TableCell align="center" colSpan={15}>
+                          No Sibling Records
+                          </TableCell>
+                      </TableRow>
+                    )}
+                    {record.siblings.map((sibling, index) => (
+                      <TableRow key={sibling.record_id}>
+                        <TableCell></TableCell>
+                        <TableCell>{sibling.title}</TableCell>
+                        <TableCell>
+                          <Link to={`/records/${sibling.record_id}`}>{sibling.record_id}</Link>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
               </GridBlock>
               <GridBlock title="Old Relationships">
                 {record.relationships}
