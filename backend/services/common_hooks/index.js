@@ -73,15 +73,21 @@ module.exports = {
   refreshView: async (context) => {
     const {
       id,
+      app,
+      data,
       method,
       path,
       params: {
+        user,
         transaction: { trx },
       },
     } = context;
   
     const table = path.slice(0, -1);
-  
+
+    if ('parent_record_id' in data) {
+      await app.service('records').patch(data.parent_record_id, {}, {user, transaction: {trx}});
+    }
     if (['update', 'patch', 'remove'].includes(method)) {
       await trx(`unified_${table}s`).where(`${table}_id`, id).delete();
     }

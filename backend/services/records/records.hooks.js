@@ -126,12 +126,12 @@ const updateRelations = async context => {
     await Promise.all(
       data.instances.map(instance => {
         if (instance.delete) {
-          return app.service('instances').remove(instance.instance_id);
+          return app.service('instances').remove(instance.instance_id, {user, transaction: {trx}});
         } else if (instance.instance_id) {
-          return app.service('instances').patch(instance.instance_id, instance, {user});
+          return app.service('instances').patch(instance.instance_id, instance, {user, transaction: {trx}});
         }
         delete instance.instance_id;
-        return app.service('instances').create(instance, {user});
+        return app.service('instances').create(instance, {user, transaction: {trx}});
       })
     );
     delete data.instances;
@@ -141,10 +141,9 @@ const updateRelations = async context => {
     await Promise.all(
       data.children.map(child => {
         if (child.delete) {
-          return app.service('records').patch(child.record_id, {parent_record_id: null}, {user});
+          return app.service('records').patch(child.record_id, {parent_record_id: null}, {user, transaction: {trx}});
         } else if (child.record_id && !child.parent_record_id) {
-          console.log(child, id);
-          return app.service('records').patch(child.record_id, {parent_record_id: id}, {user});
+          return app.service('records').patch(child.record_id, {parent_record_id: id}, {user, transaction: {trx}});
         }
       })
     );
@@ -161,6 +160,9 @@ const updateRelations = async context => {
     data.collection_id = data.collection ? data.collection.collection_id : null;
     delete data.collection;
   }
+  delete data.parent;
+  delete data.parent_id;
+
   return context;
 };
 
