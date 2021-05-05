@@ -51,7 +51,7 @@ quality */
 
 CREATE TABLE list_items (
   list_item_id serial PRIMARY KEY,
-  item varchar(200) NOT NULL,
+item varchar(500) NOT NULL,
   type varchar(45) NOT NULL,
   description varchar(200) DEFAULT NULL
 );
@@ -153,6 +153,18 @@ LANGUAGE
 insert into archives VALUES(default, 'The Freedom Archives');
 insert into users (select user_id, 1, lower(username), firstname, lastname, user_type, password, status, email from freedom_archives_old.users);
 insert into list_items(item, type, description) (select item, type, description from freedom_archives_old.list_items);
+insert into list_items(item, type)
+  (select distinct publisher,
+                   'publisher'
+   from
+     (select publisher
+      from freedom_archives_old.documents
+      union select organization
+      from freedom_archives_old.collections) a
+   where publisher != ''
+   order by publisher);
+
+
 insert into collections (collection_id, collection_name, display_order) values (0, 'Uncategorized', 0);
 
 insert into collections (select collection_id, parent_id, collection_name, description, summary, call_number, organization as publisher, internal_notes as notes, thumbnail, display_order, needs_review::bool, is_hidden::bool, true, b.user_id as creator_user_id, c.user_id as contributor_user_id, null, date_modified from freedom_archives_old.collections a left join users b on a.creator = b.username left join users c on a.contributor = c.username);
@@ -412,6 +424,7 @@ create view records_view as
     creator.firstname || ' ' || creator.lastname as creator_name,
     creator.username as creator_username,
     coalesce(children.children, '[]'::json) as children,
+coalesce(siblings.siblings, '[]'::json) as siblings,
     jsonb_build_object('title', parent.title, 'record_id', parent.record_id) as parent,
     authors.items as authors,
     subjects.items as subjects,
@@ -452,6 +465,16 @@ create view records_view as
   left join users contributor on a.contributor_user_id = contributor.user_id
   left join users creator on a.creator_user_id = creator.user_id
   left join (select parent_record_id, array_to_json(array_agg(row_to_json(b))) as children from (select parent_record_id, record_id, title from records) b group by parent_record_id) children on children.parent_record_id = a.record_id
+
+left join
+  (select parent_record_id,
+          array_to_json(array_agg(row_to_json(b))) as siblings
+   from
+     (select parent_record_id,
+             record_id,
+             title
+      from records) b
+   group by parent_record_id) siblings on siblings.parent_record_id = a.parent_record_id
   left join records_list_items_view authors on authors.type = 'author' and authors.record_id = a.record_id
   left join records_list_items_view subjects on subjects.type = 'subject' and subjects.record_id = a.record_id
   left join records_list_items_view keywords on keywords.type = 'keyword' and keywords.record_id = a.record_id
