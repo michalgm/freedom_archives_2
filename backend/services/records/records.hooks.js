@@ -166,6 +166,23 @@ const updateRelations = async context => {
   return context;
 };
 
+const fetchRelations = async (context) => {
+  const {id, app, result} = context;
+  const {parent_record_id} = result;
+  const $select = ['record_id', 'title', 'primary_instance_thumbnail', 'collection', 'primary_instance_format', 'primary_instance_media_type'];
+  const $limit = 1000;
+  const $sort = {title: 1};
+  const [{data: [parent = {}]}, {data: children}, {data: siblings}] = await Promise.all([
+    parent_record_id ? app.service('records')._find({query: {record_id: parent_record_id, $select, $limit, $sort}}) : {data: []},
+    app.service('records')._find({query: {parent_record_id: id, $select, $limit, $sort}}),
+    parent_record_id ? app.service('records')._find({query: {parent_record_id, $select, $limit, $sort}}) : {data: []}
+  ]);
+  result.parent = parent;
+  result.children = children;
+  result.siblings = siblings;
+  return context;
+};
+
 module.exports = {
   before: {
     all: [authenticate('jwt')],
@@ -203,7 +220,7 @@ module.exports = {
       },
     ],
     find: [lookupFilters],
-    get: [],
+    get: [fetchRelations],
     create: [refreshView, transaction.end()],
     update: [refreshView, transaction.end()],
     patch: [refreshView, transaction.end()],

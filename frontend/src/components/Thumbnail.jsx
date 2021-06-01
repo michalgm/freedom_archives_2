@@ -1,8 +1,8 @@
-import React from 'react'
 import {
   Avatar,
 } from '@material-ui/core';
 import { BrokenImage } from '@material-ui/icons';
+import React from 'react'
 
 const onError = (event)=> {
   event.target.src = `https://search.freedomarchives.org/images/fileicons/webpage.png`
@@ -23,8 +23,8 @@ export default function Thumbnail({src, type, width=75, alt=''}) {
       </span>
     )
   } else {
-    return <Avatar>
-      <BrokenImage />
+    return <Avatar style={{width, height: width}}>
+      <BrokenImage style={{fontSize: width * 0.6}} />
     </Avatar>
   }
 }

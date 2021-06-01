@@ -1,5 +1,6 @@
 import {Autocomplete} from '@material-ui/lab';
 import React from 'react';
+import RecordItem from './RecordItem'
 import {TextField} from '@material-ui/core';
 import { services } from '../api';
 import useDeepCompareEffect from 'use-deep-compare-effect'
@@ -16,6 +17,7 @@ const searchTypes = {
   records: {
     id: 'record_id',
     label: 'title',
+    renderOption: item => <RecordItem record={item} component='div' dense />
   },
 
 };
@@ -36,18 +38,20 @@ const SelectField = ({
   searchParams,
   fetchAll,
   autoHighlight,
+  excludeId,
   loadOptions: inputLoadOptions,
   ...props
 }) => {
-  const {id: typeId, label: typeLabel} = searchTypes[searchType]
+  const {id: typeId, label: typeLabel, renderOption} = searchTypes[searchType]
   const [open, setOpen] = React.useState(false);
   const [inputValue, setInputValue] = React.useState('');
   const [options, setOptions] = React.useState([]);
   const loading = Boolean(open && inputValue);
   
   const value = inputValue || ((defaultValue && defaultValue[typeLabel]) ? defaultValue[typeLabel] : "")
+  const $select = searchType === 'records' ? [typeId, typeLabel, 'parent_record_id', 'primary_instance_thumbnail', 'primary_instance_format', 'primary_instance_media_type', 'collection'] : [typeId, typeLabel]
   const query = {
-    $select: [typeId, typeLabel],
+    $select,
     $sort: {[typeLabel]: 1},
     $limit: 100,
     ...searchParams,
@@ -57,6 +61,9 @@ const SelectField = ({
     query[typeLabel] = {$ilike: `%${value}%`}
   }
 
+  if (excludeId) {
+    query[typeId] = {$ne: excludeId}
+  }
   React.useEffect(() => {
     const value = defaultValue && defaultValue[typeLabel] ? defaultValue[typeLabel] : ''
     setInputValue(value)
@@ -116,8 +123,17 @@ const SelectField = ({
       )}
       onChange={(_, option) => {
         if (!validateChange || validateChange(_, option)) {
-          setFieldValue(name, option);
+          if (!props.clearOnBlur) {
+            setFieldValue(name, option);
+          }
           onChange && onChange(_, option);
+        }
+      }}
+      renderOption={(option) => {
+        if (renderOption) {
+          return renderOption(option)
+        } else {
+          return option[typeLabel]
         }
       }}
       onInputChange={(_, option) => {

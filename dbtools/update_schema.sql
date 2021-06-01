@@ -405,27 +405,38 @@ create table unified_collections as select * from collections_view;
 -- CREATE INDEX collections_fulltext_index on unified_collections using GIN (fulltext);
 ALTER TABLE unified_collections add PRIMARY KEY(collection_id);
 
+drop view if exists record_summaries;
+create view record_summaries AS
+  SELECT a.record_id,
+    a.title,
+    a.parent_record_id,
+    primary_instance.thumbnail as primary_instance_thumbnail,
+    primary_instance.format as primary_instance_format,
+    primary_instance.media_type as primary_instance_media_type,
+    jsonb_build_object('collection_name', collections.collection_name, 'collection_id', collections.collection_id) as collection
+  FROM records a 
+  left join instances primary_instance on a.primary_instance_id = primary_instance.instance_id
+  left join collections using(collection_id);
+
 /* FIXME collection */
 drop view if exists records_view;
 create view records_view as
   select a.*,
+    b.primary_instance_thumbnail,
+    b.primary_instance_format,
+    b.primary_instance_media_type,
+    b.collection,
     coalesce(a.month::text, '??') || '/' || coalesce(a.day::text, '??') || '/' || coalesce(a.year::text, '??') as date_string,
     (coalesce(a.year::text, '1900')::text || '-' || coalesce(a.month::text, '01')::text || '-' || coalesce(a.day::text, '01')::text)::date as date,
-    jsonb_build_object('collection_name', collections.collection_name, 'collection_id', collections.collection_id) as collection,
     jsonb_build_object('item', publisher_lookup.item, 'list_item_id', publisher_lookup.list_item_id) as publisher,
     jsonb_build_object('item', program_lookup.item, 'list_item_id', program_lookup.list_item_id) as program,
     instances.instances as instances,
     instances.has_digital as has_digital,
     instances.instance_count as instance_count,
-    -- primary_instance.instance_id as primary_instance_id,
-    primary_instance.thumbnail as primary_instance_thumbnail,
     contributor.firstname || ' ' || contributor.lastname as contributor_name,
     contributor.username as contributor_username,
     creator.firstname || ' ' || creator.lastname as creator_name,
     creator.username as creator_username,
-    coalesce(children.children, '[]'::json) as children,
-coalesce(siblings.siblings, '[]'::json) as siblings,
-    jsonb_build_object('title', parent.title, 'record_id', parent.record_id) as parent,
     authors.items as authors,
     subjects.items as subjects,
     keywords.items as keywords,
@@ -447,9 +458,13 @@ coalesce(siblings.siblings, '[]'::json) as siblings,
     array(select distinct format from instances where instances.record_id = a.record_id and format is not null) as formats,
     array(select distinct quality from instances where instances.record_id = a.record_id and quality is not null) as qualitys,
     array(select distinct generation from instances where instances.record_id = a.record_id and generation is not null) as generations,
-    array(select distinct media_type from instances where instances.record_id = a.record_id and media_type is not null) as media_types
+    array(select distinct media_type from instances where instances.record_id = a.record_id and media_type is not null) as media_types,
+    array(select row_to_json(record_summaries) from record_summaries where record_summaries.parent_record_id = a.record_id) as children,
+    array(select row_to_json(record_summaries) from record_summaries where record_summaries.parent_record_id = a.parent_record_id and record_summaries.record_id != a.record_id) as siblings,
+    (select row_to_json(parent) from record_summaries parent where a.parent_record_id = parent.record_id) as parent
   from records a
-  left join collections using(collection_id)
+  left join record_summaries b using (record_id)
+  -- left join record_summaries parent on a.parent_record_id = parent.record_id
   left join list_items publisher_lookup on a.publisher_id = publisher_lookup.list_item_id
   left join list_items program_lookup on a.program_id = program_lookup.list_item_id
   left join 
@@ -464,23 +479,24 @@ coalesce(siblings.siblings, '[]'::json) as siblings,
   left join instances primary_instance on a.primary_instance_id = primary_instance.instance_id
   left join users contributor on a.contributor_user_id = contributor.user_id
   left join users creator on a.creator_user_id = creator.user_id
-  left join (select parent_record_id, array_to_json(array_agg(row_to_json(b))) as children from (select parent_record_id, record_id, title from records) b group by parent_record_id) children on children.parent_record_id = a.record_id
+  -- left join (select parent_record_id, array_to_json(array_agg(row_to_json(b))) as children from (select parent_record_id, record_id, title from records) b group by parent_record_id) children on children.parent_record_id = a.record_id
 
-left join
-  (select parent_record_id,
-          array_to_json(array_agg(row_to_json(b))) as siblings
-   from
-     (select parent_record_id,
-             record_id,
-             title
-      from records) b
-   group by parent_record_id) siblings on siblings.parent_record_id = a.parent_record_id
+-- left join
+--   (select parent_record_id,
+--           array_to_json(array_agg(row_to_json(b))) as siblings
+--    from
+--      (select parent_record_id,
+--              record_id,
+--              title
+--       from records) b
+--    group by parent_record_id) siblings on siblings.parent_record_id = a.parent_record_id
   left join records_list_items_view authors on authors.type = 'author' and authors.record_id = a.record_id
   left join records_list_items_view subjects on subjects.type = 'subject' and subjects.record_id = a.record_id
   left join records_list_items_view keywords on keywords.type = 'keyword' and keywords.record_id = a.record_id
   left join records_list_items_view producers on producers.type = 'producer' and producers.record_id = a.record_id
-  left join records parent on a.parent_record_id = parent.record_id
+  -- left join records parent on a.parent_record_id = parent.record_id
   ;
+
 drop table if exists unified_records cascade;
 create table unified_records as select * from records_view;
 CREATE INDEX records_fulltext_index on unified_records using GIN (fulltext);

@@ -2,14 +2,17 @@ import "./Record.scss";
 
 import {
   Button,
+  Divider,
   Grid,
   Icon,
   IconButton,
+  List,
   Table,
   TableBody,
   TableCell,
   TableHead,
   TableRow,
+  Typography
 } from "@material-ui/core/";
 import {FieldArray, useFormikContext} from "formik";
 import React, {useEffect, useRef, useState} from "react";
@@ -21,6 +24,7 @@ import Form from "../components/Form";
 import GridBlock from "../components/GridBlock";
 import Link from "../components/Link";
 import ListItemField from "../components/ListItemField";
+import RecordItem from '../components/RecordItem'
 import {Redirect} from "react-router-dom";
 import ViewContainer from "../components/ViewContainer";
 import {useTitle} from '../appContext'
@@ -31,59 +35,46 @@ function Children({children = []}) {
     <FieldArray
       name="children"
       render={({push}) => {
+        const children = values.children.map((child = {}, index) => {
+          if (!child) {
+            return null
+          }
+          child.action = () => (<IconButton
+            onClick={() =>
+              setFieldValue(
+                `children[${index}].delete`,
+                !child.delete
+              )
+            }
+          >
+            <Icon>{child.delete ? "restore" : "delete"}</Icon>
+          </IconButton>)
+          return child;
+        })
+
         return (
-          <>
-            <Table size="small">
-              <TableHead>
-                <TableRow>
-                  <TableCell></TableCell>
-                  <TableCell>Title</TableCell>
-                  <TableCell>ID</TableCell>
-                </TableRow>
-              </TableHead>
-              <TableBody>
-                {values.children.length === 0 && (
-                  <TableRow>
-                    <TableCell align="center" colSpan={15}>
-                      No Child Records
-                  </TableCell>
-                  </TableRow>
-                )}
-                {values.children.map((child, index) => (
-                  <TableRow key={child.record_id}>
-                    <TableCell className="instance-action">
-                      <IconButton
-                        onClick={() =>
-                          setFieldValue(
-                            `children[${index}].delete`,
-                            !child.delete
-                          )
-                        }
-                      >
-                        <Icon>{child.delete ? "restore" : "delete"}</Icon>
-                      </IconButton>
-                    </TableCell>
-                    <TableCell>{child.title}</TableCell>
-                    <TableCell>
-                      <Link to={`/records/${child.record_id}`}>{child.record_id}</Link>
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
+          <List>
+            {values.children.length === 0 && (
+              <Typography>
+                No Child Records
+              </Typography>
+            )}
+            <RecordsList records={children} />
             <Field
               name='new_child'
               type="select"
               searchType="records"
               size="small"
+              clearOnBlur
+              selectOnFocus
+              excludeId={values.record_id}
               onChange={(_, child) => {
-                console.log(child)
-                push(child);
-                console.log(values)
-                delete values.new_child
+                if (child) {
+                  push(child);
+                }
               }}
             />
-          </>
+          </List>
         );
       }}
     />
@@ -363,27 +354,38 @@ function Relationships({id, relationships = []}) {
     </Table>
   );
 }
+function RecordsList({records}) {
+  return records.map(record => (
+    <React.Fragment key={record.record_id}>
+      <RecordItem record={record} link action={record.action} />
+      <Divider component="li" />
+    </React.Fragment>
+  ))
+}
 
 function RecordParent({parent}) {
-  const {setFieldValue} = useFormikContext();
+  const {values, setFieldValue} = useFormikContext();
   return (
     <Grid container justify="center" alignItems="center" spacing={4}>
-      <Grid item xs={8}>
+      <Grid item xs={12}>
+        <List>
+          <RecordItem record={parent} link />
+        </List>
+      </Grid>
+      <Grid item xs={12}>
         <Field
           name='parent'
           type="select"
           searchType="records"
           size="small"
+          label=" "
+          excludeId={values.record_id}
           onChange={(_, record) => {
             setFieldValue('parent_record_id', record.record_id);
             setFieldValue('parent', {...record});
           }}
         />
       </Grid>
-      <Grid item>
-        {parent.record_id && <Link to={`/records/${parent.record_id}`}><Icon>pageview</Icon></Link>}
-      </Grid>
-
     </Grid>
   )
 
@@ -440,7 +442,6 @@ function Record({id, showForm, ro = false, embedded = false}) {
   };
 
   const updateRecord = async (data) => {
-    console.log(data);
     delete data.new_child
     try {
       await records.patch(id, data);
@@ -592,33 +593,14 @@ function Record({id, showForm, ro = false, embedded = false}) {
                 />
               </GridBlock>
               <GridBlock title="Sibling Records">
-                <Table size="small">
-                  <TableHead>
-                    <TableRow>
-                      <TableCell></TableCell>
-                      <TableCell>Title</TableCell>
-                      <TableCell>ID</TableCell>
-                    </TableRow>
-                  </TableHead>
-                  <TableBody>
-                    {record.siblings.length === 0 && (
-                      <TableRow>
-                        <TableCell align="center" colSpan={15}>
-                          No Sibling Records
-                          </TableCell>
-                      </TableRow>
-                    )}
-                    {record.siblings.map((sibling, index) => (
-                      <TableRow key={sibling.record_id}>
-                        <TableCell></TableCell>
-                        <TableCell>{sibling.title}</TableCell>
-                        <TableCell>
-                          <Link to={`/records/${sibling.record_id}`}>{sibling.record_id}</Link>
-                        </TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
+                <List>
+                  {record.siblings.length === 0 && (
+                    <Typography>
+                      No Sibling Records
+                    </Typography>
+                  )}
+                  <RecordsList records={record.siblings} />
+                </List>
               </GridBlock>
               <GridBlock title="Old Relationships">
                 {record.relationships}

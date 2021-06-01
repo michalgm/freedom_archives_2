@@ -85,21 +85,21 @@ module.exports = {
   
     const table = path.slice(0, -1);
 
-    if ('parent_record_id' in data) {
+    if ('parent_record_id' in data && data.parent_record_id) {
       await app.service('records').patch(data.parent_record_id, {}, {user, transaction: {trx}});
     }
     if (['update', 'patch', 'remove'].includes(method)) {
       await trx(`unified_${table}s`).where(`${table}_id`, id).delete();
     }
     if (['update', 'patch', 'create'].includes(method)) {
-      const [data] = await trx(`${table}s_view`).where(`${table}_id`, id).select();
+      const [data = {}] = await trx(`${table}s_view`).where(`${table}_id`, id).select();
       const encoded = {};
       Object.keys(data).forEach(key => {
         if (
           data[key] &&
           typeof data[key] === 'object' &&
           !key.includes('_search') &&
-          !['call_numbers', 'formats', 'qualitys', 'generations', 'media_types'].includes(key)
+          !['call_numbers', 'formats', 'qualitys', 'generations', 'media_types', 'children', 'siblings', 'parent'].includes(key)
         ) {
           encoded[key] = JSON.stringify(data[key]);
         } else {
