@@ -412,11 +412,13 @@ create view record_summaries AS
     a.parent_record_id,
     primary_instance.thumbnail as primary_instance_thumbnail,
     primary_instance.format as primary_instance_format,
+    list_items.item as primary_instance_format_text,
     primary_instance.media_type as primary_instance_media_type,
     jsonb_build_object('collection_name', collections.collection_name, 'collection_id', collections.collection_id) as collection
   FROM records a 
   left join instances primary_instance on a.primary_instance_id = primary_instance.instance_id
-  left join collections using(collection_id);
+  left join collections using(collection_id)
+  left join list_items on primary_instance.format = list_items.list_item_id and list_items.type = 'format';
 
 /* FIXME collection */
 drop view if exists records_view;
@@ -424,6 +426,7 @@ create view records_view as
   select a.*,
     b.primary_instance_thumbnail,
     b.primary_instance_format,
+    b.primary_instance_format_text,
     b.primary_instance_media_type,
     b.collection,
     coalesce(a.month::text, '??') || '/' || coalesce(a.day::text, '??') || '/' || coalesce(a.year::text, '??') as date_string,

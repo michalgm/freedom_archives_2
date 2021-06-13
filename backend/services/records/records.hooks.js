@@ -169,7 +169,7 @@ const updateRelations = async context => {
 const fetchRelations = async (context) => {
   const {id, app, result} = context;
   const {parent_record_id} = result;
-  const $select = ['record_id', 'title', 'primary_instance_thumbnail', 'collection', 'primary_instance_format', 'primary_instance_media_type'];
+  const $select = ['record_id', 'title', 'primary_instance_thumbnail', 'collection', 'primary_instance_format_text', 'primary_instance_media_type'];
   const $limit = 1000;
   const $sort = {title: 1};
   const [{data: [parent = {}]}, {data: children}, {data: siblings}] = await Promise.all([

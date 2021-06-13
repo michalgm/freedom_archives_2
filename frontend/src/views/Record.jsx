@@ -363,28 +363,40 @@ function RecordsList({records}) {
   ))
 }
 
-function RecordParent({parent}) {
+function RecordParent() {
   const {values, setFieldValue} = useFormikContext();
+  const [edit, setEdit] = useState(false);
   return (
     <Grid container justify="center" alignItems="center" spacing={4}>
       <Grid item xs={12}>
-        <List>
-          <RecordItem record={parent} link />
-        </List>
-      </Grid>
-      <Grid item xs={12}>
-        <Field
-          name='parent'
-          type="select"
-          searchType="records"
-          size="small"
-          label=" "
-          excludeId={values.record_id}
-          onChange={(_, record) => {
-            setFieldValue('parent_record_id', record.record_id);
-            setFieldValue('parent', {...record});
-          }}
-        />
+        {
+          edit ?
+            <Field
+              name='parent'
+              type="select"
+              searchType="records"
+              size="small"
+              label=" "
+              autoFocus
+              selectOnFocus
+              excludeId={values.record_id}
+              onChange={(_, record) => {
+                if (record) {
+                  setFieldValue('parent_record_id', record.record_id);
+                  setFieldValue('parent', {...record});
+                  setEdit(false)
+                }
+              }}
+            />
+            :
+            <List>
+              <RecordItem record={values.parent} link missingRecordText="No Parent Record" action={() => (<IconButton
+                onClick={() => {setEdit(true)}}
+              >
+                <Icon>edit</Icon>
+              </IconButton>)} />
+            </List>
+        }
       </Grid>
     </Grid>
   )
@@ -585,14 +597,14 @@ function Record({id, showForm, ro = false, embedded = false}) {
                   parent={record.parent || {}}
                 />
               </GridBlock>
-              <GridBlock title="Child Records">
+              <GridBlock width={6} title="Child Records">
                 <Children
                   edit={edit}
                   record={record}
                   children={record.children || []}
                 />
               </GridBlock>
-              <GridBlock title="Sibling Records">
+              <GridBlock width={6} title="Sibling Records">
                 <List>
                   {record.siblings.length === 0 && (
                     <Typography>

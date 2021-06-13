@@ -8,4 +8,5 @@ backend.bak/*
 frontend/build
 frontend/node_modules
 */*.sql
+*.sql
 ./public/*

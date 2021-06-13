@@ -43,13 +43,13 @@ const SelectField = ({
   ...props
 }) => {
   const {id: typeId, label: typeLabel, renderOption} = searchTypes[searchType]
-  const [open, setOpen] = React.useState(false);
+  const [open, setOpen] = React.useState(props.autoFocus || false);
   const [inputValue, setInputValue] = React.useState('');
   const [options, setOptions] = React.useState([]);
   const loading = Boolean(open && inputValue);
   
   const value = inputValue || ((defaultValue && defaultValue[typeLabel]) ? defaultValue[typeLabel] : "")
-  const $select = searchType === 'records' ? [typeId, typeLabel, 'parent_record_id', 'primary_instance_thumbnail', 'primary_instance_format', 'primary_instance_media_type', 'collection'] : [typeId, typeLabel]
+  const $select = searchType === 'records' ? [typeId, typeLabel, 'parent_record_id', 'primary_instance_thumbnail', 'primary_instance_format_text', 'primary_instance_media_type', 'collection'] : [typeId, typeLabel]
   const query = {
     $select,
     $sort: {[typeLabel]: 1},
@@ -119,6 +119,7 @@ const SelectField = ({
           InputLabelProps={{ shrink: true }}
           label={label}
           variant={props.variant || "outlined"}
+          autoFocus={props.autoFocus || false}
         />
       )}
       onChange={(_, option) => {
