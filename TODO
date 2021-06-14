@@ -1,0 +1,22 @@
+Todos:
+    ☐ add record count + digitized
+    ☐ link to collection in search results
+    ☐ Thumbnail uploads/resizing/management
+    ✔ record display: title, collection, format, thumbnail @done(21-06-13 16:23)
+    ☐ collectionItem component
+    Record:
+        ☐ Link to collection
+        Continuations:
+            ☐ continuation needs order/index field
+    Collection:
+        ☐ Manage Child records
+        ☐ Notes should be textarea
+        ☐ Featured Records interface
+        ☐ Subcollections
+
+Archive:
+  ✔ move call number to media level @done(21-06-13 16:10) @project(Todos)
+  ✔ breadcrumbs @done(21-06-13 16:10) @project(Todos)
+  ✔ add filters to search @done(21-06-13 16:10) @project(Todos)
+  ✔ loses focus when it searches @done(21-06-13 16:10) @project(Todos)
+  ✔ add organizer/publisher @done(21-06-13 16:10) @project(Todos)
