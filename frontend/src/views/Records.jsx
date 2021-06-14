@@ -55,6 +55,8 @@ function Records() {
         'collection',
         'has_digital',
         'description',
+        'primary_instance_thumbnail',
+        'primary_instance_format_text'
       ]
     }
     if (search) {

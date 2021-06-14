@@ -3,8 +3,6 @@ import {
     Grid,
     Icon,
     IconButton,
-    List,
-    ListItem,
     Paper,
 } from '@material-ui/core';
 import {FieldArray, useFormikContext} from "formik";
@@ -13,7 +11,7 @@ import {collections, records} from '../api';
 
 import Field from '../components/Field';
 import Form from '../components/Form';
-import {Link} from 'react-router-dom';
+import {ItemsList} from './RecordItem';
 import ListItemField from '../components/ListItemField'
 import PaginationFooter from '../components/PaginationFooter'
 import ViewContainer from '../components/ViewContainer';
@@ -167,28 +165,17 @@ export default function Manage({renderItem, defaultFilter, filterTypes, createQu
     }
     return (
         <ViewContainer
-            footerElements={[<PaginationFooter total={total} offset={offset} page_size={page_size} setOffset={setOffset} />]}
+            footerElements={[<PaginationFooter type={service} total={total} offset={offset} page_size={page_size} setOffset={setOffset} />]}
             headerElements={[renderFilterBar()]}
             service={service}
         >
             <Paper>
-                <List>
-                    {items.map((item, index) => {
-                        return (
-                            <ListItem
-                                key={item[`${service}_id`]}
-                                divider
-                                button
-                                alignItems="flex-start"
-                                component={Link}
-                                to={`/${service}s/${item[`${service}_id`]}`}
-                                onClick={() => dispatch('SEARCH_INDEX', offset + index)}
-                            >
-                                {renderItem(item)}
-                            </ListItem>
-                        )
-                    })}
-                </List>
+                <ItemsList
+                    description
+                    items={items}
+                    onClick={(index) => dispatch('SEARCH_INDEX', offset + index)}
+                    type={service}
+                />
             </Paper>
         </ViewContainer>
     )

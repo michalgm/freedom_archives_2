@@ -1,6 +1,7 @@
 import {
   Divider,
   Grid,
+  List,
   ListItem,
   ListItemAvatar,
   ListItemSecondaryAction,
@@ -12,6 +13,59 @@ import {Link as DOMLInk} from 'react-router-dom';
 import Link from '../components/Link'
 import React from 'react'
 import Thumbnail from '../components/Thumbnail'
+import {startCase} from 'lodash';
+
+export function RecordsList({records, ...props}) {
+  return <ItemsList type='record' items={records} {...props} />
+}
+
+export function CollectionsList({collections, ...props}) {
+  return <ItemsList type='collection' items={collections} {...props} />
+}
+
+export function ItemsList({items, type, emptyText, index, ...props}) {
+  const ItemTag = type === 'record' ? RecordItem : CollectionItem;
+  emptyText = emptyText || `No ${startCase(type)}s Found`
+  return (<List>
+    {items.length === 0 && (
+      <Typography>
+        {emptyText}
+      </Typography>
+    )}
+    {
+      items.map((item, index) => (
+        <React.Fragment key={item[`${type}_id`]}>
+          <ItemTag
+            action={item.action}
+            index={index}
+            type={type}
+            link
+            {...{[type]: item}}
+            {...props}
+          />
+          <Divider component="li" />
+        </React.Fragment>
+      ))
+    }
+  </List>)
+}
+
+export default function RecordItem({record: {title, record_id, primary_instance_thumbnail, primary_instance_format_text, collection: {collection_name, collection_id} = {}, description}, description: showDescription, ...props}) {
+  const details = [
+    {type: 'Collection', label: collection_name, link: `/collections/${collection_id}`},
+    {type: 'Format', label: primary_instance_format_text}
+  ]
+
+  return <Item id={record_id} thumbnail={primary_instance_thumbnail} details={details} title={title} description={showDescription && description} {...props} type='record' />
+}
+
+export function CollectionItem({collection: {collection_name, collection_id, thumbnail, description, parent}, description: showDescription, ...props}) {
+  const details = parent && parent.collection_id ? [
+    {type: 'Parent Collection', label: parent.collection_name, link: `/collections/${parent.collection_id}`},
+  ] : []
+
+  return <Item id={collection_id} thumbnail={thumbnail} title={collection_name} description={showDescription && description} details={details} {...props} type='collection' />
+}
 
 function RecordItemDetails({details, dense}) {
   return <Grid container alignItems="center" justify="flex-start" spacing={2} style={{marginTop: 0, marginBottom: 0}}>
@@ -41,18 +95,17 @@ function RecordItemDetails({details, dense}) {
   </Grid>
 }
 
-export default function RecordItem({record: {title, record_id, primary_instance_thumbnail, primary_instance_media_type, primary_instance_format_text, collection: {collection_name, collection_id} = {}}, link, dense, action, missingRecordText = "None", ...props}) {
-  const list_item_props = link && record_id ? {component: DOMLInk, to: `/records/${record_id}`, button: true} : {}
-  const details = [
-    {type: 'Collection', label: collection_name, link: `/collections/${collection_id}`},
-    {type: 'Format', label: primary_instance_format_text}
-  ]
+export function Item({id, type, thumbnail, details = [], title, description, link, dense, action, missingRecordText = "None", index, onClick: onClickHandler, ...props}) {
+  const list_item_props = link && id ? {component: DOMLInk, to: `/${type}s/${id}`, button: true} : {}
+  const onClick = onClickHandler ? (event) => {
+    onClickHandler(index, event)
+  } : null
 
   return (
-    <ListItem {...list_item_props} dense={dense} {...props}>
-      {record_id && <ListItemAvatar style={{minWidth: dense ? 35 : null}}>
+    <ListItem {...list_item_props} alignItems="flex-start" dense={dense} onClick={onClick} {...props}>
+      {id && <ListItemAvatar style={{minWidth: dense ? 35 : null}}>
         <Thumbnail
-          src={primary_instance_thumbnail ? `https://search.freedomarchives.org/${primary_instance_thumbnail}` : ''}
+          src={thumbnail ? `https://search.freedomarchives.org/${thumbnail}` : ''}
           alt={`${title} Thumbnail`}
           width={dense ? 20 : 40}
         />
@@ -61,9 +114,23 @@ export default function RecordItem({record: {title, record_id, primary_instance_
       <ListItemText
         disableTypography
         primary={
-          record_id ? title : missingRecordText
+          id ? title : missingRecordText
         }
-        secondary={<RecordItemDetails details={details} dense={dense} />}
+        secondary={
+          <>
+            <RecordItemDetails details={details} dense={dense} />
+            {
+              description && <Typography
+                variant="body2"
+                color="textSecondary"
+                style={{marginTop: 4.9, maxHeight: 100, overflowX: 'auto'}}
+                dangerouslySetInnerHTML={{
+                  __html: description,
+                }}
+              />
+            }
+          </>
+        }
       />
       {
         action &&

@@ -2,7 +2,6 @@ import "./Record.scss";
 
 import {
   Button,
-  Divider,
   Grid,
   Icon,
   IconButton,
@@ -12,10 +11,10 @@ import {
   TableCell,
   TableHead,
   TableRow,
-  Typography
 } from "@material-ui/core/";
 import {FieldArray, useFormikContext} from "formik";
 import React, {useEffect, useRef, useState} from "react";
+import RecordItem, {RecordsList} from '../components/RecordItem'
 import {records, relationships} from "../api";
 
 import Field from "../components/Field";
@@ -24,7 +23,6 @@ import Form from "../components/Form";
 import GridBlock from "../components/GridBlock";
 import Link from "../components/Link";
 import ListItemField from "../components/ListItemField";
-import RecordItem from '../components/RecordItem'
 import {Redirect} from "react-router-dom";
 import ViewContainer from "../components/ViewContainer";
 import {useTitle} from '../appContext'
@@ -53,13 +51,8 @@ function Children({children = []}) {
         })
 
         return (
-          <List>
-            {values.children.length === 0 && (
-              <Typography>
-                No Child Records
-              </Typography>
-            )}
-            <RecordsList records={children} />
+          <>
+            <RecordsList records={children} emptyText="No Child Records" />
             <Field
               name='new_child'
               type="select"
@@ -74,7 +67,7 @@ function Children({children = []}) {
                 }
               }}
             />
-          </List>
+          </>
         );
       }}
     />
@@ -354,14 +347,6 @@ function Relationships({id, relationships = []}) {
     </Table>
   );
 }
-function RecordsList({records}) {
-  return records.map(record => (
-    <React.Fragment key={record.record_id}>
-      <RecordItem record={record} link action={record.action} />
-      <Divider component="li" />
-    </React.Fragment>
-  ))
-}
 
 function RecordParent() {
   const {values, setFieldValue} = useFormikContext();
@@ -605,14 +590,7 @@ function Record({id, showForm, ro = false, embedded = false}) {
                 />
               </GridBlock>
               <GridBlock width={6} title="Sibling Records">
-                <List>
-                  {record.siblings.length === 0 && (
-                    <Typography>
-                      No Sibling Records
-                    </Typography>
-                  )}
-                  <RecordsList records={record.siblings} />
-                </List>
+                <RecordsList records={record.siblings} emptyText="No Sibling Records" />
               </GridBlock>
               <GridBlock title="Old Relationships">
                 {record.relationships}

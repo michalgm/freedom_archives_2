@@ -2,6 +2,7 @@ import {Chip} from '@material-ui/core'
 import { Pagination } from '@material-ui/lab';
 import React from 'react';
 import {makeStyles} from '@material-ui/core/styles';
+import {startCase} from 'lodash';
 
 const useStyles = makeStyles({
   pagination: {
@@ -17,12 +18,12 @@ const useStyles = makeStyles({
   },
 });
 
-function PaginationFooter({total, offset, page_size, setOffset, ...props}) {
+function PaginationFooter({total, offset, page_size, type = 'record', setOffset, ...props}) {
   const classes = useStyles();
 
   return (
     <div className={classes.pagination}>
-      <Chip variant="outlined" label={`${total} records`} />
+      <Chip variant="outlined" label={`${total} ${startCase(type)}s`} />
       <Pagination
         page={(offset / page_size) + 1}
         count={Math.round(total / page_size)}
@@ -34,7 +35,7 @@ function PaginationFooter({total, offset, page_size, setOffset, ...props}) {
         variant="outlined"
         {...props}
       />
-      <Chip className='spacer-chip' variant="outlined" label={`${total} records`} />
+      <Chip className='spacer-chip' variant="outlined" label={`${total} ${startCase(type)}s`} />
     </div>
   );
 }
