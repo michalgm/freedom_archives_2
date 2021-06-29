@@ -43,7 +43,7 @@ function Collections() {
       ]
     }
     if (search) {
-      const $ilike = `%${search}%`
+      const $ilike = `%${search.replace(/ /g, '%')}%`
       query.$or = [
         {subjects_text: {$ilike}},
         {keywords_text: {$ilike}},

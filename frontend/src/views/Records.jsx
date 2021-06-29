@@ -60,7 +60,7 @@ function Records() {
       ]
     }
     if (search) {
-      const $ilike = `%${search}%`
+      const $ilike = `%${search.replace(/ /g, '%')}%`
       query.$or = [
         {keywords_text: {$ilike}},
         {producers_text: {$ilike}},

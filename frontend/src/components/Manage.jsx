@@ -86,7 +86,7 @@ export default function Manage({renderItem, defaultFilter, filterTypes, createQu
                                 query[field] = {$contains: [value.list_item_id || value]}
                                 break;
                             case 'fuzzy':
-                                query[field] = {'$ilike': `%${value}%`}
+                                query[field] = {'$ilike': `%${value.replace(/ /g, '%')}%`}
                                 break;
                             case 'listitem':
                                 query[`${field}_search`] = {$contains: [value.item]}

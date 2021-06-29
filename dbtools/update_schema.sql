@@ -1,13 +1,13 @@
 BEGIN;
-CREATE TEMP TABLE parent_lookup as select record_id, parent_record_id from records where parent_record_id is not null;
-select * from parent_lookup;
+-- CREATE TEMP TABLE parent_lookup as select record_id, parent_record_id from records where parent_record_id is not null;
+-- select * from `parent_lookup`;
 
 DROP SCHEMA IF EXISTS freedom_archives CASCADE;
 CREATE schema freedom_archives;
 
-select * from parent_lookup;
+-- select * from `parent_lookup`;
 SET search_path to freedom_archives;
-select * from parent_lookup;
+-- select * from parent_lookup;
 
 CREATE TABLE archives (
   archive_id serial PRIMARY KEY,
@@ -272,10 +272,6 @@ update records set year = year + 1900 where year > 20 and year < 99;
 update records set year = year + 2000 where year < 20;
 
 update records set year = null where year > 2020;
-
-select * from parent_lookup;
-
-update records r set parent_record_id = p.parent_record_id from parent_lookup p where p.record_id = r.record_id;
 
 insert into records_to_list_items (select distinct list_item_id,
   id as record_id from freedom_archives_old.list_items_lookup a join freedom_archives.list_items b on a.item = b.item and a.type = b.type join records on id = record_id where is_doc = 1);
