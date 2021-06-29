@@ -1,5 +1,4 @@
-const { Service } = require('feathers-knex');
-const { authenticate } = require('@feathersjs/authentication').hooks;
+const {Service} = require('feathers-knex');
 const { hooks: { transaction } } = require('feathers-knex');
 
 class Relationships extends Service {
@@ -62,7 +61,7 @@ module.exports = function(app) {
 
   service.hooks({
     before: {
-      all: [authenticate('jwt')],
+      all: [],
       patch: [transaction.start(), setUser]
     },
     after: {

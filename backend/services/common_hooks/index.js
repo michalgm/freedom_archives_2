@@ -13,14 +13,15 @@ module.exports = {
     }
     return context;
   },
-    
-  maskView: context => {
-    context.service.table = context.path;
-    return context;
-  },
-  
-  unMaskView: context => {
-    context.service.table = `unified_${context.path}`;
+
+  fetchUnified: async (context) => {
+    const {id, app, method, params, path} = context;
+    // context.params.knex = context.app.service(`unified_${path}`).createQuery(context.params);
+    if (method === 'get') {
+      context.result = await app.service(`unified_${path}`).get(id, params);
+    } else {
+      context.result = await app.service(`unified_${path}`).find(params);
+    }
     return context;
   },
   
@@ -85,11 +86,8 @@ module.exports = {
   
     const table = path.slice(0, -1);
 
-    if ('parent_record_id' in data && data.parent_record_id) {
-      await app.service('records').patch(data.parent_record_id, {}, {user, transaction: {trx}});
-    }
     if (['update', 'patch', 'remove'].includes(method)) {
-      await trx(`unified_${table}s`).where(`${table}_id`, id).delete();
+      await trx(`_unified_${table}s`).where(`${table}_id`, id).delete();
     }
     if (['update', 'patch', 'create'].includes(method)) {
       const [data = {}] = await trx(`${table}s_view`).where(`${table}_id`, id).select();
@@ -99,7 +97,7 @@ module.exports = {
           data[key] &&
           typeof data[key] === 'object' &&
           !key.includes('_search') &&
-          !['call_numbers', 'formats', 'qualitys', 'generations', 'media_types', 'children', 'siblings', 'parent'].includes(key)
+          !['call_numbers', 'formats', 'qualitys', 'generations', 'media_types', 'siblings'].includes(key)
         ) {
           encoded[key] = JSON.stringify(data[key]);
         } else {
@@ -107,7 +105,7 @@ module.exports = {
         }
       });
       context.result = data;
-      await trx(`unified_${table}s`).insert(encoded);
+      await trx(`_unified_${table}s`).insert(encoded);
       return context;
     }
   }

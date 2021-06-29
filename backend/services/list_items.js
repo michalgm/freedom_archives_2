@@ -1,5 +1,4 @@
-const { Service } = require('feathers-knex');
-const { authenticate } = require('@feathersjs/authentication').hooks;
+const {Service} = require('feathers-knex');
 
 class ListItems extends Service {
   constructor(options) {
@@ -20,12 +19,4 @@ module.exports = function(app) {
   // Initialize our service with any options it requires
   app.use('/list_items', new ListItems(options, app));
 
-  // Get our initialized service so that we can register hooks
-  const service = app.service('list_items');
-
-  service.hooks({
-    before: {
-      all: [authenticate('jwt')],
-    }
-  });
 };

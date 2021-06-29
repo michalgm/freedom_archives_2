@@ -1,11 +1,12 @@
 Todos:
     ☐ add record count + digitized
-    ☐ link to collection in search results
+    ✔ link to collection in search results @done(21-06-14 23:32)
     ☐ Thumbnail uploads/resizing/management
     ✔ record display: title, collection, format, thumbnail @done(21-06-13 16:23)
     ☐ collectionItem component
+    ☐ clear search when switching between record + collection @high 
     Record:
-        ☐ Link to collection
+        ✔ Link to collection @done(21-06-29 01:49)
         Continuations:
             ☐ continuation needs order/index field
     Collection:

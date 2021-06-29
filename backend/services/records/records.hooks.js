@@ -1,4 +1,3 @@
-const { authenticate } = require('@feathersjs/authentication').hooks;
 const tsquery = require('pg-tsquery')();
 const {
   hooks: { transaction },
@@ -6,16 +5,15 @@ const {
 const {
   setUser,
   updateListItemRelations,
-  maskView,
-  unMaskView,
   refreshView,
-  updateThumbnail
+  updateThumbnail,
+  fetchUnified
 } = require('../common_hooks/');
 
 const fullTextSearch = context => {
   if (context.params.query.$fullText !== undefined) {
     const { $fullText, ...query } = context.params.query;
-    const knex = context.service.createQuery({ ...context.params, query });
+    const knex = context.app.service(`unified_${context.path}`).createQuery({...context.params, query});
     if ($fullText) {
       const fullTextQuery = tsquery($fullText);
       context.fullText = fullTextQuery;
@@ -160,37 +158,23 @@ const updateRelations = async context => {
     data.collection_id = data.collection ? data.collection.collection_id : null;
     delete data.collection;
   }
-  delete data.parent;
-  delete data.parent_id;
+  if ('parent' in data) {
+    data.parent_record_id = data.parent ? data.parent.record_id : null;
+    delete data.parent;
+  }
 
-  return context;
-};
-
-const fetchRelations = async (context) => {
-  const {id, app, result} = context;
-  const {parent_record_id} = result;
-  const $select = ['record_id', 'title', 'primary_instance_thumbnail', 'collection', 'primary_instance_format_text', 'primary_instance_media_type'];
-  const $limit = 1000;
-  const $sort = {title: 1};
-  const [{data: [parent = {}]}, {data: children}, {data: siblings}] = await Promise.all([
-    parent_record_id ? app.service('records')._find({query: {record_id: parent_record_id, $select, $limit, $sort}}) : {data: []},
-    app.service('records')._find({query: {parent_record_id: id, $select, $limit, $sort}}),
-    parent_record_id ? app.service('records')._find({query: {parent_record_id, $select, $limit, $sort}}) : {data: []}
-  ]);
-  result.parent = parent;
-  result.children = children;
-  result.siblings = siblings;
   return context;
 };
 
 module.exports = {
   before: {
-    all: [authenticate('jwt')],
-    find: [fullTextSearch],
-    get: [],
+    all: [],
+    find: [fullTextSearch, fetchUnified],
+    get: [
+      fetchUnified,
+    ],
     create: [
       transaction.start(),
-      maskView,
       setUser,
       updateListItemRelations,
       updateRelations,
@@ -198,18 +182,16 @@ module.exports = {
     update: [transaction.start()],
     patch: [
       transaction.start(),
-      maskView,
       setUser,
       updateListItemRelations,
       updateRelations,
       updateThumbnail,
     ],
-    remove: [transaction.start(), maskView],
+    remove: [transaction.start()],
   },
 
   after: {
     all: [
-      unMaskView,
       context => {
         if (context.params.knex) {
           context.result.query = context.params.knex.toString();
@@ -220,7 +202,7 @@ module.exports = {
       },
     ],
     find: [lookupFilters],
-    get: [fetchRelations],
+    get: [],
     create: [refreshView, transaction.end()],
     update: [refreshView, transaction.end()],
     patch: [refreshView, transaction.end()],
@@ -228,7 +210,7 @@ module.exports = {
   },
 
   error: {
-    all: [unMaskView],
+    all: [],
     find: [],
     get: [],
     create: [transaction.rollback()],
