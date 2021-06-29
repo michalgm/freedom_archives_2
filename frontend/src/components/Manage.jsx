@@ -34,7 +34,7 @@ const useStyles = makeStyles({
 
 function Filter({filter, index, remove, filterTypes}) {
     const classes = useStyles();
-    const {setFieldValue, values: {filters}} = useFormikContext()
+    const {values: {filters}} = useFormikContext()
     if (!filters[index]) {
         return null;
     }
@@ -54,9 +54,6 @@ function Filter({filter, index, remove, filterTypes}) {
                 type='simpleSelect'
                 options={filter_fields}
                 getOptionLabel={(option) => startCase(option)}
-                onChange={() => {
-                    setFieldValue(`filters[${index}].value`, '')
-                }}
             />
             {
                 type === 'listitem' || type === 'listitem_id' ?

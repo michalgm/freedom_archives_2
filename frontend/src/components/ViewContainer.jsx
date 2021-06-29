@@ -1,10 +1,13 @@
 import {Box, Grid, Icon, Paper, Typography} from '@material-ui/core';
 import React, {useEffect} from 'react';
 import {collections, records} from '../api';
+import {useSearch, useStateValue} from '../appContext'
 
 import ButtonLink from './ButtonLink'
 import {startCase} from 'lodash';
-import {useStateValue} from '../appContext'
+import {
+  useLocation
+} from 'react-router-dom';
 
 const renderTime = (item, type) => {
   return (
@@ -21,8 +24,18 @@ const renderTime = (item, type) => {
 };
 
 function ViewContainer({children, item, buttonRef, neighborService, ...props}) {
-  const {state: {search: {query}, search_index}, dispatch} = useStateValue();
+  const {state: {search: {query, type}, search_index}, dispatch} = useStateValue();
   const [neighbors, setNeighbors] = React.useState({prev: null, next: null})
+  const location = useLocation();
+  const resetSearch = useSearch();
+
+  const rootPath = location.pathname.split('/')[1];
+
+  useEffect(() => {
+    if (rootPath !== `${type}s`) {
+      resetSearch()
+    }
+  }, [rootPath, type]);
 
   useEffect(() => {
     const updateNeighbors = async (direction) => {
@@ -42,8 +55,10 @@ function ViewContainer({children, item, buttonRef, neighborService, ...props}) {
         setNeighbors({prev: neighbors[0], next: neighbors[2]})
       }
     }
-    updateNeighbors()
-  }, [search_index, query, neighborService])
+    if (rootPath === `${type}s`) {
+      updateNeighbors()
+    }
+  }, [search_index, query, neighborService, rootPath, type])
 
   const renderNeighborLink = (type) => {
     const offset = type === 'prev' ? -1 : 1

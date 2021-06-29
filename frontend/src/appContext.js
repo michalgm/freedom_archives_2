@@ -17,6 +17,7 @@ const initialState = {
   search_index: 0,
   title: ''
 };
+
 const reducer = (state, action) => {
   const { type, payload } = action;
   switch (type) {
@@ -78,6 +79,14 @@ export const useTitle = () => {
   const {dispatch} = useContext(StateContext);
   return title => {
     dispatch({type: 'TITLE', payload: title})
+  }
+}
+
+export const useSearch = () => {
+  const {dispatch} = useContext(StateContext);
+  return () => {
+    dispatch({type: 'SEARCH', payload: initialState.search})
+    dispatch({type: 'SEARCH_INDEX', payload: 0})
   }
 }
 

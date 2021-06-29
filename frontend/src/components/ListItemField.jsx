@@ -60,7 +60,7 @@ const ListItemField = ({name, listType, isMulti, ...props}) => {
         size="small"
         {...props}
       />
-       <NewListItemDialog
+      <NewListItemDialog
         handleClose={(...args) => {
           toggleOpen(false);
         }}

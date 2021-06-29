@@ -1,6 +1,8 @@
-import {Autocomplete} from '@material-ui/lab';
+import RecordItem, {CollectionItem} from './RecordItem'
+
+import {Autocomplete} from 'formik-material-ui-lab';
+import {Field} from 'formik';
 import React from 'react';
-import RecordItem from './RecordItem'
 import {TextField} from '@material-ui/core';
 import { services } from '../api';
 import useDeepCompareEffect from 'use-deep-compare-effect'
@@ -13,10 +15,13 @@ const searchTypes = {
   collections: {
     id: 'collection_id',
     label: 'collection_name',
+    fields: ['collection_id', 'collection_name', 'thumbnail', 'parent'],
+    renderOption: item => <CollectionItem collection={item} component='div' dense />
   },
   records: {
     id: 'record_id',
     label: 'title',
+    fields: ['record_id', 'title', 'parent_record_id', 'primary_instance_thumbnail', 'primary_instance_format_text', 'primary_instance_media_type', 'collection'],
     renderOption: item => <RecordItem record={item} component='div' dense />
   },
 
@@ -31,25 +36,26 @@ const SelectField = ({
   label,
   name,
   validateChange,
-  onChange,
+  onChange: customOnChange,
   onBlur,
   searchType,
   setFieldValue,
   searchParams,
   fetchAll,
   autoHighlight,
-  excludeId,
+  excludeIds,
+  managed,
   loadOptions: inputLoadOptions,
   ...props
 }) => {
-  const {id: typeId, label: typeLabel, renderOption} = searchTypes[searchType]
+  const {id: typeId, label: typeLabel, renderOption, fields} = searchTypes[searchType]
   const [open, setOpen] = React.useState(props.autoFocus || false);
   const [inputValue, setInputValue] = React.useState('');
   const [options, setOptions] = React.useState([]);
   const loading = Boolean(open && inputValue);
   
   const value = inputValue || ((defaultValue && defaultValue[typeLabel]) ? defaultValue[typeLabel] : "")
-  const $select = searchType === 'records' ? [typeId, typeLabel, 'parent_record_id', 'primary_instance_thumbnail', 'primary_instance_format_text', 'primary_instance_media_type', 'collection'] : [typeId, typeLabel]
+  const $select = fields || [typeId, typeLabel]
   const query = {
     $select,
     $sort: {[typeLabel]: 1},
@@ -60,9 +66,11 @@ const SelectField = ({
   if (!fetchAll) {
     query[typeLabel] = {$ilike: `%${value}%`}
   }
-
-  if (excludeId) {
-    query[typeId] = {$ne: excludeId}
+  if (excludeIds) {
+    query[typeId] = {$nin: excludeIds}
+  }
+  if (isMulti) {
+    query[typeId] = {$nin: defaultValue.map(item => item[typeId])}
   }
   React.useEffect(() => {
     const value = defaultValue && defaultValue[typeLabel] ? defaultValue[typeLabel] : ''
@@ -92,8 +100,20 @@ const SelectField = ({
     fetchRecord();
   }, [query, searchType, fetchAll, value, loading])
 
+
+  const onChange = React.useCallback(
+    (event, option) => {
+      const {value} = event.target;
+      setFieldValue(name, option);
+
+      !isMulti && customOnChange && customOnChange(event, option);
+    },
+    [setFieldValue, name, isMulti]
+  );
+
   return (
-    <Autocomplete
+    <Field
+      component={Autocomplete}
       loading={loading}
       multiple={isMulti}
       open={open}
@@ -113,23 +133,17 @@ const SelectField = ({
       }
       }
       options={options}
-      renderInput={params => (
+      renderInput={(params: unused) => (
         <TextField
           {...params}
+          name={name}
           InputLabelProps={{ shrink: true }}
           label={label}
           variant={props.variant || "outlined"}
           autoFocus={props.autoFocus || false}
         />
       )}
-      onChange={(_, option) => {
-        if (!validateChange || validateChange(_, option)) {
-          if (!props.clearOnBlur) {
-            setFieldValue(name, option);
-          }
-          onChange && onChange(_, option);
-        }
-      }}
+      onChange={onChange}
       renderOption={(option) => {
         if (renderOption) {
           return renderOption(option)
@@ -140,6 +154,7 @@ const SelectField = ({
       onInputChange={(_, option) => {
         setInputValue(option);
       }}
+      name={name}
       value={defaultValue}
       inputValue={inputValue}
       blurOnSelect

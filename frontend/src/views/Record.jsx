@@ -5,16 +5,15 @@ import {
   Grid,
   Icon,
   IconButton,
-  List,
   Table,
   TableBody,
   TableCell,
   TableHead,
   TableRow,
 } from "@material-ui/core/";
+import {EditableItem, RecordsList} from '../components/RecordItem'
 import {FieldArray, useFormikContext} from "formik";
 import React, {useEffect, useRef, useState} from "react";
-import RecordItem, {RecordsList} from '../components/RecordItem'
 import {records, relationships} from "../api";
 
 import Field from "../components/Field";
@@ -60,7 +59,8 @@ function Children({children = []}) {
               size="small"
               clearOnBlur
               selectOnFocus
-              excludeId={values.record_id}
+              managed
+              excludeIds={[values.record_id, ...values.children.map(({record_id}) => record_id)]}
               onChange={(_, child) => {
                 if (child) {
                   push(child);
@@ -312,9 +312,6 @@ function Relationships({id, relationships = []}) {
           const side = relation.docid_1 === id ? 2 : 1;
 
           const doc_id = relation[`docid_${side}`];
-          // if (doc_id === `${id}`) {
-          //   return null;
-          // }
           return (
             <React.Fragment
               key={`${relation.docid_1}_${relation.docid_2}_${relation.track_number_1}_${relation.track_number_2}`}
@@ -349,39 +346,10 @@ function Relationships({id, relationships = []}) {
 }
 
 function RecordParent() {
-  const {values, setFieldValue} = useFormikContext();
-  const [edit, setEdit] = useState(false);
   return (
     <Grid container justify="center" alignItems="center" spacing={4}>
       <Grid item xs={12}>
-        {
-          edit ?
-            <Field
-              name='parent'
-              type="select"
-              searchType="records"
-              size="small"
-              label=" "
-              autoFocus
-              selectOnFocus
-              excludeId={values.record_id}
-              onChange={(_, record) => {
-                if (record) {
-                  setFieldValue('parent_record_id', record.record_id);
-                  setFieldValue('parent', {...record});
-                  setEdit(false)
-                }
-              }}
-            />
-            :
-            <List>
-              <RecordItem record={values.parent} link missingRecordText="No Parent Record" action={() => (<IconButton
-                onClick={() => {setEdit(true)}}
-              >
-                <Icon>edit</Icon>
-              </IconButton>)} />
-            </List>
-        }
+        <EditableItem service="records" name="parent" />
       </Grid>
     </Grid>
   )
@@ -440,8 +408,14 @@ function Record({id, showForm, ro = false, embedded = false}) {
 
   const updateRecord = async (data) => {
     delete data.new_child
+    const clean_data = Object.keys(data).reduce((acc, key) => {
+      if (!key.match(/^mui/)) {
+        acc[key] = data[key]
+      }
+      return acc
+    }, {})
     try {
-      await records.patch(id, data);
+      await records.patch(id, clean_data);
       const updated = await records.get(id);
       loadRecord(updated);
     } catch { }
@@ -521,11 +495,9 @@ function Record({id, showForm, ro = false, embedded = false}) {
                     >
                       Old Admin Link
                     </Button>
-                    {/* <img src={record.primary_instance_thumbnail} /> */}
                     <p>
                       <img
                         alt=""
-                        // width="100"
                         src={
                           "https://search.freedomarchives.org/" +
                           record.primary_instance_thumbnail
@@ -533,12 +505,8 @@ function Record({id, showForm, ro = false, embedded = false}) {
                       />
 
                     </p>
-                    {/* <div style={{width: 50, height: 200, background: 'blue'}} /> */}
                   </Grid>
                 )}
-                <FieldRow>
-                  {/* <Field name="call_number" /> */}
-                </FieldRow>
                 <FieldRow>
                   <ListItemField name="authors" isMulti />
                   <ListItemField name="producers" isMulti />
@@ -548,12 +516,7 @@ function Record({id, showForm, ro = false, embedded = false}) {
                   <ListItemField name="subjects" isMulti />
                 </FieldRow>
                 <FieldRow>
-                  <Field
-                    type="select"
-                    searchType="collections"
-                    name="collection"
-                    size="small"
-                  />
+                  <EditableItem service="collections" name="collection" />
                   <Field name="vol_number" />
                 </FieldRow>
                 <FieldRow>

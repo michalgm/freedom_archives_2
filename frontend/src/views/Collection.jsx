@@ -1,5 +1,6 @@
 import React, {useEffect, useRef, useState} from 'react';
 
+import {EditableItem} from '../components/RecordItem'
 import Field from '../components/Field';
 import FieldRow from '../components/FieldRow';
 import Form from '../components/Form';
@@ -32,7 +33,14 @@ function Collection() {
   }, [id, setTitle]);
 
   const updateCollection = async data => {
-    const updated = await collectionsService.patch(id, data);
+    const clean_data = Object.keys(data).reduce((acc, key) => {
+      if (!key.match(/^mui/)) {
+        acc[key] = data[key]
+      }
+      return acc
+    }, {})
+    await collectionsService.patch(id, clean_data);
+    const updated = await collectionsService.get(id);
     setCollection(updated);
   };
 
@@ -58,45 +66,48 @@ function Collection() {
   return (
     <ViewContainer item={collection} buttonRef={buttonRef} neighborService='collection'>
       <GridBlock>
-        <Form
-          initialValues={collection}
-          onSubmit={updateCollection}
-          ro={!edit}
-          buttons={buttons}
-          buttonRef={buttonRef}
-        >
-          <FieldRow>
-            <Field name="collection_name" />
-            <Field name="parent" type="select" searchType="collections" />
-          </FieldRow>
-          <FieldRow>
-            <Field name="is_hidden" type="checkbox" />
-            <Field name="needs_review" type="checkbox" />
-          </FieldRow>
-          <FieldRow>
-            <Field name="call_number" type="call_number" />
-            <Field name="publisher" />
-          </FieldRow>
-          <FieldRow>
-            <Field name="date_range" />
-            <Field name="thumbnail" />
-          </FieldRow>
-          <FieldRow>
-            <ListItemField name="keywords" isMulti />
-          </FieldRow>
-          <FieldRow>
-            <ListItemField name="subjects" isMulti />
-          </FieldRow>
-          <FieldRow>
-            <Field name="description" type="html" />
-          </FieldRow>
-          <FieldRow>
-            <Field name="summary" multiline />
-          </FieldRow>
-          <FieldRow>
-            <Field name="notes" multiline />
-          </FieldRow>
-        </Form>
+        {
+          collection.collection_name &&
+          <Form
+            initialValues={collection}
+            onSubmit={updateCollection}
+            ro={!edit}
+            buttons={buttons}
+            buttonRef={buttonRef}
+          >
+            <FieldRow>
+              <Field name="collection_name" />
+              <EditableItem service="collections" name="parent" />
+            </FieldRow>
+            <FieldRow>
+              <Field name="is_hidden" type="checkbox" />
+              <Field name="needs_review" type="checkbox" />
+            </FieldRow>
+            <FieldRow>
+              <Field name="call_number" type="call_number" />
+              <ListItemField name="publisher" />
+            </FieldRow>
+            <FieldRow>
+              <Field name="date_range" />
+              <Field name="thumbnail" />
+            </FieldRow>
+            <FieldRow>
+              <ListItemField name="keywords" isMulti />
+            </FieldRow>
+            <FieldRow>
+              <ListItemField name="subjects" isMulti />
+            </FieldRow>
+            <FieldRow>
+              <Field name="description" type="html" />
+            </FieldRow>
+            <FieldRow>
+              <Field name="summary" multiline />
+            </FieldRow>
+            <FieldRow>
+              <Field name="notes" multiline />
+            </FieldRow>
+          </Form>
+        }
       </GridBlock>
     </ViewContainer>
     // {/* <Grid item xs={12}>

@@ -15,7 +15,7 @@ const filter_types = {
   description: {input: 'text', match: 'fuzzy'},
   summary: {input: 'text', match: 'fuzzy'},
   notes: {input: 'text', match: 'fuzzy'},
-  publisher: {input: 'text', match: 'fuzzy'},
+  publisher: {input: 'listitem', match: 'listitem_id'},
   'keywords': {input: 'listitem', match: 'listitem'},
   'subjects': {input: 'listitem', match: 'listitem'},
 };
