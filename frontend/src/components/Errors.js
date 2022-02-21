@@ -1,6 +1,6 @@
 import React from 'react';
 import { useStateValue } from '../appContext'
-import { Alert, AlertTitle } from '@material-ui/lab'
+import { Alert, AlertTitle } from '@mui/material';
 
 function Errors() {
   const { state: { error }, dispatch } = useStateValue();

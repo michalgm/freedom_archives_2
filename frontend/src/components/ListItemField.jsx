@@ -5,13 +5,13 @@ import {
   DialogContent,
   DialogTitle,
   Grid,
-} from '@material-ui/core';
+} from '@mui/material';
 import React, {useState} from 'react';
 
 import Field from './Field';
 import FieldRow from './FieldRow';
 import Form from './Form';
-import {createFilterOptions} from '@material-ui/lab'
+import { createFilterOptions } from '@mui/material/useAutocomplete';
 import { list_items } from '../api';
 import { useFormikContext } from 'formik';
 
@@ -19,7 +19,7 @@ const ListItemField = ({name, listType, isMulti, ...props}) => {
   const [open, toggleOpen] = React.useState(false);
   const [newValue, setNewValue] = React.useState('');
   
-  const filter = createFilterOptions();
+  const filter = createFilterOptions({trim: true});
   const type = listType || name.replace(/s$/, '');
   
   const validateChange = (_, item) => {

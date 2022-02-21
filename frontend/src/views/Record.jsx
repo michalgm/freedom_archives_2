@@ -10,7 +10,7 @@ import {
   TableCell,
   TableHead,
   TableRow,
-} from "@material-ui/core/";
+} from "@mui/material/";
 import {EditableItem, RecordsList} from '../components/RecordItem'
 import {FieldArray, useFormikContext} from "formik";
 import React, {useEffect, useRef, useState} from "react";
@@ -22,7 +22,7 @@ import Form from "../components/Form";
 import GridBlock from "../components/GridBlock";
 import Link from "../components/Link";
 import ListItemField from "../components/ListItemField";
-import {Redirect} from "react-router-dom";
+import {Navigate} from "react-router-dom";
 import ViewContainer from "../components/ViewContainer";
 import {useTitle} from '../appContext'
 
@@ -43,7 +43,7 @@ function Children({children = []}) {
                 !child.delete
               )
             }
-          >
+            size="large">
             <Icon>{child.delete ? "restore" : "delete"}</Icon>
           </IconButton>)
           return child;
@@ -71,7 +71,7 @@ function Children({children = []}) {
         );
       }}
     />
-  )
+  );
 }
 
 function Instance({instance = {}, record, index, edit}) {
@@ -98,133 +98,131 @@ function Instance({instance = {}, record, index, edit}) {
   if (instance.delete) {
     edit = false;
   }
-  return (
-    <>
-      <TableRow className={`instance ${instance.delete ? "deleted" : ""}`}>
-        <TableCell className="instance-action">
-          <IconButton
-            onClick={() =>
-              context.setFieldValue(
-                `instances[${index}].delete`,
-                !instance.delete
-              )
-            }
-          >
-            <Icon>{instance.delete ? "restore" : "delete"}</Icon>
-          </IconButton>
-        </TableCell>
-        {/* <TableCell className='instance-action' rowSpan={2}>
-          {instance.url ? (
-            <a
-              href={instance.url}
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              {instance.thumbnail ? (
-                <img
-                  alt=""
-                  width="60"
-                  src={
-                    'https://search.freedomarchives.org/' +
-                    instance.thumbnail
-                  }
-                />
-              ) : null}
-            </a>
-          ) : null}
-
-        </TableCell> */}
-        <TableCell>
-          <Field
-            ro={!edit}
-            type="radio"
-            // radioGroup="primary_instance_id"
-            name="primary_instance_id"
-            value={`${instance.instance_id}`}
-          />
-        </TableCell>
-        <TableCell>
-          <Field
-            ro={!edit}
-            fullWidth={false}
-            label=" "
-            name={`instances[${index}].call_number`}
-          />
-        </TableCell>
-        <TableCell>
-          <ListItemField
-            fetchAll
-            ro={!edit}
-            label=" "
-            name={`instances[${index}].generation_item`}
-            listType="generation"
-            variant="standard"
-          />
-        </TableCell>
-        <TableCell>
-          <ListItemField
-            fetchAll
-            ro={!edit}
-            label=" "
-            name={`instances[${index}].format_item`}
-            listType="format"
-            variant="standard"
-          />
-        </TableCell>
-        <TableCell>
-          <ListItemField
-            fetchAll
-            ro={!edit}
-            label=" "
-            name={`instances[${index}].quality_item`}
-            listType="quality"
-            variant="standard"
-          />
-        </TableCell>
-        <TableCell>
-          <Field
-            ro={!edit}
-            type="number"
-            inputProps={{min: 0, style: {width: 40}}}
-            label=" "
-            name={`instances[${index}].no_copies`}
-          />
-        </TableCell>
-
-        {/* <TableCell>
-        <Link to={`/record/${instance.original_doc_id}`}>
-          {instance.original_doc_id}
-        </Link>
-      </TableCell> */}
-      </TableRow>
-      <TableRow className={instance.delete ? "deleted" : ""}>
-        <TableCell />
-        <TableCell>
-          {
-            instance.url &&
-            <Link
-              href={instance.url}
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              <Icon>open_in_new</Icon>
-            </Link>
+  return <>
+    <TableRow className={`instance ${instance.delete ? "deleted" : ""}`}>
+      <TableCell className="instance-action">
+        <IconButton
+          onClick={() =>
+            context.setFieldValue(
+              `instances[${index}].delete`,
+              !instance.delete
+            )
           }
-        </TableCell>
-        <TableCell>
-          {instance.media_type}
-        </TableCell>
-        <TableCell colSpan={5}>
-          <Field ro={!edit} label="URL" name={`instances[${index}].url`} />
-        </TableCell>
-        {/* <TableCell colSpan={2}>
-        <pre>
-            {JSON.stringify(instance, null, ' ')}
-        </pre>
-        </TableCell> */}
-      </TableRow>
-    </>
-  );
+          size="large">
+          <Icon>{instance.delete ? "restore" : "delete"}</Icon>
+        </IconButton>
+      </TableCell>
+      {/* <TableCell className='instance-action' rowSpan={2}>
+        {instance.url ? (
+          <a
+            href={instance.url}
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            {instance.thumbnail ? (
+              <img
+                alt=""
+                width="60"
+                src={
+                  'https://search.freedomarchives.org/' +
+                  instance.thumbnail
+                }
+              />
+            ) : null}
+          </a>
+        ) : null}
+
+      </TableCell> */}
+      <TableCell>
+        <Field
+          ro={!edit}
+          type="radio"
+          // radioGroup="primary_instance_id"
+          name="primary_instance_id"
+          value={`${instance.instance_id}`}
+        />
+      </TableCell>
+      <TableCell>
+        <Field
+          ro={!edit}
+          fullWidth={false}
+          label=" "
+          name={`instances[${index}].call_number`}
+        />
+      </TableCell>
+      <TableCell>
+        <ListItemField
+          fetchAll
+          ro={!edit}
+          label=" "
+          name={`instances[${index}].generation_item`}
+          listType="generation"
+          variant="standard"
+        />
+      </TableCell>
+      <TableCell>
+        <ListItemField
+          fetchAll
+          ro={!edit}
+          label=" "
+          name={`instances[${index}].format_item`}
+          listType="format"
+          variant="standard"
+        />
+      </TableCell>
+      <TableCell>
+        <ListItemField
+          fetchAll
+          ro={!edit}
+          label=" "
+          name={`instances[${index}].quality_item`}
+          listType="quality"
+          variant="standard"
+        />
+      </TableCell>
+      <TableCell>
+        <Field
+          ro={!edit}
+          type="number"
+          inputProps={{min: 0, style: {width: 40}}}
+          label=" "
+          name={`instances[${index}].no_copies`}
+        />
+      </TableCell>
+
+      {/* <TableCell>
+      <Link to={`/record/${instance.original_doc_id}`}>
+        {instance.original_doc_id}
+      </Link>
+    </TableCell> */}
+    </TableRow>
+    <TableRow className={instance.delete ? "deleted" : ""}>
+      <TableCell />
+      <TableCell>
+        {
+          instance.url &&
+          <Link
+            href={instance.url}
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            <Icon>open_in_new</Icon>
+          </Link>
+        }
+      </TableCell>
+      <TableCell>
+        {instance.media_type}
+      </TableCell>
+      <TableCell colSpan={5}>
+        <Field ro={!edit} label="URL" name={`instances[${index}].url`} />
+      </TableCell>
+      {/* <TableCell colSpan={2}>
+      <pre>
+          {JSON.stringify(instance, null, ' ')}
+      </pre>
+      </TableCell> */}
+    </TableRow>
+  </>;
 }
 
 function Instances({record, instances = [], edit}) {
@@ -347,16 +345,16 @@ function Relationships({id, relationships = []}) {
 
 function RecordParent() {
   return (
-    <Grid container justify="center" alignItems="center" spacing={4}>
+    <Grid container justifyContent="center" alignItems="center" spacing={4}>
       <Grid item xs={12}>
         <EditableItem service="records" name="parent" />
       </Grid>
     </Grid>
-  )
+  );
 
 }
 
-function Record({id, showForm, ro = false, embedded = false}) {
+function Record({showForm, ro = false, embedded = false, id}) {
   const [record, setRecord] = useState({});
   const [returnHome, set_returnHome] = useState(false);
   const [edit, setEdit] = useState(!ro);
@@ -445,7 +443,7 @@ function Record({id, showForm, ro = false, embedded = false}) {
   }, [id]);
 
   if (returnHome) {
-    return <Redirect to="/" />;
+    return <Navigate to="/" />;
   }
 
   const buttons = edit

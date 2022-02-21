@@ -1,9 +1,9 @@
 import RecordItem, {CollectionItem} from './RecordItem'
 
-import {Autocomplete} from 'formik-material-ui-lab';
+import {Autocomplete} from 'formik-mui';
 import {Field} from 'formik';
 import React from 'react';
-import {TextField} from '@material-ui/core';
+import {TextField} from '@mui/material';
 import { services } from '../api';
 import useDeepCompareEffect from 'use-deep-compare-effect'
 
@@ -55,6 +55,9 @@ const SelectField = ({
   const loading = Boolean(open && inputValue);
   
   const value = inputValue || ((defaultValue && defaultValue[typeLabel]) ? defaultValue[typeLabel] : "")
+
+  const currentValues = (Array.isArray(defaultValue) ? defaultValue : [defaultValue]).map((item) => item[typeLabel])
+
   const $select = fields || [typeId, typeLabel]
   const query = {
     $select,
@@ -76,7 +79,7 @@ const SelectField = ({
     const value = defaultValue && defaultValue[typeLabel] ? defaultValue[typeLabel] : ''
     setInputValue(value)
   }, [defaultValue, typeLabel])
-
+  
   useDeepCompareEffect(() => {
     if (
       (fetchAll && options.length) ||
@@ -94,7 +97,20 @@ const SelectField = ({
         noLoading: true,
         query,
       });
-      setOptions([{[typeId]: null, [typeLabel]: ''}, ...options.filter(o => o[typeLabel].trim())])
+      
+      const newOptions = options.filter(o => o[typeLabel].trim())
+      if (currentValues[0] != null) {
+        newOptions.push({[typeId]: null, [typeLabel]: '', clear: true})
+      }
+      const optionValues = options.map(o => o[typeLabel]);
+      (isMulti ? defaultValue : [defaultValue]).forEach(value => {
+        if(!optionValues.includes(value[typeLabel])) {
+          newOptions.push({...value, hidden: true})
+        }
+      });
+
+      setOptions(newOptions);
+
       active = false;
     };
     fetchRecord();
@@ -125,7 +141,7 @@ const SelectField = ({
         setOpen(false);
       }}
       getOptionLabel={item => item[typeLabel] || ''}
-      getOptionSelected={(option, value) => {
+      isOptionEqualToValue={(option, value) => {
         if (!value[typeId] && !option[typeId]) {
           return true;
         }
@@ -144,11 +160,18 @@ const SelectField = ({
         />
       )}
       onChange={onChange}
-      renderOption={(option) => {
+      renderOption={(props, option) => {
+        if (option.hidden) {
+          return null;
+        }
         if (renderOption) {
-          return renderOption(option)
+          return <li {...props}>
+            {renderOption(option)}
+          </li>
         } else {
-          return option[typeLabel]
+          return <li {...props}>
+            {option[typeLabel]}
+          </li>
         }
       }}
       onInputChange={(_, option) => {

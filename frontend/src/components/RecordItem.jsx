@@ -1,4 +1,4 @@
-import {Link as DOMLink, useHistory} from 'react-router-dom';
+import {Link as DOMLink, useNavigate} from 'react-router-dom';
 import {
   Divider,
   Grid,
@@ -10,7 +10,7 @@ import {
   ListItemSecondaryAction,
   ListItemText,
   Typography
-} from '@material-ui/core';
+} from '@mui/material';
 import React, {useState} from 'react'
 
 import Field from "../components/Field";
@@ -62,13 +62,13 @@ export function EditableItem({service, name}) {
     const missingText = name === 'parent' ? 'Parent Record' : 'Collection'
     const {tag: ItemTag, itemName} = services[service]
 
-    return <List>
-      <ItemTag {...{[itemName]: values[name]}} link missingRecordText={`No ${missingText}`} action={() => (<IconButton
-        onClick={() => {setEdit(true)}}
-      >
-        <Icon>edit</Icon>
-      </IconButton>)} />
-    </List>
+    return (
+      <List>
+        <ItemTag {...{[itemName]: values[name]}} link missingRecordText={`No ${missingText}`} action={() => (<IconButton onClick={() => {setEdit(true)}} size="large">
+          <Icon>edit</Icon>
+        </IconButton>)} />
+      </List>
+    );
   }
 }
 
@@ -116,33 +116,35 @@ export function CollectionItem({collection: {collection_name, collection_id, thu
 }
 
 function RecordItemDetails({details, dense}) {
-  const history = useHistory();
-  const navigate = link => (e) => {
+  const navigate = useNavigate();
+  const navigateTo = link => (e) => {
     e.preventDefault()
-    history.push(link);
+    navigate(link);
   }
-  return <Grid container alignItems="center" justify="flex-start" spacing={2} style={{marginTop: 0, marginBottom: 0}}>
-    {
-      details.reduce((acc, {label, type, link}) => {
-        if (label) {
-          const item = (
-            <Grid key={type} item style={{paddingTop: 0, paddingBottom: 0}}>
-              <Typography color="textSecondary" variant="caption">
-                {type}:&nbsp;
-                <b> {label} </b>
-                {
-                  link && !dense && <Icon onClick={navigate(link)} color="primary" fontSize="inherit" variant="caption">launch</Icon>
-                }
-              </Typography>
-            </Grid>
-          )
-          return acc === null ? [item] : [acc, <Divider key="divider" orientation="vertical" flexItem />, item]
-        } else {
-          return acc
-        }
-      }, null)
-    }
-  </Grid>
+  return (
+    <Grid container alignItems="center" justifyContent="flex-start" spacing={2} style={{marginTop: 0, marginBottom: 0}}>
+      {
+        details.reduce((acc, {label, type, link}) => {
+          if (label) {
+            const item = (
+              <Grid key={type} item style={{paddingTop: 0, paddingBottom: 0}}>
+                <Typography color="textSecondary" variant="caption">
+                  {type}:&nbsp;
+                  <b> {label} </b>
+                  {
+                    link && !dense && <Icon onClick={navigateTo(link)} color="primary" fontSize="inherit" variant="caption">launch</Icon>
+                  }
+                </Typography>
+              </Grid>
+            )
+            return acc === null ? [item] : [acc, <Divider key="divider" orientation="vertical" flexItem />, item]
+          } else {
+            return acc
+          }
+        }, null)
+      }
+    </Grid>
+  );
 }
 
 export function Item({id, type, thumbnail, details = [], title, description, link, dense, action, missingRecordText = "None", index, onClick: onClickHandler, ...props}) {

@@ -1,8 +1,10 @@
 import './Search.scss';
 
-import {Box, Button, Card, Chip, Divider, Grid, Icon, Link as MULink, Paper, Typography} from '@material-ui/core';
+import {Box, Button, Card, Chip, Divider, Grid, Icon, Link as MULink, Paper, Typography} from '@mui/material';
 import React, {useEffect, useRef, useState} from 'react';
-import {makeStyles, useTheme} from '@material-ui/core/styles';
+import { useTheme } from '@mui/material/styles';
+
+import makeStyles from '@mui/styles/makeStyles';
 
 import AutoSave from '../components/AutoSave'
 import Field from '../components/Field';
@@ -87,7 +89,7 @@ function Filter({type, values = [], addFilter, search}) {
         href=""
         onClick={e => e.preventDefault()}
         style={{fontWeight: (search || []).includes(value) ? 800 : 400}}
-      >
+        underline="hover">
         {label || '???'}
       </MULink>{' '}
       &nbsp;({count})
@@ -95,7 +97,6 @@ function Filter({type, values = [], addFilter, search}) {
   );
 
   return (
-
     <div key={type} style={{flexGrow: 1, marginBottom: 10}}>
       <Typography variant="h6" gutterBottom>{startCase(type)}</Typography>
       <div style={{paddingLeft: 10}}>
@@ -107,7 +108,11 @@ function Filter({type, values = [], addFilter, search}) {
             )}
         </div>
         {(values && values.length > limit) &&
-          <Button size="small" color="default" startIcon={<Icon>add</Icon>} onClick={e => setlimit(limit + 5)} style={{display: 'flex', cursor: 'pointer'}}>
+          <Button
+            size="small"
+            startIcon={<Icon>add</Icon>}
+            onClick={e => setlimit(limit + 5)}
+            style={{display: 'flex', cursor: 'pointer'}}>
             Show More...
           </Button>
         }
@@ -202,7 +207,7 @@ function Search() {
   }, [searchRef.current, offset]);
 
   const addFilter = ({type, value}) => {
-    let newFilter = [...search[type] || []];
+    let newFilter = [...(search[type] || [])];
     if (newFilter.includes(value)) {
       newFilter = newFilter.filter(v => v !== value)
     } else {

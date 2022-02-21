@@ -7,19 +7,19 @@ import {
   Icon,
   Toolbar,
   Typography
-} from '@material-ui/core';
+} from '@mui/material';
+import {
+  Content,
+  EdgeTrigger,
+  Header,
+  Root,
+} from '@mui-treasury/layout';
 import {
   Link,
   BrowserRouter as Router,
 } from 'react-router-dom';
-import {
-  Root,
-  getContent,
-  getHeader,
-  getMuiTreasuryScheme,
-  getSidebarTrigger,
-} from '@mui-treasury/layout';
-import {StateProvider, useStateValue} from './appContext';
+import { StateProvider, useStateValue } from './appContext';
+import { StyledEngineProvider, ThemeProvider, createTheme } from '@mui/material/styles';
 
 import Authentication from './Authentication';
 import Breadcrumbs from './components/Breadcrumbs';
@@ -28,48 +28,59 @@ import Loading from './views/Loading';
 import React from 'react';
 import Routes from './Routes'
 import Sidebar from './views/Sidebar';
-import {app} from './api';
-import styled from 'styled-components';
+import { app } from './api';
 
-const Header = getHeader(styled);
-const SidebarTrigger = getSidebarTrigger(styled);
-const Content = getContent(styled);
+const theme = createTheme();
 
-const scheme = getMuiTreasuryScheme();
-// scheme.configureHeader(builder => {
-//   builder
-//     .registerConfig('xs', {
-//       position: 'sticky',
-//     })
-//     .registerConfig('md', {
-//       position: 'relative', // won't stick to top when scroll down
-//     });
-// });
-// scheme.configureEdgeSidebar(builder => {
-//   builder
-//     .create('sidebar', { anchor: 'left' })
-//     .registerTemporaryConfig('xs', {
-//       anchor: 'left',
-//       width: 'auto', // 'auto' is only valid for temporary variant
-//     })
-//     .registerPermanentConfig('md', {
-//       width: 300, // px, (%, rem, em is compatible)
-//       collapsible: true,
-//       collapsedWidth: 64,
-//     });
-// });
+const scheme = {
+  header: {
+    config: {
+      xs: {
+        position: "fixed",
+        height: 56,
+        clipped: true
+      },
+    },
+  },
+  leftEdgeSidebar: {
+    autoCollapse: "sm",
+    config: {
+      xs: {
+        variant: "temporary",
+        width: 256,
+        collapsible: false,
+        persistentBehavior: "fit",
+      },
+      md: {
+        variant: "permanent",
+        persistentBehavior: "fit",
+        width: 256,
+        collapsible: false,
+      },
+    },
+  },
+  initialState: {
+    leftEdgeSidebar: {
+      open: true,
+    },
+  }
+};
 
 function App() {
   return (
-    <StateProvider>
-      <Router>
-        <Root scheme={scheme}>
-          <CssBaseline>
-            <Layout />
-          </CssBaseline>
-        </Root>
-      </Router>
-    </StateProvider>
+    <StyledEngineProvider injectFirst>
+      <ThemeProvider theme={theme}>
+        <StateProvider>
+          <Router>
+            <Root scheme={scheme}>
+              <CssBaseline>
+                <Layout />
+              </CssBaseline>
+            </Root>
+          </Router>
+        </StateProvider>
+      </ThemeProvider>
+    </StyledEngineProvider>
   );
 }
 
@@ -80,9 +91,9 @@ function Layout() {
   const style = isAuthenticated
     ? {}
     : {
-        marginLeft: 0,
-        width: '100%',
-      };
+      marginLeft: 0,
+      width: '100%',
+    };
   return (
     <div className="App">
       <NavBar />
@@ -119,7 +130,13 @@ function NavBar() {
   return (
     <Header color="primary">
       <Toolbar className='topnav'>
-        <SidebarTrigger sidebarId="primarySidebar" color="inherit" />
+        <EdgeTrigger target={{ anchor: "left", field: "open" }}>
+          {(open, setOpen) => (
+            <Icon onClick={() => setOpen(!open)}>
+              {open ? 'keyboard_arrow_left' : 'menu'}
+            </Icon>
+          )}
+        </EdgeTrigger>
         <Breadcrumbs />
         <Logout />
       </Toolbar>
@@ -138,7 +155,7 @@ function Main() {
     <Container maxWidth="xl">
       <Authentication />
       <Errors />
-      <Routes isAuthenticated={isAuthenticated}/>
+      <Routes isAuthenticated={isAuthenticated} />
     </Container>
   );
 }

@@ -5,7 +5,7 @@ import {useFormikContext} from 'formik';
 export default function AutoSave({timeout = 300}) {
     const formik = useFormikContext()
     const {submitForm, values, isValid, dirty, isSubmitting} = formik;
-    const {callback: debouncedSubmitCaller} = useDebouncedCallback((submitForm) => {
+    const debouncedSubmitCaller = useDebouncedCallback((submitForm) => {
         submitForm();
     }, timeout)
 

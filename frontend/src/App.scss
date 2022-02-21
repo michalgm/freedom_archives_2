@@ -6,7 +6,8 @@
     }
   }
   .topnav {
-    .logout, .logout .MuiTypography-root {
+    .logout,
+    .logout .MuiTypography-root {
       display: flex;
       align-items: center;
       flex-wrap: nowrap;

@@ -1,18 +1,17 @@
-import React from 'react';
 import {
   Divider,
   List,
   ListItem,
-  Typography,
   ListItemText,
-} from '@material-ui/core';
+  Typography,
+} from '@mui/material';
 import {
-  getDrawerSidebar,
-  getSidebarContent,
-  getCollapseBtn,
+  EdgeSidebar,
+  SidebarContent,
 } from '@mui-treasury/layout';
-import styled from 'styled-components';
-import { useRouteMatch, Link } from 'react-router-dom';
+import { Link, useMatch, useResolvedPath, useLocation } from 'react-router-dom';
+
+import React from 'react';
 
 const sideBarConfig = {
   Collections: [
@@ -44,13 +43,9 @@ const sideBarConfig = {
   ],
 };
 
-const DrawerSidebar = getDrawerSidebar(styled);
-const SidebarContent = getSidebarContent(styled);
-const CollapseBtn = getCollapseBtn(styled);
-
 function Sidebar() {
   return (
-    <DrawerSidebar sidebarId={'primarySidebar'}>
+    <EdgeSidebar anchor="left">
       <SidebarContent>
         {Object.keys(sideBarConfig).map(title => {
           return (
@@ -73,15 +68,22 @@ function Sidebar() {
           );
         })}
       </SidebarContent>
-      <CollapseBtn />
-    </DrawerSidebar>
+      {/* <EdgeTrigger target={{ anchor: "left", field: "collapsed" }} /> */}
+    </EdgeSidebar>
   );
 }
 
-function SidebarItem({ label, icon, href }) {
-  const current = Boolean(useRouteMatch(href) !== null && href);
+function SidebarItem({ label, icon, href='notalink'}) {
+  const {pathname = null} = useResolvedPath(href) 
+  const location = useLocation()
+  // console.log(location)?
+  // console.log(useMatch({path: pathname || ''}))
+  const current = Boolean(useMatch({path: pathname || ''}) !== null || (location.pathname === '/' && href==='/records')) && href;
+  // const home = Boolean(useMatch({path: href==='records' ? '/' : 'notalink'}))
+  
+  // console.log({href, pathname, current, home})
   return (
-    <ListItemLink button selected={current} href={href}>
+    <ListItemLink button selected={Boolean(current)} href={href}>
       <ListItemText>{label}</ListItemText>
     </ListItemLink>
   );

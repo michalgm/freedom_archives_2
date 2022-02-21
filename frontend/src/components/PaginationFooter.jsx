@@ -1,7 +1,7 @@
-import {Chip} from '@material-ui/core'
-import { Pagination } from '@material-ui/lab';
+import {Chip} from '@mui/material'
+import { Pagination } from '@mui/material';
 import React from 'react';
-import {makeStyles} from '@material-ui/core/styles';
+import makeStyles from '@mui/styles/makeStyles';
 import {startCase} from 'lodash';
 
 const useStyles = makeStyles({

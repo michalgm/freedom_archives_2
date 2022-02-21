@@ -2,13 +2,13 @@ import {
   Breadcrumbs as Crumbs,
   Icon,
   Typography
-} from '@material-ui/core'
+} from '@mui/material'
 import {useStateValue, useTitle} from '../appContext'
 
 import {Helmet} from 'react-helmet'
 import Link from './Link';
 import React from 'react'
-import {makeStyles} from '@material-ui/core/styles';
+import makeStyles from '@mui/styles/makeStyles';
 import {startCase} from 'lodash';
 import {
   useLocation

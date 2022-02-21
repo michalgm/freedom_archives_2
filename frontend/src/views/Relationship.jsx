@@ -1,4 +1,4 @@
-import { Divider, Grid, Paper, Typography } from '@material-ui/core';
+import { Divider, Grid, Paper, Typography } from '@mui/material';
 import React, { useEffect, useState } from 'react';
 
 import Field from '../components/Field';
@@ -6,7 +6,7 @@ import Link from '../components/Link';
 import Record from './Record';
 import { relationships } from '../api';
 
-function Relationship({ id }) {
+function Relationship({id}) {
   const [relation, setRelation] = useState({});
 
   useEffect(() => {

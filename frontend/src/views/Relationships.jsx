@@ -9,13 +9,13 @@ import {
   Paper,
   TextField,
   Typography,
-} from '@material-ui/core';
+} from '@mui/material';
 import React, { useEffect, useState } from 'react';
 
 import ButtonLink from '../components/ButtonLink';
 import Relationship from './Relationship';
 import { relationships } from '../api';
-import { useHistory } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 
 function LinearProgressWithLabel(props) {
   return (
@@ -32,7 +32,8 @@ function LinearProgressWithLabel(props) {
   );
 }
 
-function Relationships({ skip = 1 }) {
+function Relationships() {
+  const {skip=1} = useParams()
   const $skip = parseInt(skip, 10);
   const [idList, setIdList] = useState([]);
   const [complete, setComplete] = useState(0);
@@ -40,7 +41,7 @@ function Relationships({ skip = 1 }) {
   const [notes, setNotes] = useState('');
   const [type, setType] = useState('');
   const [nextUnreviewed, setNextUnreviewed] = useState('');
-  const history = useHistory();
+  const navigate = useNavigate();
 
   // const [excludeReviewed, setExcludeReviewed] = useState(false);
 
@@ -140,7 +141,7 @@ function Relationships({ skip = 1 }) {
   const setRelationType = async () => {
     await relationships.patch(relation.id, { type, notes });
     const next = await fetchNextUnreviewed(idList);
-    history.push(`/relationships/${next}`);
+    navigate(`/relationships/${next}`);
   };
 
   const updateNotes = event => {
@@ -152,7 +153,7 @@ function Relationships({ skip = 1 }) {
       <Grid
         container
         spacing={4}
-        justify="center"
+        justifyContent="center"
         alignItems="center"
         direction="row"
       >
@@ -161,7 +162,7 @@ function Relationships({ skip = 1 }) {
             <Grid
               container
               spacing={4}
-              justify="center"
+              justifyContent="center"
               alignItems="center"
               direction="row"
             >

@@ -2,10 +2,10 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import {
   Button
-} from '@material-ui/core';
+} from '@mui/material';
 
 const CollisionLink = React.forwardRef((props, ref) => (
-  <Link innerRef={ref} {...props} />
+  <Link ref={ref} {...props} />
 ));
 
 function ButtonLink(props) {

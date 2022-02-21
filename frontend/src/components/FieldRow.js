@@ -1,5 +1,5 @@
 import React from 'react';
-import { Grid } from '@material-ui/core';
+import { Grid } from '@mui/material';
 
 function FieldRow({ children, ro = false }) {
   const fields = React.Children.toArray(children);

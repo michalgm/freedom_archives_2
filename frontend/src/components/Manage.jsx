@@ -4,7 +4,7 @@ import {
     Icon,
     IconButton,
     Paper,
-} from '@material-ui/core';
+} from '@mui/material';
 import {FieldArray, useFormikContext} from "formik";
 import React, {useEffect, useState} from 'react'
 import {collections, records} from '../api';
@@ -15,7 +15,7 @@ import {ItemsList} from './RecordItem';
 import ListItemField from '../components/ListItemField'
 import PaginationFooter from '../components/PaginationFooter'
 import ViewContainer from '../components/ViewContainer';
-import {makeStyles} from '@material-ui/core/styles';
+import makeStyles from '@mui/styles/makeStyles';
 import {startCase} from 'lodash'
 import {useStateValue} from '../appContext';
 
@@ -44,25 +44,27 @@ function Filter({filter, index, remove, filterTypes}) {
     const type = filterTypes[field]?.input;
     const filter_fields = Object.keys(filterTypes).sort()
 
-    return <Grid item xs={6} lg={3}>
-        <Paper className={classes.filter}>
-            <IconButton onClick={() => remove(index)} variant="outlined" size="small"><Icon>close</Icon></IconButton>
-            <Field
-                size="small"
-                name={`filters[${index}].field`}
-                label='Field'
-                type='simpleSelect'
-                options={filter_fields}
-                getOptionLabel={(option) => startCase(option)}
-            />
-            {
-                type === 'listitem' || type === 'listitem_id' ?
-                    <ListItemField name={`filters[${index}].value`} label='Value' listType={field.replace(/s$/, '')} />
-                    : <Field name={`filters[${index}].value`} label='Value' />
-            }
+    return (
+        <Grid item xs={6} lg={3}>
+            <Paper className={classes.filter}>
+                <IconButton onClick={() => remove(index)} variant="outlined" size="small"><Icon>close</Icon></IconButton>
+                <Field
+                    size="small"
+                    name={`filters[${index}].field`}
+                    label='Field'
+                    type='simpleSelect'
+                    options={filter_fields}
+                    getOptionLabel={(option) => startCase(option)}
+                />
+                {
+                    type === 'listitem' || type === 'listitem_id' ?
+                        <ListItemField name={`filters[${index}].value`} label='Value' listType={field.replace(/s$/, '')} />
+                        : <Field name={`filters[${index}].value`} label='Value' />
+                }
 
-        </Paper>
-    </Grid >
+            </Paper>
+        </Grid >
+    );
 }
 
 export default function Manage({renderItem, defaultFilter, filterTypes, createQuery, type, service}) {

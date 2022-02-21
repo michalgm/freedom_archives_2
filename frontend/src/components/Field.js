@@ -5,15 +5,15 @@ import {
   FormGroup,
   Radio,
   TextField,
-} from '@material-ui/core';
-import {Field as FormikField, useFormikContext} from 'formik';
+} from '@mui/material';
+import { Field as FormikField, useFormikContext } from 'formik';
 
-import { Alert } from '@material-ui/lab';
-import {Autocomplete} from '@material-ui/lab';
+import { Alert } from '@mui/material';
+import { Autocomplete } from '@mui/material';
 import HTMLField from './HTMLField';
 import React from 'react';
 import SelectField from './SelectField';
-import {startCase} from 'lodash';
+import { startCase } from 'lodash';
 
 const CustomComponent = ({
   type,
@@ -57,7 +57,7 @@ const CustomComponent = ({
       </FormControl>
     );
   } else if (type === 'simpleSelect') {
-    const {onChange, ...selectProps} = props;
+    const { onChange, ...selectProps } = props;
     field = (
       <FormControl disabled={ro} margin="dense" fullWidth>
         <FormGroup>
@@ -73,7 +73,7 @@ const CustomComponent = ({
             renderInput={(params) => (
               <TextField
                 {...params}
-                InputLabelProps={{shrink: true}}
+                InputLabelProps={{ shrink: true }}
                 label={label}
                 variant={props.variant || "outlined"}
                 {...props.inputProps}
@@ -112,11 +112,11 @@ const CustomComponent = ({
   } else if (type === 'radio') {
     field = <Radio
       disabled={ro}
-      {...{name, value: value || ''}}
+      {...{ name, value: value || '' }}
       {...props}
     />
   } else if (type === 'html') {
-    field = <HTMLField {...{name, value, setFieldValue: context.setFieldValue}} {...props} />;
+    field = <HTMLField {...{ name, value, setFieldValue: context.setFieldValue }} {...props} />;
   } else {
     field = (
       <TextField

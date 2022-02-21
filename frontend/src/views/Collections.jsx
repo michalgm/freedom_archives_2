@@ -3,9 +3,9 @@ import {
   ListItemAvatar,
   ListItemText,
   Typography,
-} from '@material-ui/core';
+} from '@mui/material';
 
-import { BrokenImage } from '@material-ui/icons';
+import { BrokenImage } from '@mui/icons-material';
 import Manage from '../components/Manage';
 import React from 'react';
 

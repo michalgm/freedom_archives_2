@@ -1,8 +1,9 @@
 import {
-  Redirect,
+  Navigate,
   Route,
-  Switch,
-  useLocation
+  Routes as RouterRoutes,
+  useLocation,
+  useParams
 } from 'react-router-dom';
 
 import Collection from './views/Collection';
@@ -11,67 +12,40 @@ import Login from './views/Login';
 import React from 'react';
 import Record from './views/Record';
 import Records from './views/Records';
-import Relationship from './views/Relationship';
 import Relationships from './views/Relationships';
 import Search from './views/Search';
 import Test from './views/Test';
+
+function RecordElement() {
+  const {id} = useParams();
+  return <Record showForm id={id}/>
+}
 
 function Routes({isAuthenticated}) {
   const location = useLocation();
 
   if (isAuthenticated) {
     return (
-      <Switch>
-        <Route exact path="/" component={Records} />
-        <Route exact path="/test" component={Test} />
-        <Route exact path="/collections" component={Collections} />
-        <Route
-          path="/collections/:id"
-          render={({
-            match: {
-              params: { id },
-            },
-          }) => <Collection id={id} />}
-        />
-        <Route exact path="/search" component={Search} />
-        <Route exact path="/records" component={Records} />
-        <Route
-          exact
-          path="/records/:id"
-          render={({
-            match: {
-              params: { id },
-            },
-          }) => <Record id={id} showForm />}
-        />
-        <Route
-          path="/relationship/:id"
-          render={({
-            match: {
-              params: { id },
-            },
-          }) => <Relationship id={id} />}
-        />
+      <RouterRoutes>
+        <Route exact path="/" element={<Records/>} />
+        <Route exact path="/test" element={<Test/>} />
+        <Route exact path="/collections" element={<Collections/>}/>
+        <Route path="/collections/:id" element={<Collection/>} />
+        <Route exact path="/search" element={<Search/>} />
+        <Route exact path="/records" element={<Records/>}/>
+        <Route path="/records/:id" element={<RecordElement/>}/>
 
-        <Route
-          path="/relationships/:skip?"
-          render={({
-            match: {
-              params: { skip },
-            },
-          }) => <Relationships skip={skip} />}
-        />
-      </Switch>
+        <Route path="/relationships/:skip" element={<Relationships/>}/>
+        <Route path="/relationships/" element={<Relationships/>}/>
+        <Route path="/login" element={<Login/>} />
+      </RouterRoutes>
     )
   } else if (isAuthenticated === false) {
-    console.log(location)
     return (
-      <Switch>
-        <Route path="/login" component={Login} />
-        <Route>
-          <Redirect to={{pathname: "/login", state: {referrer: location}}} />
-        </Route>
-      </Switch>
+      <RouterRoutes>
+        <Route path="/login" element={<Login/>} />
+        <Route index element={<Navigate to={{pathname: "/login", state: {referrer: location}}} />}/>
+      </RouterRoutes>
     )
   } 
   

@@ -1,6 +1,6 @@
 import './Form.scss';
 
-import { Button, Grid } from '@material-ui/core';
+import { Button, Grid } from '@mui/material';
 import { Formik, Form as FormikForm, useFormikContext } from 'formik';
 
 import React from 'react';
@@ -55,7 +55,7 @@ const Form = ({
     }
 
     return (
-      <Grid container className="buttons" spacing={1} justify="flex-end">
+      <Grid container className="buttons" spacing={1} justifyContent="flex-end">
         {buttons.map(({ ...props }, key) => (
           <Grid item key={key}>
             <FormButton {...props} />

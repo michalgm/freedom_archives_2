@@ -1,4 +1,4 @@
-import {Box, Grid, Icon, Paper, Typography} from '@material-ui/core';
+import {Box, Grid, Icon, Paper, Typography} from '@mui/material';
 import React, {useEffect} from 'react';
 import {collections, records} from '../api';
 import {useSearch, useStateValue} from '../appContext'
@@ -93,7 +93,7 @@ function ViewContainer({children, item, buttonRef, neighborService, ...props}) {
               container
               alignContent="center"
               alignItems="center"
-              justify={section.length === 1 ? 'center' : 'space-between'}
+              justifyContent={section.length === 1 ? 'center' : 'space-between'}
               spacing={2}
             // direction="column"
             >
