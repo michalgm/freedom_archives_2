@@ -44,7 +44,7 @@ function Routes({isAuthenticated}) {
     return (
       <RouterRoutes>
         <Route path="/login" element={<Login/>} />
-        <Route index element={<Navigate to={{pathname: "/login", state: {referrer: location}}} />}/>
+        <Route path="*" index element={<Navigate to={"/login"} state={{referrer: location}} />}/>
       </RouterRoutes>
     )
   } 
