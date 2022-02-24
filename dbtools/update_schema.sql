@@ -435,7 +435,22 @@ create view collections_view as
     subjects.items_text as subjects_text,
     keywords.items_text as keywords_text,
     subjects.items_search as subjects_search,
-    keywords.items_search as keywords_search
+    keywords.items_search as keywords_search,
+    array(
+      SELECT json_build_object(
+        'record_id', b.record_id,
+        'title', b.title,
+        'parent_record_id', b.parent_record_id,
+        'primary_instance_thumbnail', primary_instance.thumbnail,
+        'primary_instance_format', primary_instance.format,
+        'primary_instance_format_text', list_items.item,
+        'primary_instance_media_type', primary_instance.media_type
+      )
+      FROM records b 
+      left join instances primary_instance on b.primary_instance_id = primary_instance.instance_id
+      left join list_items on primary_instance.format = list_items.list_item_id and list_items.type = 'format'
+      where a.collection_id = b.collection_id
+    ) as child_records
   FROM collections a
   left join list_items publisher_lookup on a.publisher_id = publisher_lookup.list_item_id
   left join users contributor on a.contributor_user_id = contributor.user_id

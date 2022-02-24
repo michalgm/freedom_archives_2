@@ -1,9 +1,9 @@
-import RecordItem, {CollectionItem} from './RecordItem'
+import RecordItem, { CollectionItem } from './RecordItem'
 
-import {Autocomplete} from 'formik-mui';
-import {Field} from 'formik';
+import { Autocomplete } from 'formik-mui';
+import { Field } from 'formik';
 import React from 'react';
-import {TextField} from '@mui/material';
+import { TextField } from '@mui/material';
 import { services } from '../api';
 import useDeepCompareEffect from 'use-deep-compare-effect'
 
@@ -45,15 +45,18 @@ const SelectField = ({
   autoHighlight,
   excludeIds,
   managed,
+  clearOnChange,
   loadOptions: inputLoadOptions,
   ...props
 }) => {
-  const {id: typeId, label: typeLabel, renderOption, fields} = searchTypes[searchType]
+  const { id: typeId, label: typeLabel, renderOption, fields } = searchTypes[searchType]
   const [open, setOpen] = React.useState(props.autoFocus || false);
   const [inputValue, setInputValue] = React.useState('');
   const [options, setOptions] = React.useState([]);
+
   const loading = Boolean(open && inputValue);
-  
+
+
   const value = inputValue || ((defaultValue && defaultValue[typeLabel]) ? defaultValue[typeLabel] : "")
 
   const currentValues = (Array.isArray(defaultValue) ? defaultValue : [defaultValue]).map((item) => item[typeLabel])
@@ -61,25 +64,25 @@ const SelectField = ({
   const $select = fields || [typeId, typeLabel]
   const query = {
     $select,
-    $sort: {[typeLabel]: 1},
+    $sort: { [typeLabel]: 1 },
     $limit: 100,
     ...searchParams,
   }
 
   if (!fetchAll) {
-    query[typeLabel] = {$ilike: `%${value}%`}
+    query[typeLabel] = { $ilike: `%${value}%` }
   }
   if (excludeIds) {
-    query[typeId] = {$nin: excludeIds}
+    query[typeId] = { $nin: excludeIds }
   }
   if (isMulti) {
-    query[typeId] = {$nin: defaultValue.map(item => item[typeId])}
+    query[typeId] = { $nin: defaultValue.map(item => item[typeId]) }
   }
   React.useEffect(() => {
     const value = defaultValue && defaultValue[typeLabel] ? defaultValue[typeLabel] : ''
     setInputValue(value)
   }, [defaultValue, typeLabel])
-  
+
   useDeepCompareEffect(() => {
     if (
       (fetchAll && options.length) ||
@@ -93,19 +96,19 @@ const SelectField = ({
     }
     active = true;
     const fetchRecord = async () => {
-      const {data: options} = await services[searchType].find({
+      const { data: options } = await services[searchType].find({
         noLoading: true,
         query,
       });
-      
+
       const newOptions = options.filter(o => o[typeLabel].trim())
       if (currentValues[0] != null) {
-        newOptions.push({[typeId]: null, [typeLabel]: '', clear: true})
+        newOptions.push({ [typeId]: null, [typeLabel]: '', clear: true })
       }
       const optionValues = options.map(o => o[typeLabel]);
       (isMulti ? defaultValue : [defaultValue]).forEach(value => {
-        if(!optionValues.includes(value[typeLabel])) {
-          newOptions.push({...value, hidden: true})
+        if (!optionValues.includes(value[typeLabel])) {
+          newOptions.push({ ...value, hidden: true })
         }
       });
 
@@ -119,12 +122,16 @@ const SelectField = ({
 
   const onChange = React.useCallback(
     (event, option) => {
-      const {value} = event.target;
+      // const { value } = event.target;
       setFieldValue(name, option);
 
       !isMulti && customOnChange && customOnChange(event, option);
+      if (clearOnChange) {
+        setOptions([]);
+        setFieldValue(name, null)
+      }
     },
-    [setFieldValue, name, isMulti]
+    [setFieldValue, name, isMulti, clearOnChange, customOnChange]
   );
 
   return (
@@ -149,7 +156,7 @@ const SelectField = ({
       }
       }
       options={options}
-      renderInput={(params: unused) => (
+      renderInput={(params) => (
         <TextField
           {...params}
           name={name}
@@ -161,7 +168,8 @@ const SelectField = ({
       )}
       onChange={onChange}
       renderOption={(props, option) => {
-        if (option.hidden) {
+        props.key = option[typeId]
+        if (option.hidden || !props.key) {
           return null;
         }
         if (renderOption) {
