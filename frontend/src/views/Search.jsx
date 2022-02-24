@@ -1,6 +1,6 @@
 import './Search.scss';
 
-import {Box, Button, Card, Chip, Divider, Grid, Icon, Link as MULink, Paper, Typography} from '@mui/material';
+import { Box, Button, Card, Chip, Divider, Grid, Icon, Link as MULink, Paper, Typography} from '@mui/material';
 import React, {useEffect, useRef, useState} from 'react';
 import { useTheme } from '@mui/material/styles';
 
@@ -72,7 +72,7 @@ function Description({text}) {
         </div>
       </div>
       {height > (descriptionMaxLines * theme.typography.body2.lineHeight) &&
-        <Typography variant="caption" className={classes.openControl} onClick={e => setopen(!open)}>
+        <Typography color="text.secondary" variant="caption" className={classes.openControl} onClick={e => setopen(!open)}>
           <Icon className={open ? 'open' : ''}>expand_more</Icon> View {open ? 'Less' : 'More'}
         </Typography>
       }
@@ -84,7 +84,7 @@ function Filter({type, values = [], addFilter, search}) {
   const [limit, setlimit] = useState(5)
 
   const renderFilterItem = ({value, label, count, i, type}) => (
-    <div key={i} onClick={() => addFilter({type, value})}>
+    <Box key={i} onClick={() => addFilter({type, value})} sx={{display: 'flex', alignItems: 'center', justifyContent: 'space-between'}}>
       <MULink
         href=""
         onClick={e => e.preventDefault()}
@@ -92,8 +92,8 @@ function Filter({type, values = [], addFilter, search}) {
         underline="hover">
         {label || '???'}
       </MULink>{' '}
-      &nbsp;({count})
-    </div>
+      <Typography variant='caption' color="text.secondary">({count})</Typography>
+    </Box>
   );
 
   return (
