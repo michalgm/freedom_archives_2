@@ -11,10 +11,10 @@ import {
   TableHead,
   TableRow,
 } from "@mui/material/";
-import {EditableItem, RecordsList} from '../components/RecordItem'
-import {FieldArray, useFormikContext} from "formik";
-import React, {useEffect, useRef, useState} from "react";
-import {records, relationships} from "../api";
+import { EditableItem, RecordsList } from '../components/RecordItem'
+import { FieldArray, useFormikContext } from "formik";
+import React, { useEffect, useRef, useState } from "react";
+import { records, relationships } from "../api";
 
 import Field from "../components/Field";
 import FieldRow from "../components/FieldRow";
@@ -22,16 +22,16 @@ import Form from "../components/Form";
 import GridBlock from "../components/GridBlock";
 import Link from "../components/Link";
 import ListItemField from "../components/ListItemField";
-import {Navigate} from "react-router-dom";
+import { Navigate } from "react-router-dom";
 import ViewContainer from "../components/ViewContainer";
-import {useTitle} from '../appContext'
+import { useTitle } from '../appContext'
 
-function Children({children = []}) {
-  const {values, setFieldValue} = useFormikContext();
+function Children({ children = [] }) {
+  const { values, setFieldValue } = useFormikContext();
   return (
     <FieldArray
       name="children"
-      render={({push}) => {
+      render={({ push }) => {
         const children = values.children.map((child = {}, index) => {
           if (!child) {
             return null
@@ -60,7 +60,7 @@ function Children({children = []}) {
               clearOnBlur
               selectOnFocus
               managed
-              excludeIds={[values.record_id, ...values.children.map(({record_id}) => record_id)]}
+              excludeIds={[values.record_id, ...values.children.map(({ record_id }) => record_id)]}
               onChange={(_, child) => {
                 if (child) {
                   push(child);
@@ -74,7 +74,7 @@ function Children({children = []}) {
   );
 }
 
-function Instance({instance = {}, record, index, edit}) {
+function Instance({ instance = {}, record, index, edit }) {
   const context = useFormikContext();
 
   // Column        |           Type           | Collation | Nullable |                    Default
@@ -184,7 +184,7 @@ function Instance({instance = {}, record, index, edit}) {
         <Field
           ro={!edit}
           type="number"
-          inputProps={{min: 0, style: {width: 40}}}
+          inputProps={{ min: 0, style: { width: 40 } }}
           label=" "
           name={`instances[${index}].no_copies`}
         />
@@ -225,39 +225,39 @@ function Instance({instance = {}, record, index, edit}) {
   </>;
 }
 
-function Instances({record, instances = [], edit}) {
-  const {values} = useFormikContext();
+function Instances({ record, instances = [], edit }) {
+  const { values: { instances = [] } } = useFormikContext();
 
   return (
     <FieldArray
       name="instances"
-      render={({push}) => {
+      render={({ push }) => {
         return (
           <>
             <Table size="small" className="instances">
               <TableHead>
                 <TableRow>
-                  <TableCell style={{width: 50}}></TableCell>
+                  <TableCell style={{ width: 50 }}></TableCell>
                   {/* <TableCell style={{width: 100}}></TableCell> */}
-                  <TableCell style={{width: 60}}>Primary</TableCell>
-                  <TableCell style={{width: 120}}>Call Number</TableCell>
+                  <TableCell style={{ width: 60 }}>Primary</TableCell>
+                  <TableCell style={{ width: 120 }}>Call Number</TableCell>
                   <TableCell>Generation</TableCell>
                   <TableCell>Format</TableCell>
                   <TableCell>Quality</TableCell>
-                  <TableCell style={{width: 60}}>Copies</TableCell>
+                  <TableCell style={{ width: 60 }}>Copies</TableCell>
                   {/* <TableCell>URL</TableCell> */}
                   {/* <TableCell>ID</TableCell> */}
                 </TableRow>
               </TableHead>
               <TableBody>
-                {values.instances.length === 0 && (
+                {instances.length === 0 && (
                   <TableRow>
                     <TableCell align="center" colSpan={15}>
                       No Instances
                     </TableCell>
                   </TableRow>
                 )}
-                {values.instances.map((instance, index) => (
+                {instances.map((instance, index) => (
                   <Instance
                     key={index}
                     edit={edit}
@@ -270,7 +270,7 @@ function Instances({record, instances = [], edit}) {
             <Button
               variant="contained"
               onClick={() =>
-                push({record_id: record.record_id, no_copies: 1})
+                push({ record_id: record.record_id, no_copies: 1 })
               }
               startIcon={<Icon>add</Icon>}
             >
@@ -283,7 +283,7 @@ function Instances({record, instances = [], edit}) {
   );
 }
 
-function Relationships({id, relationships = []}) {
+function Relationships({ id, relationships = [] }) {
   return (
     <Table size="small">
       <TableHead>
@@ -354,7 +354,7 @@ function RecordParent() {
 
 }
 
-function Record({showForm, ro = false, embedded = false, id}) {
+function Record({ showForm, ro = false, embedded = false, id }) {
   const [record, setRecord] = useState({});
   const [returnHome, set_returnHome] = useState(false);
   const [edit, setEdit] = useState(!ro);
@@ -421,11 +421,11 @@ function Record({showForm, ro = false, embedded = false, id}) {
 
   useEffect(() => {
     const fetchRecord = async () => {
-      const [record, {data}] = await Promise.all([
+      const [record, { data }] = await Promise.all([
         records.get(id),
         relationships.find({
           query: {
-            $or: [{docid_1: id}, {docid_2: id}],
+            $or: [{ docid_1: id }, { docid_2: id }],
             $sort: {
               docid_1: 1,
               docid_2: 1,
@@ -448,8 +448,8 @@ function Record({showForm, ro = false, embedded = false, id}) {
 
   const buttons = edit
     ? [
-      {label: "Save", type: "submit", color: "primary"},
-      {label: "Delete", onClick: deleteRecord, color: "secondary"},
+      { label: "Save", type: "submit", color: "primary" },
+      { label: "Delete", onClick: deleteRecord, color: "secondary" },
       {
         label: "Cancel",
         onClick: () => setEdit(false),
@@ -457,7 +457,7 @@ function Record({showForm, ro = false, embedded = false, id}) {
         type: "reset",
       },
     ]
-    : [{label: "Edit", onClick: () => setEdit(true), type: "button"}];
+    : [{ label: "Edit", onClick: () => setEdit(true), type: "button" }];
 
   // const {has_digital} = record;
 

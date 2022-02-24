@@ -32,6 +32,8 @@ const CustomComponent = ({
 
   const variant = props.variant || ro ? 'filled' : 'outlined'
   let field;
+  const { onChange } = props
+  props.onChange = React.useCallback((event, option) => onChange(event, option), [onChange])
 
   if (type === 'select') {
     field = (
@@ -49,7 +51,7 @@ const CustomComponent = ({
               value: value || (isMulti ? [] : ''),
               name,
               setFieldValue: context.setFieldValue,
-              ...props,
+              ...props
             }}
             variant={variant}
           />
