@@ -16,6 +16,7 @@ import { FieldArray, useFormikContext } from "formik";
 import React, { useEffect, useRef, useState } from "react";
 import { records, relationships } from "../api";
 
+import Continuations from "../components/Continuations";
 import Field from "../components/Field";
 import FieldRow from "../components/FieldRow";
 import Form from "../components/Form";
@@ -57,8 +58,7 @@ function Children({ children = [] }) {
               type="select"
               searchType="records"
               size="small"
-              clearOnBlur
-              selectOnFocus
+              clearOnChange
               managed
               excludeIds={[values.record_id, ...values.children.map(({ record_id }) => record_id)]}
               onChange={(_, child) => {
@@ -225,7 +225,7 @@ function Instance({ instance = {}, record, index, edit }) {
   </>;
 }
 
-function Instances({ record, instances = [], edit }) {
+function Instances({ record, edit }) {
   const { values: { instances = [] } } = useFormikContext();
 
   return (
@@ -387,7 +387,8 @@ function Record({ showForm, ro = false, embedded = false, id }) {
     //   record[key] = record_data[key];
     // });
     record.instances = record_data.instances;
-    record.children = record_data.children; //<Children children={record_data.children || []} />;
+    record.children = record_data.children;
+    record.continuations = record_data.continuations;
     record.relationships = (
       <Relationships id={record_data.record_id} relationships={relationships} />
     );
@@ -552,6 +553,9 @@ function Record({ showForm, ro = false, embedded = false, id }) {
               </GridBlock>
               <GridBlock width={6} title="Sibling Records">
                 <RecordsList records={record.siblings} emptyText="No Sibling Records" />
+              </GridBlock>
+              <GridBlock width={6} title="Continuations">
+                <Continuations records={record.continuations} emptyText="No Related Continuations" />
               </GridBlock>
               <GridBlock title="Old Relationships">
                 {record.relationships}

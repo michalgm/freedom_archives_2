@@ -39,7 +39,7 @@ quality */
 
 CREATE TABLE list_items (
   list_item_id serial PRIMARY KEY,
-item varchar(500) NOT NULL,
+  item varchar(500) NOT NULL,
   type varchar(45) NOT NULL,
   description varchar(200) DEFAULT NULL
 );
@@ -141,6 +141,10 @@ CREATE TABLE instances_to_list_items (
   PRIMARY KEY (list_item_id, instance_id)
 );
 
+CREATE TABLE continuations (
+  continuation_id serial PRIMARY KEY,
+  continuation_records integer[]
+);
 
 create table related_records as select * from freedom_archives_old.related_records;
 /*
@@ -268,10 +272,12 @@ update records set month = '12' where record_id in (select docid from freedom_ar
 
 update records set day = 30 where month = 6 and day = 31;
 update records set year = 2005 where record_id = 28007;
-update records set year = year + 1900 where year > 20 and year < 99;
-update records set year = year + 2000 where year < 20;
-
-update records set year = null where year > 2020;
+update records set year = year + 1900 where year > (extract(year from current_date) - 2000) and year <= 99;
+update records set year = year + 2000 where year <= (extract(year from current_date) - 2000);
+update records set year = 2005 where year = 20042005;
+select record_id, title, year from records where year > extract(year from current_date);
+select record_id, title, year from records where year < 1900;
+update records set year = null where year > extract(year from current_date);
 
 insert into records_to_list_items (select distinct list_item_id,
   id as record_id from freedom_archives_old.list_items_lookup a join freedom_archives.list_items b on a.item = b.item and a.type = b.type join records on id = record_id where is_doc = 1);
@@ -295,7 +301,6 @@ date_modified timestamp DEFAULT NULL,
 original_doc_id integer DEFAULT NULL */
 
 create table duplicate_relations as select id from freedom_archives_old.related_records where docid_1 = docid_2 and title_1 = title_2 and description_1 = description_2 and track_number_1 = track_number_2;
-
 
 insert into instances (record_id, call_number, format, no_copies, quality, generation, url, thumbnail, media_type, creator_user_id, contributor_user_id, date_created, date_modified, original_doc_id )
   select
@@ -497,9 +502,9 @@ create view records_view as
     (coalesce(a.year::text, '1900')::text || '-' || coalesce(a.month::text, '01')::text || '-' || coalesce(a.day::text, '01')::text)::date as date,
     jsonb_build_object('item', publisher_lookup.item, 'list_item_id', publisher_lookup.list_item_id) as publisher,
     jsonb_build_object('item', program_lookup.item, 'list_item_id', program_lookup.list_item_id) as program,
-    instances.instances as instances,
+    coalesce(instances.instances, '[]') as instances,
     instances.has_digital as has_digital,
-    instances.instance_count as instance_count,
+    COALESCE(instances.instance_count, 0) as instance_count,
     contributor.firstname || ' ' || contributor.lastname as contributor_name,
     contributor.username as contributor_username,
     creator.firstname || ' ' || creator.lastname as creator_name,
@@ -597,11 +602,17 @@ create or replace view unified_records as
   b.collection,
   array(select row_to_json(record_summaries) from record_summaries where record_summaries.parent_record_id = a.record_id) as children,
   array(select row_to_json(record_summaries) from record_summaries where record_summaries.parent_record_id = a.parent_record_id and record_summaries.record_id != a.record_id) as siblings,
-  COALESCE((select row_to_json(parent) from record_summaries parent where a.parent_record_id = parent.record_id), '{}') as parent
+  COALESCE((select row_to_json(parent) from record_summaries parent where a.parent_record_id = parent.record_id), '{}') as parent,
+  array(
+    select row_to_json(cr)
+      from (
+          select c.continuation_id, continuation_records, rs.* from continuations c, unnest(c.continuation_records)  WITH ORDINALITY rid join record_summaries rs on rid = rs.record_id where a.record_id = ANY(c.continuation_records) order by array_position(c.continuation_records, rid)
+      ) cr
+  ) as continuations
   -- (select parent from record_summaries parent where a.parent_record_id = parent.record_id) as parent,
   from _unified_records a
   left join record_summaries b using (record_id);
-  
+
 drop table if exists unknown_relations;
 
 create table unknown_relations as

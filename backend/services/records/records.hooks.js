@@ -13,7 +13,7 @@ const {
 const fullTextSearch = context => {
   if (context.params.query.$fullText !== undefined) {
     const { $fullText, ...query } = context.params.query;
-    const knex = context.app.service(`unified_${context.path}`).createQuery({...context.params, query});
+    const knex = context.app.service(`unified_${context.path}`).createQuery({ ...context.params, query });
     if ($fullText) {
       const fullTextQuery = tsquery($fullText);
       context.fullText = fullTextQuery;
@@ -124,12 +124,12 @@ const updateRelations = async context => {
     await Promise.all(
       data.instances.map(instance => {
         if (instance.delete) {
-          return app.service('instances').remove(instance.instance_id, {user, transaction: {trx}});
+          return app.service('instances').remove(instance.instance_id, { user, transaction: { trx } });
         } else if (instance.instance_id) {
-          return app.service('instances').patch(instance.instance_id, instance, {user, transaction: {trx}});
+          return app.service('instances').patch(instance.instance_id, instance, { user, transaction: { trx } });
         }
         delete instance.instance_id;
-        return app.service('instances').create(instance, {user, transaction: {trx}});
+        return app.service('instances').create(instance, { user, transaction: { trx } });
       })
     );
     delete data.instances;
@@ -139,13 +139,30 @@ const updateRelations = async context => {
     await Promise.all(
       data.children.map(child => {
         if (child.delete) {
-          return app.service('records').patch(child.record_id, {parent_record_id: null}, {user, transaction: {trx}});
+          return app.service('records').patch(child.record_id, { parent_record_id: null }, { user, transaction: { trx } });
         } else if (child.record_id && !child.parent_record_id) {
-          return app.service('records').patch(child.record_id, {parent_record_id: id}, {user, transaction: {trx}});
+          return app.service('records').patch(child.record_id, { parent_record_id: id }, { user, transaction: { trx } });
         }
       })
     );
     delete data.children;
+  }
+
+  if (data.continuations !== undefined) {
+    const { continuation_id } = data.continuations[0];
+
+    const continuation_records = data.continuations
+      .filter(record => ! record.delete)
+      .map(record => record.record_id);
+
+    if (continuation_id) {
+      await trx('continuations').where({continuation_id}).update({ continuation_records });
+    } else {
+      await trx('continuations').insert({ continuation_records: [id, ...continuation_records] });
+    }
+
+    delete data.continuations;
+    delete data.new_continuation;
   }
 
   ['program', 'publisher'].forEach(key => {

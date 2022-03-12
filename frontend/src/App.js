@@ -31,13 +31,13 @@ import Sidebar from './views/Sidebar';
 import { app } from './api';
 
 const theme = createTheme();
-
+// console.log(theme)
 const scheme = {
   header: {
     config: {
       xs: {
         position: "fixed",
-        height: 56,
+        height: 64,
         clipped: true
       },
     },
