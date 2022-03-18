@@ -2,6 +2,7 @@ import "./Record.scss";
 
 import {
   Button,
+  Divider,
   Grid,
   Icon,
   IconButton,
@@ -10,13 +11,13 @@ import {
   TableCell,
   TableHead,
   TableRow,
+  Typography,
 } from "@mui/material/";
-import { EditableItem, RecordsList } from '../components/RecordItem'
+import { EditableItem, EditableItemsList, RecordsList } from '../components/RecordItem'
 import { FieldArray, useFormikContext } from "formik";
 import React, { useEffect, useRef, useState } from "react";
 import { records, relationships } from "../api";
 
-import Continuations from "../components/Continuations";
 import Field from "../components/Field";
 import FieldRow from "../components/FieldRow";
 import Form from "../components/Form";
@@ -26,53 +27,6 @@ import ListItemField from "../components/ListItemField";
 import { Navigate } from "react-router-dom";
 import ViewContainer from "../components/ViewContainer";
 import { useTitle } from '../appContext'
-
-function Children({ children = [] }) {
-  const { values, setFieldValue } = useFormikContext();
-  return (
-    <FieldArray
-      name="children"
-      render={({ push }) => {
-        const children = values.children.map((child = {}, index) => {
-          if (!child) {
-            return null
-          }
-          child.action = () => (<IconButton
-            onClick={() =>
-              setFieldValue(
-                `children[${index}].delete`,
-                !child.delete
-              )
-            }
-            size="large">
-            <Icon>{child.delete ? "restore" : "delete"}</Icon>
-          </IconButton>)
-          return child;
-        })
-
-        return (
-          <>
-            <RecordsList records={children} emptyText="No Child Records" />
-            <Field
-              name='new_child'
-              type="select"
-              searchType="records"
-              size="small"
-              clearOnChange
-              managed
-              excludeIds={[values.record_id, ...values.children.map(({ record_id }) => record_id)]}
-              onChange={(_, child) => {
-                if (child) {
-                  push(child);
-                }
-              }}
-            />
-          </>
-        );
-      }}
-    />
-  );
-}
 
 function Instance({ instance = {}, record, index, edit }) {
   const context = useFormikContext();
@@ -406,13 +360,13 @@ function Record({ showForm, ro = false, embedded = false, id }) {
   };
 
   const updateRecord = async (data) => {
-    delete data.new_child
     const clean_data = Object.keys(data).reduce((acc, key) => {
-      if (!key.match(/^mui/)) {
+      if (!key.match(/^(mui|__new_)/)) {
         acc[key] = data[key]
       }
       return acc
     }, {})
+
     try {
       await records.patch(id, clean_data);
       const updated = await records.get(id);
@@ -537,6 +491,11 @@ function Record({ showForm, ro = false, embedded = false, id }) {
                   instances={record.instances || []}
                 />
               </GridBlock>
+              <Grid item xs={12}>
+                <Divider/>
+                <Typography variant="h4">Relationships</Typography>
+
+              </Grid>
               <GridBlock title="Parent Record">
                 <RecordParent
                   edit={edit}
@@ -544,18 +503,25 @@ function Record({ showForm, ro = false, embedded = false, id }) {
                   parent={record.parent || {}}
                 />
               </GridBlock>
-              <GridBlock width={6} title="Child Records">
-                <Children
+              <GridBlock title="Child Records">
+                <EditableItemsList
                   edit={edit}
                   record={record}
-                  children={record.children || []}
+                  name='children'
+                  emptyText="No child records"
                 />
               </GridBlock>
-              <GridBlock width={6} title="Sibling Records">
+              <GridBlock title="Sibling Records">
                 <RecordsList records={record.siblings} emptyText="No Sibling Records" />
               </GridBlock>
-              <GridBlock width={6} title="Continuations">
-                <Continuations records={record.continuations} emptyText="No Related Continuations" />
+              <GridBlock title="Continuations">
+                <EditableItemsList
+                  edit={edit}
+                  record={record}
+                  name='continuations'
+                  emptyText="No related continuations"
+                  reorder={true}
+                />
               </GridBlock>
               <GridBlock title="Old Relationships">
                 {record.relationships}

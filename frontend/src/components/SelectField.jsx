@@ -47,6 +47,7 @@ const SelectField = ({
   managed,
   clearOnChange,
   loadOptions: inputLoadOptions,
+  InputProps,
   ...props
 }) => {
   const { id: typeId, label: typeLabel, renderOption, fields } = searchTypes[searchType]
@@ -164,6 +165,7 @@ const SelectField = ({
           label={label}
           variant={props.variant || "outlined"}
           autoFocus={props.autoFocus || false}
+          InputProps={InputProps}  
         />
       )}
       onChange={onChange}

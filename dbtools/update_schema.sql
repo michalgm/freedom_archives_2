@@ -603,12 +603,12 @@ create or replace view unified_records as
   array(select row_to_json(record_summaries) from record_summaries where record_summaries.parent_record_id = a.record_id) as children,
   array(select row_to_json(record_summaries) from record_summaries where record_summaries.parent_record_id = a.parent_record_id and record_summaries.record_id != a.record_id) as siblings,
   COALESCE((select row_to_json(parent) from record_summaries parent where a.parent_record_id = parent.record_id), '{}') as parent,
-  array(
+  COALESCE(array(
     select row_to_json(cr)
       from (
           select c.continuation_id, continuation_records, rs.* from continuations c, unnest(c.continuation_records)  WITH ORDINALITY rid join record_summaries rs on rid = rs.record_id where a.record_id = ANY(c.continuation_records) order by array_position(c.continuation_records, rid)
       ) cr
-  ) as continuations
+  ), '{}') as continuations
   -- (select parent from record_summaries parent where a.parent_record_id = parent.record_id) as parent,
   from _unified_records a
   left join record_summaries b using (record_id);

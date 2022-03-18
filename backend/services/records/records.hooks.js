@@ -149,7 +149,7 @@ const updateRelations = async context => {
   }
 
   if (data.continuations !== undefined) {
-    const { continuation_id } = data.continuations[0];
+    const { continuation_id } = data.continuations[0] || {};
 
     const continuation_records = data.continuations
       .filter(record => ! record.delete)
@@ -178,6 +178,7 @@ const updateRelations = async context => {
   if ('parent' in data) {
     data.parent_record_id = data.parent ? data.parent.record_id : null;
     delete data.parent;
+    console.log(data)
   }
 
   return context;

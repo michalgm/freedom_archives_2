@@ -1,22 +1,25 @@
+import { Add, Delete, KeyboardArrowDown, KeyboardArrowUp, Restore } from '@mui/icons-material'
 import { Link as DOMLink, useNavigate } from 'react-router-dom';
 import {
   Divider,
   Grid,
   Icon,
   IconButton,
+  InputAdornment,
   List,
   ListItem,
   ListItemAvatar,
   ListItemSecondaryAction,
   ListItemText,
+  Stack,
   Typography
 } from '@mui/material';
+import { FieldArray, useFormikContext } from "formik";
 import React, { useState } from 'react'
 
 import Field from "../components/Field";
 import Thumbnail from '../components/Thumbnail'
 import { startCase } from 'lodash';
-import { useFormikContext } from "formik";
 
 export function RecordsList({ records, ...props }) {
   return <ItemsList type='record' items={records} {...props} />
@@ -99,6 +102,116 @@ export function ItemsList({ items, type, emptyText, index, ...props }) {
   </List>)
 }
 
+const icons = {
+  Delete,
+  KeyboardArrowUp,
+  KeyboardArrowDown,
+  Restore
+}
+
+function EditableItemsListAction({ icon, size = 'small', ...props }) {
+  const IconTag = icons[icon]
+  return <IconButton
+    size={size}
+    {
+    ...props
+    }
+  >
+    <IconTag fontSize="inherit" />
+  </IconButton>
+}
+
+export function EditableItemsList({ children = [], name, emptyText, reorder = false, type = 'record' }) {
+  const [add, setAdd] = useState(false)
+
+  const { values, setFieldValue } = useFormikContext();
+
+  return (
+    <FieldArray
+      name={name}
+      render={({ push, move }) => {
+        const items = values[name].map((item = {}, index) => {
+          if (!item) {
+            return null
+          }
+          const actions = [
+            <EditableItemsListAction
+              key="remove"
+              onClick={() =>
+                setFieldValue(
+                  `${name}[${index}].delete`,
+                  !item.delete
+                )
+              }
+              disabled={index === 0}
+              icon={item.delete ? 'Restore' : 'Delete'}
+              size={reorder ? 'small' : 'large'}
+            />
+          ]
+          if (reorder) {
+            actions.unshift(
+              <EditableItemsListAction
+                key="up"
+                onClick={() =>
+                  move(index, index - 1)
+                }
+                disabled={index === 0}
+                icon='KeyboardArrowUp'
+              />
+            )
+            actions.push(
+              <EditableItemsListAction
+                key="down"
+                onClick={() =>
+                  move(index, index + 1)
+                }
+                disabled={index === values[name].length - 1}
+                icon='KeyboardArrowDown'
+              />
+            )
+          }
+          item.action = () => (
+            <Grid container direction="column">
+              {actions}
+            </Grid>
+          )
+          return item;
+        })
+        const label = `Add ${name}`
+        const field = <Field
+          name={`__new_${name}`}
+          label={label}
+          type="select"
+          searchType={`${type}s`}
+          size="small"
+          clearOnChange
+          managed
+          excludeIds={[values[`${type}_id`], ...values[name].map((item) => item[`${type}_id`])]}
+          onChange={(_, child) => {
+            if (child) {
+              push(child);
+            }
+          }}
+          InputProps={{
+            startAdornment:
+              <InputAdornment position="start">
+                <Add />
+              </InputAdornment>
+          }}
+        />
+
+
+        return (
+          <>
+            { add ? field : (<><IconButton onClick={() => setAdd(true)}><Add/></IconButton> {label}</>)}
+            <RecordsList records={items} emptyText={emptyText} />
+          </>
+        );
+      }}
+    />
+  );
+}
+
 export default function RecordItem({ record: { title, record_id, primary_instance_thumbnail, primary_instance_format_text, collection: { collection_name, collection_id } = {}, description } = {}, description: showDescription, ...props }) {
   const details = [
     { type: 'Collection', label: collection_name, link: `/collections/${collection_id}` },
@@ -121,29 +234,32 @@ function RecordItemDetails({ details, dense }) {
     e.preventDefault()
     navigate(link);
   }
+  const items = details.reduce((acc, { label, type, link }) => {
+    if (label) {
+      const item = (
+        <Grid key={type} item style={{ paddingTop: 0, paddingBottom: 0 }}>
+          <Typography color="textSecondary" variant="caption">
+            {type}:&nbsp;
+            <b> {label} </b>
+            {
+              link && !dense && <Icon onClick={navigateTo(link)} color="primary" style={{ fontSize: 'inherit' }} >launch</Icon>
+            }
+          </Typography>
+        </Grid>
+      )
+      // return acc === null ? [item] : [acc, item]
+      return [...acc, item]
+    } else {
+      return acc
+    }
+  }, [])
+
   return (
-    <Grid container alignItems="center" justifyContent="flex-start" spacing={2} style={{ marginTop: 0, marginBottom: 0 }}>
-      {
-        details.reduce((acc, { label, type, link }) => {
-          if (label) {
-            const item = (
-              <Grid key={type} item style={{ paddingTop: 0, paddingBottom: 0 }}>
-                <Typography color="textSecondary" variant="caption">
-                  {type}:&nbsp;
-                  <b> {label} </b>
-                  {
-                    link && !dense && <Icon onClick={navigateTo(link)} color="primary" style={{ fontSize: 'inherit' }} >launch</Icon>
-                  }
-                </Typography>
-              </Grid>
-            )
-            return acc === null ? [item] : [acc, <Divider key="divider" orientation="vertical" sx={{ marginLeft: 2 }} flexItem />, item]
-          } else {
-            return acc
-          }
-        }, null)
-      }
-    </Grid>
+    <Stack direction="row"
+      divider={<Divider orientation="vertical" flexItem />}
+      spacing={1}>
+      {items}
+    </Stack>
   );
 }
 
