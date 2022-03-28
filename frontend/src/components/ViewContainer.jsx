@@ -1,13 +1,21 @@
-import {Box, Grid, Icon, Paper, Typography} from '@mui/material';
-import React, {useEffect} from 'react';
-import {collections, records} from '../api';
-import {useSearch, useStateValue} from '../appContext'
+import { Box, Grid, Icon, Paper, Typography } from '@mui/material';
+import React, { useEffect } from 'react';
+import { ThemeProvider, createTheme } from '@mui/material/styles';
+import { collections, records } from '../api';
+import { useSearch, useStateValue } from '../appContext'
 
 import ButtonLink from './ButtonLink'
-import {startCase} from 'lodash';
+// import {darkTheme} from '../App'
+import { startCase } from 'lodash';
 import {
   useLocation
 } from 'react-router-dom';
+
+export const darkTheme = createTheme({
+  palette: {
+    mode: "dark",
+  }
+});
 
 const renderTime = (item, type) => {
   return (
@@ -23,9 +31,9 @@ const renderTime = (item, type) => {
   );
 };
 
-function ViewContainer({children, item, buttonRef, neighborService, ...props}) {
-  const {state: {search: {query, type}, search_index}, dispatch} = useStateValue();
-  const [neighbors, setNeighbors] = React.useState({prev: null, next: null})
+function ViewContainer({ children, item, buttonRef, neighborService, ...props }) {
+  const { state: { search: { query, type }, search_index }, dispatch } = useStateValue();
+  const [neighbors, setNeighbors] = React.useState({ prev: null, next: null })
   const location = useLocation();
   const resetSearch = useSearch();
 
@@ -47,12 +55,12 @@ function ViewContainer({children, item, buttonRef, neighborService, ...props}) {
           $limit: 3,
           $select: [id]
         }
-        const {data} = await (neighborService === 'record' ? records : collections).find({query: neighborQuery});
+        const { data } = await (neighborService === 'record' ? records : collections).find({ query: neighborQuery });
         let neighbors = data.map((item) => item[id]);
         if (!search_index) {
           neighbors.unshift(null)
         }
-        setNeighbors({prev: neighbors[0], next: neighbors[2]})
+        setNeighbors({ prev: neighbors[0], next: neighbors[2] })
       }
     }
     if (rootPath === `${type}s`) {
@@ -64,7 +72,7 @@ function ViewContainer({children, item, buttonRef, neighborService, ...props}) {
     const offset = type === 'prev' ? -1 : 1
     if (neighborService) {
       return (
-        <Grid item xs component={Box} textAlign={type === 'prev' ? 'left' : 'right'} style={{flex: '0 0 auto'}}>
+        <Grid item xs component={Box} textAlign={type === 'prev' ? 'left' : 'right'} style={{ flex: '0 0 auto' }}>
           <ButtonLink
             disabled={!neighbors[type]}
             to={`/${neighborService}s/${neighbors[type]}`}
@@ -80,32 +88,34 @@ function ViewContainer({children, item, buttonRef, neighborService, ...props}) {
   }
 
   const renderSection = type => {
-    const section = props[`${type}Elements`] || [];
+    const sectionElements = props[`${type}Elements`] || [];
+    const sectionProps = props[`${type}Props`] || {};
+    const darkmode = props[`${type}DarkMode`] || false
     if (
-      section.length ||
+      sectionElements.length ||
       (type === 'footer' && item) ||
       (type === 'header' && buttonRef)
     ) {
-      return (
-        <Grid item xs={12} style={{flex: 'none'}}>
-          <Paper>
+      const section = (
+        <Grid item xs={12} style={{ flex: 'none' }}>
+          <Paper  {...sectionProps}>
             <Grid
               container
               alignContent="center"
               alignItems="center"
-              justifyContent={section.length === 1 ? 'center' : 'space-between'}
+              justifyContent={sectionElements.length === 1 ? 'center' : 'space-between'}
               spacing={2}
             // direction="column"
             >
               {type === 'footer' && item && (
                 <>
                   {renderNeighborLink('prev')}
-                  <Grid item xs style={{textAlign: 'center'}}>
+                  <Grid item xs style={{ textAlign: 'center' }}>
                     {renderTime(item, 'created')}
                   </Grid>
                 </>
               )}
-              {section.map((item, index) => (
+              {sectionElements.map((item, index) => (
                 <Grid
                   item
                   xs
@@ -120,7 +130,7 @@ function ViewContainer({children, item, buttonRef, neighborService, ...props}) {
               )}
               {type === 'footer' && item && (
                 <>
-                  <Grid item xs style={{textAlign: 'center'}}>
+                  <Grid item xs style={{ textAlign: 'center' }}>
                     {renderTime(item, 'modified')}
                   </Grid>
                   {renderNeighborLink('next')}
@@ -130,6 +140,13 @@ function ViewContainer({children, item, buttonRef, neighborService, ...props}) {
           </Paper>
         </Grid>
       );
+      if (darkmode) {
+        return <ThemeProvider theme={darkTheme}>
+          {section}
+        </ThemeProvider>
+      } else {
+        return section
+      }
     }
   };
 
@@ -138,10 +155,10 @@ function ViewContainer({children, item, buttonRef, neighborService, ...props}) {
       container
       direction="column"
       spacing={4}
-      style={{height: 'calc(100vh - 58px)', flexWrap: 'nowrap'}}
+      style={{ height: 'calc(100vh - 58px)', flexWrap: 'nowrap' }}
     >
       {renderSection('header')}
-      <Grid item xs={12} style={{overflowX: 'auto'}}>
+      <Grid item xs={12} style={{ overflowX: 'auto' }}>
         {children}
       </Grid>
       {renderSection('footer')}

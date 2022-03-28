@@ -9,13 +9,13 @@ import {
 import { Field as FormikField, useFormikContext } from 'formik';
 
 import { Alert } from '@mui/material';
-import { Autocomplete } from '@mui/material';
+import { Autocomplete } from 'formik-mui';
 import HTMLField from './HTMLField';
 import React from 'react';
 import SelectField from './SelectField';
 import { startCase } from 'lodash';
 
-const CustomComponent = ({
+const FieldComponent = ({
   type,
   ro,
   label,
@@ -25,15 +25,29 @@ const CustomComponent = ({
   autoSubmit,
   debounce,
   margin,
+  customOnChange,
+  onChange: defaultOnChange,
   ...props
 }) => {
   const labelValue = label === " " ? null : (label || startCase(name)).replace('_value', '');
-  const context = useFormikContext();
+  const { errors, setFieldValue } = useFormikContext();
 
   const variant = props.variant || ro ? 'filled' : 'outlined'
   let field;
-  const { onChange } = props
-  props.onChange = React.useCallback((event, option) => onChange(event, option), [onChange])
+
+  props.onChange = React.useCallback(async (event, option) => {
+    const { value, checked } = event.currentTarget
+    const results = customOnChange && await customOnChange(event, option)
+    if (results !== false) {
+      const newValue = type === 'checkbox' ? checked : (option || value)
+      if (['checkbox', 'radio'].includes(type)) {
+        await defaultOnChange(event, option)
+      } else {
+        await setFieldValue(name, newValue)
+      }
+    }
+    return results
+  }, [name, setFieldValue, defaultOnChange, customOnChange, type])
 
   if (type === 'select') {
     field = (
@@ -50,7 +64,7 @@ const CustomComponent = ({
               defaultValue: value || (isMulti ? [] : ''),
               value: value || (isMulti ? [] : ''),
               name,
-              setFieldValue: context.setFieldValue,
+              setFieldValue: setFieldValue,
               ...props
             }}
             variant={variant}
@@ -59,14 +73,14 @@ const CustomComponent = ({
       </FormControl>
     );
   } else if (type === 'simpleSelect') {
-    const { onChange, ...selectProps } = props;
+    const { InputProps, ...selectProps } = props;
     field = (
       <FormControl disabled={ro} margin="dense" fullWidth>
         <FormGroup>
-          <Autocomplete
+          <FormikField
+            component={Autocomplete}
             fullWidth
             autoHighlight
-            blurOnSelect
             className="select-input"
             margin={margin || "dense"}
             disabled={ro}
@@ -75,19 +89,16 @@ const CustomComponent = ({
             renderInput={(params) => (
               <TextField
                 {...params}
-                InputLabelProps={{ shrink: true }}
+                name={name}
+                InputLabelProps={{ ...params.InputLabelProps, shrink: true }}
                 label={label}
                 variant={props.variant || "outlined"}
-                {...props.inputProps}
+                InputProps={{ ...params.InputProps, ...(props.InputProps || {}) }}
               />
             )}
-            onChange={(event, option) => {
-              context.setFieldValue(name, option);
-              props.onChange && props.onChange(event, option);
-            }}
             {...{
-              defaultValue: value || '',
-              value: value || '',
+              defaultValue: value || null,
+              value: value || null,
               name,
               ...selectProps
             }}
@@ -118,7 +129,7 @@ const CustomComponent = ({
       {...props}
     />
   } else if (type === 'html') {
-    field = <HTMLField {...{ name, value, setFieldValue: context.setFieldValue }} {...props} />;
+    field = <HTMLField {...{ name, value, setFieldValue: setFieldValue }} {...props} />;
   } else {
     field = (
       <TextField
@@ -138,8 +149,8 @@ const CustomComponent = ({
   }
 
   const renderError = () => {
-    if (context && context.errors && context.errors[name]) {
-      const error = context.errors[name];
+    if (errors && errors[name]) {
+      const error = errors[name];
       return <Alert severity="error">{error}</Alert>;
     }
   };
@@ -151,11 +162,11 @@ const CustomComponent = ({
   );
 };
 
-const Field = ({ raw, ...props }) => {
+const Field = ({ raw, onChange: customOnChange, ...props }) => {
   if (raw) {
-    return CustomComponent({ ro: true, ...props });
+    return FieldComponent({ ro: true, onChange: customOnChange, ...props });
   }
-  return <FormikField as={CustomComponent} {...props} />;
+  return <FormikField as={FieldComponent} customOnChange={customOnChange} {...props} />;
 };
 
 export default Field;

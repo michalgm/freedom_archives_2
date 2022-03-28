@@ -4,37 +4,27 @@ import {
     Icon,
     IconButton,
     Paper,
+    Stack,
 } from '@mui/material';
-import {FieldArray, useFormikContext} from "formik";
-import React, {useEffect, useState} from 'react'
-import {collections, records} from '../api';
+import { FieldArray, useFormikContext } from "formik";
+import React, { useEffect, useState } from 'react'
+import { collections, records } from '../api';
 
+import { Close } from '@mui/icons-material'
 import Field from '../components/Field';
 import Form from '../components/Form';
-import {ItemsList} from './RecordItem';
+import { ItemsList } from './RecordItem';
 import ListItemField from '../components/ListItemField'
 import PaginationFooter from '../components/PaginationFooter'
 import ViewContainer from '../components/ViewContainer';
-import makeStyles from '@mui/styles/makeStyles';
-import {startCase} from 'lodash'
-import {useStateValue} from '../appContext';
+import { startCase } from 'lodash'
+import { useDebouncedCallback } from 'use-debounce';
+import { useStateValue } from '../appContext';
 
 const page_size = 10;
 
-const useStyles = makeStyles({
-    filter: {
-        display: 'flex',
-        background: 'rgba(0, 0, 0, 0.08)',
-
-        "& .MuiTextField-root": {
-            background: 'white'
-        }
-    },
-});
-
-function Filter({filter, index, remove, filterTypes}) {
-    const classes = useStyles();
-    const {values: {filters}} = useFormikContext()
+function Filter({ filter, index, remove, filterTypes }) {
+    const { setFieldValue, values: { filters } } = useFormikContext()
     if (!filters[index]) {
         return null;
     }
@@ -45,77 +35,101 @@ function Filter({filter, index, remove, filterTypes}) {
     const filter_fields = Object.keys(filterTypes).sort()
 
     return (
-        <Grid item xs={6} lg={3}>
-            <Paper className={classes.filter}>
-                <IconButton onClick={() => remove(index)} variant="outlined" size="small"><Icon>close</Icon></IconButton>
-                <Field
-                    size="small"
-                    name={`filters[${index}].field`}
-                    label='Field'
-                    type='simpleSelect'
-                    options={filter_fields}
-                    getOptionLabel={(option) => startCase(option)}
-                />
-                {
-                    type === 'listitem' || type === 'listitem_id' ?
-                        <ListItemField name={`filters[${index}].value`} label='Value' listType={field.replace(/s$/, '')} />
-                        : <Field name={`filters[${index}].value`} label='Value' />
-                }
-
+        <Grid item xs={12} md={6} lg={4} sx={{ bgColor: 'grey.200' }}>
+            <Paper sx={{ bgcolor: 'grey.200' }}>
+                <Stack direction="row" spacing={0} sx={{ bgColor: 'grey.200' }}>
+                    <IconButton sx={{ fontSize: 12, pl: 0 }} onClick={() => remove(index)} variant="outlined"><Close fontSize="inherit" /></IconButton>
+                    <Field
+                        size="small"
+                        name={`filters[${index}].field`}
+                        label='Field'
+                        type='simpleSelect'
+                        options={filter_fields}
+                        getOptionLabel={(option) => startCase(option)}
+                        disableClearable
+                        autoSelect
+                        InputProps={{ sx: { bgcolor: '#fff' } }}
+                        onChange={() => {
+                            setFieldValue(`filters[${index}].value`, null)
+                        }}
+                    />
+                    {
+                        type === 'listitem' || type === 'listitem_id' ?
+                            <ListItemField
+                                name={`filters[${index}].value`}
+                                label='Value'
+                                listType={field.replace(/s$/, '')}
+                                disableClearable
+                                // disabled={!field}
+                                selectOnFocus={true}
+                                InputProps={{ sx: { bgcolor: '#fff' } }}
+                                disableNew
+                            />
+                            : <Field
+                                size="small"
+                                name={`filters[${index}].value`}
+                                label='Value'
+                                // disabled={!field}
+                                inputProps={{ sx: { bgcolor: '#fff' } }}
+                            />
+                    }
+                </Stack>
             </Paper>
         </Grid >
     );
 }
 
-export default function Manage({renderItem, defaultFilter, filterTypes, createQuery, type, service}) {
+export default function Manage({ renderItem, defaultFilter, filterTypes, createQuery, type, service }) {
     const [items, setItems] = useState([]);
     const [total, setTotal] = useState(0);
     const [offset, setOffset] = useState(0);
     const [filter, setFilter] = useState(defaultFilter);
-    const {dispatch} = useStateValue();
-    useEffect(() => {
-        const {filters} = filter
-        const fetchItems = async () => {
-            const query = createQuery(filter)
-            query.$skip = offset;
-            query.$limit = page_size;
+    const { dispatch } = useStateValue();
+    const lookupItems = useDebouncedCallback(async ({ filter, offset, page_size, service }) => {
+        const { filters } = filter
+        const query = createQuery(filter)
+        query.$skip = offset;
+        query.$limit = page_size;
 
-            if (filters.length) {
-                filters.forEach(({field, value}) => {
-                    if (value && field) {
-                        switch (filterTypes[field].match) {
-                            case 'contained':
-                                query[field] = {$contains: [value.list_item_id || value]}
-                                break;
-                            case 'fuzzy':
-                                query[field] = {'$ilike': `%${value.replace(/ /g, '%')}%`}
-                                break;
-                            case 'listitem':
-                                query[`${field}_search`] = {$contains: [value.item]}
-                                break;
-                            case 'listitem_id':
-                                query[`${field.replace(/s$/, '')}_id`] = value.list_item_id
-                                break;
-                            default:
-                                query[field] = value
-                        }
+        if (filters.length) {
+            filters.forEach(({ field, value }) => {
+                if (value && field) {
+                    switch (filterTypes[field].match) {
+                        case 'contained':
+                            query[field] = { $contains: [value.list_item_id || value] }
+                            break;
+                        case 'fuzzy':
+                            query[field] = { '$ilike': `%${value.replace(/ /g, '%')}%` }
+                            break;
+                        case 'listitem':
+                            query[`${field}_search`] = { $contains: [value.item] }
+                            break;
+                        case 'listitem_id':
+                            query[`${field.replace(/s$/, '')}_id`] = value.list_item_id
+                            break;
+                        default:
+                            query[field] = value
                     }
-                })
-            }
-            const {data, total} = await (service === 'record' ? records : collections).find({query});
-            setItems(data);
-
-            setTotal(total);
-            dispatch('SEARCH', {
-                type: service,
-                query,
-                total,
-                offset,
-                page_size,
+                }
             })
-        };
-        fetchItems();
-    }, [offset, filter, service]);
+        }
+        const { data, total } = await (service === 'record' ? records : collections).find({ query });
+        setItems(data);
+
+        setTotal(total);
+        dispatch('SEARCH', {
+            type: service,
+            query,
+            total,
+            offset,
+            page_size,
+        })
+
+    }, 250)
+
+    useEffect(() => {
+        lookupItems({ filter, offset, page_size, service });
+    }, [offset, filter, service, createQuery, filterTypes, lookupItems]);
 
     const renderFilterBar = () => {
         return (
@@ -126,7 +140,7 @@ export default function Manage({renderItem, defaultFilter, filterTypes, createQu
                 }
             }}>
                 <Grid item xs={3}>
-                    <Field name="search" type="search" label="Quick Search" />
+                    <Field size="small" name="search" type="search" label="Quick Search" />
                 </Grid>
                 <Grid item xs={4}>
                     {service === 'record' && <Field
@@ -137,22 +151,22 @@ export default function Manage({renderItem, defaultFilter, filterTypes, createQu
                     />}
                 </Grid>
                 <Grid item xs={3}>
-                    <div style={{display: 'flex', flexDirection: 'column'}}>
-                        {service === 'record' && <Field type='checkbox' name="non_digitized" label="Include non-digitized" margin="none" size="small" style={{paddingBottom: 4, paddingTop: 4}} />}
-                        <Field type='checkbox' name="hidden" label="Include Hidden" margin="none" size="small" style={{paddingBottom: 4, paddingTop: 4}} />
-                        <Field type='checkbox' name="needs_review" label="Needs Review" margin="none" size="small" style={{paddingBottom: 4, paddingTop: 4}} />
+                    <div style={{ display: 'flex', flexDirection: 'column' }}>
+                        {service === 'record' && <Field type='checkbox' name="non_digitized" label="Include non-digitized" margin="none" size="small" style={{ paddingBottom: 4, paddingTop: 4 }} />}
+                        <Field type='checkbox' name="hidden" label="Include Hidden" margin="none" size="small" style={{ paddingBottom: 4, paddingTop: 4 }} />
+                        <Field type='checkbox' name="needs_review" label="Needs Review" margin="none" size="small" style={{ paddingBottom: 4, paddingTop: 4 }} />
                     </div>
                 </Grid>
                 <FieldArray
                     name="filters"
-                    render={({push, remove}) => {
+                    render={({ push, remove }) => {
                         return <>
                             <Grid item xs={2} lg={2}>
-                                <Button variant="outlined" startIcon={<Icon>add</Icon>} onClick={() => {push({field: '', value: ''})}}>Add Filter</Button>
+                                <Button variant="outlined" startIcon={<Icon>add</Icon>} onClick={() => { push({ field: null, value: null }) }}>Add Filter</Button>
 
                             </Grid>
                             <Grid item xs={12}>
-                                <Grid container spacing={2}>
+                                <Grid container spacing={1}>
                                     {filter.filters.map((filter, index) => <Filter filterTypes={filterTypes} filter={filter} key={index} index={index} remove={remove} />)}
                                 </Grid>
                             </Grid>
@@ -166,7 +180,9 @@ export default function Manage({renderItem, defaultFilter, filterTypes, createQu
         <ViewContainer
             footerElements={[<PaginationFooter type={service} total={total} offset={offset} page_size={page_size} setOffset={setOffset} />]}
             headerElements={[renderFilterBar()]}
+            // headerProps={{sx: {bgcolor: 'grey.800', color: 'info.contrastText'}}}
             service={service}
+        // headerDarkMode
         >
             <Paper>
                 <ItemsList

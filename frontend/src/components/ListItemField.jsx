@@ -6,7 +6,7 @@ import {
   DialogTitle,
   Grid,
 } from '@mui/material';
-import React, {useState} from 'react';
+import React, { useState } from 'react';
 
 import Field from './Field';
 import FieldRow from './FieldRow';
@@ -15,18 +15,19 @@ import { createFilterOptions } from '@mui/material/useAutocomplete';
 import { list_items } from '../api';
 import { useFormikContext } from 'formik';
 
-const ListItemField = ({name, listType, isMulti, ...props}) => {
+const ListItemField = ({ name, disableNew, listType, isMulti, ...props }) => {
   const [open, toggleOpen] = React.useState(false);
   const [newValue, setNewValue] = React.useState('');
-  
-  const filter = createFilterOptions({trim: true});
+
+  const filter = createFilterOptions({ trim: true });
   const type = listType || name.replace(/s$/, '');
-  
+
   const validateChange = (_, item) => {
     const lastItem = isMulti ? item && item[item.length - 1] : item;
-    if (lastItem && !lastItem.list_item_id && lastItem.item) {
+    if (lastItem && lastItem.list_item_id === 'new' && lastItem.item) {
       toggleOpen(true);
       setNewValue(lastItem.item.replace(/^Add "(.+)"$/, '$1'));
+      return false
     } else {
       return true;
     }
@@ -43,16 +44,22 @@ const ListItemField = ({name, listType, isMulti, ...props}) => {
         selectOnFocus
         clearOnBlur
         handleHomeEndKeys
-        validateChange={validateChange}
+        onChange={(event, option) => {
+          props.onChange && props.onChange(event, option)
+          return validateChange(event, option)
+        }}
         filterOptions={(options, params) => {
           const filtered = filter(options, params)
           if (
+            !disableNew &&
+            options.length &&
             params.inputValue !== '' &&
-            !filtered.some(({item}) => item.toLowerCase() === params.inputValue.toLowerCase())
+            !filtered.some(({ item }) => item.toLowerCase() === params.inputValue.toLowerCase())
           ) {
             filtered.push({
               value: params.inputValue,
               item: `Add "${params.inputValue}"`,
+              list_item_id: `new`
             });
           }
           return filtered

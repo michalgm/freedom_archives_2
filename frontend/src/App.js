@@ -30,7 +30,21 @@ import Routes from './Routes'
 import Sidebar from './views/Sidebar';
 import { app } from './api';
 
-const theme = createTheme();
+export const theme = createTheme({
+  components: {
+    MuiTextField: {
+      defaultProps: {
+        size: 'small'
+      }
+    }
+  }
+});
+export const darkTheme = createTheme({
+  palette: {
+    type: "dark"
+  }
+});
+
 // console.log(theme)
 const scheme = {
   header: {
