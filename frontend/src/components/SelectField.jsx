@@ -1,9 +1,9 @@
 import { MenuItem, TextField } from '@mui/material';
+import React, { useEffect } from 'react';
 import RecordItem, { CollectionItem } from './RecordItem'
 
 import { Autocomplete } from 'formik-mui';
 import { Field } from 'formik';
-import React from 'react';
 import { services } from '../api';
 import { useDebouncedCallback } from 'use-debounce';
 import useDeepCompareEffect from 'use-deep-compare-effect'
@@ -55,7 +55,7 @@ const SelectField = ({
   const [open, setOpen] = React.useState(props.autoFocus || false);
   const [inputValue, setInputValue] = React.useState('');
   const [options, setOptions] = React.useState([]);
-
+  const has_options = options.length !== 0
   const loading = Boolean(open && inputValue);
 
   const value = inputValue || ((defaultValue && defaultValue[typeLabel]) ? defaultValue[typeLabel] : null)
@@ -66,7 +66,7 @@ const SelectField = ({
   const query = {
     $select,
     $sort: { [typeLabel]: 1 },
-    $limit: 100,
+    $limit: fetchAll ? 10000 : 100,
     ...searchParams,
   }
 
@@ -85,7 +85,7 @@ const SelectField = ({
   }, [defaultValue, typeLabel])
 
   const fetchOptions = useDebouncedCallback(async () => {
-    if (!value) {
+    if (!value && !fetchAll) {
       return
     }
     const { data: options } = await services[searchType].find({
@@ -105,22 +105,18 @@ const SelectField = ({
     });
     setOptions(newOptions);
     active = false;
-  }, 250)
+  }, fetchAll ? 0 : 250)
 
   useDeepCompareEffect(() => {
     if (
-      (fetchAll && options.length) ||
-      (!fetchAll && (
-        // !loading
-        // || active
-        !value
-      ))
+      (fetchAll && has_options) ||
+      (!fetchAll && !value)
     ) {
       return undefined;
     }
     active = true;
     fetchOptions()
-  }, [query, searchType, fetchAll, value, loading])
+  }, [query, searchType, fetchAll, value, loading, has_options])
 
 
   const onChange = React.useCallback(
