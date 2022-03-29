@@ -35,7 +35,7 @@ function Filter({ filter, index, remove, filterTypes }) {
     const filter_fields = Object.keys(filterTypes).sort()
 
     return (
-        <Grid item xs={12} md={6} lg={4} sx={{ bgColor: 'grey.200' }}>
+        <Grid item xs={"auto"} sx={{ bgColor: 'grey.200' }}>
             <Paper sx={{ bgcolor: 'grey.200' }}>
                 <Stack direction="row" spacing={0} sx={{ bgColor: 'grey.200' }}>
                     <IconButton sx={{ fontSize: 12, pl: 0 }} onClick={() => remove(index)} variant="outlined"><Close fontSize="inherit" /></IconButton>
@@ -140,7 +140,7 @@ export default function Manage({ renderItem, defaultFilter, filterTypes, createQ
                 }
             }}>
                 <Grid item xs={3}>
-                    <Field size="small" name="search" type="search" label="Quick Search" />
+                    <Field size="small" name="search" type="search" label="Quick Search" helperText="Search title, description. keywords, producers, and call number" />
                 </Grid>
                 <Grid item xs={4}>
                     {service === 'record' && <Field
