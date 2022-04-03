@@ -129,7 +129,19 @@ const FieldComponent = ({
       {...props}
     />
   } else if (type === 'html') {
-    field = <HTMLField {...{ name, value, setFieldValue: setFieldValue }} {...props} />;
+    field = <HTMLField
+      variant={variant}
+      disabled={ro}
+      margin={margin || "dense"}
+      label={labelValue}
+      InputLabelProps={{ shrink: true }}
+      autoComplete="off"
+      setFieldValue={setFieldValue}
+      fullWidth
+      type={type || 'text'}
+      {...{ name, value: value || '' }}
+      {...props}
+    />;
   } else {
     field = (
       <TextField
