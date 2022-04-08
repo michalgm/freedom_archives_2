@@ -4,14 +4,14 @@ import {
 import { BrokenImage } from '@mui/icons-material';
 import React from 'react'
 
-const onError = (event)=> {
-  event.target.src = `https://search.freedomarchives.org/images/fileicons/webpage.png`
+const onError = (event) => {
+  event.target.src = `https://search.freedomarchives.org/images/fileicons/nodigital.png`
 }
 
-export default function Thumbnail({src, type, width=75, alt=''}) {
+export default function Thumbnail({ src, type, width = 75, alt = '' }) {
   if (src) {
     return (
-      <span style={{width, minWidth: width, display: 'block', marginRight: 10}}>
+      <span style={{ width, minWidth: width, display: 'block', marginRight: 10 }}>
         <img
           style={{
             maxWidth: '100%',
@@ -23,8 +23,8 @@ export default function Thumbnail({src, type, width=75, alt=''}) {
       </span>
     )
   } else {
-    return <Avatar style={{width, height: width}}>
-      <BrokenImage style={{fontSize: width * 0.6}} />
+    return <Avatar style={{ width, height: width }}>
+      <BrokenImage style={{ fontSize: width * 0.6 }} />
     </Avatar>
   }
 }
