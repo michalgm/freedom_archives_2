@@ -24,7 +24,7 @@ const filter_types = {
   'producers': { input: 'listitem', match: 'listitem' },
   'programs': { input: 'listitem', match: 'listitem_id' },
   'publishers': { input: 'listitem', match: 'listitem_id' },
-  'call_numbers': { input: 'text', match: 'contained' },
+  'call_numbers': { input: 'text', match: 'contained', case: 'upper' },
   'formats': { input: 'listitem', match: 'contained' },
   'qualitys': { input: 'listitem', match: 'contained' },
   'generations': { input: 'listitem', match: 'contained' },
@@ -67,7 +67,7 @@ function Records() {
         { title: { $ilike } },
         { description: { $ilike } },
         { record_id: parseInt(search, 10) || undefined },
-        { call_numbers: { $contains: [search] } }
+        { call_numbers: { $contains: [search.toUpperCase()] } }
       ]
     }
     return query;

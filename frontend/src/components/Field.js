@@ -27,10 +27,13 @@ const FieldComponent = ({
   margin,
   customOnChange,
   onChange: defaultOnChange,
+  raw,
+  context,
   ...props
 }) => {
   const labelValue = label === " " ? null : (label || startCase(name)).replace('_value', '');
-  const { errors, setFieldValue } = useFormikContext();
+
+  const { errors, setFieldValue } = context || {};
 
   const variant = props.variant || ro ? 'filled' : 'outlined'
   let field;
@@ -86,6 +89,7 @@ const FieldComponent = ({
             disabled={ro}
             label={labelValue}
             variant={variant}
+            componentsProps={{ paper: { sx: { width: 'max-content' } } }}
             renderInput={(params) => (
               <TextField
                 {...params}
@@ -128,30 +132,21 @@ const FieldComponent = ({
       {...{ name, value: value || '' }}
       {...props}
     />
-  } else if (type === 'html') {
-    field = <HTMLField
-      variant={variant}
-      disabled={ro}
-      margin={margin || "dense"}
-      label={labelValue}
-      InputLabelProps={{ shrink: true }}
-      autoComplete="off"
-      setFieldValue={setFieldValue}
-      fullWidth
-      type={type || 'text'}
-      {...{ name, value: value || '' }}
-      {...props}
-    />;
+
   } else {
+    let FieldComponent = TextField
+    if (type === 'html') {
+      FieldComponent = HTMLField
+    }
+
     field = (
-      <TextField
+      <FieldComponent
         variant={variant}
         disabled={ro}
         margin={margin || "dense"}
         label={labelValue}
         InputLabelProps={{ shrink: true }}
         autoComplete="off"
-        inputProps={{ style: { color: '#000' } }}
         fullWidth
         type={type || 'text'}
         {...{ name, value: value || '' }}
@@ -174,11 +169,16 @@ const FieldComponent = ({
   );
 };
 
+const ContextField = (props) => {
+  const context = useFormikContext()
+  return <FormikField as={FieldComponent} context={context} {...props} />
+}
+
 const Field = ({ raw, onChange: customOnChange, ...props }) => {
   if (raw) {
-    return FieldComponent({ ro: true, onChange: customOnChange, ...props });
+    return <FieldComponent ro raw {...props} />;
   }
-  return <FormikField as={FieldComponent} customOnChange={customOnChange} {...props} />;
+  return <ContextField customOnChange={customOnChange} {...props} />
 };
 
 export default Field;

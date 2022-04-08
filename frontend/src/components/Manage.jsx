@@ -36,8 +36,8 @@ function Filter({ filter, index, remove, filterTypes }) {
 
     return (
         <Grid item xs={"auto"} sx={{ bgColor: 'grey.200' }}>
-            <Paper sx={{ bgcolor: 'grey.200' }}>
-                <Stack direction="row" spacing={0} sx={{ bgColor: 'grey.200' }}>
+            <Paper sx={{ bgcolor: 'grey.200', width: 300 }}>
+                <Stack direction="row" spacing={1} sx={{ bgColor: 'grey.200' }}>
                     <IconButton sx={{ fontSize: 12, pl: 0 }} onClick={() => remove(index)} variant="outlined"><Close fontSize="inherit" /></IconButton>
                     <Field
                         size="small"
@@ -50,7 +50,7 @@ function Filter({ filter, index, remove, filterTypes }) {
                         autoSelect
                         InputProps={{ sx: { bgcolor: '#fff' } }}
                         onChange={() => {
-                            setFieldValue(`filters[${index}].value`, null)
+                            return setFieldValue(`filters[${index}].value`, null)
                         }}
                     />
                     {
@@ -94,6 +94,10 @@ export default function Manage({ renderItem, defaultFilter, filterTypes, createQ
         if (filters.length) {
             filters.forEach(({ field, value }) => {
                 if (value && field) {
+                    if (filterTypes[field].case === 'upper' && typeof value === 'string') {
+                        value = value.toUpperCase()
+                    }
+
                     switch (filterTypes[field].match) {
                         case 'contained':
                             query[field] = { $contains: [value.list_item_id || value] }

@@ -6,7 +6,7 @@ import Link from '../components/Link';
 import Record from './Record';
 import { relationships } from '../api';
 
-function Relationship({id}) {
+function Relationship({ id }) {
   const [relation, setRelation] = useState({});
 
   useEffect(() => {
@@ -36,9 +36,8 @@ function Relationship({id}) {
                   </Link>
                   <Link
                     target="_blank"
-                    href={`https://search.freedomarchives.org/admin/#/documents/${
-                      relation[`docid_${num}`]
-                    }`}
+                    href={`https://search.freedomarchives.org/admin/#/documents/${relation[`docid_${num}`]
+                      }`}
                   >
                     (Live DB Link)
                   </Link>

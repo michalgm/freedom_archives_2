@@ -1,9 +1,9 @@
 import { MenuItem, TextField } from '@mui/material';
-import React, { useEffect } from 'react';
 import RecordItem, { CollectionItem } from './RecordItem'
 
 import { Autocomplete } from 'formik-mui';
 import { Field } from 'formik';
+import React from 'react';
 import { services } from '../api';
 import { useDebouncedCallback } from 'use-debounce';
 import useDeepCompareEffect from 'use-deep-compare-effect'
@@ -189,6 +189,7 @@ const SelectField = ({
       loadingText="Loading...."
       inputValue={inputValue}
       blurOnSelect
+      componentsProps={{ paper: { sx: { width: 'max-content' } } }}
       {...props}
     />
   );

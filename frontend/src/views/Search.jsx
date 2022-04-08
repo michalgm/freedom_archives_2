@@ -1,20 +1,20 @@
 import './Search.scss';
 
-import { Box, Button, Card, Chip, Divider, Grid, Icon, Link as MULink, Paper, Typography} from '@mui/material';
-import React, {useEffect, useRef, useState} from 'react';
-import { useTheme } from '@mui/material/styles';
-
-import makeStyles from '@mui/styles/makeStyles';
+import { Box, Button, Card, Divider, Grid, Icon, Link as MULink, Paper, Typography } from '@mui/material';
+import React, { useEffect, useRef, useState } from 'react';
 
 import AutoSave from '../components/AutoSave'
 import Field from '../components/Field';
 import Form from '../components/Form';
+import KVChip from '../components/KVChip';
 import PaginationFooter from '../components/PaginationFooter'
 import Thumbnail from '../components/Thumbnail';
-import {isEqual} from 'lodash';
-import {records as recordsService} from '../api';
-import {startCase} from 'lodash';
-import {unstable_batchedUpdates} from 'react-dom'
+import { isEqual } from 'lodash';
+import makeStyles from '@mui/styles/makeStyles';
+import { records as recordsService } from '../api';
+import { startCase } from 'lodash';
+import { unstable_batchedUpdates } from 'react-dom'
+import { useTheme } from '@mui/material/styles';
 
 const descriptionMaxLines = 5;
 
@@ -52,7 +52,7 @@ const useStyles = makeStyles({
 
 const page_size = 10;
 
-function Description({text}) {
+function Description({ text }) {
   const theme = useTheme();
   const classes = useStyles(theme);
   const [open, setopen] = useState(false)
@@ -80,15 +80,15 @@ function Description({text}) {
   )
 }
 
-function Filter({type, values = [], addFilter, search}) {
+function Filter({ type, values = [], addFilter, search }) {
   const [limit, setlimit] = useState(5)
 
-  const renderFilterItem = ({value, label, count, i, type}) => (
-    <Box key={i} onClick={() => addFilter({type, value})} sx={{display: 'flex', alignItems: 'center', justifyContent: 'space-between'}}>
+  const renderFilterItem = ({ value, label, count, i, type }) => (
+    <Box key={i} onClick={() => addFilter({ type, value })} sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
       <MULink
         href=""
         onClick={e => e.preventDefault()}
-        style={{fontWeight: (search || []).includes(value) ? 800 : 400}}
+        style={{ fontWeight: (search || []).includes(value) ? 800 : 400 }}
         underline="hover">
         {label || '???'}
       </MULink>{' '}
@@ -97,14 +97,14 @@ function Filter({type, values = [], addFilter, search}) {
   );
 
   return (
-    <div key={type} style={{flexGrow: 1, marginBottom: 10}}>
+    <div key={type} style={{ flexGrow: 1, marginBottom: 10 }}>
       <Typography variant="h6" gutterBottom>{startCase(type)}</Typography>
-      <div style={{paddingLeft: 10}}>
+      <div style={{ paddingLeft: 10 }}>
         <div>
           {(values || [])
             .slice(0, limit)
             .map(([label, count, value], i) =>
-              renderFilterItem({value: value || label, label, count, type, i})
+              renderFilterItem({ value: value || label, label, count, type, i })
             )}
         </div>
         {(values && values.length > limit) &&
@@ -112,7 +112,7 @@ function Filter({type, values = [], addFilter, search}) {
             size="small"
             startIcon={<Icon>add</Icon>}
             onClick={e => setlimit(limit + 5)}
-            style={{display: 'flex', cursor: 'pointer'}}>
+            style={{ display: 'flex', cursor: 'pointer' }}>
             Show More...
           </Button>
         }
@@ -123,9 +123,9 @@ function Filter({type, values = [], addFilter, search}) {
 }
 
 function Search() {
-  const [records, setRecords] = useState({count: 0, records: []});
+  const [records, setRecords] = useState({ count: 0, records: [] });
   const [filters, setFilters] = useState([]);
-  const [search, setSearch] = useState({$fullText: '', include_non_digitized: false});
+  const [search, setSearch] = useState({ $fullText: '', include_non_digitized: false });
   const [total, setTotal] = useState(0);
   const [offset, setOffset] = useState(0);
   const [time, setTime] = useState(0);
@@ -146,7 +146,7 @@ function Search() {
     const fetchRecords = async () => {
       const time = new Date();
       try {
-        const {$fullText, include_non_digitized} = search;
+        const { $fullText, include_non_digitized } = search;
         const query = {
           $select: ['record_id', 'title', 'description', 'year', 'publisher', 'producers', 'authors'],
           $limit: page_size,
@@ -158,22 +158,22 @@ function Search() {
         }
         ['keyword', 'subject', 'author', 'producer'].forEach(type => {
           if (search[type]) {
-            query[`${type}s_search`] = {$contains: search[type]};
+            query[`${type}s_search`] = { $contains: search[type] };
           }
         });
         ['year', 'title'].forEach(type => {
           if (search[type]) {
-            query[type] = {$in: search[type]};
+            query[type] = { $in: search[type] };
           }
         });
         if (search.collection) {
-          query.collection_id = {$in: search.collection};
+          query.collection_id = { $in: search.collection };
         }
         const {
           total,
           data: records,
           filters = [],
-        } = await recordsService.find({query});
+        } = await recordsService.find({ query });
         unstable_batchedUpdates(() => {
           setRecords({
             total, records: records.map(record => {
@@ -184,7 +184,7 @@ function Search() {
                 if (value) {
                   if (Array.isArray(value)) {
                     if (value.length) {
-                      value = value.map(({item}) => item).join(', ')
+                      value = value.map(({ item }) => item).join(', ')
                     }
                   } else if (typeof value === 'object') {
                     value = value.item
@@ -206,43 +206,41 @@ function Search() {
     fetchRecords();
   }, [searchRef.current, offset]);
 
-  const addFilter = ({type, value}) => {
+  const addFilter = ({ type, value }) => {
     let newFilter = [...(search[type] || [])];
     if (newFilter.includes(value)) {
       newFilter = newFilter.filter(v => v !== value)
     } else {
       newFilter.push(value)
     }
-    setSearch({...search, ...{[type]: newFilter}})
+    setSearch({ ...search, ...{ [type]: newFilter } })
   };
 
   const clearFilters = () => {
     const newFilters = {};
-    filters.forEach(({type}) => {
+    filters.forEach(({ type }) => {
       newFilters[type] = [];
     });
-    setSearch({...search, ...newFilters})
+    setSearch({ ...search, ...newFilters })
   };
 
   const renderResult = (record = {}) => {
     return (
       <Grid item xs={12} key={record.record_id}>
-        <Card style={{display: 'flex'}}>
+        <Card style={{ display: 'flex' }}>
           <Thumbnail
             src={`https://search.freedomarchives.org/images/thumbnails/${record.record_id}.jpg`}
             width={75}
           />
-          <div style={{width: '100%'}}>
+          <div style={{ width: '100%' }}>
             <Typography variant='h5'>
               {record.title}
             </Typography>
-            <Typography variant='caption'>
-              <Grid container spacing={1} style={{marginBottom: 3, marginTop: 3}}>
-                {(record.details || []).map(([key, value]) => <Grid item key={key}>
-                  <Chip variant="outlined" size="small" label={`${startCase(key)} - ${value}`} />
-                </Grid>)}
-              </Grid>
-            </Typography>
+            <Grid container spacing={1} style={{ marginBottom: 3, marginTop: 3 }}>
+              {(record.details || []).map(([key, value]) => <Grid item key={key}>
+                <KVChip keyName={startCase(key)} value={value} />
+              </Grid>)}
+            </Grid>
             <Description text={record.description} />
           </div>
         </Card>
@@ -269,7 +267,7 @@ function Search() {
       >
         Clear Filters
       </Button>
-      {filters.map(({type, values}) => {
+      {filters.map(({ type, values }) => {
         return <Filter
           key={type}
           type={type}
@@ -281,7 +279,7 @@ function Search() {
     </div>
   );
 
-  const SearchForm = ({children}) => (
+  const SearchForm = ({ children }) => (
     <Paper>
       <Form
         initialValues={search}

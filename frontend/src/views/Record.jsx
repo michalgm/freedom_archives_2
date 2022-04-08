@@ -492,7 +492,7 @@ function Record({ showForm, ro = false, embedded = false, id }) {
                 />
               </GridBlock>
               <Grid item xs={12}>
-                <Divider/>
+                <Divider />
                 <Typography variant="h4">Relationships</Typography>
 
               </Grid>

@@ -2,10 +2,12 @@ import { Add, Delete, KeyboardArrowDown, KeyboardArrowUp, Restore } from '@mui/i
 import { Link as DOMLink, useNavigate } from 'react-router-dom';
 import {
   Divider,
+  FormControl,
   Grid,
   Icon,
   IconButton,
   InputAdornment,
+  InputLabel,
   List,
   ListItem,
   ListItemAvatar,
@@ -29,7 +31,7 @@ export function CollectionsList({ collections, ...props }) {
   return <ItemsList type='collection' items={collections} {...props} />
 }
 
-export function EditableItem({ service, name }) {
+export function EditableItem({ service, name, label = '' }) {
   const { values, setFieldValue } = useFormikContext();
   const [edit, setEdit] = useState(false);
   const services = {
@@ -43,34 +45,39 @@ export function EditableItem({ service, name }) {
     },
 
   }
-
+  if (!service) {
+    return
+  }
   if (edit) {
     return <Field
       name={name}
       type="select"
       searchType={`${service}`}
       size="small"
-      label=" "
+      label={name}
       autoFocus
       selectOnFocus
       excludeIds={[values.record_id]}
-      onChange={(_, item) => {
+      onChange={async (_, item) => {
         if (item) {
-          setFieldValue(name, { ...item });
-          setEdit(false)
+          await setFieldValue(name, { ...item });
+          await setEdit(false)
         }
       }}
     />
   } else {
-    const missingText = name === 'parent' ? 'Parent Record' : 'Collection'
     const { tag: ItemTag, itemName } = services[service]
+    const missingText = name === 'parent' ? 'Parent Record' : 'Collection'
 
     return (
-      <List>
-        <ItemTag {...{ [itemName]: values[name] }} link missingRecordText={`No ${missingText}`} action={() => (<IconButton onClick={() => { setEdit(true) }} size="large">
-          <Icon>edit</Icon>
-        </IconButton>)} />
-      </List>
+      <FormControl variant="outlined" fullWidth size="small" margin="dense">
+        <InputLabel shrink>{startCase(label || name)}</InputLabel>
+        <List sx={{ width: '100%' }}>
+          <ItemTag {...{ [itemName]: values[name] }} link missingRecordText={`No ${missingText}`} action={() => (<IconButton onClick={() => { setEdit(true) }} size="large">
+            <Icon>edit</Icon>
+          </IconButton>)} />
+        </List>
+      </FormControl>
     );
   }
 }
@@ -203,7 +210,7 @@ export function EditableItemsList({ children = [], name, emptyText, reorder = fa
 
         return (
           <>
-            { add ? field : (<><IconButton onClick={() => setAdd(true)}><Add/></IconButton> {label}</>)}
+            {add ? field : (<><IconButton onClick={() => setAdd(true)}><Add /></IconButton> {label}</>)}
             <RecordsList records={items} emptyText={emptyText} />
           </>
         );
@@ -268,10 +275,9 @@ export function Item({ id, type, thumbnail, details = [], title, description, li
   const onClick = onClickHandler ? (event) => {
     onClickHandler(index, event)
   } : null
-
   return (
     <ListItem {...list_item_props} alignItems="flex-start" dense={dense} onClick={onClick} {...props}>
-      {id && <ListItemAvatar style={{ minWidth: dense ? 35 : null }}>
+      {Boolean(id) && <ListItemAvatar style={{ minWidth: dense ? 35 : null }}>
         <Thumbnail
           src={thumbnail ? `https://search.freedomarchives.org/${thumbnail}` : ''}
           alt={`${title} Thumbnail`}

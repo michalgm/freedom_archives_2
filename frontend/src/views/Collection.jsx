@@ -1,6 +1,12 @@
+import { EditableItem, RecordsList } from '../components/RecordItem'
+import { FieldArray, useFormikContext } from "formik";
+import {
+  Grid,
+  Icon,
+  IconButton
+} from "@mui/material/";
 import React, { useEffect, useRef, useState } from 'react';
 
-import { EditableItem, RecordsList } from '../components/RecordItem'
 import Field from '../components/Field';
 import FieldRow from '../components/FieldRow';
 import Form from '../components/Form';
@@ -10,13 +16,6 @@ import ViewContainer from '../components/ViewContainer';
 import { collections as collectionsService } from '../api';
 import { useParams } from 'react-router-dom';
 import { useTitle } from '../appContext'
-import { FieldArray, useFormikContext } from "formik";
-import {
-  Icon,
-  IconButton,
-  Grid
-} from "@mui/material/";
-import Records from './Records';
 
 function Collection() {
   const [collection, setCollection] = useState({});
@@ -81,44 +80,47 @@ function Collection() {
           buttons={buttons}
           buttonRef={buttonRef}
         >
-          <GridBlock>
-            <FieldRow>
-              <Field name="collection_name" />
-              <EditableItem service="collections" name="parent" />
-            </FieldRow>
-            <FieldRow>
-              <Field name="is_hidden" type="checkbox" />
-              <Field name="needs_review" type="checkbox" />
-            </FieldRow>
-            <FieldRow>
-              <Field name="call_number" type="call_number" />
-              <ListItemField name="publisher" />
-            </FieldRow>
-            <FieldRow>
-              <Field name="date_range" />
-              <Field name="thumbnail" />
-            </FieldRow>
-            <FieldRow>
-              <ListItemField name="keywords" isMulti />
-            </FieldRow>
-            <FieldRow>
-              <ListItemField name="subjects" isMulti />
-            </FieldRow>
-            <FieldRow>
-              <Field name="description" type="html" />
-            </FieldRow>
-            <FieldRow>
-              <Field name="summary" multiline />
-            </FieldRow>
-            <FieldRow>
-              <Field name="notes" multiline />
-            </FieldRow>
-          </GridBlock>
-          <Children
-            edit={edit}
-            collection={collection}
-            children={collection.child_records || []}
-          />
+          <Grid container spacing={2}>
+            <GridBlock spacing={2}>
+              <FieldRow>
+                <Field name="collection_name" />
+                <EditableItem service="collections" name="parent" />
+                {/* <Field type='editableItem' service="collections" name="parent" /> */}
+              </FieldRow>
+              <FieldRow>
+                <Field name="is_hidden" type="checkbox" />
+                <Field name="needs_review" type="checkbox" />
+              </FieldRow>
+              <FieldRow>
+                <Field name="call_number" type="call_number" />
+                <ListItemField name="publisher" />
+              </FieldRow>
+              <FieldRow>
+                <Field name="date_range" />
+                <Field name="thumbnail" />
+              </FieldRow>
+              <FieldRow>
+                <ListItemField name="keywords" isMulti />
+              </FieldRow>
+              <FieldRow>
+                <ListItemField name="subjects" isMulti />
+              </FieldRow>
+              <FieldRow>
+                <Field name="description" type="html" />
+              </FieldRow>
+              <FieldRow>
+                <Field name="summary" multiline />
+              </FieldRow>
+              <FieldRow>
+                <Field name="notes" multiline />
+              </FieldRow>
+            </GridBlock>
+            <Children
+              edit={edit}
+              collection={collection}
+              children={collection.child_records || []}
+            />
+          </Grid>
         </Form>
       }
 

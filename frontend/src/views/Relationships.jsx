@@ -11,11 +11,11 @@ import {
   Typography,
 } from '@mui/material';
 import React, { useEffect, useState } from 'react';
+import { useNavigate, useParams } from 'react-router-dom';
 
 import ButtonLink from '../components/ButtonLink';
 import Relationship from './Relationship';
 import { relationships } from '../api';
-import { useNavigate, useParams } from 'react-router-dom';
 
 function LinearProgressWithLabel(props) {
   return (
@@ -33,7 +33,7 @@ function LinearProgressWithLabel(props) {
 }
 
 function Relationships() {
-  const {skip=1} = useParams()
+  const { skip = 1 } = useParams()
   const $skip = parseInt(skip, 10);
   const [idList, setIdList] = useState([]);
   const [complete, setComplete] = useState(0);
@@ -157,6 +157,7 @@ function Relationships() {
         alignItems="center"
         direction="row"
       >
+
         <Paper>
           <Grid item xs={12}>
             <Grid

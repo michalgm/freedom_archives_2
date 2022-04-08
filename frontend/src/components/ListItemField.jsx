@@ -99,7 +99,7 @@ export const NewListItemDialog = ({
       type,
     });
     const name = `${type}s`;
-    setFieldValue(name, [...values[name], result]);
+    await setFieldValue(name, [...values[name], result]);
     handleClose(result);
   };
 

@@ -42,7 +42,7 @@ const HtmlEditor = React.forwardRef(({ defaultValue, value, setFieldValue, name,
     }}
     data={value}
     onChange={(event, editor) => {
-      setFieldValue(name, editor.getData());
+      return setFieldValue(name, editor.getData());
     }}
   />
 })
