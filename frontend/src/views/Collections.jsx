@@ -10,14 +10,14 @@ import Manage from '../components/Manage';
 import React from 'react';
 
 const filter_types = {
-  collection_name: {input: 'text', match: 'fuzzy'},
-  call_number: {input: 'text', match: 'fuzzy'},
-  description: {input: 'text', match: 'fuzzy'},
-  summary: {input: 'text', match: 'fuzzy'},
-  notes: {input: 'text', match: 'fuzzy'},
-  publisher: {input: 'listitem', match: 'listitem_id'},
-  'keywords': {input: 'listitem', match: 'listitem'},
-  'subjects': {input: 'listitem', match: 'listitem'},
+  collection_name: { input: 'text', match: 'fuzzy' },
+  call_number: { input: 'text', match: 'fuzzy', case: 'upper' },
+  description: { input: 'text', match: 'fuzzy' },
+  summary: { input: 'text', match: 'fuzzy' },
+  notes: { input: 'text', match: 'fuzzy' },
+  publisher: { input: 'listitem', match: 'listitem_id' },
+  'keywords': { input: 'listitem', match: 'listitem' },
+  'subjects': { input: 'listitem', match: 'listitem' },
 };
 
 function Collections() {
@@ -29,7 +29,7 @@ function Collections() {
   }
 
   const createQuery = filter => {
-    const {search, hidden, needs_review} = filter
+    const { search, hidden, needs_review } = filter
     const query = {
       is_hidden: hidden ? undefined : false,
       needs_review: needs_review ? needs_review : undefined,
@@ -45,11 +45,11 @@ function Collections() {
     if (search) {
       const $ilike = `%${search.replace(/ /g, '%')}%`
       query.$or = [
-        {subjects_text: {$ilike}},
-        {keywords_text: {$ilike}},
-        {collection_name: {$ilike}},
-        {description: {$ilike}},
-        {collection_id: parseInt(search, 10) || undefined},
+        { subjects_text: { $ilike } },
+        { keywords_text: { $ilike } },
+        { collection_name: { $ilike } },
+        { description: { $ilike } },
+        { collection_id: parseInt(search, 10) || undefined },
       ]
     }
     return query;
@@ -58,37 +58,37 @@ function Collections() {
   const renderItem = (collection) => {
     return (
       <>
-      <ListItemAvatar>
-        {collection.thumbnail ? (
-          <img
-            src={`https://search.freedomarchives.org/${collection.thumbnail}`}
-            alt={`${collection.collection_name} Thumbnail`}
-            width={40}
-          />
-        ) : (
-          <Avatar>
-            <BrokenImage />
-          </Avatar>
-        )}
-      </ListItemAvatar>
-      <ListItemText
-        primary={collection.collection_name}
-        secondaryTypographyProps={{ component: 'div' }}
-        secondary={
-          <>
-            <Typography variant="subtitle2" gutterBottom>
-              Parent Collection: {collection.parent.collection_name}
-            </Typography>
-            <Typography
-              style={{ maxHeight: 100, overflowX: 'auto' }}
-              variant="body2"
-              dangerouslySetInnerHTML={{
-                __html: collection.description,
-              }}
-            ></Typography>
-          </>
-        }
-      ></ListItemText>
+        <ListItemAvatar>
+          {collection.thumbnail ? (
+            <img
+              src={`https://search.freedomarchives.org/${collection.thumbnail}`}
+              alt={`${collection.collection_name} Thumbnail`}
+              width={40}
+            />
+          ) : (
+            <Avatar>
+              <BrokenImage />
+            </Avatar>
+          )}
+        </ListItemAvatar>
+        <ListItemText
+          primary={collection.collection_name}
+          secondaryTypographyProps={{ component: 'div' }}
+          secondary={
+            <>
+              <Typography variant="subtitle2" gutterBottom>
+                Parent Collection: {collection.parent.collection_name}
+              </Typography>
+              <Typography
+                style={{ maxHeight: 100, overflowX: 'auto' }}
+                variant="body2"
+                dangerouslySetInnerHTML={{
+                  __html: collection.description,
+                }}
+              ></Typography>
+            </>
+          }
+        ></ListItemText>
       </>
     )
   }
