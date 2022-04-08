@@ -1,4 +1,4 @@
-import { Box, Grid, Icon, Paper, Typography } from '@mui/material';
+import { Box, Grid, Icon, Paper, Stack, Typography } from '@mui/material';
 import React, { useEffect } from 'react';
 import { ThemeProvider, createTheme } from '@mui/material/styles';
 import { collections, records } from '../api';
@@ -151,18 +151,17 @@ function ViewContainer({ children, item, buttonRef, neighborService, ...props })
   };
 
   return (
-    <Grid
-      container
+    <Stack
       direction="column"
       spacing={4}
       style={{ height: 'calc(100vh - 58px)', flexWrap: 'nowrap' }}
     >
       {renderSection('header')}
-      <Grid item xs={12} style={{ overflowX: 'auto' }}>
+      <Grid id='contents' item xs={12} sx={{ overflowX: 'auto', padding: '1px' }}>
         {children}
       </Grid>
       {renderSection('footer')}
-    </Grid>
+    </Stack>
   );
 }
 

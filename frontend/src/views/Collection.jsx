@@ -80,47 +80,45 @@ function Collection() {
           buttons={buttons}
           buttonRef={buttonRef}
         >
-          <Grid container spacing={2}>
-            <GridBlock spacing={2}>
-              <FieldRow>
-                <Field name="collection_name" />
-                <EditableItem service="collections" name="parent" />
-                {/* <Field type='editableItem' service="collections" name="parent" /> */}
-              </FieldRow>
-              <FieldRow>
-                <Field name="is_hidden" type="checkbox" />
-                <Field name="needs_review" type="checkbox" />
-              </FieldRow>
-              <FieldRow>
-                <Field name="call_number" type="call_number" />
-                <ListItemField name="publisher" />
-              </FieldRow>
-              <FieldRow>
-                <Field name="date_range" />
-                <Field name="thumbnail" />
-              </FieldRow>
-              <FieldRow>
-                <ListItemField name="keywords" isMulti />
-              </FieldRow>
-              <FieldRow>
-                <ListItemField name="subjects" isMulti />
-              </FieldRow>
-              <FieldRow>
-                <Field name="description" type="html" />
-              </FieldRow>
-              <FieldRow>
-                <Field name="summary" multiline />
-              </FieldRow>
-              <FieldRow>
-                <Field name="notes" multiline />
-              </FieldRow>
-            </GridBlock>
-            <Children
-              edit={edit}
-              collection={collection}
-              children={collection.child_records || []}
-            />
-          </Grid>
+          <GridBlock spacing={2}>
+            <FieldRow>
+              <Field name="collection_name" />
+              <EditableItem service="collections" name="parent" />
+              {/* <Field type='editableItem' service="collections" name="parent" /> */}
+            </FieldRow>
+            <FieldRow>
+              <Field name="is_hidden" type="checkbox" />
+              <Field name="needs_review" type="checkbox" />
+            </FieldRow>
+            <FieldRow>
+              <Field name="call_number" type="call_number" />
+              <ListItemField name="publisher" />
+            </FieldRow>
+            <FieldRow>
+              <Field name="date_range" />
+              <Field name="thumbnail" />
+            </FieldRow>
+            <FieldRow>
+              <ListItemField name="keywords" isMulti />
+            </FieldRow>
+            <FieldRow>
+              <ListItemField name="subjects" isMulti />
+            </FieldRow>
+            <FieldRow>
+              <Field name="description" type="html" />
+            </FieldRow>
+            <FieldRow>
+              <Field name="summary" multiline />
+            </FieldRow>
+            <FieldRow>
+              <Field name="notes" multiline />
+            </FieldRow>
+          </GridBlock>
+          <Children
+            edit={edit}
+            collection={collection}
+            children={collection.child_records || []}
+          />
         </Form>
       }
 

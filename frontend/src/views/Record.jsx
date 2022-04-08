@@ -427,106 +427,104 @@ function Record({ showForm, ro = false, embedded = false, id }) {
             buttons={showForm && buttons}
             buttonRef={buttonRef}
           >
-            <Grid container spacing={2}>
-              <GridBlock title='' spacing={2}>
-                <Grid item xs={10}>
-                  <Grid container spacing={2}>
-                    <Grid item xs={12}>
-                      <Field name="title" />
-                    </Grid>
-                    <Grid item xs={12}>
-                      <Field name="description" multiline rows={4} />
-                    </Grid>
+            <GridBlock title='' spacing={2}>
+              <Grid item xs={10}>
+                <Grid container spacing={2}>
+                  <Grid item xs={12}>
+                    <Field name="title" />
+                  </Grid>
+                  <Grid item xs={12}>
+                    <Field name="description" multiline rows={4} />
                   </Grid>
                 </Grid>
-                {(
-                  <Grid item xs={2} className="record-thumbnail">
-                    <Button
-                      variant="contained"
-                      href={`https://search.freedomarchives.org/admin/#/documents/${record.record_id}`}
-                      target="_blank"
-                    >
-                      Old Admin Link
-                    </Button>
-                    <p>
-                      <img
-                        alt=""
-                        src={
-                          "https://search.freedomarchives.org/" +
-                          record.primary_instance_thumbnail
-                        }
-                      />
-
-                    </p>
-                  </Grid>
-                )}
-                <FieldRow>
-                  <ListItemField name="authors" isMulti />
-                  <ListItemField name="producers" isMulti />
-                </FieldRow>
-                <FieldRow>
-                  <ListItemField name="keywords" isMulti />
-                  <ListItemField name="subjects" isMulti />
-                </FieldRow>
-                <FieldRow>
-                  <EditableItem service="collections" name="collection" />
-                  <Field name="vol_number" />
-                </FieldRow>
-                <FieldRow>
-                  <ListItemField listType="program" name="program" />
-                  <ListItemField listType="publisher" name="publisher" />
-                </FieldRow>
-                <FieldRow>
-                  <Field name="location" />
-                  <Field name="date_string" label="Date" />
-                </FieldRow>
-                <FieldRow>
-                  <Field name="notes" multiline rows={4} />
-                </FieldRow>
-              </GridBlock>
-              <GridBlock title="Media">
-                <Instances
-                  edit={edit}
-                  record={record}
-                  instances={record.instances || []}
-                />
-              </GridBlock>
-              <Grid item xs={12}>
-                <Divider />
-                <Typography variant="h4">Relationships</Typography>
-
               </Grid>
-              <GridBlock title="Parent Record">
-                <RecordParent
-                  edit={edit}
-                  record={record}
-                  parent={record.parent || {}}
-                />
-              </GridBlock>
-              <GridBlock title="Child Records">
-                <EditableItemsList
-                  edit={edit}
-                  record={record}
-                  name='children'
-                  emptyText="No child records"
-                />
-              </GridBlock>
-              <GridBlock title="Sibling Records">
-                <RecordsList records={record.siblings} emptyText="No Sibling Records" />
-              </GridBlock>
-              <GridBlock title="Continuations">
-                <EditableItemsList
-                  edit={edit}
-                  record={record}
-                  name='continuations'
-                  emptyText="No related continuations"
-                  reorder={true}
-                />
-              </GridBlock>
-              <GridBlock title="Old Relationships">
-                {record.relationships}
-              </GridBlock>
+              {(
+                <Grid item xs={2} className="record-thumbnail">
+                  <Button
+                    variant="contained"
+                    href={`https://search.freedomarchives.org/admin/#/documents/${record.record_id}`}
+                    target="_blank"
+                  >
+                    Old Admin Link
+                  </Button>
+                  <p>
+                    <img
+                      alt=""
+                      src={
+                        "https://search.freedomarchives.org/" +
+                        record.primary_instance_thumbnail
+                      }
+                    />
+
+                  </p>
+                </Grid>
+              )}
+              <FieldRow>
+                <ListItemField name="authors" isMulti />
+                <ListItemField name="producers" isMulti />
+              </FieldRow>
+              <FieldRow>
+                <ListItemField name="keywords" isMulti />
+                <ListItemField name="subjects" isMulti />
+              </FieldRow>
+              <FieldRow>
+                <EditableItem service="collections" name="collection" />
+                <Field name="vol_number" />
+              </FieldRow>
+              <FieldRow>
+                <ListItemField listType="program" name="program" />
+                <ListItemField listType="publisher" name="publisher" />
+              </FieldRow>
+              <FieldRow>
+                <Field name="location" />
+                <Field name="date_string" label="Date" />
+              </FieldRow>
+              <FieldRow>
+                <Field name="notes" multiline rows={4} />
+              </FieldRow>
+            </GridBlock>
+            <GridBlock title="Media">
+              <Instances
+                edit={edit}
+                record={record}
+                instances={record.instances || []}
+              />
+            </GridBlock>
+            <Grid item xs={12}>
+              <Divider />
+              <Typography variant="h4">Relationships</Typography>
+
             </Grid>
+            <GridBlock title="Parent Record">
+              <RecordParent
+                edit={edit}
+                record={record}
+                parent={record.parent || {}}
+              />
+            </GridBlock>
+            <GridBlock title="Child Records">
+              <EditableItemsList
+                edit={edit}
+                record={record}
+                name='children'
+                emptyText="No child records"
+              />
+            </GridBlock>
+            <GridBlock title="Sibling Records">
+              <RecordsList records={record.siblings} emptyText="No Sibling Records" />
+            </GridBlock>
+            <GridBlock title="Continuations">
+              <EditableItemsList
+                edit={edit}
+                record={record}
+                name='continuations'
+                emptyText="No related continuations"
+                reorder={true}
+              />
+            </GridBlock>
+            <GridBlock title="Old Relationships">
+              {record.relationships}
+            </GridBlock>
           </Form>
         )}
       </ViewContainer>
