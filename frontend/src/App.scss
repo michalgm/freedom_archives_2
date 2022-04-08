@@ -1,9 +1,13 @@
 .App {
+  .EdgeHeaderOffset {
+    flex: none;
+  }
   .MuiContainer-root {
-    padding-top: 10px;
+    padding-top: 8px;
     .MuiPaper-root {
       padding: 10px;
     }
+
   }
   .topnav {
     .logout,
