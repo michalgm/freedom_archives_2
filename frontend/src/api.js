@@ -1,12 +1,26 @@
 const feathers = require('@feathersjs/feathers');
 const rest = require('@feathersjs/rest-client');
 const auth = require('@feathersjs/authentication-client');
+const { FetchClient } = require('@feathersjs/rest-client')
+const qs = require('qs')
 
 export const app = feathers();
 
+class MyFetchClient extends FetchClient {
+  getQuery(query) {
+    if (Object.keys(query).length !== 0) {
+      const queryString = qs.stringify(query, {
+        strictNullHandling: true
+      })
+      return `?${queryString}`
+    }
+    return ''
+  }
+}
+
 const restClient = rest();
 
-app.configure(restClient.fetch(window.fetch));
+app.configure(restClient.fetch(window.fetch, MyFetchClient));
 app.configure(auth({ path: '/api/authentication' }));
 
 export const records = app.service('/api/records');

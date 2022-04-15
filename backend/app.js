@@ -4,6 +4,7 @@ const compress = require('compression');
 const helmet = require('helmet');
 const cors = require('cors');
 const logger = require('./logger');
+const qs = require('qs');
 
 const feathers = require('@feathersjs/feathers');
 const configuration = require('@feathersjs/configuration');
@@ -35,6 +36,10 @@ api.configure(channels);
 api.hooks(appHooks);
 
 const app = express();
+
+app.set('query parser', function(str) {
+  return qs.parse(str, {  strictNullHandling: true, });
+});
 
 // Load app configuration
 // Enable security, CORS, compression, favicon and body parsing
