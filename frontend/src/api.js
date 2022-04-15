@@ -28,6 +28,7 @@ export const relationships = app.service('/api/relationships');
 export const authentication = app.service('/api/authentication');
 export const list_items = app.service('/api/list_items');
 export const collections = app.service('/api/collections');
+export const value_lookup = app.service('/api/value_lookup');
 
 export const authenticate = async (username, password) => {
   return app
@@ -49,6 +50,7 @@ export const services = {
   relationships,
   list_items,
   collections,
+  value_lookup
 };
 
 export const getAuthentication = app.get('/api/authentication');
