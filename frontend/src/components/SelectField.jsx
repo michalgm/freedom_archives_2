@@ -25,6 +25,10 @@ const searchTypes = {
     fields: ['record_id', 'title', 'parent_record_id', 'primary_instance_thumbnail', 'primary_instance_format_text', 'primary_instance_media_type', 'collection'],
     renderOption: item => <RecordItem record={item} component='div' dense />
   },
+  value_lookup: {
+    id: 'value',
+    label: 'value'
+  }
 
 };
 

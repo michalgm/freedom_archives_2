@@ -10,25 +10,25 @@ import React from 'react';
 import Thumbnail from '../components/Thumbnail'
 
 const filter_types = {
-  'day': { input: 'number', match: 'exact' },
+  'day': { input: 'simpleSelect', match: 'exact', allowNull: true },
   'description': { input: 'text', match: 'fuzzy' },
-  'file_extension': { input: 'text', match: 'exact' },
+  // 'file_extension': { input: 'text', match: 'exact' },
   'location': { input: 'text', match: 'fuzzy' },
-  'month': { input: 'number', match: 'exact' },
+  'month': { input: 'simpleSelect', match: 'exact', allowNull: true },
   'title': { input: 'text', match: 'fuzzy' },
   'vol_number': { input: 'text', match: 'fuzzy' },
-  'year': { input: 'text', match: 'exact' },
+  'year': { input: 'simpleSelect', match: 'exact', allowNull: true },
   'authors': { input: 'listitem', match: 'listitem' },
   'subjects': { input: 'listitem', match: 'listitem' },
   'keywords': { input: 'listitem', match: 'listitem' },
   'producers': { input: 'listitem', match: 'listitem' },
   'programs': { input: 'listitem', match: 'listitem_id' },
   'publishers': { input: 'listitem', match: 'listitem_id' },
-  'call_numbers': { input: 'text', match: 'contained', case: 'upper' },
+  'call_numbers': { input: 'select', match: 'contained', case: 'upper' },
   'formats': { input: 'listitem', match: 'contained' },
   'qualitys': { input: 'listitem', match: 'contained' },
   'generations': { input: 'listitem', match: 'contained' },
-  'media_types': { input: 'text', match: 'contained' },
+  'media_types': { input: 'simpleSelect', match: 'contained' },
 }
 
 function Records() {
@@ -67,7 +67,7 @@ function Records() {
         { title: { $ilike } },
         { description: { $ilike } },
         { record_id: parseInt(search, 10) || undefined },
-        { call_numbers: { $contains: [search.toUpperCase()] } }
+        { call_numbers: { $contains: [search.toUpperCase()] } },
       ]
     }
     return query;

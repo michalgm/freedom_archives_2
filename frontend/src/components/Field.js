@@ -15,6 +15,14 @@ import React from 'react';
 import SelectField from './SelectField';
 import { startCase } from 'lodash';
 
+const selectOptions = {
+  day: Array.from({ length: 32 }, (v, k) => ({ id: k || null, label: `${k || '??'}` })),
+  month: ['??', 'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'].map((label, index) => ({ id: index || null, label })),
+  year: [{ id: null, label: '??' }, ...Array.from({ length: new Date().getFullYear() - 1900 }, (v, k) => ({ id: k + 1900, label: k + 1900 + "" }))],
+  media_types: ['Audio', 'Webpage', 'Video', 'PDF'].map(id => ({ id, label: id })),
+
+}
+
 const FieldComponent = ({
   type,
   ro,
@@ -42,7 +50,7 @@ const FieldComponent = ({
     const { value, checked } = event.currentTarget
     const results = customOnChange && await customOnChange(event, option)
     if (results !== false) {
-      const newValue = type === 'checkbox' ? checked : (option || value)
+      const newValue = type === 'checkbox' ? checked : (option !== undefined ? option : value)
       if (['checkbox', 'radio'].includes(type)) {
         await defaultOnChange(event, option)
       } else {
@@ -76,7 +84,19 @@ const FieldComponent = ({
       </FormControl>
     );
   } else if (type === 'simpleSelect') {
-    const { InputProps, ...selectProps } = props;
+    let { InputProps, options, selectType, inputProps, ...selectProps } = props;
+
+    if (!options) {
+      options = selectOptions[selectType] || []
+    }
+    if (options[0] && options[0].id !== undefined) {
+      value = options.find(o => o.id === value)
+      selectProps.isOptionEqualToValue = (option, value) => {
+        return option.id === value.id
+      }
+      selectProps.onChange = (event, value) => props.onChange(event, value.id)
+    }
+
     field = (
       <FormControl disabled={ro} margin="dense" fullWidth>
         <FormGroup>
@@ -90,6 +110,7 @@ const FieldComponent = ({
             label={labelValue}
             variant={variant}
             componentsProps={{ paper: { sx: { width: 'max-content' } } }}
+            options={options}
             renderInput={(params) => (
               <TextField
                 {...params}
@@ -97,7 +118,8 @@ const FieldComponent = ({
                 InputLabelProps={{ ...params.InputLabelProps, shrink: true }}
                 label={label}
                 variant={props.variant || "outlined"}
-                InputProps={{ ...params.InputProps, ...(props.InputProps || {}) }}
+                InputProps={{ ...params.InputProps, ...(InputProps || {}) }}
+                inputProps={{ ...params.inputProps, ...(inputProps || {}) }}
               />
             )}
             {...{

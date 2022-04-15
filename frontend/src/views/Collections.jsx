@@ -11,7 +11,7 @@ import React from 'react';
 
 const filter_types = {
   collection_name: { input: 'text', match: 'fuzzy' },
-  call_number: { input: 'text', match: 'fuzzy', case: 'upper' },
+  call_number: { input: 'select', match: 'exact', case: 'upper' },
   description: { input: 'text', match: 'fuzzy' },
   summary: { input: 'text', match: 'fuzzy' },
   notes: { input: 'text', match: 'fuzzy' },
@@ -50,6 +50,7 @@ function Collections() {
         { collection_name: { $ilike } },
         { description: { $ilike } },
         { collection_id: parseInt(search, 10) || undefined },
+        { call_numbers: { $contains: [search.toUpperCase()] } }
       ]
     }
     return query;

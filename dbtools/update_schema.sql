@@ -641,3 +641,4 @@ create table unknown_relations as
 drop table if exists parent_lookup;
 
 COMMIT;
+create view value_lookup as select distinct call_number as value from instances where call_number != '' and call_Number !=  ' ' order by call_number;

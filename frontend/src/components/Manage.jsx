@@ -34,45 +34,73 @@ function Filter({ filter, index, remove, filterTypes }) {
     const type = filterTypes[field]?.input;
     const filter_fields = Object.keys(filterTypes).sort()
 
+    let value_field
+    if (type === 'listitem' || type === 'listitem_id') {
+        value_field = <ListItemField
+            name={`filters[${index}].value`}
+            label='Value'
+            listType={field.replace(/s$/, '')}
+            disableClearable
+            // disabled={!field}
+            selectOnFocus={true}
+            InputProps={{ sx: { bgcolor: '#fff' } }}
+            disableNew
+        />
+    } else if (type === 'select') {
+        value_field = <Field
+            size="small"
+            name={`filters[${index}].value`}
+            label='Value'
+            searchType='value_lookup'
+            type='select'
+            InputProps={{ sx: { bgcolor: '#fff' } }}
+        />
+
+    } else if (type === 'simpleSelect') {
+        value_field = <Field
+            size="small"
+            name={`filters[${index}].value`}
+            label='Value'
+            selectType={field}
+            type='simpleSelect'
+            // disabled={!field}
+            InputProps={{ sx: { bgcolor: '#fff' } }}
+        />
+    } else {
+        value_field = <Field
+            size="small"
+            name={`filters[${index}].value`}
+            label='Value'
+            type={type}
+            // disabled={!field}
+            inputProps={{ sx: { bgcolor: '#fff' } }}
+        />
+    }
     return (
         <Grid item xs={"auto"} sx={{ bgColor: 'grey.200' }}>
-            <Paper sx={{ bgcolor: 'grey.200', width: 300 }}>
+            <Paper sx={{ bgcolor: 'grey.200', width: 361 }}>
                 <Stack direction="row" spacing={1} sx={{ bgColor: 'grey.200' }}>
                     <IconButton sx={{ fontSize: 12, pl: 0 }} onClick={() => remove(index)} variant="outlined"><Close fontSize="inherit" /></IconButton>
-                    <Field
-                        size="small"
-                        name={`filters[${index}].field`}
-                        label='Field'
-                        type='simpleSelect'
-                        options={filter_fields}
-                        getOptionLabel={(option) => startCase(option)}
-                        disableClearable
-                        autoSelect
-                        InputProps={{ sx: { bgcolor: '#fff' } }}
-                        onChange={() => {
-                            return setFieldValue(`filters[${index}].value`, null)
-                        }}
-                    />
-                    {
-                        type === 'listitem' || type === 'listitem_id' ?
-                            <ListItemField
-                                name={`filters[${index}].value`}
-                                label='Value'
-                                listType={field.replace(/s$/, '')}
-                                disableClearable
-                                // disabled={!field}
-                                selectOnFocus={true}
-                                InputProps={{ sx: { bgcolor: '#fff' } }}
-                                disableNew
-                            />
-                            : <Field
-                                size="small"
-                                name={`filters[${index}].value`}
-                                label='Value'
-                                // disabled={!field}
-                                inputProps={{ sx: { bgcolor: '#fff' } }}
-                            />
-                    }
+                    <div style={{ width: '40%' }}
+                    >
+                        <Field
+                            size="small"
+                            name={`filters[${index}].field`}
+                            label='Field'
+                            type='simpleSelect'
+                            options={filter_fields}
+                            getOptionLabel={(option) => startCase(option)}
+                            disableClearable
+                            autoSelect
+                            InputProps={{ sx: { bgcolor: '#fff' } }}
+                            onChange={() => {
+                                return setFieldValue(`filters[${index}].value`, null)
+                            }}
+                        />
+                    </div>
+                    <div style={{ width: '60%' }}>
+                        {value_field}
+                    </div>
                 </Stack>
             </Paper>
         </Grid >
@@ -82,6 +110,7 @@ function Filter({ filter, index, remove, filterTypes }) {
 export default function Manage({ renderItem, defaultFilter, filterTypes, createQuery, type, service }) {
     const [items, setItems] = useState([]);
     const [total, setTotal] = useState(0);
+    const [digitizedTotal, setDigitizedTotal] = useState(0);
     const [offset, setOffset] = useState(0);
     const [filter, setFilter] = useState(defaultFilter);
     const { dispatch } = useStateValue();
@@ -93,14 +122,14 @@ export default function Manage({ renderItem, defaultFilter, filterTypes, createQ
 
         if (filters.length) {
             filters.forEach(({ field, value }) => {
-                if (value && field) {
-                    if (filterTypes[field].case === 'upper' && typeof value === 'string') {
+                const filter = filterTypes[field]
+                if (filter && (value !== null || (value !== undefined && filter.allowNull))) {
+                    if (filter.case === 'upper' && typeof value === 'string') {
                         value = value.toUpperCase()
                     }
-
-                    switch (filterTypes[field].match) {
+                    switch (filter.match) {
                         case 'contained':
-                            query[field] = { $contains: [value.list_item_id || value] }
+                            query[field] = { $contains: [value.list_item_id || value.value || value] }
                             break;
                         case 'fuzzy':
                             query[field] = { '$ilike': `%${value.replace(/ /g, '%')}%` }
@@ -117,10 +146,14 @@ export default function Manage({ renderItem, defaultFilter, filterTypes, createQ
                 }
             })
         }
-        const { data, total } = await (service === 'record' ? records : collections).find({ query });
+        const [{ data, total }, { total: digitizedTotal = 0 }] = await Promise.all([
+            (service === 'record' ? records : collections).find({ query }),
+            service === 'record' ? records.find({ query: { ...query, has_digital: true, '$select': [`record_id`], '$limit': 1 } }) : {}
+        ])
         setItems(data);
 
         setTotal(total);
+        setDigitizedTotal(digitizedTotal)
         dispatch('SEARCH', {
             type: service,
             query,
@@ -182,7 +215,7 @@ export default function Manage({ renderItem, defaultFilter, filterTypes, createQ
     }
     return (
         <ViewContainer
-            footerElements={[<PaginationFooter type={service} total={total} offset={offset} page_size={page_size} setOffset={setOffset} />]}
+            footerElements={[<PaginationFooter type={service} total={total} digitizedTotal={digitizedTotal} offset={offset} page_size={page_size} setOffset={setOffset} />]}
             headerElements={[renderFilterBar()]}
             // headerProps={{sx: {bgcolor: 'grey.800', color: 'info.contrastText'}}}
             service={service}

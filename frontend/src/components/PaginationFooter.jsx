@@ -18,12 +18,12 @@ const useStyles = makeStyles({
   },
 });
 
-function PaginationFooter({total, offset, page_size, type = 'record', setOffset, ...props}) {
+function PaginationFooter({total, offset, page_size, type = 'record', setOffset, digitizedTotal, ...props}) {
   const classes = useStyles();
 
   return (
     <div className={classes.pagination}>
-      <Chip variant="outlined" label={`${total} ${startCase(type)}s`} />
+      <Chip variant="outlined" label={`${total} ${startCase(type)}s ${type === 'record' ? `(${digitizedTotal} digitized)` : '' }`} />
       <Pagination
         page={(offset / page_size) + 1}
         count={Math.round(total / page_size)}
