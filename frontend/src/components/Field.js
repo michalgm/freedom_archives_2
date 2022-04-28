@@ -160,7 +160,6 @@ const FieldComponent = ({
     if (type === 'html') {
       FieldComponent = HTMLField
     }
-
     field = (
       <FieldComponent
         variant={variant}
@@ -171,7 +170,11 @@ const FieldComponent = ({
         autoComplete="off"
         fullWidth
         type={type || 'text'}
-        {...{ name, value: value || '' }}
+        {...{
+          name,
+          value: value || '',
+          minRows: props.multiline ? 2 : null
+        }}
         {...props}
       />
     );
