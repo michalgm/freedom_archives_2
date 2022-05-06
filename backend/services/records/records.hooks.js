@@ -6,7 +6,7 @@ const {
   setUser,
   updateListItemRelations,
   refreshView,
-  updateThumbnail,
+  updateThumbnailFromUrl,
   fetchUnified
 } = require('../common_hooks/');
 
@@ -152,11 +152,11 @@ const updateRelations = async context => {
     const { continuation_id } = data.continuations[0] || {};
 
     const continuation_records = data.continuations
-      .filter(record => ! record.delete)
+      .filter(record => !record.delete)
       .map(record => record.record_id);
 
     if (continuation_id) {
-      await trx('continuations').where({continuation_id}).update({ continuation_records });
+      await trx('continuations').where({ continuation_id }).update({ continuation_records });
     } else {
       await trx('continuations').insert({ continuation_records: [id, ...continuation_records] });
     }
@@ -178,9 +178,20 @@ const updateRelations = async context => {
   if ('parent' in data) {
     data.parent_record_id = data.parent ? data.parent.record_id : null;
     delete data.parent;
-    console.log(data)
   }
+  Object.keys(data).forEach(key => {
+    if (['call_numbers', 'formats', 'qualitys', 'generations', 'media_types', 'siblings', 'relationships'].includes(key) || key.match('_search')) {
+      delete data[key];
+    }
+  });
+  await new Promise(r => setTimeout(r, 2000));
+  return context;
+};
 
+const updateThumbnail = async context => {
+  if (context.params.url) {
+    return updateThumbnailFromUrl({ url: context.params.url, filename: context.id });
+  }
   return context;
 };
 

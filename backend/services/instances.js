@@ -1,5 +1,8 @@
-const {Service} = require('feathers-knex');
-const {hooks: {transaction}} = require('feathers-knex');
+const { Service } = require('feathers-knex');
+const { hooks: { transaction } } = require('feathers-knex');
+const {
+  writeThumbnailFromUrl,
+} = require('./common_hooks/');
 class Instances extends Service {
   constructor(options) {
     super({
@@ -9,7 +12,7 @@ class Instances extends Service {
   }
 }
 
-module.exports = function(app) {
+module.exports = function (app) {
   const options = {
     id: 'instance_id',
     Model: app.get('knexClient'),
@@ -24,14 +27,14 @@ module.exports = function(app) {
   const service = app.service('instances');
 
   const updateView = async (context) => {
-    const {id, app, data, params: {user}} = context;
+    const { id, app, data, params: { user } } = context;
     if (!id) {
-      await app.service('records').patch(data.record_id, {}, {user});
+      await app.service('records').patch(data.record_id, {}, { user });
     }
   };
 
   const cleanupMeta = (context) => {
-    const {data} = context;
+    const { data } = context;
     [
       'format',
       'quality',
@@ -54,6 +57,14 @@ module.exports = function(app) {
     return context;
   };
 
+  const updateThumbnail = async (context) => {
+    const { id, data: { url, record_id } } = context;
+    if (url) {
+      await writeThumbnailFromUrl({ url, filename: record_id });
+    }
+    return context;
+  };
+
   service.hooks({
     before: {
       all: [],
@@ -61,8 +72,8 @@ module.exports = function(app) {
       patch: [transaction.start(), cleanupMeta],
     },
     after: {
-      create: [updateView, transaction.end()],
-      patch: [updateView, transaction.end()],
+      create: [updateThumbnail, updateView, transaction.end()],
+      patch: [updateThumbnail, updateView, transaction.end()],
       remove: [updateView, transaction.end()],
     },
     error: {

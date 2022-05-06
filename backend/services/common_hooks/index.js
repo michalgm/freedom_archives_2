@@ -1,9 +1,10 @@
-const {updateThumbnail} = require('./thumbnailer');
+const { writeThumbnail, writeThumbnailFromUrl } = require('./thumbnailer');
 
 module.exports = {
-  updateThumbnail,
+  writeThumbnail,
+  writeThumbnailFromUrl,
   setUser: context => {
-    const {data, method, service: {Model}, params: {user: {user_id}}} = context;
+    const { data, method, service: { Model }, params: { user: { user_id } } } = context;
     if (method === 'create') {
       data.creator_user_id = user_id;
       data.date_created = Model.raw('now()');
@@ -15,7 +16,7 @@ module.exports = {
   },
 
   fetchUnified: async (context) => {
-    const {id, app, method, params, path} = context;
+    const { id, app, method, params, path } = context;
     // context.params.knex = context.app.service(`unified_${path}`).createQuery(context.params);
     if (method === 'get') {
       context.result = await app.service(`unified_${path}`).get(id, params);
@@ -24,7 +25,7 @@ module.exports = {
     }
     return context;
   },
-  
+
   updateListItemRelations: async context => {
     const {
       id,
@@ -38,7 +39,7 @@ module.exports = {
     for (const type of ['subjects', 'keywords', 'producers', 'authors']) {
       if (data[type] !== undefined) {
         // console.log('UPDATE', data);
-    
+
         const ids = trx
           .from(`${table}s_to_list_items`)
           .join(
@@ -49,9 +50,9 @@ module.exports = {
           .where('type', type.replace(/s$/, ''))
           .andWhere(`${table}_id`, id)
           .select(`${table}s_to_list_items.list_item_id`);
-    
+
         await trx(`${table}s_to_list_items`).whereIn('list_item_id', ids).delete();
-    
+
         await trx(`${table}s_to_list_items`).insert(
           data[type].map(({ list_item_id }) => ({ list_item_id, [`${table}_id`]: id }))
         );
@@ -59,7 +60,7 @@ module.exports = {
         // console.log('UPDATE', context.data);
       }
     }
-    
+
     if (!Object.keys(data).length) {
       context.result = await trx('records').where('record_id', id).select();
     }
@@ -70,7 +71,7 @@ module.exports = {
     // console.log('UPDATE DONE', context.result);
     return context;
   },
-  
+
   refreshView: async (context) => {
     const {
       id,
@@ -83,32 +84,31 @@ module.exports = {
         transaction: { trx },
       },
     } = context;
-  
-    const table = path.slice(0, -1);
 
+    const table = path.slice(0, -1);
     if (['update', 'patch', 'remove'].includes(method)) {
       await trx(`_unified_${table}s`).where(`${table}_id`, id).delete();
     }
     if (['update', 'patch', 'create'].includes(method)) {
-      const [data = {}] = await trx(`${table}s_view`).where(`${table}_id`, id).select();
+      const [current_data = {}] = await trx(`${table}s_view`).where(`${table}_id`, id).select();
       const encoded = {};
-      Object.keys(data).forEach(key => {
+      Object.keys(current_data).forEach(key => {
         if (
-          data[key] &&
-          typeof data[key] === 'object' &&
+          current_data[key] &&
+          typeof current_data[key] === 'object' &&
           !key.includes('_search') &&
           !['call_numbers', 'formats', 'qualitys', 'generations', 'media_types', 'siblings'].includes(key)
         ) {
-          encoded[key] = JSON.stringify(data[key]);
+          encoded[key] = JSON.stringify(current_data[key]);
         } else {
-          encoded[key] = data[key];
+          encoded[key] = current_data[key];
+          delete current_data[key];
         }
       });
-      context.result = data;
+      context.result = current_data;
       await trx(`_unified_${table}s`).insert(encoded);
       return context;
     }
   }
-    
+
 };
-  

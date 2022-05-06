@@ -30,7 +30,10 @@ module.exports = {
   },
 
   error: {
-    all: [],
+    all: [async context => {
+      console.error(`Error in ${context.path} calling ${context.method}  method on ${context.id}`, context.error.message, context.error.stack);
+      return context;
+    }],
     find: [],
     get: [],
     create: [],

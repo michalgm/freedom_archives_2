@@ -25,7 +25,7 @@
   "scripts": {
     "test": "npm run eslint && npm run mocha",
     "eslint": "eslint backend/. test/. --config .eslintrc.json",
-    "dev": "nodemon -d 1 -w config/ -w backend/ -w package.json backend/index.js",
+    "dev": "LD_PRELOAD=$LD_PRELOAD:/usr/lib/x86_64-linux-gnu/libjemalloc.so nodemon -d 1 -w config/ -w backend/ -w package.json backend/index.js",
     "start": "concurrently \"npm run dev\" \"cd ./frontend; npm run start\"",
     "start:prod": "node backend/",
     "mocha": "mocha test/ --recursive --exit"
@@ -46,6 +46,7 @@
     "pg": "^8.7.3",
     "pg-tsquery": "^8.3.0",
     "serve-favicon": "^2.5.0",
+    "sharp": "^0.27.2",
     "winston": "^3.6.0"
   },
   "devDependencies": {
