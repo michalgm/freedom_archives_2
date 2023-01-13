@@ -29,6 +29,7 @@ export const authentication = app.service('/api/authentication');
 export const list_items = app.service('/api/list_items');
 export const collections = app.service('/api/collections');
 export const value_lookup = app.service('/api/value_lookup');
+export const users = app.service('/api/users');
 
 export const authenticate = async (username, password) => {
   return app

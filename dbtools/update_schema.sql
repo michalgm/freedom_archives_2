@@ -14,15 +14,17 @@ CREATE TABLE archives (
   title text
 );
 
+CREATE TYPE user_role as ENUM ('user', 'intern', 'administrator');
+
 CREATE TABLE users (
   user_id serial PRIMARY KEY,
   archive_id integer NOT NULL REFERENCES archives,
   username varchar(50) NOT NULL,
   firstname varchar(50) DEFAULT NULL,
   lastname varchar(50) DEFAULT NULL,
-  user_type varchar(50) DEFAULT NULL,
+  role user_role DEFAULT NULL,
   password varchar(200) DEFAULT NULL,
-  status varchar(20) DEFAULT NULL,
+  active boolean DEFAULT false,
   email varchar(100) DEFAULT NULL
 );
 
@@ -169,7 +171,7 @@ LANGUAGE
 `LENGTH` varchar(50) DEFAULT NULL, */
 
 insert into archives VALUES(default, 'The Freedom Archives');
-insert into users (select user_id, 1, lower(username), firstname, lastname, user_type, password, status, email from freedom_archives_old.users);
+insert into users (select user_id, 1, lower(username), firstname, lastname, lower(user_type)::user_role, password, coalesce(status, '')='active', email from freedom_archives_old.users);
 insert into list_items(item, type, description) (select item, type, description from freedom_archives_old.list_items);
 insert into list_items(item, type)
   (select distinct publisher,
@@ -270,7 +272,7 @@ update records set month = '10' where record_id in (select docid from freedom_ar
 update records set month = '11' where record_id in (select docid from freedom_archives_old.documents where month = 'No');
 update records set month = '12' where record_id in (select docid from freedom_archives_old.documents where month = 'De');
 
-update records set day = 30 where month = 6 and day = 31;
+update records set day = 30 where month in (6, 9) and day = 31;
 update records set year = 2005 where record_id = 28007;
 update records set year = year + 1900 where year > (extract(year from current_date) - 2000) and year <= 99;
 update records set year = year + 2000 where year <= (extract(year from current_date) - 2000);

@@ -15,6 +15,7 @@ import Records from './views/Records';
 import Relationships from './views/Relationships';
 import Search from './views/Search';
 import Test from './views/Test';
+import Users from './views/Users';
 
 function RecordElement() {
   const {id} = useParams();
@@ -37,6 +38,7 @@ function Routes({isAuthenticated}) {
 
         <Route path="/relationships/:skip" element={<Relationships/>}/>
         <Route path="/relationships/" element={<Relationships/>}/>
+        <Route path="/users" element={<Users/>} />
         <Route path="/login" element={<Login/>} />
       </RouterRoutes>
     )
