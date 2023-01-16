@@ -42,7 +42,7 @@
     "cors": "^2.8.5",
     "feathers-knex": "github:michalgm/feathers-knex#add-overlap-operator",
     "helmet": "^6.0.1",
-    "knex": "^0.21.21",
+    "knex": "^2.4.0",
     "pg": "^8.7.3",
     "pg-tsquery": "^8.3.0",
     "serve-favicon": "^2.5.0",
