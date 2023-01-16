@@ -153,7 +153,8 @@ export default function Users() {
       delete newRow.isNew;
       delete newRow.user_id;
       newRow = await usersService.create(newRow);
-      addNotification({ message: `User ${newRow.username} created!` });
+        addNotification({ message: `User ${newRow.username} created!` });
+        setEditPassword({ open: true, user: newRow });
     } else {
       newRow = await usersService.patch(newRow.user_id, newRow);
       addNotification({ message: `User ${newRow.username} updated!` });
