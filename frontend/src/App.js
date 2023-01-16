@@ -25,6 +25,7 @@ import Authentication from './Authentication';
 import Breadcrumbs from './components/Breadcrumbs';
 import Errors from './components/Errors';
 import Loading from './views/Loading';
+import Notifications from './components/Notifications';
 import React from 'react';
 import Routes from './Routes'
 import Sidebar from './views/Sidebar';
@@ -170,6 +171,7 @@ function Main() {
       <Authentication />
       <Errors />
       <Routes isAuthenticated={isAuthenticated} />
+      <Notifications />
     </Container>
   );
 }

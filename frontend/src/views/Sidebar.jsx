@@ -9,7 +9,7 @@ import {
   EdgeSidebar,
   SidebarContent,
 } from '@mui-treasury/layout';
-import { Link, useMatch, useResolvedPath, useLocation } from 'react-router-dom';
+import { Link, useLocation, useMatch, useResolvedPath } from 'react-router-dom';
 
 import React from 'react';
 
@@ -38,7 +38,7 @@ const sideBarConfig = {
     { label: 'Update Thumbnails', icon: '', href: ''},
     { label: 'Update Keywords', icon: '', href: ''},
     { label: 'Backup Database', icon: '', href: ''},
-    { label: 'Manage Users' },
+    { label: 'Manage Users' , href: '/users'},
     { label: 'Publish/Restore Live Site' }
   ],
 };

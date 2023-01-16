@@ -1,4 +1,4 @@
-import { Button, Grid } from "@mui/material";
+import { Button, Grid, Tooltip } from "@mui/material";
 import {
   DataGrid,
   GridActionsCellItem,
@@ -10,16 +10,23 @@ import React, { useEffect, useState } from "react";
 
 import AddIcon from "@mui/icons-material/Add";
 import CancelIcon from "@mui/icons-material/Cancel";
+import ChangePassword from "./ChangePassword";
 import DeleteIcon from "@mui/icons-material/Delete";
 import EditIcon from "@mui/icons-material/Edit";
+import PasswordIcon from "@mui/icons-material/Password";
 import SaveIcon from "@mui/icons-material/Save";
+import { useAddNotification } from "../appContext";
 import { users as usersService } from "../api";
 
 export default function Users() {
   const [users, setUsers] = useState([]);
   const [rowModesModel, setRowModesModel] = React.useState({});
-
+  const [editPassword, setEditPassword] = useState({
+    open: false,
+    user: { username: "intern", user_id: 5 },
+  });
   const apiRef = useGridApiRef();
+  const addNotification = useAddNotification();
 
   const fetchUsers = async () => {
     const query = {
@@ -39,6 +46,32 @@ export default function Users() {
   useEffect(() => {
     fetchUsers();
   }, []);
+
+  const getActions = ({ id, row }) => {
+    const isInEditMode = rowModesModel[id]?.mode === GridRowModes.Edit;
+    const icons = isInEditMode
+      ? [
+          ["Save", SaveIcon, () => updateRow(id, true)],
+          ["Cancel", CancelIcon, () => updateRow(id, true, true)],
+        ]
+      : [
+          ["Edit", EditIcon, () => updateRow(id)],
+          ["Delete", DeleteIcon, () => deleteRow(row)],
+          [
+            "Change Password",
+            PasswordIcon,
+            () => setEditPassword({ open: true, user: row }),
+          ],
+        ];
+
+    return icons.map(([label, Icon, action]) => {
+      return (
+        <Tooltip title={label} arrow placement="top">
+          <GridActionsCellItem icon={<Icon />} label={label} onClick={action} />
+        </Tooltip>
+      );
+    });
+  };
 
   const columns = [
     {
@@ -74,37 +107,12 @@ export default function Users() {
     {
       field: "actions",
       type: "actions",
-      getActions: ({ id }) => {
-        const isInEditMode = rowModesModel[id]?.mode === GridRowModes.Edit;
-
-        return isInEditMode
-          ? [
-              <GridActionsCellItem
-                icon={<SaveIcon />}
-                label="Save"
-                onClick={() => updateRow(id, true)}
-              />,
-              <GridActionsCellItem
-                icon={<CancelIcon />}
-                label="Cancel"
-                onClick={() => updateRow(id, true, true)}
-              />,
-            ]
-          : [
-              <GridActionsCellItem
-                icon={<EditIcon />}
-                label="Edit"
-                onClick={() => updateRow(id)}
-              />,
-              <GridActionsCellItem
-                icon={<DeleteIcon />}
-                label="Delete"
-                onClick={() => deleteRow(id)}
-              />,
-            ];
-      },
+      getActions,
     },
-  ];
+  ].map((col) => {
+    col.disableColumnMenu = true;
+    return col;
+  });
 
   const handleRowEditStart = (params, event) => {
     event.defaultMuiPrevented = true;
@@ -114,11 +122,14 @@ export default function Users() {
     event.defaultMuiPrevented = true;
   };
 
-  const deleteRow = (user_id) => {
-    processRowUpdate({ user_id, delete: true });
+  const deleteRow = (user) => {
+    processRowUpdate({ ...user, delete: true });
   };
 
   const updateRow = (id, view = false, cancel = false) => {
+    if (cancel && id === -1) {
+      setUsers(users.slice(0, -1));
+    }
     const rowModesModel = users.reduce((acc, { user_id }) => {
       acc[user_id] = {
         mode: GridRowModes.View,
@@ -135,15 +146,17 @@ export default function Users() {
   };
 
   const processRowUpdate = async (newRow) => {
-    console.log("update", newRow);
     if (newRow.delete) {
       await usersService.remove(newRow.user_id);
+      addNotification({ message: `User ${newRow.username} deleted!` });
     } else if (newRow.isNew) {
       delete newRow.isNew;
       delete newRow.user_id;
       newRow = await usersService.create(newRow);
+      addNotification({ message: `User ${newRow.username} created!` });
     } else {
       newRow = await usersService.patch(newRow.user_id, newRow);
+      addNotification({ message: `User ${newRow.username} updated!` });
     }
     await fetchUsers();
 
@@ -156,10 +169,10 @@ export default function Users() {
       ...oldRows,
       {
         user_id,
-        username: "mrfoo",
-        firstname: "Foo",
-        lastname: "Bar",
-        email: "foo@foo.com",
+        username: "",
+        firstname: "",
+        lastname: "",
+        email: "",
         role: "intern",
         active: true,
         isNew: true,
@@ -208,6 +221,12 @@ export default function Users() {
             onRowEditStop={handleRowEditStop}
             processRowUpdate={processRowUpdate}
             onProcessRowUpdateError={(error) => console.error(error)}
+            sx={{
+              "& .MuiDataGrid-columnHeaderTitle": {
+                textTransform: "capitalize",
+              },
+            }}
+            hideFooter
           />
 
           <Button
@@ -215,8 +234,12 @@ export default function Users() {
             startIcon={<AddIcon />}
             onClick={() => addUser()}
           >
-            Add record
+            Add user
           </Button>
+          <ChangePassword
+            {...editPassword}
+            handleClose={() => setEditPassword({ open: false, user: {} })}
+          />
         </Grid>
       </Grid>
     </div>

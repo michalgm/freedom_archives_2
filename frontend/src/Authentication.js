@@ -1,6 +1,7 @@
 import React, { useEffect } from 'react';
-import { useStateValue } from './appContext';
 import { app, authentication } from './api';
+
+import { useStateValue } from './appContext';
 
 function Authentication() {
   const {
@@ -21,7 +22,9 @@ function Authentication() {
               `Error in ${context.path} calling ${context.method} method`,
               context.error
             );
-            dispatch('ERROR', { error: context.error.message });
+            if (!context.params.noDispatchError) {
+              dispatch('ERROR', { error: context.error.message });
+            }
           }
           return context;
         },

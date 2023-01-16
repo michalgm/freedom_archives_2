@@ -1,7 +1,7 @@
 import { Grid } from '@mui/material';
 import React from 'react';
 
-function FieldRow({ children, ro = false }) {
+function FieldRow({ children, ro = false, ...props }) {
   const fields = React.Children.toArray(children);
   const width = 12 / fields.length;
   return fields.map((element, index) => {
@@ -11,6 +11,7 @@ function FieldRow({ children, ro = false }) {
         item
         key={element.props.name || index}
         xs={element.props.width || width}
+        {...props}
       >
         {React.cloneElement(element, { ro })}
       </Grid>

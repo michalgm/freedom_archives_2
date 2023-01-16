@@ -15,7 +15,8 @@ const initialState = {
     ids: []
   },
   search_index: 0,
-  title: ''
+  title: '',
+  notifications: [],
 };
 
 const reducer = (state, action) => {
@@ -44,7 +45,8 @@ const reducer = (state, action) => {
     case 'LOADING':
     case 'TITLE':
     case 'SEARCH_INDEX':
-      return {...state, [type.toLowerCase()]: payload};
+    case 'NOTIFICATIONS':
+      return { ...state, [type.toLowerCase()]: payload };
     default:
       return state;
   }
@@ -87,6 +89,14 @@ export const useSearch = () => {
   return () => {
     dispatch({type: 'SEARCH', payload: initialState.search})
     dispatch({type: 'SEARCH_INDEX', payload: 0})
+  }
+}
+
+export const useAddNotification = () => {
+  const { state, dispatch } = useContext(StateContext);
+  return notification => {
+    const id = notification.id || (Math.random() + 1).toString(36).substring(7);
+    dispatch({ type: 'NOTIFICATIONS', payload: [...state.notifications, { ...notification, id }] })
   }
 }
 
