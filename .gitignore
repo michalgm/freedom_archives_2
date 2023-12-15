@@ -111,9 +111,13 @@ lib/
 data/
 backend.bak/
 config/local.json
-public/
+# public/
 public/index.html
 
 dbtools/bak/
 interferencedb/
-ck_editor/
+ck_editor/public.bak
+public.bak
+thumbnails/*
+
+.mysql-opts
