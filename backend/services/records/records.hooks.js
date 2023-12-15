@@ -5,15 +5,32 @@ const {
 const {
   setUser,
   updateListItemRelations,
+  prepListItemRelations,
   refreshView,
   updateThumbnailFromUrl,
-  fetchUnified
-} = require('../common_hooks/');
+  fetchUnified,
+} = require("../common_hooks/");
 
-const fullTextSearch = context => {
+const setArchive = (context) => {
+  const {
+    data,
+    method,
+    params: {
+      user: { archive_id },
+    },
+  } = context;
+  if (method === "create") {
+    data.archive_id = archive_id;
+  }
+  return context;
+};
+
+const fullTextSearch = (context) => {
   if (context.params.query.$fullText !== undefined) {
     const { $fullText, ...query } = context.params.query;
-    const knex = context.app.service(`unified_${context.path}`).createQuery({ ...context.params, query });
+    const knex = context.app
+      .service(`unified_${context.path}`)
+      .createQuery({ ...context.params, query });
     if ($fullText) {
       const fullTextQuery = tsquery($fullText);
       context.fullText = fullTextQuery;
@@ -24,7 +41,7 @@ const fullTextSearch = context => {
         )
       );
       knex.whereRaw(`fulltext @@ to_tsquery('english', ?)`, [fullTextQuery]);
-      knex.orderBy('score', 'desc');
+      knex.orderBy("score", "desc");
     }
     context.params.knex = knex;
   }
@@ -44,7 +61,7 @@ const lookupFilters = async ({
     const ids = await knex
       .clearSelect()
       .clearOrder()
-      .select('record_id')
+      .select("record_id")
       .toString();
 
     // await trx.raw(
@@ -88,7 +105,7 @@ const lookupFilters = async ({
           where record_id in (${subquery})
           group by title
         ) a`,
-        ].flatMap(async query => (await Model.raw(query)).rows.flat())
+        ].flatMap(async (query) => (await Model.raw(query)).rows.flat())
       )
     ).flat();
 
@@ -99,115 +116,178 @@ const lookupFilters = async ({
   }
 };
 
-const updateRelations = async context => {
+const prepData = (context) => {
+  const { data } = context;
+  if (data && Object.keys(data).length) {
+    const relation_data = {};
+
+    // remove calculated fields
+    Object.keys(data).forEach((key) => {
+      if (
+        [
+          "call_numbers",
+          "formats",
+          "qualitys",
+          "generations",
+          "media_types",
+          "siblings",
+          "relationships",
+          "primary_instance_id",
+        ].includes(key) ||
+        key.match("_search")
+      ) {
+        delete data[key];
+      }
+    });
+
+    if (data.date_string) {
+      const [month, day, year] = data.date_string.split("/");
+      data.month = month;
+      data.day = day;
+      data.year = year;
+      delete data.date_string;
+    }
+    // Stash relation data out of data object
+
+    ["program", "publisher"].forEach((key) => {
+      if (key in data) {
+        data[`${key}_id`] = data[key] ? data[key].list_item_id : null;
+      }
+    });
+    if ("collection" in data) {
+      data.collection_id = data.collection
+        ? data.collection.collection_id
+        : null;
+    }
+    if ("parent" in data) {
+      data.parent_record_id = data.parent ? data.parent.record_id : null;
+    }
+
+    [
+      "instances",
+      "children",
+      "continuations",
+      "program",
+      "publisher",
+      "collection",
+      "parent",
+    ].forEach((key) => {
+      if (data[key]) {
+        relation_data[key] = data[key];
+        delete data[key];
+      }
+    });
+
+    context.relation_data = relation_data;
+  }
+  prepListItemRelations(context);
+  return context;
+};
+
+const updateRelations = async (context) => {
   const {
-    id,
     app,
     params: {
       user,
       transaction: { trx },
     },
     data,
+    relation_data = {},
   } = context;
+  const id = context.id || context.result.record_id;
 
   if (!Object.keys(data).length) {
-    context.result = await trx('records').where('record_id', id).select();
+    context.result = await trx("records").where("record_id", id).select();
   }
-  if (data.date_string) {
-    const [month, day, year] = data.date_string.split("/");
-    data.month = month;
-    data.day = day;
-    data.year = year;
-    delete data.date_string;
-  }
-  if (data.instances !== undefined) {
+
+  if (relation_data.instances !== undefined) {
     await Promise.all(
-      data.instances.map(instance => {
+      relation_data.instances.map((instance) => {
         if (instance.delete) {
-          return app.service('instances').remove(instance.instance_id, { user, transaction: { trx } });
+          return app
+            .service("instances")
+            .remove(instance.instance_id, { user, transaction: { trx } });
         } else if (instance.instance_id) {
-          return app.service('instances').patch(instance.instance_id, instance, { user, transaction: { trx } });
+          return app
+            .service("instances")
+            .patch(instance.instance_id, instance, {
+              user,
+              transaction: { trx },
+            });
         }
         delete instance.instance_id;
-        return app.service('instances').create(instance, { user, transaction: { trx } });
+        instance.record_id ||= id;
+        return app
+          .service("instances")
+          .create(instance, { user, transaction: { trx } });
       })
     );
-    delete data.instances;
   }
 
-  if (data.children !== undefined) {
+  if (relation_data.children !== undefined) {
     await Promise.all(
-      data.children.map(child => {
+      relation_data.children.map((child) => {
         if (child.delete) {
-          return app.service('records').patch(child.record_id, { parent_record_id: null }, { user, transaction: { trx } });
+          return app
+            .service("records")
+            .patch(
+              child.record_id,
+              { parent_record_id: null },
+              { user, transaction: { trx } }
+            );
         } else if (child.record_id && !child.parent_record_id) {
-          return app.service('records').patch(child.record_id, { parent_record_id: id }, { user, transaction: { trx } });
+          return app
+            .service("records")
+            .patch(
+              child.record_id,
+              { parent_record_id: id },
+              { user, transaction: { trx } }
+            );
         }
       })
     );
-    delete data.children;
   }
 
-  if (data.continuations !== undefined) {
-    const { continuation_id } = data.continuations[0] || {};
+  if (relation_data.continuations !== undefined) {
+    const { continuation_id } = relation_data.continuations[0] || {};
 
-    const continuation_records = data.continuations
-      .filter(record => !record.delete)
-      .map(record => record.record_id);
+    const continuation_records = relation_data.continuations
+      .filter((record) => !record.delete)
+      .map((record) => record.record_id);
 
     if (continuation_id) {
-      await trx('continuations').where({ continuation_id }).update({ continuation_records });
+      await trx("continuations")
+        .where({ continuation_id })
+        .update({ continuation_records });
     } else {
-      await trx('continuations').insert({ continuation_records: [id, ...continuation_records] });
+      await trx("continuations").insert({
+        continuation_records: [id, ...continuation_records],
+      });
     }
 
-    delete data.continuations;
-    delete data.new_continuation;
+    // delete data.new_continuation; FIXME?
   }
 
-  ['program', 'publisher'].forEach(key => {
-    if (key in data) {
-      data[`${key}_id`] = data[key] ? data[key].list_item_id : null;
-      delete data[key];
-    }
-  });
-  if ('collection' in data) {
-    data.collection_id = data.collection ? data.collection.collection_id : null;
-    delete data.collection;
-  }
-  if ('parent' in data) {
-    data.parent_record_id = data.parent ? data.parent.record_id : null;
-    delete data.parent;
-  }
-  Object.keys(data).forEach(key => {
-    if (['call_numbers', 'formats', 'qualitys', 'generations', 'media_types', 'siblings', 'relationships'].includes(key) || key.match('_search')) {
-      delete data[key];
-    }
-  });
-  await new Promise(r => setTimeout(r, 2000));
+  // await new Promise(r => setTimeout(r, 2000)); //why was this here?
   return context;
 };
 
-const updateThumbnail = async context => {
+const updateThumbnail = async (context) => {
   if (context.params.url) {
-    return updateThumbnailFromUrl({ url: context.params.url, filename: context.id });
+    return updateThumbnailFromUrl({
+      url: context.params.url,
+      filename: context.id,
+    });
   }
   return context;
 };
 
 module.exports = {
   before: {
-    all: [],
+    all: [prepData],
     find: [fullTextSearch, fetchUnified],
-    get: [
-      fetchUnified,
-    ],
-    create: [
-      transaction.start(),
-      setUser,
-      updateListItemRelations,
-      updateRelations,
-    ],
+    get: [fetchUnified],
+    create: [transaction.start(), setUser, setArchive],
     update: [transaction.start()],
     patch: [
       transaction.start(),
@@ -221,7 +301,7 @@ module.exports = {
 
   after: {
     all: [
-      context => {
+      (context) => {
         if (context.params.knex) {
           context.result.query = context.params.knex.toString();
         }
@@ -232,7 +312,13 @@ module.exports = {
     ],
     find: [lookupFilters],
     get: [],
-    create: [refreshView, transaction.end()],
+    create: [
+      updateListItemRelations,
+      updateRelations,
+      updateThumbnail,
+      refreshView,
+      transaction.end(),
+    ],
     update: [refreshView, transaction.end()],
     patch: [refreshView, transaction.end()],
     remove: [refreshView, transaction.end()],

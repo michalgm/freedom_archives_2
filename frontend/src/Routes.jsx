@@ -28,20 +28,21 @@ function Routes({isAuthenticated}) {
   if (isAuthenticated) {
     return (
       <RouterRoutes>
-        <Route exact path="/" element={<Records/>} />
-        <Route exact path="/test" element={<Test/>} />
-        <Route exact path="/collections" element={<Collections/>}/>
-        <Route path="/collections/:id" element={<Collection/>} />
-        <Route exact path="/search" element={<Search/>} />
-        <Route exact path="/records" element={<Records/>}/>
-        <Route path="/records/:id" element={<RecordElement/>}/>
+        <Route exact path="/" element={<Records />} />
+        <Route exact path="/test" element={<Test />} />
+        <Route exact path="/collections" element={<Collections />} />
+        <Route path="/collections/:id" element={<Collection />} />
+        <Route exact path="/search" element={<Search />} />
+        <Route exact path="/records" element={<Records />} />
+        <Route path="/records/new" element={<Record showForm newRecord />} />
+        <Route path="/records/:id" element={<RecordElement />} />
 
-        <Route path="/relationships/:skip" element={<Relationships/>}/>
-        <Route path="/relationships/" element={<Relationships/>}/>
-        <Route path="/users" element={<Users/>} />
-        <Route path="/login" element={<Login/>} />
+        <Route path="/relationships/:skip" element={<Relationships />} />
+        <Route path="/relationships/" element={<Relationships />} />
+        <Route path="/users" element={<Users />} />
+        <Route path="/login" element={<Login />} />
       </RouterRoutes>
-    )
+    );
   } else if (isAuthenticated === false) {
     return (
       <RouterRoutes>

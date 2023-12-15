@@ -27,9 +27,19 @@ module.exports = function (app) {
   const service = app.service('instances');
 
   const updateView = async (context) => {
-    const { id, app, data, params: { user } } = context;
+    const {
+      id,
+      app,
+      data,
+      params: {
+        user,
+        transaction: { trx },
+      },
+    } = context;
     if (!id) {
-      await app.service('records').patch(data.record_id, {}, { user });
+      await app
+        .service("records")
+        .patch(data.record_id, {}, { user, transaction: { trx } });
     }
   };
 
@@ -58,7 +68,9 @@ module.exports = function (app) {
   };
 
   const updateThumbnail = async (context) => {
-    const { id, data: { url, record_id } } = context;
+    const {
+      data: { url, record_id },
+    } = context;
     if (url) {
       await writeThumbnailFromUrl({ url, filename: record_id });
     }

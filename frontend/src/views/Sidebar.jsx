@@ -15,31 +15,30 @@ import React from 'react';
 
 const sideBarConfig = {
   Collections: [
-    { label: 'Manage Collections', icon: '', href: '/collections' },
-    { label: 'New Collection', icon: '', href: '' },
-    { label: 'Manage Featured Collections', icon: '', href: '' },
+    { label: "Manage Collections", icon: "", href: "/collections" },
+    { label: "New Collection", icon: "", href: "" },
+    { label: "Manage Featured Collections", icon: "", href: "" },
   ],
   Records: [
-    { label: 'Search Records', icon: '', href: '/search' },
-    { label: 'Manage Records', icon: '', href: '/records' },
-    { label: 'New Record', icon: '', href: '' },
-    { label: 'Manage Featured Records', icon: '', href: '' },
+    { label: "Search Records", icon: "", href: "/search" },
+    { label: "Manage Records", icon: "", href: "/records" },
+    { label: "New Record", icon: "", href: "/records/new" },
+    { label: "Manage Featured Records", icon: "", href: "" },
   ],
-  'Site Management': [
-    { label: 'Edit site header text', icon: '', href: ''},
-    { label: 'Edit Lists', icon: '', href: ''},
-    { label: 'Export Collections', icon: '', href: ''},
-    { label: 'Find Duplicate Records', icon: '', href: ''},
-    { label: 'Review Changes', icon: '', href: ''},
-
+  "Site Management": [
+    { label: "Edit site header text", icon: "", href: "" },
+    { label: "Edit Lists", icon: "", href: "" },
+    { label: "Export Collections", icon: "", href: "" },
+    { label: "Find Duplicate Records", icon: "", href: "" },
+    { label: "Review Changes", icon: "", href: "" },
   ],
   Admin: [
-    { label: 'Update Unknown Relationships', icon: '', href: '/relationships' },
-    { label: 'Update Thumbnails', icon: '', href: ''},
-    { label: 'Update Keywords', icon: '', href: ''},
-    { label: 'Backup Database', icon: '', href: ''},
-    { label: 'Manage Users' , href: '/users'},
-    { label: 'Publish/Restore Live Site' }
+    { label: "Update Unknown Relationships", icon: "", href: "/relationships" },
+    { label: "Update Thumbnails", icon: "", href: "" },
+    { label: "Update Keywords", icon: "", href: "" },
+    { label: "Backup Database", icon: "", href: "" },
+    { label: "Manage Users", href: "/users" },
+    { label: "Publish/Restore Live Site" },
   ],
 };
 

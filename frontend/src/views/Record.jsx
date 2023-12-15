@@ -15,7 +15,8 @@ import {
 } from "@mui/material/";
 import { EditableItem, EditableItemsList, RecordsList } from '../components/RecordItem'
 import { FieldArray, useFormikContext } from "formik";
-import React, { useEffect, useRef, useState } from "react";
+import { Navigate, useNavigate } from "react-router-dom";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import { records, relationships } from "../api";
 
 import Field from "../components/Field";
@@ -24,9 +25,68 @@ import Form from "../components/Form";
 import GridBlock from "../components/GridBlock";
 import Link from "../components/Link";
 import ListItemField from "../components/ListItemField";
-import { Navigate } from "react-router-dom";
 import ViewContainer from "../components/ViewContainer";
-import { useTitle } from '../appContext'
+import { useTitle } from "../appContext";
+
+const defaultRecord = {
+  // record_id: null,
+  // archive_id: null,
+  // title: null,
+  // description: null,
+  // notes: null,
+  // location: null,
+  // vol_number: null,
+  // collection_id: null,
+  // parent_record_id: null,
+  // primary_instance_id: null,
+  // year: null,
+  // month: null,
+  // day: null,
+  // publisher_id: null,
+  // program_id: null,
+  // needs_review: false,
+  // is_hidden: false,
+  // publish_to_global: false,
+  // creator_user_id: null,
+  // contributor_user_id: null,
+  // date_created: null,
+  // date_modified: null,
+  // date_string: null,
+  // date: null,
+  publisher: {
+    item: null,
+    list_item_id: null,
+  },
+  program: {
+    item: null,
+    list_item_id: null,
+  },
+  instances: [],
+  // has_digital: true,
+  // instance_count: null,
+  // contributor_name: null,
+  // contributor_username: null,
+  // creator_name: null,
+  // creator_username: null,
+  call_numbers: [],
+  formats: [],
+  qualitys: [],
+  generations: [],
+  media_types: [],
+  authors: [],
+  subjects: [],
+  keywords: [],
+  producers: [],
+  // primary_instance_thumbnail: null,
+  // primary_instance_format: null,
+  // primary_instance_format_text: null,
+  // primary_instance_media_type: null,
+  collection: {},
+  children: [],
+  siblings: [],
+  parent: {},
+  continuations: [],
+};
 
 function Instance({ instance = {}, record, index, edit }) {
   const context = useFormikContext();
@@ -52,21 +112,23 @@ function Instance({ instance = {}, record, index, edit }) {
   if (instance.delete) {
     edit = false;
   }
-  return <>
-    <TableRow className={`instance ${instance.delete ? "deleted" : ""}`}>
-      <TableCell className="instance-action">
-        <IconButton
-          onClick={() =>
-            context.setFieldValue(
-              `instances[${index}].delete`,
-              !instance.delete
-            )
-          }
-          size="large">
-          <Icon>{instance.delete ? "restore" : "delete"}</Icon>
-        </IconButton>
-      </TableCell>
-      {/* <TableCell className='instance-action' rowSpan={2}>
+  return (
+    <>
+      <TableRow className={`instance ${instance.delete ? "deleted" : ""}`}>
+        <TableCell className="instance-action">
+          <IconButton
+            onClick={() =>
+              context.setFieldValue(
+                `instances[${index}].delete`,
+                !instance.delete
+              )
+            }
+            size="large"
+          >
+            <Icon>{instance.delete ? "restore" : "delete"}</Icon>
+          </IconButton>
+        </TableCell>
+        {/* <TableCell className='instance-action' rowSpan={2}>
         {instance.url ? (
           <a
             href={instance.url}
@@ -87,100 +149,96 @@ function Instance({ instance = {}, record, index, edit }) {
         ) : null}
 
       </TableCell> */}
-      <TableCell>
-        <Field
-          ro={!edit}
-          type="radio"
-          // radioGroup="primary_instance_id"
-          name="primary_instance_id"
-          value={`${instance.instance_id}`}
-        />
-      </TableCell>
-      <TableCell>
-        <Field
-          ro={!edit}
-          fullWidth={false}
-          label=" "
-          name={`instances[${index}].call_number`}
-        />
-      </TableCell>
-      <TableCell>
-        <ListItemField
-          fetchAll
-          ro={!edit}
-          label=" "
-          name={`instances[${index}].generation_item`}
-          listType="generation"
-          variant="standard"
-        />
-      </TableCell>
-      <TableCell>
-        <ListItemField
-          fetchAll
-          ro={!edit}
-          label=" "
-          name={`instances[${index}].format_item`}
-          listType="format"
-          variant="standard"
-        />
-      </TableCell>
-      <TableCell>
-        <ListItemField
-          fetchAll
-          ro={!edit}
-          label=" "
-          name={`instances[${index}].quality_item`}
-          listType="quality"
-          variant="standard"
-        />
-      </TableCell>
-      <TableCell>
-        <Field
-          ro={!edit}
-          type="number"
-          inputProps={{ min: 0, style: { width: 40 } }}
-          label=" "
-          name={`instances[${index}].no_copies`}
-        />
-      </TableCell>
+        <TableCell>
+          <Field
+            ro={!edit}
+            type="radio"
+            // radioGroup="primary_instance_id"
+            name="primary_instance_id"
+            value={`${instance.instance_id}`}
+          />
+        </TableCell>
+        <TableCell>
+          <Field
+            ro={!edit}
+            fullWidth={false}
+            label=" "
+            name={`instances[${index}].call_number`}
+          />
+        </TableCell>
+        <TableCell>
+          <ListItemField
+            fetchAll
+            ro={!edit}
+            label=" "
+            name={`instances[${index}].generation_item`}
+            listType="generation"
+            variant="standard"
+          />
+        </TableCell>
+        <TableCell>
+          <ListItemField
+            fetchAll
+            ro={!edit}
+            label=" "
+            name={`instances[${index}].format_item`}
+            listType="format"
+            variant="standard"
+          />
+        </TableCell>
+        <TableCell>
+          <ListItemField
+            fetchAll
+            ro={!edit}
+            label=" "
+            name={`instances[${index}].quality_item`}
+            listType="quality"
+            variant="standard"
+          />
+        </TableCell>
+        <TableCell>
+          <Field
+            ro={!edit}
+            type="number"
+            inputProps={{ min: 0, style: { width: 40 } }}
+            label=" "
+            name={`instances[${index}].no_copies`}
+          />
+        </TableCell>
 
-      {/* <TableCell>
+        {/* <TableCell>
       <Link to={`/record/${instance.original_doc_id}`}>
         {instance.original_doc_id}
       </Link>
     </TableCell> */}
-    </TableRow>
-    <TableRow className={instance.delete ? "deleted" : ""}>
-      <TableCell />
-      <TableCell>
-        {
-          instance.url &&
-          <Link
-            href={instance.url}
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Icon>open_in_new</Icon>
-          </Link>
-        }
-      </TableCell>
-      <TableCell>
-        {instance.media_type}
-      </TableCell>
-      <TableCell colSpan={5}>
-        <Field ro={!edit} label="URL" name={`instances[${index}].url`} />
-      </TableCell>
-      {/* <TableCell colSpan={2}>
+      </TableRow>
+      <TableRow className={instance.delete ? "deleted" : ""}>
+        <TableCell />
+        <TableCell>
+          {instance.url && (
+            <Link href={instance.url} target="_blank" rel="noopener noreferrer">
+              <Icon>open_in_new</Icon>
+            </Link>
+          )}
+        </TableCell>
+        <TableCell>{instance.media_type}</TableCell>
+        <TableCell colSpan={5}>
+          <Field ro={!edit} label="URL" name={`instances[${index}].url`} />
+        </TableCell>
+        {/* <TableCell colSpan={2}>
       <pre>
           {JSON.stringify(instance, null, ' ')}
       </pre>
       </TableCell> */}
-    </TableRow>
-  </>;
+      </TableRow>
+    </>
+  );
 }
 
 function Instances({ record, edit }) {
-  const { values: { instances = [] } } = useFormikContext();
+  const {
+    values: { instances = [] },
+  } = useFormikContext();
 
   return (
     <FieldArray
@@ -305,20 +363,28 @@ function RecordParent() {
       </Grid>
     </Grid>
   );
-
 }
 
-function Record({ showForm, ro = false, embedded = false, id }) {
-  const [record, setRecord] = useState({});
+function Record({
+  showForm,
+  ro = false,
+  embedded = false,
+  id,
+  newRecord = false,
+}) {
+  const navigate = useNavigate();
+
+  const [record, setRecord] = useState(defaultRecord);
   const [returnHome, set_returnHome] = useState(false);
   const [edit, setEdit] = useState(!ro);
   const buttonRef = useRef();
-  const setTitle = useTitle()
+
+  // FsetTconst setTitle = useCallback(useTitle, []);
   if (!buttonRef.current) {
     buttonRef.current = document.createElement("div");
   }
 
-  const loadRecord = async (record_data, relationships) => {
+  const loadRecord = useCallback(async (record_data, relationships) => {
     const record = record_data;
 
     // [
@@ -349,9 +415,20 @@ function Record({ showForm, ro = false, embedded = false, id }) {
     record.primary_instance_id = `${record.primary_instance_id}`;
     // console.log(record.primary_instance_id)
     setRecord(record);
-    if (!embedded) {
-      setTitle(record.title)
-    }
+  }, []);
+  useTitle(embedded ? record.title : "");
+
+  const clean_data = (data) =>
+    Object.keys(data).reduce((acc, key) => {
+      if (!key.match(/^(mui|__new_)/)) {
+        acc[key] = data[key];
+      }
+      return acc;
+    }, {});
+
+  const createRecord = async (data) => {
+    const res = await records.create(clean_data(data));
+    navigate(`/records/${res.record_id}`);
   };
 
   const deleteRecord = async () => {
@@ -360,21 +437,19 @@ function Record({ showForm, ro = false, embedded = false, id }) {
   };
 
   const updateRecord = async (data) => {
-    const clean_data = Object.keys(data).reduce((acc, key) => {
-      if (!key.match(/^(mui|__new_)/)) {
-        acc[key] = data[key]
-      }
-      return acc
-    }, {})
-
     try {
-      await records.patch(id, clean_data);
+      await records.patch(id, clean_data(data));
       const updated = await records.get(id);
       loadRecord(updated);
-    } catch { }
+    } catch {}
   };
 
+  const action = newRecord ? createRecord : updateRecord;
+
   useEffect(() => {
+    if (newRecord) {
+      return;
+    }
     const fetchRecord = async () => {
       const [record, { data }] = await Promise.all([
         records.get(id),
@@ -395,7 +470,7 @@ function Record({ showForm, ro = false, embedded = false, id }) {
       //   .then(loadRecord);
     };
     fetchRecord();
-  }, [id]);
+  }, [id, loadRecord, newRecord]);
 
   if (returnHome) {
     return <Navigate to="/" />;
@@ -403,31 +478,39 @@ function Record({ showForm, ro = false, embedded = false, id }) {
 
   const buttons = edit
     ? [
-      { label: "Save", type: "submit", color: "primary" },
-      { label: "Delete", onClick: deleteRecord, color: "secondary" },
-      {
-        label: "Cancel",
-        onClick: () => setEdit(false),
-        variant: "outlined",
-        type: "reset",
-      },
-    ]
+        { label: "Save", type: "submit", color: "primary" },
+        ...(newRecord
+          ? []
+          : [
+              { label: "Delete", onClick: deleteRecord, color: "secondary" },
+              {
+                label: "Cancel",
+                onClick: () => setEdit(false),
+                variant: "outlined",
+                type: "reset",
+              },
+            ]),
+      ]
     : [{ label: "Edit", onClick: () => setEdit(true), type: "button" }];
 
   // const {has_digital} = record;
 
   return (
     <div className="record">
-      <ViewContainer item={record} buttonRef={showForm && buttonRef} neighborService='record'>
-        {record.title && (
+      <ViewContainer
+        item={record}
+        buttonRef={showForm && buttonRef}
+        neighborService="record"
+      >
+        {(record.title || newRecord) && (
           <Form
             initialValues={record}
-            onSubmit={updateRecord}
+            onSubmit={action}
             ro={!edit}
             buttons={showForm && buttons}
             buttonRef={buttonRef}
           >
-            <GridBlock title='' spacing={2}>
+            <GridBlock title="" spacing={2}>
               <Grid item xs={10}>
                 <Grid container spacing={2}>
                   <Grid item xs={12}>
@@ -438,10 +521,10 @@ function Record({ showForm, ro = false, embedded = false, id }) {
                   </Grid>
                 </Grid>
               </Grid>
-              {(
+              {
                 <Grid item xs={2} className="record-thumbnail">
                   <Button
-                    variant="contained"
+                    variant="outlined"
                     href={`https://search.freedomarchives.org/admin/#/documents/${record.record_id}`}
                     target="_blank"
                   >
@@ -455,10 +538,9 @@ function Record({ showForm, ro = false, embedded = false, id }) {
                         record.primary_instance_thumbnail
                       }
                     />
-
                   </p>
                 </Grid>
-              )}
+              }
               <FieldRow>
                 <ListItemField name="authors" isMulti />
                 <ListItemField name="producers" isMulti />
@@ -493,7 +575,6 @@ function Record({ showForm, ro = false, embedded = false, id }) {
             <Grid item xs={12}>
               <Divider />
               <Typography variant="h4">Relationships</Typography>
-
             </Grid>
             <GridBlock title="Parent Record">
               <RecordParent
@@ -506,18 +587,21 @@ function Record({ showForm, ro = false, embedded = false, id }) {
               <EditableItemsList
                 edit={edit}
                 record={record}
-                name='children'
+                name="children"
                 emptyText="No child records"
               />
             </GridBlock>
             <GridBlock title="Sibling Records">
-              <RecordsList records={record.siblings} emptyText="No Sibling Records" />
+              <RecordsList
+                records={record.siblings}
+                emptyText="No Sibling Records"
+              />
             </GridBlock>
             <GridBlock title="Continuations">
               <EditableItemsList
                 edit={edit}
                 record={record}
-                name='continuations'
+                name="continuations"
                 emptyText="No related continuations"
                 reorder={true}
               />

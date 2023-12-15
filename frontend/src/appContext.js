@@ -80,7 +80,9 @@ export const useStateValue = () => {
 export const useTitle = () => {
   const {dispatch} = useContext(StateContext);
   return title => {
-    dispatch({type: 'TITLE', payload: title})
+    if (title) {
+      dispatch({ type: "TITLE", payload: title });
+    }
   }
 }
 
