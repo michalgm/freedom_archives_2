@@ -1,31 +1,32 @@
-import {Chip} from '@mui/material'
-import { Pagination } from '@mui/material';
-import React from 'react';
-import makeStyles from '@mui/styles/makeStyles';
-import {startCase} from 'lodash';
+import { Box, Chip } from "@mui/material";
 
-const useStyles = makeStyles({
-  pagination: {
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    // flexGrow: 1,
-    "& > .spacer-chip": {
-      visibility: 'hidden'
-      // margin: 'auto'
-    }
+import { Pagination } from "@mui/material";
+import React from "react";
+import { startCase } from "lodash";
 
-  },
-});
-
-function PaginationFooter({total, offset, page_size, type = 'record', setOffset, digitizedTotal, ...props}) {
-  const classes = useStyles();
-
+function PaginationFooter({
+  total,
+  offset,
+  page_size,
+  type = "record",
+  setOffset,
+  digitizedTotal,
+  ...props
+}) {
+  const label = `${total} ${startCase(type)}s ${
+    type === "record" ? `(${digitizedTotal} digitized)` : ""
+  }`;
   return (
-    <div className={classes.pagination}>
-      <Chip variant="outlined" label={`${total} ${startCase(type)}s ${type === 'record' ? `(${digitizedTotal} digitized)` : '' }`} />
+    <Box
+      sx={{
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "space-between",
+      }}
+    >
+      <Chip variant="outlined" label={label} />
       <Pagination
-        page={(offset / page_size) + 1}
+        page={offset / page_size + 1}
         count={Math.round(total / page_size)}
         onChange={(_, page) => setOffset((page - 1) * page_size)}
         showFirstButton
@@ -35,8 +36,13 @@ function PaginationFooter({total, offset, page_size, type = 'record', setOffset,
         variant="outlined"
         {...props}
       />
-      <Chip className='spacer-chip' variant="outlined" label={`${total} ${startCase(type)}s`} />
-    </div>
+      <Chip
+        sx={{ visibility: "hidden" }}
+        className="spacer-chip"
+        variant="outlined"
+        label={label}
+      />
+    </Box>
   );
 }
 

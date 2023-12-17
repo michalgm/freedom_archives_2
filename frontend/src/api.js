@@ -1,8 +1,8 @@
-const feathers = require('@feathersjs/feathers');
-const rest = require('@feathersjs/rest-client');
-const auth = require('@feathersjs/authentication-client');
-const { FetchClient } = require('@feathersjs/rest-client')
-const qs = require('qs')
+const { feathers } = require("@feathersjs/feathers");
+const rest = require("@feathersjs/rest-client");
+const auth = require("@feathersjs/authentication-client");
+const { FetchClient } = require("@feathersjs/rest-client");
+const qs = require("qs");
 
 export const app = feathers();
 
@@ -10,37 +10,37 @@ class MyFetchClient extends FetchClient {
   getQuery(query) {
     if (Object.keys(query).length !== 0) {
       const queryString = qs.stringify(query, {
-        strictNullHandling: true
-      })
-      return `?${queryString}`
+        strictNullHandling: true,
+      });
+      return `?${queryString}`;
     }
-    return ''
+    return "";
   }
 }
 
 const restClient = rest();
 
-app.configure(restClient.fetch(window.fetch, MyFetchClient));
-app.configure(auth({ path: '/api/authentication' }));
+app.configure(restClient.fetch(window.fetch.bind(window), MyFetchClient));
+app.configure(auth({ path: "/api/authentication" }));
 
-export const records = app.service('/api/records');
-export const relationships = app.service('/api/relationships');
-export const authentication = app.service('/api/authentication');
-export const list_items = app.service('/api/list_items');
-export const collections = app.service('/api/collections');
-export const value_lookup = app.service('/api/value_lookup');
-export const users = app.service('/api/users');
+export const records = app.service("/api/records");
+export const relationships = app.service("/api/relationships");
+export const authentication = app.service("/api/authentication");
+export const list_items = app.service("/api/list_items");
+export const collections = app.service("/api/collections");
+export const value_lookup = app.service("/api/value_lookup");
+export const users = app.service("/api/users");
 
 export const authenticate = async (username, password) => {
   return app
     .authenticate({
-      strategy: 'local',
+      strategy: "local",
       username,
       password,
     })
-    .catch(e => {
+    .catch((e) => {
       // Show login page (potentially with `e.message`)
-      console.error('Authentication error', e);
+      console.error("Authentication error", e);
       return Promise.reject(e);
     });
 };
@@ -51,7 +51,7 @@ export const services = {
   relationships,
   list_items,
   collections,
-  value_lookup
+  value_lookup,
 };
 
-export const getAuthentication = app.get('/api/authentication');
+export const getAuthentication = app.get("/api/authentication");

@@ -1,40 +1,24 @@
-import {LinearProgress} from '@mui/material';
-import React from 'react';
-import {app} from '../api';
-import {debounce} from 'lodash';
-import makeStyles from '@mui/styles/makeStyles';
-import {useStateValue} from '../appContext';
+import { Box, LinearProgress } from "@mui/material";
 
-const useStyles = makeStyles({
-  progress: {
-    width: '100%',
-  },
-  loadingContainer: {
-    opacity: 1,
-    transition: 'opacity 0.3s',
-    '&.loading': {
-      marginTop: -4,
-      opacity: 0.6,
-    }
-  },
-});
+import React from "react";
+import { app } from "../api";
+import { debounce } from "lodash";
+import { useStateValue } from "../appContext";
 
 let loaded = false;
 
-export default function Loading({children}) {
-  const classes = useStyles();
-
+export default function Loading({ children }) {
   const {
-    state: {loading},
+    state: { loading },
     dispatch,
   } = useStateValue();
   if (!loaded) {
-    const debouncedLoaded = debounce(() => dispatch('LOADING', false), 100);
+    const debouncedLoaded = debounce(() => dispatch("LOADING", false), 100);
     app.hooks({
       before: {
-        all: context => {
+        all: (context) => {
           if (!(context.arguments[0] && context.arguments[0].noLoading)) {
-            dispatch('LOADING', true);
+            dispatch("LOADING", true);
             debouncedLoaded.cancel();
           }
         },
@@ -52,10 +36,23 @@ export default function Loading({children}) {
   // return true && (
   return (
     <>
-      {loading && <LinearProgress className={classes.progress} color="secondary" size={100} />}
-      <div className={`${classes.loadingContainer} ${loading ? 'loading' : ''}`}>
+      {loading && (
+        <LinearProgress sx={{ width: "100%" }} color="secondary" size={100} />
+      )}
+      <Box
+        sx={[
+          {
+            opacity: 1,
+            transition: "opacity 0.3s",
+          },
+          loading && {
+            marginTop: "-4px",
+            opacity: 0.6,
+          },
+        ]}
+      >
         {children}
-      </div>
+      </Box>
     </>
   );
 }

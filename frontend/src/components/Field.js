@@ -173,7 +173,7 @@ const FieldComponent = ({
         {...{
           name,
           value: value || '',
-          minRows: props.multiline ? 2 : null
+          minRows: !props.rows && props.multiline ? 2 : null
         }}
         {...props}
       />
