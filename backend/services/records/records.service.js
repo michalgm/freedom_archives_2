@@ -6,8 +6,10 @@ class Records extends Service {
   constructor(options) {
     super({
       ...options,
-      name: 'records',
-      whitelist: ['$fullText', '$overlap']
+      name: "records",
+      filters: {
+        $fullText: (v) => v,
+      },
     });
   }
 }

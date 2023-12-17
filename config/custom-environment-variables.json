@@ -1,0 +1,15 @@
+{
+    "hostname": "HOSTNAME",
+    "host": "HOST",
+    "port": "PORT",
+    "authentication": {
+        "secret": "SECRET"
+    },
+    "postgres": {
+        "connection": {
+            "password": "PGPASSWORD",
+            "user": "PGUSER",
+            "database": "PGUSER"
+        }
+    }
+}

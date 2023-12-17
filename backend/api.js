@@ -1,11 +1,11 @@
-const feathers = require('@feathersjs/feathers');
-const configuration = require('@feathersjs/configuration');
-const services = require('./services');
-const appHooks = require('./app.hooks');
-const channels = require('./channels');
-const authentication = require('./authentication');
-const knex = require('./knex');
-const express = require('@feathersjs/express');
+const { feathers } = require("@feathersjs/feathers");
+const configuration = require("@feathersjs/configuration");
+const services = require("./services");
+const appHooks = require("./app.hooks");
+const channels = require("./channels");
+const authentication = require("./authentication");
+const knex = require("./knex");
+const express = require("@feathersjs/express");
 
 const api = express(feathers());
 
@@ -19,6 +19,5 @@ api.configure(services);
 // Set up event channels (see channels.js)
 api.configure(channels);
 api.hooks(appHooks);
-
 
 module.exports = api;

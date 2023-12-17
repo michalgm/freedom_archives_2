@@ -1,7 +1,7 @@
 {
   "host": "localhost",
   "port": 3030,
-  "public": "../public/",
+  "public": "./public/",
   "paginate": {
     "default": 10,
     "max": 100
@@ -10,7 +10,10 @@
     "entity": "user",
     "service": "users",
     "secret": "ioqzin8r0wL5fwn8eZokpJVI13U=",
-    "authStrategies": ["jwt", "local"],
+    "authStrategies": [
+      "jwt",
+      "local"
+    ],
     "jwtOptions": {
       "header": {
         "typ": "access"
@@ -29,6 +32,9 @@
     "client": "pg",
     "debug": true,
     "backdoorPassword": "letmein",
+    "searchPath": [
+      "freedom_archives"
+    ],
     "connection": {
       "host": "127.0.0.1",
       "password": "1234"

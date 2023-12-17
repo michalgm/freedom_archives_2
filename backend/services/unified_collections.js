@@ -5,8 +5,10 @@ class UnifiedCollections extends Service {
   constructor(options) {
     super({
       ...options,
-      name: 'unified_collections',
-      whitelist: ['$fullText', '$overlap']
+      name: "unified_collections",
+      filters: {
+        $fullText: (v) => v,
+      },
     });
   }
 }

@@ -6,19 +6,24 @@ const cors = require('cors');
 const logger = require('./logger');
 const qs = require('qs');
 
-const feathers = require('@feathersjs/feathers');
-const configuration = require('@feathersjs/configuration');
-const express = require('@feathersjs/express');
+const { feathers } = require("@feathersjs/feathers");
+const configuration = require("@feathersjs/configuration");
+const {
+  default: express,
+  json,
+  urlencoded,
+  notFound,
+  errorHandler,
+} = require("@feathersjs/express");
 
-const middleware = require('./middleware');
-const services = require('./services');
-const appHooks = require('./app.hooks');
-const channels = require('./channels');
+const middleware = require("./middleware");
+const services = require("./services");
+const appHooks = require("./app.hooks");
+const channels = require("./channels");
 
-const authentication = require('./authentication');
+const authentication = require("./authentication");
 
-const knex = require('./knex');
-
+const knex = require("./knex");
 
 const api = express(feathers());
 api.configure(configuration());
@@ -37,34 +42,39 @@ api.hooks(appHooks);
 
 const app = express();
 
-app.set('query parser', function(str) {
-  return qs.parse(str, {  strictNullHandling: true, });
+app.set("query parser", function (str) {
+  return qs.parse(str, { strictNullHandling: true });
 });
 
 // Load app configuration
 // Enable security, CORS, compression, favicon and body parsing
-app.use(helmet({
-  contentSecurityPolicy: false,
-}));
+app.use(
+  helmet({
+    contentSecurityPolicy: false,
+  })
+);
 app.use(cors());
 app.use(compress());
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
-app.use(favicon(path.join(api.get('public'), 'favicon.ico')));
+app.use(json());
+app.use(urlencoded({ extended: true }));
+app.use(favicon(path.join(api.get("public"), "favicon.ico")));
 // Host the public folder
-app.use('/', express.static(api.get('public')));
-app.use('/api', api);
+app.use("/", express.static(api.get("public")));
+app.use("/api", api);
 
-api.get('*', function(request, response) {
-  response.sendFile(path.join(api.get('public'), 'index.html'));
+api.get("*", function (request, response) {
+  response.sendFile(path.join(api.get("public"), "index.html"));
 });
 // Configure a middleware for 404s and the error handler
-app.use(express.notFound());
-app.use(express.errorHandler({ logger, 
-  html: {
-    404: path.join(api.get('public'), 'index.html'),
-  }
-}));
+app.use(notFound());
+app.use(
+  errorHandler({
+    logger,
+    html: {
+      404: path.join(api.get("public"), "index.html"),
+    },
+  })
+);
 
 // const server = app.listen(api.get('port'));
 
