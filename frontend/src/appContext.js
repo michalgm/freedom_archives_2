@@ -1,4 +1,9 @@
-import React, {createContext, useContext, useReducer} from 'react';
+import React, {
+  createContext,
+  useCallback,
+  useContext,
+  useReducer,
+} from "react";
 export const StateContext = createContext();
 const initialState = {
   isAuthenticated: null,
@@ -8,23 +13,23 @@ const initialState = {
   error: null,
   loading: false,
   search: {
-    type: '',
+    type: "",
     query: {},
     total: 0,
     index: 0,
-    ids: []
+    ids: [],
   },
   search_index: 0,
-  title: '',
+  title: "",
   notifications: [],
 };
 
 const reducer = (state, action) => {
   const { type, payload } = action;
   switch (type) {
-    case 'LOGIN':
-      localStorage.setItem('user', JSON.stringify(payload.user));
-      localStorage.setItem('token', JSON.stringify(payload.token));
+    case "LOGIN":
+      localStorage.setItem("user", JSON.stringify(payload.user));
+      localStorage.setItem("token", JSON.stringify(payload.token));
       return {
         ...state,
         isAuthenticated: true,
@@ -32,20 +37,20 @@ const reducer = (state, action) => {
         token: payload.token,
         error: null,
       };
-    case 'LOGOUT':
-      console.log('LOGOUT!');
+    case "LOGOUT":
+      console.log("LOGOUT!");
       localStorage.clear();
       return { ...state, isAuthenticated: false, user: null };
-    case 'INITIALIZE_HOOKS':
+    case "INITIALIZE_HOOKS":
       return { ...state, hooks_initialized: true };
-    case 'SEARCH':
+    case "SEARCH":
       return { ...state, search: payload };
-    case 'ERROR':
+    case "ERROR":
       return { ...state, error: payload.error };
-    case 'LOADING':
-    case 'TITLE':
-    case 'SEARCH_INDEX':
-    case 'NOTIFICATIONS':
+    case "LOADING":
+    case "TITLE":
+    case "SEARCH_INDEX":
+    case "NOTIFICATIONS":
       return { ...state, [type.toLowerCase()]: payload };
     default:
       return state;
@@ -78,29 +83,32 @@ export const useStateValue = () => {
 };
 
 export const useTitle = () => {
-  const {dispatch} = useContext(StateContext);
-  return title => {
+  const { dispatch } = useContext(StateContext);
+  return (title) => {
     if (title) {
       dispatch({ type: "TITLE", payload: title });
     }
-  }
-}
+  };
+};
 
-export const useSearch = () => {
-  const {dispatch} = useContext(StateContext);
-  return () => {
-    dispatch({type: 'SEARCH', payload: initialState.search})
-    dispatch({type: 'SEARCH_INDEX', payload: 0})
-  }
-}
+export const useResetSearch = () => {
+  const { dispatch } = useContext(StateContext);
+  return useCallback(() => {
+    dispatch({ type: "SEARCH", payload: initialState.search });
+    dispatch({ type: "SEARCH_INDEX", payload: 0 });
+  }, [dispatch]);
+};
 
 export const useAddNotification = () => {
   const { state, dispatch } = useContext(StateContext);
-  return notification => {
+  return (notification) => {
     const id = notification.id || (Math.random() + 1).toString(36).substring(7);
-    dispatch({ type: 'NOTIFICATIONS', payload: [...state.notifications, { ...notification, id }] })
-  }
-}
+    dispatch({
+      type: "NOTIFICATIONS",
+      payload: [...state.notifications, { ...notification, id }],
+    });
+  };
+};
 
 // export const useTitle = title => {
 //   const {dispatch} = useContext(StateContext);

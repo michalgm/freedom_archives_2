@@ -19,7 +19,6 @@ import Form from "../components/Form";
 import KVChip from "../components/KVChip";
 import PaginationFooter from "../components/PaginationFooter";
 import Thumbnail from "../components/Thumbnail";
-import { isEqual } from "lodash";
 import { records as recordsService } from "../api";
 import { startCase } from "lodash";
 import { unstable_batchedUpdates } from "react-dom";
@@ -152,15 +151,16 @@ function Search() {
   const [offset, setOffset] = useState(0);
   const [time, setTime] = useState(0);
 
-  const searchRef = useRef(search);
-  // console.log(searchRef.current, search, records, filters, total, offset, time)
-  if (!isEqual(search, searchRef.current)) {
-    searchRef.current = search;
-  }
+  // const searchRef = useRef(search);
+  // // console.log(searchRef.current, search, records, filters, total, offset, time)
+  // if (!isEqual(search, searchRef.current)) {
+  //   searchRef.current = search;
+  // }
 
   useEffect(() => {
     setOffset(0);
-  }, [searchRef.current]);
+    // }, [searchRef.current]);
+  }, [search]);
 
   useEffect(() => {
     // console.log('search?')
@@ -234,7 +234,7 @@ function Search() {
       } catch {}
     };
     fetchRecords();
-  }, [searchRef.current, offset]);
+  }, [search, offset]);
 
   const addFilter = ({ type, value }) => {
     let newFilter = [...(search[type] || [])];

@@ -7,7 +7,7 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 
 const FormButton = ({ label, onClick, ...props }) => {
-  const { handleReset, handleSubmit } = useFormikContext();
+  const { handleReset, handleSubmit, isValid } = useFormikContext();
   const click = e => {
     if (props.type === 'reset') {
       handleReset(e);
@@ -21,7 +21,7 @@ const FormButton = ({ label, onClick, ...props }) => {
     }
   };
   return (
-    <Button variant="contained" size="medium" onClick={click} {...props}>
+    <Button variant="contained" size="medium" onClick={click} disabled={props.type === 'submit' && !isValid} {...props}>
       {label}
     </Button>
   );
@@ -45,6 +45,7 @@ const Form = ({
   buttonsBelow,
   buttonRef,
   onChange,
+  gridProps = {},
   ...props
 }) => {
   const rows = React.Children.toArray(children);
@@ -68,6 +69,7 @@ const Form = ({
   return (
     <Formik
       enableReinitialize
+      validateOnChange={false}
       onSubmit={values => {
         if (noUpdateCheck) {
           return onSubmit(values);
@@ -93,6 +95,7 @@ const Form = ({
           style={{ textAlign: 'left' }}
           spacing={2}
           className={`${ro ? 'read-only' : ''}`}
+          {...gridProps}
         >
           {!buttonsBelow && !buttonRef && renderButtons(buttons)}
           {rows.map(row =>

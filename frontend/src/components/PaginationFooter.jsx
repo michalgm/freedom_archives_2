@@ -14,7 +14,9 @@ function PaginationFooter({
   ...props
 }) {
   const label = `${total} ${startCase(type)}s ${
-    type === "record" ? `(${digitizedTotal} digitized)` : ""
+    type === "record" && digitizedTotal !== undefined
+      ? `(${digitizedTotal} digitized)`
+      : ""
   }`;
   return (
     <Box

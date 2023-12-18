@@ -1,19 +1,11 @@
 import { Box, Grid, Icon, Paper, Stack, Typography } from "@mui/material";
 import React, { useEffect } from "react";
-import { ThemeProvider, createTheme } from "@mui/material/styles";
 import { collections, records } from "../api";
-import { useSearch, useStateValue } from "../appContext";
+import { useResetSearch, useStateValue } from "../appContext";
 
 import ButtonLink from "./ButtonLink";
-// import {darkTheme} from '../App'
 import { startCase } from "lodash";
 import { useLocation } from "react-router-dom";
-
-export const darkTheme = createTheme({
-  palette: {
-    mode: "dark",
-  },
-});
 
 const renderTime = (item, type) => {
   return (
@@ -45,7 +37,7 @@ function ViewContainer({
   } = useStateValue();
   const [neighbors, setNeighbors] = React.useState({ prev: null, next: null });
   const location = useLocation();
-  const resetSearch = useSearch();
+  const resetSearch = useResetSearch();
 
   const rootPath = location.pathname.split("/")[1];
 
@@ -53,7 +45,7 @@ function ViewContainer({
     if (rootPath !== `${type}s`) {
       resetSearch();
     }
-  }, [rootPath, type]);
+  }, [rootPath, type, resetSearch]);
 
   useEffect(() => {
     const updateNeighbors = async (direction) => {
@@ -109,7 +101,6 @@ function ViewContainer({
   const renderSection = (type) => {
     const sectionElements = props[`${type}Elements`] || [];
     const sectionProps = props[`${type}Props`] || {};
-    const darkmode = props[`${type}DarkMode`] || false;
     if (
       sectionElements.length ||
       (type === "footer" && item) ||
@@ -161,11 +152,7 @@ function ViewContainer({
           </Paper>
         </Grid>
       );
-      if (darkmode) {
-        return <ThemeProvider theme={darkTheme}>{section}</ThemeProvider>;
-      } else {
-        return section;
-      }
+      return section;
     }
   };
 

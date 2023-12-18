@@ -1,6 +1,9 @@
 import "./Record.scss";
 
 import {
+  Accordion,
+  AccordionDetails,
+  AccordionSummary,
   Button,
   Divider,
   Grid,
@@ -13,12 +16,17 @@ import {
   TableRow,
   Typography,
 } from "@mui/material/";
-import { EditableItem, EditableItemsList, RecordsList } from '../components/RecordItem'
+import {
+  EditableItem,
+  EditableItemsList,
+  RecordsList,
+} from "../components/RecordItem";
 import { FieldArray, useFormikContext } from "formik";
 import { Navigate, useNavigate } from "react-router-dom";
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import { records, relationships } from "../api";
 
+import { ExpandMore } from "@mui/icons-material";
 import Field from "../components/Field";
 import FieldRow from "../components/FieldRow";
 import Form from "../components/Form";
@@ -246,7 +254,7 @@ function Instances({ record, edit }) {
       render={({ push }) => {
         return (
           <>
-            <Table size="small" className="instances">
+            <Table size="small" className="instances" sx={{ mb: 2 }}>
               <TableHead>
                 <TableRow>
                   <TableCell style={{ width: 50 }}></TableCell>
@@ -574,41 +582,49 @@ function Record({
             </GridBlock>
             <Grid item xs={12}>
               <Divider />
-              <Typography variant="h4">Relationships</Typography>
+              <Accordion>
+                <AccordionSummary expandIcon={<ExpandMore />}>
+                  <Typography variant="h5">Relationships</Typography>
+                </AccordionSummary>
+                <AccordionDetails>
+                  <Grid container spacing={2}>
+                    <GridBlock title="Parent Record">
+                      <RecordParent
+                        edit={edit}
+                        record={record}
+                        parent={record.parent || {}}
+                      />
+                    </GridBlock>
+                    <GridBlock title="Child Records">
+                      <EditableItemsList
+                        edit={edit}
+                        record={record}
+                        name="children"
+                        emptyText="No child records"
+                      />
+                    </GridBlock>
+                    <GridBlock title="Sibling Records">
+                      <RecordsList
+                        records={record.siblings}
+                        emptyText="No Sibling Records"
+                      />
+                    </GridBlock>
+                    <GridBlock title="Continuations">
+                      <EditableItemsList
+                        edit={edit}
+                        record={record}
+                        name="continuations"
+                        emptyText="No related continuations"
+                        reorder={true}
+                      />
+                    </GridBlock>
+                    <GridBlock title="Old Relationships">
+                      {record.relationships}
+                    </GridBlock>
+                  </Grid>
+                </AccordionDetails>
+              </Accordion>
             </Grid>
-            <GridBlock title="Parent Record">
-              <RecordParent
-                edit={edit}
-                record={record}
-                parent={record.parent || {}}
-              />
-            </GridBlock>
-            <GridBlock title="Child Records">
-              <EditableItemsList
-                edit={edit}
-                record={record}
-                name="children"
-                emptyText="No child records"
-              />
-            </GridBlock>
-            <GridBlock title="Sibling Records">
-              <RecordsList
-                records={record.siblings}
-                emptyText="No Sibling Records"
-              />
-            </GridBlock>
-            <GridBlock title="Continuations">
-              <EditableItemsList
-                edit={edit}
-                record={record}
-                name="continuations"
-                emptyText="No related continuations"
-                reorder={true}
-              />
-            </GridBlock>
-            <GridBlock title="Old Relationships">
-              {record.relationships}
-            </GridBlock>
           </Form>
         )}
       </ViewContainer>

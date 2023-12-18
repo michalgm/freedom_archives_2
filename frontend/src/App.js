@@ -1,4 +1,4 @@
-import './App.scss';
+import "./App.scss";
 
 import {
   Button,
@@ -6,44 +6,40 @@ import {
   CssBaseline,
   Icon,
   Toolbar,
-  Typography
-} from '@mui/material';
+  Typography,
+} from "@mui/material";
+import { Content, EdgeTrigger, Header, Root } from "@mui-treasury/layout";
+import { Link, BrowserRouter as Router } from "react-router-dom";
+import { StateProvider, useStateValue } from "./appContext";
 import {
-  Content,
-  EdgeTrigger,
-  Header,
-  Root,
-} from '@mui-treasury/layout';
-import {
-  Link,
-  BrowserRouter as Router,
-} from 'react-router-dom';
-import { StateProvider, useStateValue } from './appContext';
-import { StyledEngineProvider, ThemeProvider, createTheme } from '@mui/material/styles';
+  StyledEngineProvider,
+  ThemeProvider,
+  createTheme,
+} from "@mui/material/styles";
 
-import Authentication from './Authentication';
-import Breadcrumbs from './components/Breadcrumbs';
-import Errors from './components/Errors';
-import Loading from './views/Loading';
-import Notifications from './components/Notifications';
-import React from 'react';
-import Routes from './Routes'
-import Sidebar from './views/Sidebar';
-import { app } from './api';
+import Authentication from "./Authentication";
+import Breadcrumbs from "./components/Breadcrumbs";
+import Errors from "./components/Errors";
+import Loading from "./views/Loading";
+import Notifications from "./components/Notifications";
+import React from "react";
+import Routes from "./Routes";
+import Sidebar from "./views/Sidebar";
+import { app } from "./api";
 
 export const theme = createTheme({
   components: {
     MuiTextField: {
       defaultProps: {
-        size: 'small'
-      }
-    }
-  }
+        size: "small",
+      },
+    },
+  },
 });
 export const darkTheme = createTheme({
   palette: {
-    type: "dark"
-  }
+    type: "dark",
+  },
 });
 
 // console.log(theme)
@@ -53,7 +49,7 @@ const scheme = {
       xs: {
         position: "fixed",
         height: 64,
-        clipped: true
+        clipped: true,
       },
     },
   },
@@ -78,7 +74,7 @@ const scheme = {
     leftEdgeSidebar: {
       open: true,
     },
-  }
+  },
 };
 
 function App() {
@@ -106,9 +102,9 @@ function Layout() {
   const style = isAuthenticated
     ? {}
     : {
-      marginLeft: 0,
-      width: '100%',
-    };
+        marginLeft: 0,
+        width: "100%",
+      };
   return (
     <div className="App">
       <NavBar />
@@ -127,7 +123,7 @@ function Logout() {
     state: { isAuthenticated, user },
   } = useStateValue();
   return isAuthenticated ? (
-    <div className='logout'>
+    <div className="logout">
       <Typography variant="caption">
         <Icon>person</Icon>
         {user.firstname} {user.lastname}
@@ -137,18 +133,18 @@ function Logout() {
       </Button>
     </div>
   ) : (
-    ''
+    ""
   );
 }
 
 function NavBar() {
   return (
     <Header color="primary">
-      <Toolbar className='topnav'>
+      <Toolbar className="topnav">
         <EdgeTrigger target={{ anchor: "left", field: "open" }}>
           {(open, setOpen) => (
             <Icon onClick={() => setOpen(!open)}>
-              {open ? 'keyboard_arrow_left' : 'menu'}
+              {open ? "keyboard_arrow_left" : "menu"}
             </Icon>
           )}
         </EdgeTrigger>
@@ -167,7 +163,10 @@ function Main() {
   // const title = isAuthenticated ? 'Welcome' : 'Login'
   // <h1>{title}</h1>
   return (
-    <Container maxWidth="xl">
+    <Container
+      maxWidth="xl"
+      sx={{ backgroundColor: "#efefef", paddingBottom: "8px" }}
+    >
       <Authentication />
       <Errors />
       <Routes isAuthenticated={isAuthenticated} />
