@@ -33,6 +33,7 @@ import GridBlock from "../components/GridBlock";
 import Link from "../components/Link";
 import ListItemField from "../components/ListItemField";
 import ViewContainer from "../components/ViewContainer";
+import { useConfirm } from "material-ui-confirm";
 import { useNavigate } from "react-router-dom";
 import { useTitle } from "../appContext";
 
@@ -385,6 +386,7 @@ function Record({
   const [record, setRecord] = useState(defaultRecord);
   const [edit, setEdit] = useState(!ro);
   const buttonRef = useRef();
+  const confirm = useConfirm();
 
   // FsetT
   const setTitle = useTitle();
@@ -440,8 +442,22 @@ function Record({
   };
 
   const deleteRecord = async () => {
-    await records.remove(id);
-    navigate(`/records`);
+    try {
+      await confirm({
+        description: (
+          <>
+            <Typography gutterBottom>
+              Are you sure you want to delete record "<b>{record.title}</b>"?
+            </Typography>
+          </>
+        ),
+        confirmationButtonProps: {
+          variant: "contained",
+        },
+      });
+      await records.remove(id);
+      navigate(`/records`);
+    } catch {}
   };
 
   const updateRecord = async (data) => {

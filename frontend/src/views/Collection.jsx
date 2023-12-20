@@ -1,6 +1,6 @@
 import { EditableItem, RecordsList } from "../components/RecordItem";
 import { FieldArray, useFormikContext } from "formik";
-import { Grid, Icon, IconButton } from "@mui/material/";
+import { Grid, Icon, IconButton, Typography } from "@mui/material/";
 import React, { useEffect, useRef, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 
@@ -11,6 +11,7 @@ import GridBlock from "../components/GridBlock";
 import ListItemField from "../components/ListItemField";
 import ViewContainer from "../components/ViewContainer";
 import { collections as collectionsService } from "../api";
+import { useConfirm } from "material-ui-confirm";
 import { useTitle } from "../appContext";
 
 const defaultCollection = {
@@ -22,6 +23,7 @@ const defaultCollection = {
   publisher: {},
   parent: {},
 };
+
 function Collection() {
   const [collection, setCollection] = useState(defaultCollection);
   const [edit, setEdit] = useState(true);
@@ -30,6 +32,7 @@ function Collection() {
   const setTitle = useTitle();
   const newCollection = id === "new";
   const navigate = useNavigate();
+  const confirm = useConfirm();
 
   if (!buttonRef.current) {
     buttonRef.current = document.createElement("div");
@@ -69,8 +72,26 @@ function Collection() {
   };
 
   const deleteCollection = async () => {
-    await collectionsService.remove(id);
-    navigate(`/collections`);
+    try {
+      await confirm({
+        description: (
+          <>
+            <Typography gutterBottom>
+              Are you sure you want to delete collection "
+              <b>{collection.collection_name}</b>"?
+            </Typography>
+            <Typography variant="body2">
+              All child records will be moved to the 'Uncategorized' collection
+            </Typography>
+          </>
+        ),
+        confirmationButtonProps: {
+          variant: "contained",
+        },
+      });
+      await collectionsService.remove(id);
+      navigate(`/collections`);
+    } catch {}
   };
 
   const action = newCollection ? createCollection : updateCollection;

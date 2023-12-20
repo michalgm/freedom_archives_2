@@ -19,6 +19,7 @@ import {
 
 import Authentication from "./Authentication";
 import Breadcrumbs from "./components/Breadcrumbs";
+import { ConfirmProvider } from "material-ui-confirm";
 import Errors from "./components/Errors";
 import Loading from "./views/Loading";
 import Notifications from "./components/Notifications";
@@ -82,13 +83,15 @@ function App() {
     <StyledEngineProvider injectFirst>
       <ThemeProvider theme={theme}>
         <StateProvider>
-          <Router>
-            <Root scheme={scheme}>
-              <CssBaseline>
-                <Layout />
-              </CssBaseline>
-            </Root>
-          </Router>
+          <ConfirmProvider>
+            <Router>
+              <Root scheme={scheme}>
+                <CssBaseline>
+                  <Layout />
+                </CssBaseline>
+              </Root>
+            </Router>
+          </ConfirmProvider>
         </StateProvider>
       </ThemeProvider>
     </StyledEngineProvider>
