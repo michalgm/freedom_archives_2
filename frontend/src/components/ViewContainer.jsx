@@ -38,8 +38,8 @@ function ViewContainer({
   const [neighbors, setNeighbors] = React.useState({ prev: null, next: null });
   const location = useLocation();
   const resetSearch = useResetSearch();
-
-  const rootPath = location.pathname.split("/")[1];
+  const [, rootPath, id] = location.pathname.split("/");
+  const newItem = id === "new";
 
   useEffect(() => {
     if (rootPath !== `${type}s`) {
@@ -172,7 +172,7 @@ function ViewContainer({
       >
         {children}
       </Grid>
-      {renderSection("footer")}
+      {!newItem && renderSection("footer")}
     </Stack>
   );
 }
