@@ -22,7 +22,6 @@ import {
   RecordsList,
 } from "../components/RecordItem";
 import { FieldArray, useFormikContext } from "formik";
-import { Navigate, useNavigate } from "react-router-dom";
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import { records, relationships } from "../api";
 
@@ -34,6 +33,7 @@ import GridBlock from "../components/GridBlock";
 import Link from "../components/Link";
 import ListItemField from "../components/ListItemField";
 import ViewContainer from "../components/ViewContainer";
+import { useNavigate } from "react-router-dom";
 import { useTitle } from "../appContext";
 
 const defaultRecord = {
@@ -383,11 +383,12 @@ function Record({
   const navigate = useNavigate();
 
   const [record, setRecord] = useState(defaultRecord);
-  const [returnHome, set_returnHome] = useState(false);
   const [edit, setEdit] = useState(!ro);
   const buttonRef = useRef();
 
-  // FsetTconst setTitle = useCallback(useTitle, []);
+  // FsetT
+  const setTitle = useTitle();
+
   if (!buttonRef.current) {
     buttonRef.current = document.createElement("div");
   }
@@ -424,7 +425,6 @@ function Record({
     // console.log(record.primary_instance_id)
     setRecord(record);
   }, []);
-  useTitle(embedded ? record.title : "");
 
   const clean_data = (data) =>
     Object.keys(data).reduce((acc, key) => {
@@ -441,7 +441,7 @@ function Record({
 
   const deleteRecord = async () => {
     await records.remove(id);
-    set_returnHome(true);
+    navigate(`/records`);
   };
 
   const updateRecord = async (data) => {
@@ -455,9 +455,6 @@ function Record({
   const action = newRecord ? createRecord : updateRecord;
 
   useEffect(() => {
-    if (newRecord) {
-      return;
-    }
     const fetchRecord = async () => {
       const [record, { data }] = await Promise.all([
         records.get(id),
@@ -473,16 +470,16 @@ function Record({
           },
         }),
       ]);
+      setTitle(record.title);
       return loadRecord(record, data);
-      // return records.get(id)
-      //   .then(loadRecord);
     };
-    fetchRecord();
-  }, [id, loadRecord, newRecord]);
-
-  if (returnHome) {
-    return <Navigate to="/" />;
-  }
+    if (newRecord) {
+      setTitle("New Record");
+      setRecord(defaultRecord);
+    } else {
+      fetchRecord();
+    }
+  }, [id, loadRecord, setTitle, newRecord]);
 
   const buttons = edit
     ? [

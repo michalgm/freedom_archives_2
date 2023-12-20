@@ -1,17 +1,17 @@
-import './Form.scss';
+import "./Form.scss";
 
-import { Button, Grid } from '@mui/material';
-import { Formik, Form as FormikForm, useFormikContext } from 'formik';
+import { Button, Grid } from "@mui/material";
+import { Formik, Form as FormikForm, useFormikContext } from "formik";
 
-import React from 'react';
-import ReactDOM from 'react-dom';
+import React from "react";
+import ReactDOM from "react-dom";
 
 const FormButton = ({ label, onClick, ...props }) => {
   const { handleReset, handleSubmit, isValid } = useFormikContext();
-  const click = e => {
-    if (props.type === 'reset') {
+  const click = (e) => {
+    if (props.type === "reset") {
       handleReset(e);
-    } else if (props.type === 'submit') {
+    } else if (props.type === "submit") {
       e.preventDefault();
       handleSubmit(e);
     }
@@ -21,19 +21,25 @@ const FormButton = ({ label, onClick, ...props }) => {
     }
   };
   return (
-    <Button variant="contained" size="medium" onClick={click} disabled={props.type === 'submit' && !isValid} {...props}>
+    <Button
+      variant="contained"
+      size="medium"
+      onClick={click}
+      disabled={props.type === "submit" && !isValid}
+      {...props}
+    >
       {label}
     </Button>
   );
 };
 
 const HandleChangeComponent = ({ onChange }) => {
-  const { values } = useFormikContext()
+  const { values } = useFormikContext();
   React.useEffect(() => {
-    onChange(values)
-  }, [values, onChange])
-  return null
-}
+    onChange(values);
+  }, [values, onChange]);
+  return null;
+};
 
 const Form = ({
   ro,
@@ -70,7 +76,7 @@ const Form = ({
     <Formik
       enableReinitialize
       validateOnChange={false}
-      onSubmit={values => {
+      onSubmit={(values) => {
         if (noUpdateCheck) {
           return onSubmit(values);
         }
@@ -92,14 +98,14 @@ const Form = ({
         {onChange && <HandleChangeComponent onChange={onChange} />}
         <Grid
           container
-          style={{ textAlign: 'left' }}
+          style={{ textAlign: "left" }}
           spacing={2}
-          className={`${ro ? 'read-only' : ''}`}
+          className={`${ro ? "read-only" : ""}`}
           {...gridProps}
         >
           {!buttonsBelow && !buttonRef && renderButtons(buttons)}
-          {rows.map(row =>
-            row.type && row.type.name === 'FieldRow'
+          {rows.map((row) =>
+            row.type && row.type.name === "FieldRow"
               ? React.cloneElement(row, { ro })
               : row
           )}

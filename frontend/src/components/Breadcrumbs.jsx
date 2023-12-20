@@ -1,24 +1,21 @@
 import { Box, Breadcrumbs as Crumbs, Icon, Typography } from "@mui/material";
-import { useStateValue, useTitle } from "../appContext";
 
 import { Helmet } from "react-helmet";
 import Link from "./Link";
 import React from "react";
 import { startCase } from "lodash";
 import { useLocation } from "react-router-dom";
+import { useStateValue } from "../appContext";
 
 function Breadcrumbs() {
   const { state } = useStateValue();
-  const setTitle = React.useRef(useTitle()).current;
   const location = useLocation();
 
-  React.useEffect(() => {
-    setTitle("");
-  }, [location, setTitle]);
-
   const parts = location.pathname.split("/");
+
   const paths = [
     ...parts
+      .filter((p) => p !== "new" && !p.match(/^\d+$/))
       .map((p, index) =>
         index === 0
           ? { link: "/", title: "Freedom Archives Admin" }
@@ -26,11 +23,9 @@ function Breadcrumbs() {
               link: parts.slice(0, index + 1).join("/"),
               title: startCase(p),
             }
-      )
-      .filter(({ title }) => title),
+      ),
   ];
   if (state.title) {
-    paths.pop();
     paths.push({ link: location.pathname, title: state.title });
   }
 

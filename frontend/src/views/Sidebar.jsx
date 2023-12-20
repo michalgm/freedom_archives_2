@@ -4,19 +4,16 @@ import {
   ListItem,
   ListItemText,
   Typography,
-} from '@mui/material';
-import {
-  EdgeSidebar,
-  SidebarContent,
-} from '@mui-treasury/layout';
-import { Link, useLocation, useMatch, useResolvedPath } from 'react-router-dom';
+} from "@mui/material";
+import { EdgeSidebar, SidebarContent } from "@mui-treasury/layout";
+import { Link, useLocation, useMatch, useResolvedPath } from "react-router-dom";
 
-import React from 'react';
+import React from "react";
 
 const sideBarConfig = {
   Collections: [
     { label: "Manage Collections", icon: "", href: "/collections" },
-    { label: "New Collection", icon: "", href: "" },
+    { label: "New Collection", icon: "", href: "/collections/new" },
     { label: "Manage Featured Collections", icon: "", href: "" },
   ],
   Records: [
@@ -46,7 +43,7 @@ function Sidebar() {
   return (
     <EdgeSidebar anchor="left">
       <SidebarContent>
-        {Object.keys(sideBarConfig).map(title => {
+        {Object.keys(sideBarConfig).map((title) => {
           return (
             <div key={title}>
               <Divider />
@@ -72,14 +69,18 @@ function Sidebar() {
   );
 }
 
-function SidebarItem({ label, icon, href='notalink'}) {
-  const {pathname = null} = useResolvedPath(href) 
-  const location = useLocation()
+function SidebarItem({ label, icon, href = "notalink" }) {
+  const { pathname = null } = useResolvedPath(href);
+  const location = useLocation();
   // console.log(location)?
   // console.log(useMatch({path: pathname || ''}))
-  const current = Boolean(useMatch({path: pathname || ''}) !== null || (location.pathname === '/' && href==='/records')) && href;
+  const current =
+    Boolean(
+      useMatch({ path: pathname || "" }) !== null ||
+        (location.pathname === "/" && href === "/records")
+    ) && href;
   // const home = Boolean(useMatch({path: href==='records' ? '/' : 'notalink'}))
-  
+
   // console.log({href, pathname, current, home})
   return (
     <ListItemLink button selected={Boolean(current)} href={href}>
@@ -93,7 +94,7 @@ function ListItemLink(props) {
     <ListItem
       button
       disabled={!Boolean(props.href)}
-      component={props.href ? Link : 'div'}
+      component={props.href ? Link : "div"}
       to={props.href}
       {...props}
     />

@@ -2,6 +2,7 @@ import React, {
   createContext,
   useCallback,
   useContext,
+  useEffect,
   useReducer,
 } from "react";
 export const StateContext = createContext();
@@ -84,11 +85,18 @@ export const useStateValue = () => {
 
 export const useTitle = () => {
   const { dispatch } = useContext(StateContext);
-  return (title) => {
-    if (title) {
+  useEffect(() => {
+    return () => {
+      dispatch({ type: "TITLE", payload: "" });
+    };
+  }, [dispatch]);
+
+  return useCallback(
+    (title) => {
       dispatch({ type: "TITLE", payload: title });
-    }
-  };
+    },
+    [dispatch]
+  );
 };
 
 export const useResetSearch = () => {

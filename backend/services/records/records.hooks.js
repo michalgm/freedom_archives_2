@@ -1,7 +1,7 @@
-const tsquery = require('pg-tsquery')();
+const tsquery = require("pg-tsquery")();
 const {
   hooks: { transaction },
-} = require('feathers-knex');
+} = require("feathers-knex");
 const {
   setUser,
   updateListItemRelations,
@@ -9,21 +9,8 @@ const {
   refreshView,
   updateThumbnailFromUrl,
   fetchUnified,
+  setArchive,
 } = require("../common_hooks/");
-
-const setArchive = (context) => {
-  const {
-    data,
-    method,
-    params: {
-      user: { archive_id },
-    },
-  } = context;
-  if (method === "create") {
-    data.archive_id = archive_id;
-  }
-  return context;
-};
 
 const fullTextSearch = (context) => {
   if (context.params.query.$fullText !== undefined) {

@@ -1,11 +1,12 @@
-const { writeThumbnail, writeThumbnailFromUrl } = require('./thumbnailer');
+const { child } = require("winston");
+const { writeThumbnail, writeThumbnailFromUrl } = require("./thumbnailer");
 
 module.exports = {
   writeThumbnail,
   writeThumbnailFromUrl,
   setUser: (context) => {
     const {
-      data,
+      data = {},
       method,
       service: { Model },
       params: {
@@ -18,6 +19,20 @@ module.exports = {
     } else {
       data.contributor_user_id = user_id;
       data.date_modified = Model.raw("now()");
+    }
+    return context;
+  },
+
+  setArchive: (context) => {
+    const {
+      data,
+      method,
+      params: {
+        user: { archive_id },
+      },
+    } = context;
+    if (method === "create") {
+      data.archive_id = archive_id;
     }
     return context;
   },
@@ -60,9 +75,9 @@ module.exports = {
         transaction: { trx },
       },
     } = context;
-    const id = context.id || context.result.record_id;
 
     const table = path.slice(0, -1);
+    const id = context.id || context.result[`${table}_id`];
     for (const type of ["subjects", "keywords", "producers", "authors"]) {
       if (relation_data && relation_data[type] !== undefined) {
         // console.log('UPDATE', relation_data);
@@ -93,7 +108,7 @@ module.exports = {
     }
 
     if (!Object.keys(data).length) {
-      context.result = await trx("records").where("record_id", id).select();
+      context.result = await trx(`${table}s`).where(`${table}_id`, id).select();
     }
 
     // console.log('UPDATE DONE', context.result);
@@ -110,8 +125,8 @@ module.exports = {
       },
     } = context;
 
-    const id = context.id || result.record_id;
     const table = path.slice(0, -1);
+    const id = context.id || result[`${table}_id`];
     if (["update", "patch", "remove", "create"].includes(method)) {
       await trx(`_unified_${table}s`).where(`${table}_id`, id).delete();
     }

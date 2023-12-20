@@ -5,23 +5,48 @@ import {
   FormGroup,
   Radio,
   TextField,
-} from '@mui/material';
-import { Field as FormikField, useFormikContext } from 'formik';
+} from "@mui/material";
+import { Field as FormikField, useFormikContext } from "formik";
 
-import { Alert } from '@mui/material';
-import { Autocomplete } from 'formik-mui';
-import HTMLField from './HTMLField';
-import React from 'react';
-import SelectField from './SelectField';
-import { startCase } from 'lodash';
+import { Alert } from "@mui/material";
+import { Autocomplete } from "formik-mui";
+import HTMLField from "./HTMLField";
+import React from "react";
+import SelectField from "./SelectField";
+import { startCase } from "lodash";
 
 const selectOptions = {
-  day: Array.from({ length: 32 }, (v, k) => ({ id: k || null, label: `${k || '??'}` })),
-  month: ['??', 'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'].map((label, index) => ({ id: index || null, label })),
-  year: [{ id: null, label: '??' }, ...Array.from({ length: new Date().getFullYear() - 1900 }, (v, k) => ({ id: k + 1900, label: k + 1900 + "" }))],
-  media_types: ['Audio', 'Webpage', 'Video', 'PDF'].map(id => ({ id, label: id })),
-
-}
+  day: Array.from({ length: 32 }, (v, k) => ({
+    id: k || null,
+    label: `${k || "??"}`,
+  })),
+  month: [
+    "??",
+    "Jan",
+    "Feb",
+    "Mar",
+    "Apr",
+    "May",
+    "Jun",
+    "Jul",
+    "Aug",
+    "Sep",
+    "Oct",
+    "Nov",
+    "Dec",
+  ].map((label, index) => ({ id: index || null, label })),
+  year: [
+    { id: null, label: "??" },
+    ...Array.from({ length: new Date().getFullYear() - 1900 }, (v, k) => ({
+      id: k + 1900,
+      label: k + 1900 + "",
+    })),
+  ],
+  media_types: ["Audio", "Webpage", "Video", "PDF"].map((id) => ({
+    id,
+    label: id,
+  })),
+};
 
 const FieldComponent = ({
   type,
@@ -39,28 +64,32 @@ const FieldComponent = ({
   context,
   ...props
 }) => {
-  const labelValue = label === " " ? null : (label || startCase(name)).replace('_value', '');
+  const labelValue =
+    label === " " ? null : (label || startCase(name)).replace("_value", "");
 
   const { errors, setFieldValue } = context || {};
-
-  const variant = props.variant || ro ? 'filled' : 'outlined'
+  const variant = props.variant || ro ? "filled" : "outlined";
   let field;
 
-  props.onChange = React.useCallback(async (event, option) => {
-    const { value, checked } = event.currentTarget
-    const results = customOnChange && await customOnChange(event, option)
-    if (results !== false) {
-      const newValue = type === 'checkbox' ? checked : (option !== undefined ? option : value)
-      if (['checkbox', 'radio'].includes(type)) {
-        await defaultOnChange(event, option)
-      } else {
-        await setFieldValue(name, newValue)
+  props.onChange = React.useCallback(
+    async (event, option) => {
+      const { value, checked } = event.currentTarget;
+      const results = customOnChange && (await customOnChange(event, option));
+      if (results !== false) {
+        const newValue =
+          type === "checkbox" ? checked : option !== undefined ? option : value;
+        if (["checkbox", "radio"].includes(type)) {
+          await defaultOnChange(event, option);
+        } else {
+          await setFieldValue(name, newValue);
+        }
       }
-    }
-    return results
-  }, [name, setFieldValue, defaultOnChange, customOnChange, type])
+      return results;
+    },
+    [name, setFieldValue, defaultOnChange, customOnChange, type]
+  );
 
-  if (type === 'select') {
+  if (type === "select") {
     field = (
       <FormControl disabled={ro} margin="dense" fullWidth>
         <FormGroup>
@@ -72,29 +101,29 @@ const FieldComponent = ({
             label={labelValue}
             {...{
               isMulti,
-              defaultValue: value || (isMulti ? [] : ''),
-              value: value || (isMulti ? [] : ''),
+              defaultValue: value || (isMulti ? [] : ""),
+              value: value || (isMulti ? [] : ""),
               name,
               setFieldValue: setFieldValue,
-              ...props
+              ...props,
             }}
             variant={variant}
           />
         </FormGroup>
       </FormControl>
     );
-  } else if (type === 'simpleSelect') {
+  } else if (type === "simpleSelect") {
     let { InputProps, options, selectType, inputProps, ...selectProps } = props;
 
     if (!options) {
-      options = selectOptions[selectType] || []
+      options = selectOptions[selectType] || [];
     }
     if (options[0] && options[0].id !== undefined) {
-      value = options.find(o => o.id === value)
+      value = options.find((o) => o.id === value);
       selectProps.isOptionEqualToValue = (option, value) => {
-        return option.id === value.id
-      }
-      selectProps.onChange = (event, value) => props.onChange(event, value.id)
+        return option.id === value.id;
+      };
+      selectProps.onChange = (event, value) => props.onChange(event, value.id);
     }
 
     field = (
@@ -109,7 +138,7 @@ const FieldComponent = ({
             disabled={ro}
             label={labelValue}
             variant={variant}
-            componentsProps={{ paper: { sx: { width: 'max-content' } } }}
+            componentsProps={{ paper: { sx: { width: "max-content" } } }}
             options={options}
             renderInput={(params) => (
               <TextField
@@ -126,13 +155,13 @@ const FieldComponent = ({
               defaultValue: value || null,
               value: value || null,
               name,
-              ...selectProps
+              ...selectProps,
             }}
           />
         </FormGroup>
       </FormControl>
-    )
-  } else if (type === 'checkbox') {
+    );
+  } else if (type === "checkbox") {
     field = (
       <FormControl
         component="fieldset"
@@ -148,17 +177,15 @@ const FieldComponent = ({
         </FormGroup>
       </FormControl>
     );
-  } else if (type === 'radio') {
-    field = <Radio
-      disabled={ro}
-      {...{ name, value: value || '' }}
-      {...props}
-    />
-
+  } else if (type === "radio") {
+    field = (
+      <Radio disabled={ro} {...{ name, value: value || "" }} {...props} />
+    );
   } else {
-    let FieldComponent = TextField
-    if (type === 'html') {
-      FieldComponent = HTMLField
+    let FieldComponent = TextField;
+    if (type === "html") {
+      FieldComponent = HTMLField;
+      props.setFieldValue = setFieldValue;
     }
     field = (
       <FieldComponent
@@ -169,11 +196,11 @@ const FieldComponent = ({
         InputLabelProps={{ shrink: true }}
         autoComplete="off"
         fullWidth
-        type={type || 'text'}
+        type={type || "text"}
         {...{
           name,
-          value: value || '',
-          minRows: !props.rows && props.multiline ? 2 : null
+          value: value || "",
+          minRows: !props.rows && props.multiline ? 2 : null,
         }}
         {...props}
       />
@@ -195,15 +222,15 @@ const FieldComponent = ({
 };
 
 const ContextField = (props) => {
-  const context = useFormikContext()
-  return <FormikField as={FieldComponent} context={context} {...props} />
-}
+  const context = useFormikContext();
+  return <FormikField as={FieldComponent} context={context} {...props} />;
+};
 
 const Field = ({ raw, onChange: customOnChange, ...props }) => {
   if (raw) {
     return <FieldComponent ro raw {...props} />;
   }
-  return <ContextField customOnChange={customOnChange} {...props} />
+  return <ContextField customOnChange={customOnChange} {...props} />;
 };
 
 export default Field;
