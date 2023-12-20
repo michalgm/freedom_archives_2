@@ -445,11 +445,9 @@ function Record({
     try {
       await confirm({
         description: (
-          <>
-            <Typography gutterBottom>
-              Are you sure you want to delete record "<b>{record.title}</b>"?
-            </Typography>
-          </>
+          <span>
+            Are you sure you want to delete record "<b>{record.title}</b>"?
+          </span>
         ),
         confirmationButtonProps: {
           variant: "contained",

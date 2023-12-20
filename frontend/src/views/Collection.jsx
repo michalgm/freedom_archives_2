@@ -76,11 +76,15 @@ function Collection() {
       await confirm({
         description: (
           <>
-            <Typography gutterBottom>
+            <Typography component="span" sx={{ display: "block" }} gutterBottom>
               Are you sure you want to delete collection "
               <b>{collection.collection_name}</b>"?
             </Typography>
-            <Typography variant="body2">
+            <Typography
+              component="span"
+              sx={{ display: "block" }}
+              variant="body2"
+            >
               All child records will be moved to the 'Uncategorized' collection
             </Typography>
           </>
@@ -204,9 +208,12 @@ function Children({ children = [] }) {
                 }
                 child.action = () => (
                   <IconButton
-                    onClick={() =>
-                      setFieldValue(`children[${index}].delete`, !child.delete)
-                    }
+                    onClick={() => {
+                      setFieldValue(
+                        `child_records[${index}].delete`,
+                        !child.delete
+                      );
+                    }}
                     size="large"
                   >
                     <Icon>{child.delete ? "restore" : "delete"}</Icon>

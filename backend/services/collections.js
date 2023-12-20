@@ -60,15 +60,15 @@ module.exports = function (app) {
               .service("records")
               .patch(
                 child.record_id,
-                { parent_record_id: null },
+                { collection_id: 1000 },
                 { user, transaction: { trx } }
               );
-          } else if (child.record_id && !child.parent_record_id) {
+          } else if (child.record_id) {
             return app
               .service("records")
               .patch(
                 child.record_id,
-                { parent_record_id: id },
+                { collection_id: id },
                 { user, transaction: { trx } }
               );
           }
@@ -106,7 +106,10 @@ module.exports = function (app) {
 
       // remove calculated fields
       Object.keys(data).forEach((key) => {
-        if (["children"].includes(key) || key.match("_search")) {
+        if (
+          ["children", "add_new_record"].includes(key) ||
+          key.match("_search")
+        ) {
           delete data[key];
         }
       });
