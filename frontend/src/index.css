@@ -19,3 +19,7 @@ code {
 .loading button {
   pointer-events: none;
 }
+
+.ck.ck-reset.ck-editor {
+  width: 100%;
+}
