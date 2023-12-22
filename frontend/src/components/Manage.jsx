@@ -120,6 +120,8 @@ export default function Manage({
   createQuery,
   type,
   service,
+  embedded,
+  itemAction,
 }) {
   const [items, setItems] = useState([]);
   const [total, setTotal] = useState(0);
@@ -183,20 +185,22 @@ export default function Manage({
 
       setTotal(total);
       setDigitizedTotal(digitizedTotal);
-      dispatch("SEARCH", {
-        type: service,
-        query,
-        total,
-        offset,
-        page_size,
-      });
+      if (!embedded) {
+        dispatch("SEARCH", {
+          type: service,
+          query,
+          total,
+          offset,
+          page_size,
+        });
+      }
     },
     250
   );
 
   useEffect(() => {
     lookupItems({ filter, offset, page_size, service });
-  }, [offset, filter, service, createQuery, filterTypes, lookupItems]);
+  }, [offset, filter, service, filterTypes, createQuery, lookupItems]);
 
   const renderFilterBar = () => {
     return (
@@ -294,8 +298,13 @@ export default function Manage({
       </Form>
     );
   };
+
+  const link = !itemAction;
+  itemAction =
+    itemAction || ((index) => dispatch("SEARCH_INDEX", offset + index));
   return (
     <ViewContainer
+      embedded
       footerElements={[
         <PaginationFooter
           type={service}
@@ -315,8 +324,9 @@ export default function Manage({
         <ItemsList
           description
           items={items}
-          onClick={(index) => dispatch("SEARCH_INDEX", offset + index)}
+          itemAction={itemAction}
           type={service}
+          link={link}
         />
       </Paper>
     </ViewContainer>

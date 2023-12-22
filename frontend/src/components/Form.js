@@ -98,7 +98,7 @@ const Form = ({
         {onChange && <HandleChangeComponent onChange={onChange} />}
         <Grid
           container
-          style={{ textAlign: "left" }}
+          style={{ textAlign: "left", height: "100%" }}
           spacing={2}
           className={`${ro ? "read-only" : ""}`}
           {...gridProps}

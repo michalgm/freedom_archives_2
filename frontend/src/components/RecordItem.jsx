@@ -110,7 +110,15 @@ export function EditableItem({ service, name, label = "" }) {
   }
 }
 
-export function ItemsList({ items, type, emptyText, index, ...props }) {
+export function ItemsList({
+  items,
+  type,
+  emptyText,
+  index,
+  itemAction,
+  link = true,
+  ...props
+}) {
   const ItemTag = type === "record" ? RecordItem : CollectionItem;
   emptyText = emptyText || `No ${startCase(type)}s Found`;
   return (
@@ -119,10 +127,11 @@ export function ItemsList({ items, type, emptyText, index, ...props }) {
       {items.map((item, index) => (
         <React.Fragment key={item[`${type}_id`]}>
           <ItemTag
-            action={item.action}
+            itemAction={itemAction}
             index={index}
             type={type}
-            link
+            link={link}
+            action={item.action}
             {...{ [type]: item }}
             {...props}
           />
@@ -150,16 +159,15 @@ function EditableItemsListAction({ icon, size = "small", ...props }) {
 }
 
 export function EditableItemsList({
-  children = [],
   name,
   emptyText,
   reorder = false,
   type = "record",
+  add,
 }) {
-  const [add, setAdd] = useState(false);
+  const [showAdd, setShowAdd] = useState(false);
 
   const { values, setFieldValue } = useFormikContext();
-
   return (
     <FieldArray
       name={name}
@@ -174,7 +182,7 @@ export function EditableItemsList({
               onClick={() =>
                 setFieldValue(`${name}[${index}].delete`, !item.delete)
               }
-              disabled={index === 0}
+              // disabled={index === 0}
               icon={item.delete ? "Restore" : "Delete"}
               size={reorder ? "small" : "large"}
             />,
@@ -204,11 +212,13 @@ export function EditableItemsList({
           );
           return item;
         });
-        const label = `Add ${name}`;
-        const field = (
+
+        const addLabel = `Add ${name}`;
+
+        const addField = showAdd ? (
           <Field
             name={`__new_${name}`}
-            label={label}
+            label={addLabel}
             type="select"
             searchType={`${type}s`}
             size="small"
@@ -231,21 +241,22 @@ export function EditableItemsList({
               ),
             }}
           />
+        ) : (
+          <>
+            <IconButton onClick={() => setShowAdd(true)}>
+              <Add />
+            </IconButton>{" "}
+            {addLabel}
+          </>
         );
-
         return (
           <>
-            {add ? (
-              field
+            {add && addField}
+            {type === "record" ? (
+              <RecordsList records={items} emptyText={emptyText} />
             ) : (
-              <>
-                <IconButton onClick={() => setAdd(true)}>
-                  <Add />
-                </IconButton>{" "}
-                {label}
-              </>
+              <CollectionsList collections={items} emptyText={emptyText} />
             )}
-            <RecordsList records={items} emptyText={emptyText} />
           </>
         );
       }}
@@ -254,17 +265,19 @@ export function EditableItemsList({
 }
 
 export default function RecordItem({
-  record: {
+  record = {},
+  description: showDescription,
+  itemAction,
+  ...props
+}) {
+  const {
     title,
     record_id,
     primary_instance_thumbnail,
     primary_instance_format_text,
     collection: { collection_name, collection_id } = {},
     description,
-  } = {},
-  description: showDescription,
-  ...props
-}) {
+  } = record;
   const details = [
     {
       type: "Collection",
@@ -281,22 +294,20 @@ export default function RecordItem({
       title={title}
       description={showDescription && description}
       {...props}
+      onClick={() => itemAction(record)}
       type="record"
     />
   );
 }
 
 export function CollectionItem({
-  collection: {
-    collection_name,
-    collection_id,
-    thumbnail,
-    description,
-    parent,
-  } = {},
+  collection = {},
   description: showDescription,
+  itemAction,
   ...props
 }) {
+  const { collection_name, collection_id, thumbnail, description, parent } =
+    collection;
   const details =
     parent && parent.collection_id
       ? [
@@ -316,6 +327,7 @@ export function CollectionItem({
       description={showDescription && description}
       details={details}
       {...props}
+      onClick={() => itemAction(collection)}
       type="collection"
     />
   );
@@ -377,17 +389,20 @@ export function Item({
   missingRecordText = "None",
   index,
   onClick: onClickHandler,
+  itemAction,
   ...props
 }) {
   const list_item_props =
     link && id
       ? { component: DOMLink, to: `/${type}s/${id}`, button: true }
       : {};
+  list_item_props.button = Boolean(id || onClickHandler);
   const onClick = onClickHandler
     ? (event) => {
         onClickHandler(index, event);
       }
     : null;
+
   return (
     <ListItem
       {...list_item_props}
@@ -417,7 +432,12 @@ export function Item({
               <Typography
                 variant="body2"
                 color="textSecondary"
-                style={{ marginTop: 4.9, maxHeight: 100, overflowX: "auto" }}
+                style={{
+                  marginTop: 4.9,
+                  maxHeight: 100,
+                  // overflowX: "auto"
+                  overflow: "hidden",
+                }}
                 dangerouslySetInnerHTML={{
                   __html: description,
                 }}

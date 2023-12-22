@@ -1,14 +1,24 @@
-import { EditableItem, RecordsList } from "../components/RecordItem";
+import {
+  Box,
+  Divider,
+  Grid,
+  Paper,
+  Stack,
+  Tab,
+  Tabs,
+  Typography,
+} from "@mui/material/";
+import { EditableItem, EditableItemsList } from "../components/RecordItem";
 import { FieldArray, useFormikContext } from "formik";
-import { Grid, Icon, IconButton, Typography } from "@mui/material/";
 import React, { useEffect, useRef, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 
+import Collections from "../views/Collections";
 import Field from "../components/Field";
 import FieldRow from "../components/FieldRow";
 import Form from "../components/Form";
-import GridBlock from "../components/GridBlock";
 import ListItemField from "../components/ListItemField";
+import Records from "./Records";
 import ViewContainer from "../components/ViewContainer";
 import { collections as collectionsService } from "../api";
 import { useConfirm } from "material-ui-confirm";
@@ -27,12 +37,14 @@ const defaultCollection = {
 function Collection() {
   const [collection, setCollection] = useState(defaultCollection);
   const [edit, setEdit] = useState(true);
+  const [tab, setTab] = useState("collection");
   const { id } = useParams();
   const buttonRef = useRef();
   const setTitle = useTitle();
-  const newCollection = id === "new";
   const navigate = useNavigate();
   const confirm = useConfirm();
+
+  const newCollection = id === "new";
 
   if (!buttonRef.current) {
     buttonRef.current = document.createElement("div");
@@ -124,9 +136,6 @@ function Collection() {
             ]),
       ]
     : [{ label: "Edit", onClick: () => setEdit(true), type: "button" }];
-  // if (!collection.collection_name) {
-  //   return <p>nope</p>;
-  // }
 
   return (
     <ViewContainer
@@ -134,53 +143,38 @@ function Collection() {
       buttonRef={buttonRef}
       neighborService="collection"
     >
-      <Form
-        initialValues={collection}
-        onSubmit={action}
-        ro={!edit}
-        buttons={buttons}
-        buttonRef={buttonRef}
-      >
-        <GridBlock spacing={2}>
-          <FieldRow>
-            <Field name="collection_name" />
-            <EditableItem service="collections" name="parent" />
-            {/* <Field type='editableItem' service="collections" name="parent" /> */}
-          </FieldRow>
-          <FieldRow>
-            <Field name="is_hidden" type="checkbox" />
-            <Field name="needs_review" type="checkbox" />
-          </FieldRow>
-          <FieldRow>
-            <Field name="call_number" type="call_number" />
-            <ListItemField name="publisher" />
-          </FieldRow>
-          <FieldRow>
-            <Field name="date_range" />
-            <Field name="thumbnail" />
-          </FieldRow>
-          <FieldRow>
-            <ListItemField name="keywords" isMulti />
-          </FieldRow>
-          <FieldRow>
-            <ListItemField name="subjects" isMulti />
-          </FieldRow>
-          <FieldRow>
-            <Field name="description" type="html" />
-          </FieldRow>
-          <FieldRow>
-            <Field name="summary" multiline />
-          </FieldRow>
-          <FieldRow>
-            <Field name="notes" multiline />
-          </FieldRow>
-        </GridBlock>
-        <Children
-          edit={edit}
-          collection={collection}
-          children={collection.child_records || []}
-        />
-      </Form>
+      <Paper sx={{ height: "100%" }}>
+        <Stack sx={{ height: "100%" }}>
+          <Tabs
+            sx={{ mb: 2, flex: "0 0 auto" }}
+            value={tab}
+            onChange={(_, tab) => setTab(tab)}
+          >
+            <Tab label="Edit Collection" value="collection"></Tab>
+            <Tab label="Featured Records" value="featured"></Tab>
+            <Tab label="Subcollections" value="subcollections"></Tab>
+            <Tab label="Records" value="records"></Tab>
+          </Tabs>
+          <Box sx={{ overflow: "auto", flex: "1 1 auto" }}>
+            <Form
+              initialValues={collection}
+              onSubmit={action}
+              ro={!edit}
+              buttons={buttons}
+              buttonRef={buttonRef}
+            >
+              {tab === "collection" && <CollectionFields />}
+              {tab === "featured" && <FeaturedRecords />}
+              {tab === "subcollections" && (
+                <EditList property="children" type="collection" />
+              )}
+              {tab === "records" && (
+                <EditList property="child_records" type="record" />
+              )}
+            </Form>
+          </Box>
+        </Stack>
+      </Paper>
     </ViewContainer>
     // {/* <Grid item xs={12}>
     //   <pre style={{ textAlign: 'left' }}>
@@ -190,69 +184,89 @@ function Collection() {
   );
 }
 
-function Children({ children = [] }) {
-  const { values, setFieldValue } = useFormikContext();
+function CollectionFields() {
   return (
-    <GridBlock
-      title="Records"
-      subtitle={`${values.child_records.length} Records in Collection`}
-    >
-      <Grid container spacing={4}>
-        <Grid item xs={12}>
-          <FieldArray
-            name="child_records"
-            render={({ unshift }) => {
-              const children = values.child_records.map((child = {}, index) => {
-                if (!child) {
-                  return null;
-                }
-                child.action = () => (
-                  <IconButton
-                    onClick={() => {
-                      setFieldValue(
-                        `child_records[${index}].delete`,
-                        !child.delete
-                      );
-                    }}
-                    size="large"
-                  >
-                    <Icon>{child.delete ? "restore" : "delete"}</Icon>
-                  </IconButton>
-                );
-                return child;
-              });
-
-              return (
-                <>
-                  <Field
-                    name="add_new_record"
-                    type="select"
-                    searchType="records"
-                    size="small"
-                    clearOnBlur
-                    clearOnChange
-                    managed
-                    excludeIds={[
-                      ...values.child_records.map(({ record_id }) => record_id),
-                    ]}
-                    onChange={(_, child) => {
-                      if (child) {
-                        unshift(child);
-                      }
-                    }}
-                  />
-                  <RecordsList records={children} emptyText="No Records" />
-                </>
-              );
-            }}
-          />
-        </Grid>
-        {/* <Grid item xs={6}>
-          <Records />
-        </Grid> */}
-      </Grid>
-    </GridBlock>
+    <>
+      <FieldRow>
+        <Field name="collection_name" />
+        <EditableItem service="collections" name="parent" />
+        {/* <Field type='editableItem' service="collections" name="parent" /> */}
+      </FieldRow>
+      <FieldRow>
+        <Field name="is_hidden" type="checkbox" />
+        <Field name="needs_review" type="checkbox" />
+      </FieldRow>
+      <FieldRow>
+        <Field name="call_number" type="call_number" />
+        <ListItemField name="publisher" />
+      </FieldRow>
+      <FieldRow>
+        <Field name="date_range" />
+        <Field name="thumbnail" />
+      </FieldRow>
+      <FieldRow>
+        <ListItemField name="keywords" isMulti />
+      </FieldRow>
+      <FieldRow>
+        <ListItemField name="subjects" isMulti />
+      </FieldRow>
+      <FieldRow>
+        <Field name="description" type="html" />
+      </FieldRow>
+      <FieldRow>
+        <Field name="summary" multiline />
+      </FieldRow>
+      <FieldRow>
+        <Field name="notes" multiline />
+      </FieldRow>
+    </>
   );
+}
+
+function EditList({ property = "child_records", type = "record" }) {
+  const { values } = useFormikContext();
+  const ItemsList = type === "record" ? Records : Collections;
+
+  const renderFieldArray = ({ unshift, move }) => {
+    return (
+      <Grid item sx={{ height: "100%" }}>
+        <Stack
+          direction={"row"}
+          sx={{ height: "100%" }}
+          spacing={2}
+          useFlexGap
+          divider={<Divider orientation="vertical" flexItem />}
+        >
+          <Box sx={{ flex: "1 1 0" }}>
+            <Stack direction="column" sx={{ height: "100%" }}>
+              <Box sx={{ flex: "0 0 auto" }}>
+                <Typography variant="subtitle1">
+                  {`${values[property].length} ${type} in Collection`}{" "}
+                  {/* FIXME */}
+                </Typography>
+              </Box>
+              <Box sx={{ flex: "1 1 auto", overflow: "auto" }}>
+                <EditableItemsList
+                  type={type}
+                  name={property}
+                  reorder={type === "collection"}
+                />
+              </Box>
+            </Stack>
+          </Box>
+          <Box sx={{ flex: "1 1 0" }}>
+            <ItemsList embedded itemAction={(item) => unshift(item)} />
+          </Box>
+        </Stack>
+      </Grid>
+    );
+  };
+
+  return <FieldArray name={property}>{renderFieldArray}</FieldArray>;
+}
+
+function FeaturedRecords() {
+  return <Grid item>FeaturedRecords</Grid>;
 }
 
 export default Collection;

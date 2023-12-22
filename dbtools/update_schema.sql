@@ -660,6 +660,7 @@ SELECT
     a.parent_collection_id,
     a.thumbnail,
     a.call_number,
+    a.display_order,
     COALESCE((
         SELECT
             row_to_json(c)
@@ -694,7 +695,7 @@ SELECT
         LEFT JOIN list_items ON primary_instance.format = list_items.list_item_id
             AND list_items.type = 'format'
         WHERE
-            a.collection_id = b.collection_id)) AS child_records
+            a.collection_id = b.collection_id ORDER BY b.title)) AS child_records
 FROM
     collections a
     LEFT JOIN list_items publisher_lookup ON a.publisher_id = publisher_lookup.list_item_id
@@ -728,9 +729,11 @@ SELECT
         FROM
             collection_summaries
         WHERE
-            collection_summaries.parent_collection_id = a.collection_id) AS children
-FROM
-    _unified_collections a
+            collection_summaries.parent_collection_id = a.collection_id
+        ORDER BY
+            collection_summaries.display_order) AS children
+    FROM
+        _unified_collections a
     LEFT JOIN collection_summaries b USING (collection_id);
 DROP VIEW IF EXISTS record_summaries;
 CREATE VIEW record_summaries AS

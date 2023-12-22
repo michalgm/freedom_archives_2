@@ -26,6 +26,7 @@ function ViewContainer({
   item,
   buttonRef,
   neighborService,
+  embedded,
   ...props
 }) {
   const {
@@ -155,20 +156,20 @@ function ViewContainer({
       return section;
     }
   };
-
+  const height = embedded ? "100%" : "calc(100vh - 64px - 16px)";
   return (
     <Stack
       direction="column"
       spacing={4}
       useFlexGap
-      style={{ height: "calc(100vh - 64px - 16px)", flexWrap: "nowrap" }}
+      style={{ height, flexWrap: "nowrap" }}
     >
       {renderSection("header")}
       <Grid
         id="contents"
         item
         xs={12}
-        sx={{ overflowX: "auto", padding: "1px" }}
+        sx={{ overflowX: "auto", padding: "1px", flex: "1 1 auto" }}
       >
         {children}
       </Grid>

@@ -52,6 +52,31 @@ module.exports = function (app) {
         .select();
     }
 
+    if (relation_data.children !== undefined) {
+      let index = 0;
+      await Promise.all(
+        relation_data.children.map((child) => {
+          if (child.delete) {
+            return app
+              .service("collections")
+              .patch(
+                child.collection_id,
+                { parent_collection_id: null },
+                { user, transaction: { trx } }
+              );
+          } else if (child.collection_id) {
+            return app
+              .service("collections")
+              .patch(
+                child.collection_id,
+                { parent_collection_id: id, display_order: index++ },
+                { user, transaction: { trx } }
+              );
+          }
+        })
+      );
+    }
+
     if (relation_data.child_records !== undefined) {
       await Promise.all(
         relation_data.child_records.map((child) => {
@@ -74,7 +99,6 @@ module.exports = function (app) {
           }
         })
       );
-      // delete data.children;
     }
 
     return context;
@@ -106,15 +130,12 @@ module.exports = function (app) {
 
       // remove calculated fields
       Object.keys(data).forEach((key) => {
-        if (
-          ["children", "add_new_record"].includes(key) ||
-          key.match("_search")
-        ) {
+        if (["add_new_record"].includes(key) || key.match("_search")) {
           delete data[key];
         }
       });
 
-      ["child_records"].forEach((key) => {
+      ["child_records", "children"].forEach((key) => {
         if (data[key]) {
           relation_data[key] = data[key];
           delete data[key];

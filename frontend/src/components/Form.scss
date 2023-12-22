@@ -1,11 +1,12 @@
 .form {
+  height: 100%;
   .buttons {
     text-align: right;
   }
   .select-input {
     .MuiInputBase-input {
       // padding: 0;
-      &>div {
+      & > div {
         border: none;
         background-color: inherit;
       }
@@ -18,10 +19,12 @@
     .MuiChip-root.Mui-disabled {
       opacity: 1;
     }
-    .MuiAutocomplete-hasPopupIcon .MuiAutocomplete-inputRoot[class*="MuiOutlinedInput-root"] {
+    .MuiAutocomplete-hasPopupIcon
+      .MuiAutocomplete-inputRoot[class*="MuiOutlinedInput-root"] {
       padding-right: 9px;
     }
-    .MuiAutocomplete-endAdornment, .MuiChip-deleteIcon {
+    .MuiAutocomplete-endAdornment,
+    .MuiChip-deleteIcon {
       display: none;
     }
   }

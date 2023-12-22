@@ -551,6 +551,7 @@ function Record({
                   </Button>
                   <p>
                     <img
+                      style={{ maxWidth: "100%" }}
                       alt=""
                       src={
                         "https://search.freedomarchives.org/" +
@@ -612,6 +613,7 @@ function Record({
                         record={record}
                         name="children"
                         emptyText="No child records"
+                        add
                       />
                     </GridBlock>
                     <GridBlock title="Sibling Records">
@@ -627,6 +629,7 @@ function Record({
                         name="continuations"
                         emptyText="No related continuations"
                         reorder={true}
+                        add
                       />
                     </GridBlock>
                     <GridBlock title="Old Relationships">

@@ -1,6 +1,7 @@
 import "./App.scss";
 
 import {
+  Box,
   Button,
   Container,
   CssBaseline,
@@ -82,17 +83,17 @@ function App() {
   return (
     <StyledEngineProvider injectFirst>
       <ThemeProvider theme={theme}>
-        <StateProvider>
-          <ConfirmProvider>
-            <Router>
-              <Root scheme={scheme}>
-                <CssBaseline>
+        <CssBaseline>
+          <StateProvider>
+            <ConfirmProvider>
+              <Router>
+                <Root scheme={scheme}>
                   <Layout />
-                </CssBaseline>
-              </Root>
-            </Router>
-          </ConfirmProvider>
-        </StateProvider>
+                </Root>
+              </Router>
+            </ConfirmProvider>
+          </StateProvider>
+        </CssBaseline>
       </ThemeProvider>
     </StyledEngineProvider>
   );
@@ -108,8 +109,14 @@ function Layout() {
         marginLeft: 0,
         width: "100%",
       };
+  // const style = {
+  // height: "100vh",
+  // marginLeft: 0,
+
+  //   backgroundColor: "#efefef",
+  // };
   return (
-    <div className="App">
+    <Box className="App" sx={{ backgroundColor: "#efefef", height: "1vh" }}>
       <NavBar />
       {isAuthenticated && <Sidebar />}
       <Content style={style}>
@@ -117,7 +124,7 @@ function Layout() {
           <Main />
         </Loading>
       </Content>
-    </div>
+    </Box>
   );
 }
 
@@ -166,10 +173,7 @@ function Main() {
   // const title = isAuthenticated ? 'Welcome' : 'Login'
   // <h1>{title}</h1>
   return (
-    <Container
-      maxWidth="xl"
-      sx={{ backgroundColor: "#efefef", paddingBottom: "8px" }}
-    >
+    <Container maxWidth="xl" sx={{ paddingBottom: "8px" }}>
       <Authentication />
       <Errors />
       <Routes isAuthenticated={isAuthenticated} />

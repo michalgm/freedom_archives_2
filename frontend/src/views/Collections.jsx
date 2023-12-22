@@ -4,10 +4,10 @@ import {
   ListItemText,
   Typography,
 } from "@mui/material";
+import React, { useCallback } from "react";
 
 import { BrokenImage } from "@mui/icons-material";
 import Manage from "../components/Manage";
-import React from "react";
 
 const filter_types = {
   collection_name: { input: "text", match: "fuzzy" },
@@ -20,7 +20,7 @@ const filter_types = {
   subjects: { input: "listitem", match: "listitem" },
 };
 
-function Collections() {
+function Collections({ embedded, itemAction }) {
   const defaultFilter = {
     hidden: false,
     filters: [],
@@ -28,7 +28,7 @@ function Collections() {
     search: "",
   };
 
-  const createQuery = (filter) => {
+  const createQuery = useCallback((filter) => {
     const { search, hidden, needs_review } = filter;
     const query = {
       is_hidden: hidden ? undefined : false,
@@ -54,7 +54,7 @@ function Collections() {
       ];
     }
     return query;
-  };
+  }, []);
 
   const renderItem = (collection) => {
     return (
@@ -101,6 +101,8 @@ function Collections() {
       createQuery={createQuery}
       filterTypes={filter_types}
       service="collection"
+      embedded={embedded}
+      itemAction={itemAction}
     />
   );
 }
