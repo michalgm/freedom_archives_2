@@ -1,10 +1,10 @@
-const path = require('path');
-const favicon = require('serve-favicon');
-const compress = require('compression');
-const helmet = require('helmet');
-const cors = require('cors');
-const logger = require('./logger');
-const qs = require('qs');
+const path = require("path");
+const favicon = require("serve-favicon");
+const compress = require("compression");
+const helmet = require("helmet");
+const cors = require("cors");
+const logger = require("./logger");
+const qs = require("qs");
 
 const { feathers } = require("@feathersjs/feathers");
 const configuration = require("@feathersjs/configuration");
@@ -14,6 +14,7 @@ const {
   urlencoded,
   notFound,
   errorHandler,
+  rest,
 } = require("@feathersjs/express");
 
 const middleware = require("./middleware");
@@ -28,7 +29,7 @@ const knex = require("./knex");
 const api = express(feathers());
 api.configure(configuration());
 // Set up Plugins and providers
-api.configure(express.rest());
+api.configure(rest());
 api.configure(knex);
 
 // Configure other middleware (see `middleware/index.js`)
@@ -62,7 +63,7 @@ app.use(favicon(path.join(api.get("public"), "favicon.ico")));
 app.use("/", express.static(api.get("public")));
 app.use("/api", api);
 
-api.get("*", function (request, response) {
+app.get("*", function (request, response) {
   response.sendFile(path.join(api.get("public"), "index.html"));
 });
 // Configure a middleware for 404s and the error handler
@@ -80,8 +81,7 @@ app.use(
 
 // api.setup(server);
 
-
 module.exports = {
   app,
-  api
+  api,
 };

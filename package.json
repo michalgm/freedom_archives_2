@@ -22,7 +22,7 @@
     "test": "npm run eslint && npm run mocha",
     "eslint": "eslint backend/. test/. --config .eslintrc.json",
     "dev": "LD_PRELOAD=$LD_PRELOAD:/usr/lib/x86_64-linux-gnu/libjemalloc.so nodemon -d 1 -w config/ -w backend/ -w package.json backend/index.js",
-    "start": "concurrently \"npm run dev\" \"cd ./frontend; npm run start\"",
+    "start": "concurrently -k \"npm run dev\" \"cd ./frontend; npm run start\"",
     "start:prod": "node backend/",
     "mocha": "mocha test/ --recursive --exit"
   },
