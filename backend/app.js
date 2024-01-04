@@ -41,6 +41,8 @@ api.configure(services);
 api.configure(channels);
 api.hooks(appHooks);
 
+const publicPath = path.resolve(__dirname, api.get("public")); // Adjust relative path as necessary
+
 const app = express();
 
 app.set("query parser", function (str) {
@@ -58,13 +60,13 @@ app.use(cors());
 app.use(compress());
 app.use(json());
 app.use(urlencoded({ extended: true }));
-app.use(favicon(path.join(api.get("public"), "favicon.ico")));
+app.use(favicon(path.join(publicPath, "favicon.ico")));
 // Host the public folder
-app.use("/", express.static(api.get("public")));
+app.use("/", express.static(publicPath));
 app.use("/api", api);
 
 app.get("*", function (request, response) {
-  response.sendFile(path.join(api.get("public"), "index.html"));
+  response.sendFile(path.join(publicPath, "index.html"));
 });
 // Configure a middleware for 404s and the error handler
 app.use(notFound());
@@ -72,7 +74,7 @@ app.use(
   errorHandler({
     logger,
     html: {
-      404: path.join(api.get("public"), "index.html"),
+      404: path.join(publicPath, "index.html"),
     },
   })
 );

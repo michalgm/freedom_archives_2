@@ -2,6 +2,7 @@ import { Button, Grid, Icon, IconButton, Paper, Stack } from "@mui/material";
 import { FieldArray, useFormikContext } from "formik";
 import React, { useEffect, useState } from "react";
 import { collections, records } from "../api";
+import { isEqual, startCase } from "lodash-es";
 
 import { Close } from "@mui/icons-material";
 import Field from "../components/Field";
@@ -10,7 +11,6 @@ import { ItemsList } from "./RecordItem";
 import ListItemField from "../components/ListItemField";
 import PaginationFooter from "../components/PaginationFooter";
 import ViewContainer from "../components/ViewContainer";
-import { startCase } from "lodash";
 import { useDebouncedCallback } from "use-debounce";
 import { useStateValue } from "../appContext";
 
@@ -207,7 +207,7 @@ export default function Manage({
       <Form
         initialValues={filter}
         onChange={(values) => {
-          if (values !== filter) {
+          if (!isEqual(values, filter)) {
             setFilter(values);
             setOffset(0);
           }

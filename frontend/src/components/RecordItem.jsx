@@ -27,7 +27,7 @@ import React, { useState } from "react";
 
 import Field from "../components/Field";
 import Thumbnail from "../components/Thumbnail";
-import { startCase } from "lodash";
+import { startCase } from "lodash-es";
 
 export function RecordsList({ records, ...props }) {
   return <ItemsList type="record" items={records} {...props} />;

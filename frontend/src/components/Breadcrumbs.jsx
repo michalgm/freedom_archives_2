@@ -3,7 +3,7 @@ import { Box, Breadcrumbs as Crumbs, Icon, Typography } from "@mui/material";
 import { Helmet } from "react-helmet";
 import Link from "./Link";
 import React from "react";
-import { startCase } from "lodash";
+import { startCase } from "lodash-es";
 import { useLocation } from "react-router-dom";
 import { useStateValue } from "../appContext";
 

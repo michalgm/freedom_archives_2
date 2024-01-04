@@ -20,7 +20,7 @@ import KVChip from "../components/KVChip";
 import PaginationFooter from "../components/PaginationFooter";
 import Thumbnail from "../components/Thumbnail";
 import { records as recordsService } from "../api";
-import { startCase } from "lodash";
+import { startCase } from "lodash-es";
 import { unstable_batchedUpdates } from "react-dom";
 import { useTheme } from "@mui/material/styles";
 

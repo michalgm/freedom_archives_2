@@ -153,8 +153,8 @@ export default function Users() {
       delete newRow.isNew;
       delete newRow.user_id;
       newRow = await usersService.create(newRow);
-        addNotification({ message: `User ${newRow.username} created!` });
-        setEditPassword({ open: true, user: newRow });
+      addNotification({ message: `User ${newRow.username} created!` });
+      setEditPassword({ open: true, user: newRow });
     } else {
       newRow = await usersService.patch(newRow.user_id, newRow);
       addNotification({ message: `User ${newRow.username} updated!` });
@@ -191,8 +191,8 @@ export default function Users() {
 
   return (
     <div className="users">
-      <Grid container spacing={2} style={{ height: 500, width: "100%" }}>
-        <Grid item style={{ height: 500, width: "100%" }}>
+      <Grid container spacing={2} style={{ width: "100%" }}>
+        <Grid item style={{ width: "100%" }}>
           <DataGrid
             experimentalFeatures={{ newEditingApi: true }}
             apiRef={apiRef}

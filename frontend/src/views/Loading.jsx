@@ -2,7 +2,7 @@ import { Box, LinearProgress } from "@mui/material";
 
 import React from "react";
 import { app } from "../api";
-import { debounce } from "lodash";
+import { debounce } from "lodash-es";
 import { useStateValue } from "../appContext";
 
 let loaded = false;

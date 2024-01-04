@@ -1,8 +1,8 @@
-const { feathers } = require("@feathersjs/feathers");
-const rest = require("@feathersjs/rest-client");
-const auth = require("@feathersjs/authentication-client");
-const { FetchClient } = require("@feathersjs/rest-client");
-const qs = require("qs");
+import { FetchClient } from "@feathersjs/rest-client";
+import auth from "@feathersjs/authentication-client";
+import { feathers } from "@feathersjs/feathers";
+import qs from "qs";
+import rest from "@feathersjs/rest-client";
 
 export const app = feathers();
 

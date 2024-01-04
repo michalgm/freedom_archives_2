@@ -6,6 +6,7 @@
 dbtools
 backend.bak/*
 frontend/build
+frontend/dist
 frontend/node_modules
 */*.sql
 *.sql

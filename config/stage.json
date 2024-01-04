@@ -8,15 +8,17 @@
     }
   },
   "postgres": {
-      "client": "pg",
-      "debug": true,
-      "backdoorPassword": "letmein",
-      "searchPath": ["freedom_archives", "public"],
-      "connection": {
-        "host": "127.0.0.1",
-        "password": "PGPASSWORD",
-        "user": "PGUSER",
-        "database": "PGUSER"
-      }
+    "client": "pg",
+    "debug": true,
+    "backdoorPassword": "letmein",
+    "searchPath": [
+      "freedom_archives"
+    ],
+    "connection": {
+      "host": "127.0.0.1",
+      "password": "PGPASSWORD",
+      "user": "PGUSER",
+      "database": "PGUSER"
     }
+  }
 }
