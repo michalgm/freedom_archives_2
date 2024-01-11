@@ -115,7 +115,7 @@ function Filter({ filter, index, remove, filterTypes }) {
 
 export default function Manage({
   renderItem,
-  defaultFilter,
+  defaultFilter = {},
   filterTypes,
   createQuery,
   type,

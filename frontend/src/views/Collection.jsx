@@ -10,7 +10,7 @@ import {
 } from "@mui/material/";
 import { EditableItem, EditableItemsList } from "../components/RecordItem";
 import { FieldArray, useFormikContext } from "formik";
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 
 import Collections from "../views/Collections";
@@ -136,7 +136,6 @@ function Collection() {
             ]),
       ]
     : [{ label: "Edit", onClick: () => setEdit(true), type: "button" }];
-
   return (
     <ViewContainer
       item={collection}
@@ -164,9 +163,18 @@ function Collection() {
               buttonRef={buttonRef}
             >
               {tab === "collection" && <CollectionFields />}
-              {tab === "featured" && <FeaturedRecords />}
+              {tab === "featured" && (
+                <EditList
+                  property="featured_records"
+                  type="record"
+                  reorder
+                  filter={{
+                    collection: { collection_id: id },
+                  }}
+                />
+              )}
               {tab === "subcollections" && (
-                <EditList property="children" type="collection" />
+                <EditList property="children" type="collection" reorder />
               )}
               {tab === "records" && (
                 <EditList property="child_records" type="record" />
@@ -223,11 +231,20 @@ function CollectionFields() {
   );
 }
 
-function EditList({ property = "child_records", type = "record" }) {
+function EditList({
+  property = "child_records",
+  type = "record",
+  filter,
+  reorder,
+}) {
   const { values } = useFormikContext();
   const ItemsList = type === "record" ? Records : Collections;
 
-  const renderFieldArray = ({ unshift, move }) => {
+  const excludeIds = useMemo(() => {
+    return values[property].map((item) => item[`${type}_id`]);
+  }, [values[property]]);
+
+  const renderFieldArray = ({ unshift }) => {
     return (
       <Grid item sx={{ height: "100%" }}>
         <Stack
@@ -249,13 +266,18 @@ function EditList({ property = "child_records", type = "record" }) {
                 <EditableItemsList
                   type={type}
                   name={property}
-                  reorder={type === "collection"}
+                  reorder={reorder}
                 />
               </Box>
             </Stack>
           </Box>
           <Box sx={{ flex: "1 1 0" }}>
-            <ItemsList embedded itemAction={(item) => unshift(item)} />
+            <ItemsList
+              embedded
+              itemAction={(item) => unshift(item)}
+              excludeIds={excludeIds}
+              filter={filter}
+            />
           </Box>
         </Stack>
       </Grid>
@@ -263,10 +285,6 @@ function EditList({ property = "child_records", type = "record" }) {
   };
 
   return <FieldArray name={property}>{renderFieldArray}</FieldArray>;
-}
-
-function FeaturedRecords() {
-  return <Grid item>FeaturedRecords</Grid>;
 }
 
 export default Collection;

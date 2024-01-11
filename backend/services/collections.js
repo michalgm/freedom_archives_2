@@ -101,6 +101,38 @@ module.exports = function (app) {
       );
     }
 
+    if (relation_data.featured_records !== undefined) {
+      const { deleteIds, updateRecords } =
+        relation_data.featured_records.reduce(
+          (acc, record) => {
+            if (record.delete) {
+              acc.deleteIds.push(record.record_id);
+            } else {
+              acc.updateRecords.push({
+                record_id: record.record_id,
+                collection_id: id,
+                record_order: acc.updateRecords.length + 1,
+                label: record.label,
+              });
+            }
+            return acc;
+          },
+          { deleteIds: [], updateRecords: [] }
+        );
+
+      await trx
+        .from("featured_records")
+        .where("collection_id", id)
+        .whereIn("record_id", deleteIds)
+        .delete();
+
+      await trx
+        .from("featured_records")
+        .insert(updateRecords)
+        .onConflict(["collection_id", "record_id"])
+        .merge();
+    }
+
     return context;
   };
 
@@ -135,7 +167,7 @@ module.exports = function (app) {
         }
       });
 
-      ["child_records", "children"].forEach((key) => {
+      ["child_records", "children", "featured_records"].forEach((key) => {
         if (data[key]) {
           relation_data[key] = data[key];
           delete data[key];

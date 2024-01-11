@@ -8,6 +8,7 @@ import React, { useCallback } from "react";
 
 import { BrokenImage } from "@mui/icons-material";
 import Manage from "../components/Manage";
+import { merge } from "lodash-es";
 
 const filter_types = {
   collection_name: { input: "text", match: "fuzzy" },
@@ -20,41 +21,45 @@ const filter_types = {
   subjects: { input: "listitem", match: "listitem" },
 };
 
-function Collections({ embedded, itemAction }) {
-  const defaultFilter = {
+function Collections({ embedded, itemAction, filter = {}, excludeIds = [] }) {
+  const initFilter = {
     hidden: false,
     filters: [],
     needs_review: "",
     search: "",
   };
-
-  const createQuery = useCallback((filter) => {
-    const { search, hidden, needs_review } = filter;
-    const query = {
-      is_hidden: hidden ? undefined : false,
-      needs_review: needs_review ? needs_review : undefined,
-      $sort: { display_order: 1, collection_name: 1 },
-      $select: [
-        "collection_id",
-        "collection_name",
-        "description",
-        "thumbnail",
-        "parent",
-      ],
-    };
-    if (search) {
-      const $ilike = `%${search.replace(/ /g, "%")}%`;
-      query.$or = [
-        { subjects_text: { $ilike } },
-        { keywords_text: { $ilike } },
-        { collection_name: { $ilike } },
-        { description: { $ilike } },
-        { collection_id: parseInt(search, 10) || undefined },
-        { call_number: { $ilike } },
-      ];
-    }
-    return query;
-  }, []);
+  const defaultFilter = merge(initFilter, filter);
+  const createQuery = useCallback(
+    (filter) => {
+      const { search, hidden, needs_review } = filter;
+      const query = {
+        is_hidden: hidden ? undefined : false,
+        needs_review: needs_review ? needs_review : undefined,
+        collection_id: { $nin: excludeIds },
+        $sort: { display_order: 1, collection_name: 1 },
+        $select: [
+          "collection_id",
+          "collection_name",
+          "description",
+          "thumbnail",
+          "parent",
+        ],
+      };
+      if (search) {
+        const $ilike = `%${search.replace(/ /g, "%")}%`;
+        query.$or = [
+          { subjects_text: { $ilike } },
+          { keywords_text: { $ilike } },
+          { collection_name: { $ilike } },
+          { description: { $ilike } },
+          { collection_id: parseInt(search, 10) || undefined },
+          { call_number: { $ilike } },
+        ];
+      }
+      return query;
+    },
+    [excludeIds]
+  );
 
   const renderItem = (collection) => {
     return (

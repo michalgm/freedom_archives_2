@@ -111,11 +111,12 @@ CREATE INDEX instances_quality ON instances(quality);
 CREATE INDEX instances_generation ON instances(generation);
 CREATE INDEX instances_media_type ON instances(media_type);
 CREATE TABLE featured_records(
-    record_id serial PRIMARY KEY REFERENCES records ON DELETE CASCADE,
+    record_id integer REFERENCES records ON DELETE CASCADE,
     collection_id integer NOT NULL REFERENCES collections ON DELETE CASCADE,
     record_order integer DEFAULT NULL,
     label varchar(60) DEFAULT NULL
 );
+CREATE UNIQUE INDEX featured_records_idx ON featured_records(collection_id, record_id);
 CREATE TABLE records_to_list_items(
     list_item_id integer NOT NULL REFERENCES list_items,
     record_id integer NOT NULL REFERENCES records ON DELETE CASCADE,
@@ -259,6 +260,14 @@ INSERT INTO records(
             AND publisher_lookup.type = 'publisher'
     LEFT JOIN list_items program_lookup ON a.program = program_lookup.item
         AND program_lookup.type = 'program');
+INSERT INTO featured_records(
+    SELECT
+        docid AS record_id,
+        collection_id,
+        doc_order AS record_order,
+        description AS label
+    FROM
+        freedom_archives_old.featured_docs);
 
 /* update records set month = b.value from
 select month, b.value from records a join (
@@ -548,6 +557,17 @@ FROM
     instances b
 WHERE
     a.record_id = b.record_id;
+DELETE FROM freedom_archives_old.related_records
+WHERE docid_1 NOT IN (
+        SELECT
+            record_id
+        FROM
+            records)
+    OR docid_2 NOT IN (
+        SELECT
+            record_id
+        FROM
+            records);
 INSERT INTO instances(record_id, call_number, format, no_copies, quality, generation, url, thumbnail, media_type, creator_user_id, contributor_user_id, date_created, date_modified, original_doc_id)
 SELECT
     x.docid_1 AS record_id,
@@ -695,7 +715,17 @@ SELECT
         LEFT JOIN list_items ON primary_instance.format = list_items.list_item_id
             AND list_items.type = 'format'
         WHERE
-            a.collection_id = b.collection_id ORDER BY b.title)) AS child_records
+            a.collection_id = b.collection_id ORDER BY b.title)) AS child_records,
+    array_to_json(ARRAY (
+            SELECT
+                json_build_object('record_id', b.record_id, 'title', b.title, 'parent_record_id', b.parent_record_id, 'primary_instance_thumbnail', primary_instance.thumbnail, 'primary_instance_format', primary_instance.format, 'primary_instance_format_text', list_items.item, 'primary_instance_media_type', primary_instance.media_type, 'label', f.label, 'record_order', f.record_order)
+            FROM records b
+        LEFT JOIN featured_records f ON b.record_id = f.record_id
+        LEFT JOIN instances primary_instance ON b.primary_instance_id = primary_instance.instance_id
+        LEFT JOIN list_items ON primary_instance.format = list_items.list_item_id
+            AND list_items.type = 'format'
+        WHERE
+            a.collection_id = f.collection_id ORDER BY f.record_order, b.title)) AS featured_records
 FROM
     collections a
     LEFT JOIN list_items publisher_lookup ON a.publisher_id = publisher_lookup.list_item_id

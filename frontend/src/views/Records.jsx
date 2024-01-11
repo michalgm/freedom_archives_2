@@ -3,6 +3,7 @@ import React, { useCallback } from "react";
 
 import Manage from "../components/Manage";
 import Thumbnail from "../components/Thumbnail";
+import { merge } from "lodash-es";
 
 const filter_types = {
   day: { input: "simpleSelect", match: "exact", allowNull: true },
@@ -26,8 +27,8 @@ const filter_types = {
   media_types: { input: "simpleSelect", match: "contained" },
 };
 
-function Records({ embedded, itemAction }) {
-  const defaultFilter = {
+function Records({ embedded, itemAction, filter = {}, excludeIds = [] }) {
+  const initFilter = {
     search: "",
     non_digitized: false,
     collection: {},
@@ -35,45 +36,49 @@ function Records({ embedded, itemAction }) {
     needs_review: false,
     filters: [],
   };
+  const defaultFilter = merge(initFilter, filter);
 
-  const createQuery = useCallback((filter) => {
-    const {
-      search,
-      non_digitized,
-      hidden,
-      needs_review,
-      collection = {},
-    } = filter;
-
-    const query = {
-      has_digital: non_digitized ? undefined : true,
-      is_hidden: hidden ? undefined : false,
-      needs_review: needs_review ? needs_review : undefined,
-      collection_id: collection ? collection.collection_id : undefined,
-      $sort: { title: 1 },
-      $select: [
-        "record_id",
-        "title",
-        "collection",
-        "has_digital",
-        "description",
-        "primary_instance_thumbnail",
-        "primary_instance_format_text",
-      ],
-    };
-    if (search) {
-      const $ilike = `%${search.replace(/ /g, "%")}%`;
-      query.$or = [
-        { keywords_text: { $ilike } },
-        { producers_text: { $ilike } },
-        { title: { $ilike } },
-        { description: { $ilike } },
-        { record_id: parseInt(search, 10) || undefined },
-        { call_numbers: { $contains: [search.toUpperCase()] } },
-      ];
-    }
-    return query;
-  }, []);
+  const createQuery = useCallback(
+    (filter) => {
+      const {
+        search,
+        non_digitized,
+        hidden,
+        needs_review,
+        collection = {},
+      } = filter;
+      const query = {
+        has_digital: non_digitized ? undefined : true,
+        is_hidden: hidden ? undefined : false,
+        needs_review: needs_review ? needs_review : undefined,
+        collection_id: collection ? collection.collection_id : undefined,
+        record_id: { $nin: excludeIds },
+        $sort: { title: 1 },
+        $select: [
+          "record_id",
+          "title",
+          "collection",
+          "has_digital",
+          "description",
+          "primary_instance_thumbnail",
+          "primary_instance_format_text",
+        ],
+      };
+      if (search) {
+        const $ilike = `%${search.replace(/ /g, "%")}%`;
+        query.$or = [
+          { keywords_text: { $ilike } },
+          { producers_text: { $ilike } },
+          { title: { $ilike } },
+          { description: { $ilike } },
+          { record_id: parseInt(search, 10) || undefined },
+          { call_numbers: { $contains: [search.toUpperCase()] } },
+        ];
+      }
+      return query;
+    },
+    [excludeIds]
+  );
 
   const renderItem = (record) => {
     return (
@@ -139,7 +144,6 @@ function Records({ embedded, itemAction }) {
       </>
     );
   };
-
   return (
     <Manage
       renderItem={renderItem}
