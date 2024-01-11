@@ -46,7 +46,7 @@ const publicPath = path.resolve(__dirname, api.get("public")); // Adjust relativ
 const app = express();
 
 app.set("query parser", function (str) {
-  return qs.parse(str, { strictNullHandling: true });
+  return qs.parse(str, { strictNullHandling: true, arrayLimit: Infinity });
 });
 
 // Load app configuration
