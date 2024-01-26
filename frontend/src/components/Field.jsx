@@ -3,12 +3,12 @@ import {
   FormControl,
   FormControlLabel,
   FormGroup,
+  FormHelperText,
   Radio,
   TextField,
 } from "@mui/material";
 import { Field as FormikField, useFormikContext } from "formik";
 
-import { Alert } from "@mui/material";
 import { Autocomplete } from "formik-mui";
 import DateStringField from "./DateStringField";
 import HTMLField from "./HTMLField";
@@ -63,6 +63,7 @@ const FieldComponent = ({
   onChange: defaultOnChange,
   raw,
   context,
+  helperText = "",
   ...props
 }) => {
   const labelValue =
@@ -72,7 +73,7 @@ const FieldComponent = ({
   const variant = props.variant || ro ? "filled" : "outlined";
   let field;
   const error = Boolean(errors[name]);
-
+  helperText += error ? errors[name] : "";
   props.onChange = React.useCallback(
     async (event, option) => {
       const { value, checked } = event.currentTarget;
@@ -108,6 +109,7 @@ const FieldComponent = ({
               value: value || (isMulti ? [] : ""),
               name,
               setFieldValue: setFieldValue,
+              helperText,
               ...props,
             }}
             variant={variant}
@@ -145,14 +147,16 @@ const FieldComponent = ({
             options={options}
             renderInput={(params) => (
               <TextField
-                {...params}
+                {...{ helperText, error, ...params }}
                 name={name}
                 InputLabelProps={{ ...params.InputLabelProps, shrink: true }}
                 label={label}
                 variant={props.variant || "outlined"}
-                InputProps={{ ...params.InputProps, ...(InputProps || {}) }}
+                InputProps={{
+                  ...params.InputProps,
+                  ...(InputProps || {}),
+                }}
                 inputProps={{ ...params.inputProps, ...(inputProps || {}) }}
-                error={error}
               />
             )}
             {...{
@@ -174,6 +178,8 @@ const FieldComponent = ({
         label={labelValue}
         value={value || ""}
         name={name}
+        error={error}
+        helperText={helperText}
         {...props}
       />
     );
@@ -183,6 +189,7 @@ const FieldComponent = ({
         component="fieldset"
         disabled={ro}
         margin={margin || "dense"}
+        error={error}
       >
         <FormGroup>
           <FormControlLabel
@@ -191,6 +198,7 @@ const FieldComponent = ({
             variant={variant}
           />
         </FormGroup>
+        <FormHelperText>{helperText}</FormHelperText>
       </FormControl>
     );
   } else if (type === "radio") {
@@ -216,6 +224,7 @@ const FieldComponent = ({
         {...{
           error,
           name,
+          helperText,
           value: value || "",
           minRows: !props.rows && props.multiline ? 2 : null,
         }}
@@ -224,18 +233,7 @@ const FieldComponent = ({
     );
   }
 
-  const renderError = () => {
-    if (errors && errors[name]) {
-      const error = errors[name];
-      return <Alert severity="error">{error}</Alert>;
-    }
-  };
-  return (
-    <>
-      {field}
-      {renderError()}
-    </>
-  );
+  return field;
 };
 
 const ContextField = (props) => {

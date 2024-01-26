@@ -63,6 +63,7 @@ const SelectField = ({
   loadOptions: inputLoadOptions,
   InputProps,
   error,
+  helperText,
   ...props
 }) => {
   const {
@@ -185,7 +186,12 @@ const SelectField = ({
           name={name}
           label={label}
           InputLabelProps={{ ...params.InputLabelProps, shrink: true }}
-          InputProps={{ error, ...params.InputProps, ...(InputProps || {}) }}
+          helperText={helperText}
+          error={error}
+          InputProps={{
+            ...params.InputProps,
+            ...(InputProps || {}),
+          }}
           variant={props.variant || "outlined"}
           autoFocus={props.autoFocus || false}
         />
