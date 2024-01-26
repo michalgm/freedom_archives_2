@@ -1,30 +1,30 @@
-const { Service } = require('feathers-knex');
-const { hooks: { transaction } } = require('feathers-knex');
+const { Service } = require("feathers-knex");
 const {
-  writeThumbnailFromUrl,
-} = require('./common_hooks/');
+  hooks: { transaction },
+} = require("feathers-knex");
+const { writeThumbnailFromUrl } = require("./common_hooks/");
 class Instances extends Service {
   constructor(options) {
     super({
       ...options,
-      name: 'instances'
+      name: "instances",
     });
   }
 }
 
 module.exports = function (app) {
   const options = {
-    id: 'instance_id',
-    Model: app.get('knexClient'),
-    paginate: app.get('paginate'),
-    multi: true
+    id: "instance_id",
+    Model: app.get("knexClient"),
+    paginate: app.get("paginate"),
+    multi: true,
   };
 
   // Initialize our service with any options it requires
-  app.use('/instances', new Instances(options, app));
+  app.use("/instances", new Instances(options, app));
 
   // Get our initialized service so that we can register hooks
-  const service = app.service('instances');
+  const service = app.service("instances");
 
   const updateView = async (context) => {
     const {
@@ -45,11 +45,7 @@ module.exports = function (app) {
 
   const cleanupMeta = (context) => {
     const { data } = context;
-    [
-      'format',
-      'quality',
-      'generation'
-    ].forEach(key => {
+    ["format", "quality", "generation"].forEach((key) => {
       if (data[`${key}_item`] !== undefined) {
         data[key] = data[`${key}_item`].list_item_id;
         delete data[`${key}_item`];
@@ -57,13 +53,13 @@ module.exports = function (app) {
     });
 
     [
-      'contributor_name',
-      'contributor_username',
-      'creator_name',
-      'creator_username',
-      'is_primary',
-      'delete'
-    ].forEach(key => delete data[key]);
+      "contributor_name",
+      "contributor_username",
+      "creator_name",
+      "creator_username",
+      "is_primary",
+      "delete",
+    ].forEach((key) => delete data[key]);
     return context;
   };
 
@@ -90,6 +86,6 @@ module.exports = function (app) {
     },
     error: {
       patch: [transaction.rollback()],
-    }
+    },
   });
 };

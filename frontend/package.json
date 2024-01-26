@@ -41,7 +41,13 @@
     "publish": "npm run build && scp -Crp build/* freedomarc:work/freedom_archives_2/frontend/build/"
   },
   "eslintConfig": {
-    "extends": "react-app"
+    "extends": "react-app",
+    "plugins": [
+      "unused-imports"
+    ],
+    "rules": {
+      "unused-imports/no-unused-imports": "warn"
+    }
   },
   "type": "module",
   "proxy": "http://localhost:3030",
@@ -56,5 +62,8 @@
       "last 1 firefox version",
       "last 1 safari version"
     ]
+  },
+  "devDependencies": {
+    "eslint-plugin-unused-imports": "^3.0.0"
   }
 }
