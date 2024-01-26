@@ -38,6 +38,7 @@ import { useNavigate } from "react-router-dom";
 import { useTitle } from "../appContext";
 
 const defaultRecord = {
+  // date_string: "??/??/????",
   // record_id: null,
   // archive_id: null,
   // title: null,
@@ -579,7 +580,12 @@ function Record({
               </FieldRow>
               <FieldRow>
                 <Field name="location" />
-                <Field name="date_string" label="Date" />
+                <Field
+                  name="date_string"
+                  label="Date"
+                  type="datestring"
+                  helperText="MM/DD/YYYY format - enter '0' for unknown"
+                />
               </FieldRow>
               <FieldRow>
                 <Field name="notes" multiline rows={4} />

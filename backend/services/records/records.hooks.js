@@ -128,10 +128,14 @@ const prepData = (context) => {
     });
 
     if (data.date_string) {
-      const [month, day, year] = data.date_string.split("/");
-      data.month = month;
-      data.day = day;
-      data.year = year;
+      let parts = ["month", "day", "year"];
+      data.date_string.split("/").forEach((part, index) => {
+        if (["00", "MM", "DD", "YYYY"].includes(part)) {
+          data[parts[index]] = null;
+        } else {
+          data[parts[index]] = part;
+        }
+      });
       delete data.date_string;
     }
     // Stash relation data out of data object
@@ -255,7 +259,6 @@ const updateRelations = async (context) => {
     // delete data.new_continuation; FIXME?
   }
 
-  // await new Promise(r => setTimeout(r, 2000)); //why was this here?
   return context;
 };
 

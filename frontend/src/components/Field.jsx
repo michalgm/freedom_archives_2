@@ -10,6 +10,7 @@ import { Field as FormikField, useFormikContext } from "formik";
 
 import { Alert } from "@mui/material";
 import { Autocomplete } from "formik-mui";
+import DateStringField from "./DateStringField";
 import HTMLField from "./HTMLField";
 import React from "react";
 import SelectField from "./SelectField";
@@ -160,6 +161,18 @@ const FieldComponent = ({
           />
         </FormGroup>
       </FormControl>
+    );
+  } else if (type === "datestring") {
+    field = (
+      <DateStringField
+        variant={variant}
+        disabled={ro}
+        margin={margin || "dense"}
+        label={labelValue}
+        value={value || ""}
+        name={name}
+        {...props}
+      />
     );
   } else if (type === "checkbox") {
     field = (

@@ -797,7 +797,7 @@ SELECT
     -- b.primary_instance_format_text,
     -- b.primary_instance_media_type,
     -- b.collection,
-    coalesce(a.month::text, '??') || '/' || coalesce(a.day::text, '??') || '/' || coalesce(a.year::text, '??') AS date_string,
+    coalesce(lpad(a.month::text, 2, '0'), '00') || '/' || coalesce(lpad(a.day::text, 2, '0'), '00') || '/' || coalesce(a.year::text, '0000') AS date_string,
 (coalesce(a.year::text, '1900')::text || '-' || coalesce(a.month::text, '01')::text || '-' || coalesce(a.day::text, '01')::text)::date AS date,
     jsonb_build_object('item', publisher_lookup.item, 'list_item_id', publisher_lookup.list_item_id) AS publisher,
     jsonb_build_object('item', program_lookup.item, 'list_item_id', program_lookup.list_item_id) AS program,
