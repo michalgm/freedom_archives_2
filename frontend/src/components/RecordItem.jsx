@@ -127,7 +127,7 @@ export function ItemsList({
       {items.map((item, index) => (
         <React.Fragment key={item[`${type}_id`]}>
           <ItemTag
-            itemAction={itemAction}
+            itemAction={() => itemAction(index)}
             index={index}
             type={type}
             link={link}
