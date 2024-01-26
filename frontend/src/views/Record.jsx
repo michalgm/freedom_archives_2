@@ -33,6 +33,8 @@ import GridBlock from "../components/GridBlock";
 import Link from "../components/Link";
 import ListItemField from "../components/ListItemField";
 import ViewContainer from "../components/ViewContainer";
+import { isArray } from "lodash-es";
+import { startCase } from "lodash-es";
 import { useConfirm } from "material-ui-confirm";
 import { useNavigate } from "react-router-dom";
 import { useTitle } from "../appContext";
@@ -71,7 +73,7 @@ const defaultRecord = {
     item: null,
     list_item_id: null,
   },
-  instances: [],
+  instances: [{}],
   // has_digital: true,
   // instance_count: null,
   // contributor_name: null,
@@ -514,6 +516,20 @@ function Record({
     : [{ label: "Edit", onClick: () => setEdit(true), type: "button" }];
 
   // const {has_digital} = record;
+  const validate = (values) => {
+    const errors = {};
+    if (!values.instances[0] || !values.instances[0].format_item) {
+      errors.media = "Records need at least one media with a format value";
+    }
+    const required = ["title", "description"].forEach((field) => {
+      const value = values[field];
+      const arr = isArray(value);
+      if (!value || (arr && value.length == 0)) {
+        errors[field] = `${startCase(field)} ${arr ? "are" : "is"} required`;
+      }
+    });
+    return errors;
+  };
 
   return (
     <div className="record">
@@ -529,6 +545,7 @@ function Record({
             ro={!edit}
             buttons={showForm && buttons}
             buttonRef={buttonRef}
+            validate={validate}
           >
             <GridBlock title="" spacing={2}>
               <Grid item xs={10}>

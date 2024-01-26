@@ -108,8 +108,8 @@ function ViewContainer({
       (type === "header" && buttonRef)
     ) {
       const section = (
-        <Grid item xs={12} style={{ flex: "none" }}>
-          <Paper {...sectionProps}>
+        <Paper {...sectionProps}>
+          <Grid item xs={12} style={{ flex: "none" }}>
             <Grid
               container
               alignContent="center"
@@ -150,8 +150,9 @@ function ViewContainer({
                 </>
               )}
             </Grid>
-          </Paper>
-        </Grid>
+            {type === "header" && <div id={`form-errors`} />}
+          </Grid>
+        </Paper>
       );
       return section;
     }
@@ -171,7 +172,7 @@ function ViewContainer({
         xs={12}
         sx={{ overflowX: "auto", padding: "1px", flex: "1 1 auto" }}
       >
-        {children}
+        <Box sx={{ mb: 2 }}>{children}</Box>
       </Grid>
       {!newItem && renderSection("footer")}
     </Stack>

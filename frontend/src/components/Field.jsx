@@ -14,7 +14,7 @@ import DateStringField from "./DateStringField";
 import HTMLField from "./HTMLField";
 import React from "react";
 import SelectField from "./SelectField";
-import { startCase } from "lodash";
+import { startCase } from "lodash-es";
 
 const selectOptions = {
   day: Array.from({ length: 32 }, (v, k) => ({
@@ -71,6 +71,7 @@ const FieldComponent = ({
   const { errors, setFieldValue } = context || {};
   const variant = props.variant || ro ? "filled" : "outlined";
   let field;
+  const error = Boolean(errors[name]);
 
   props.onChange = React.useCallback(
     async (event, option) => {
@@ -100,6 +101,7 @@ const FieldComponent = ({
             margin={margin || "dense"}
             disabled={ro}
             label={labelValue}
+            error={error}
             {...{
               isMulti,
               defaultValue: value || (isMulti ? [] : ""),
@@ -150,6 +152,7 @@ const FieldComponent = ({
                 variant={props.variant || "outlined"}
                 InputProps={{ ...params.InputProps, ...(InputProps || {}) }}
                 inputProps={{ ...params.inputProps, ...(inputProps || {}) }}
+                error={error}
               />
             )}
             {...{
@@ -211,6 +214,7 @@ const FieldComponent = ({
         fullWidth
         type={type || "text"}
         {...{
+          error,
           name,
           value: value || "",
           minRows: !props.rows && props.multiline ? 2 : null,

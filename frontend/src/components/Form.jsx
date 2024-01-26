@@ -1,9 +1,9 @@
 import "./Form.scss";
 
-import { Button, Grid } from "@mui/material";
+import { Alert, AlertTitle, Button, Grid, Paper, Portal } from "@mui/material";
 import { Formik, Form as FormikForm, useFormikContext } from "formik";
+import React, { useEffect, useState } from "react";
 
-import React from "react";
 import ReactDOM from "react-dom";
 
 const FormButton = ({ label, onClick, ...props }) => {
@@ -41,6 +41,23 @@ const HandleChangeComponent = ({ onChange }) => {
   return null;
 };
 
+const Errors = ({ errors }) => {
+  const errors_list = Object.values(errors);
+  if (!errors_list.length) {
+    return;
+  }
+  return (
+    <Alert severity="error" sx={{ mt: 1 }}>
+      <AlertTitle variant="subtitle1">This form has errors</AlertTitle>
+      <ul>
+        {errors_list.map((error, index) => (
+          <li key={index}>{error}</li>
+        ))}
+      </ul>
+    </Alert>
+  );
+};
+
 const Form = ({
   ro,
   children,
@@ -55,6 +72,7 @@ const Form = ({
   ...props
 }) => {
   const rows = React.Children.toArray(children);
+  const [enableValidation, setEnableValidation] = useState(false);
 
   const renderButtons = (buttons, handleReset) => {
     if (!buttons.length) {
@@ -75,7 +93,8 @@ const Form = ({
   return (
     <Formik
       enableReinitialize
-      validateOnChange={false}
+      validateOnChange={enableValidation}
+      validateOnBlur={enableValidation}
       onSubmit={(values) => {
         if (noUpdateCheck) {
           return onSubmit(values);
@@ -94,26 +113,38 @@ const Form = ({
       initialValues={initialValues}
       {...props}
     >
-      <FormikForm className="form">
-        {onChange && <HandleChangeComponent onChange={onChange} />}
-        <Grid
-          container
-          style={{ textAlign: "left", height: "100%" }}
-          spacing={2}
-          className={`${ro ? "read-only" : ""}`}
-          {...gridProps}
-        >
-          {!buttonsBelow && !buttonRef && renderButtons(buttons)}
-          {rows.map((row) =>
-            row.type && row.type.name === "FieldRow"
-              ? React.cloneElement(row, { ro })
-              : row
-          )}
-          {buttonsBelow && !buttonRef && renderButtons(buttons)}
-        </Grid>
-        {buttonRef &&
-          ReactDOM.createPortal(renderButtons(buttons), buttonRef.current)}
-      </FormikForm>
+      {({ errors, touched }) => {
+        useEffect(() => {
+          if (Object.keys(errors).length > 0 && !enableValidation) {
+            setEnableValidation(true);
+          }
+        }, [errors]);
+        return (
+          <FormikForm className="form">
+            {onChange && <HandleChangeComponent onChange={onChange} />}
+            <Portal container={() => document.getElementById("form-errors")}>
+              <Errors errors={errors} />
+            </Portal>
+            <Grid
+              container
+              style={{ textAlign: "left", height: "100%" }}
+              spacing={2}
+              className={`${ro ? "read-only" : ""}`}
+              {...gridProps}
+            >
+              {!buttonsBelow && !buttonRef && renderButtons(buttons)}
+              {rows.map((row) =>
+                row.type && row.type.name === "FieldRow"
+                  ? React.cloneElement(row, { ro })
+                  : row
+              )}
+              {buttonsBelow && !buttonRef && renderButtons(buttons)}
+            </Grid>
+            {buttonRef &&
+              ReactDOM.createPortal(renderButtons(buttons), buttonRef.current)}
+          </FormikForm>
+        );
+      }}
     </Formik>
   );
 };
