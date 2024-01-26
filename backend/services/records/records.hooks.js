@@ -119,7 +119,6 @@ const prepData = (context) => {
           "media_types",
           "siblings",
           "relationships",
-          "primary_instance_id",
         ].includes(key) ||
         key.match("_search")
       ) {
