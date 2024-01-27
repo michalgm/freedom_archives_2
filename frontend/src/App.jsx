@@ -119,7 +119,7 @@ function Layout() {
     <Box className="App" sx={{ backgroundColor: "#efefef", height: "1vh" }}>
       <NavBar />
       {isAuthenticated && <Sidebar />}
-      <Content style={style}>
+      <Content sx={{ backgroundColor: "#efefef" }} style={style}>
         <Loading>
           <Main />
         </Loading>
