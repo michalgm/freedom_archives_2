@@ -30,6 +30,7 @@ const defaultCollection = {
   children: [],
   keywords: [],
   subjects: [],
+  featured_records: [],
   publisher: {},
   parent: {},
 };
@@ -168,9 +169,13 @@ function Collection() {
                   property="featured_records"
                   type="record"
                   reorder
-                  filter={{
-                    collection: { collection_id: id },
-                  }}
+                  filter={
+                    id === "new"
+                      ? null
+                      : {
+                          collection: { collection_id: id },
+                        }
+                  }
                 />
               )}
               {tab === "subcollections" && (
