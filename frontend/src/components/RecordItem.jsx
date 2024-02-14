@@ -74,7 +74,8 @@ export function EditableItem({ service, name, label = "" }) {
     );
   } else {
     const { tag: ItemTag, itemName } = services[service];
-    const missingText = name === "parent" ? "Parent Record" : "Collection";
+    const missingText =
+      name === "parent" ? `Parent ${startCase(itemName)}` : "Collection";
 
     return (
       <FormControl variant="outlined" fullWidth size="small" margin="dense">
