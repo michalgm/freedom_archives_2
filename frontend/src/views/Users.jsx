@@ -1,4 +1,4 @@
-import { Button, Grid, Tooltip } from "@mui/material";
+import { Button, Grid, Paper, Tooltip } from "@mui/material";
 import {
   DataGrid,
   GridActionsCellItem,
@@ -191,58 +191,60 @@ export default function Users() {
 
   return (
     <div className="users">
-      <Grid container spacing={2} style={{ width: "100%" }}>
-        <Grid item style={{ width: "100%" }}>
-          <DataGrid
-            experimentalFeatures={{ newEditingApi: true }}
-            apiRef={apiRef}
-            components={{ Toolbar: GridToolbar }}
-            disableColumnFilter
-            disableColumnSelector
-            disableDensitySelector
-            editMode="row"
-            isCellEditable={(params) =>
-              params.field !== "username" || params.row.isNew
-            }
-            componentsProps={{
-              toolbar: {
-                showQuickFilter: true,
-                quickFilterProps: { debounceMs: 300 },
-                csvOptions: { disableToolbarButton: true },
-                printOptions: { disableToolbarButton: true },
-              },
-            }}
-            autoHeight
-            rows={users}
-            columns={columns}
-            getRowId={getRowId}
-            rowModesModel={rowModesModel}
-            onRowModesModelChange={(newModel) => setRowModesModel(newModel)}
-            onRowEditStart={handleRowEditStart}
-            onRowEditStop={handleRowEditStop}
-            processRowUpdate={processRowUpdate}
-            onProcessRowUpdateError={(error) => console.error(error)}
-            sx={{
-              "& .MuiDataGrid-columnHeaderTitle": {
-                textTransform: "capitalize",
-              },
-            }}
-            hideFooter
-          />
+      <Paper>
+        <Grid container spacing={2} style={{ width: "100%" }}>
+          <Grid item style={{ width: "100%" }}>
+            <DataGrid
+              experimentalFeatures={{ newEditingApi: true }}
+              apiRef={apiRef}
+              components={{ Toolbar: GridToolbar }}
+              disableColumnFilter
+              disableColumnSelector
+              disableDensitySelector
+              editMode="row"
+              isCellEditable={(params) =>
+                params.field !== "username" || params.row.isNew
+              }
+              componentsProps={{
+                toolbar: {
+                  showQuickFilter: true,
+                  quickFilterProps: { debounceMs: 300 },
+                  csvOptions: { disableToolbarButton: true },
+                  printOptions: { disableToolbarButton: true },
+                },
+              }}
+              autoHeight
+              rows={users}
+              columns={columns}
+              getRowId={getRowId}
+              rowModesModel={rowModesModel}
+              onRowModesModelChange={(newModel) => setRowModesModel(newModel)}
+              onRowEditStart={handleRowEditStart}
+              onRowEditStop={handleRowEditStop}
+              processRowUpdate={processRowUpdate}
+              onProcessRowUpdateError={(error) => console.error(error)}
+              sx={{
+                "& .MuiDataGrid-columnHeaderTitle": {
+                  textTransform: "capitalize",
+                },
+              }}
+              hideFooter
+            />
 
-          <Button
-            color="primary"
-            startIcon={<AddIcon />}
-            onClick={() => addUser()}
-          >
-            Add user
-          </Button>
-          <ChangePassword
-            {...editPassword}
-            handleClose={() => setEditPassword({ open: false, user: {} })}
-          />
+            <Button
+              color="primary"
+              startIcon={<AddIcon />}
+              onClick={() => addUser()}
+            >
+              Add user
+            </Button>
+            <ChangePassword
+              {...editPassword}
+              handleClose={() => setEditPassword({ open: false, user: {} })}
+            />
+          </Grid>
         </Grid>
-      </Grid>
+      </Paper>
     </div>
   );
 }
