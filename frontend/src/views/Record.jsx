@@ -100,7 +100,7 @@ const defaultRecord = {
   continuations: [],
 };
 
-function Instance({ instance = {}, record, index, edit }) {
+function Instance({ instance = {}, record, index, edit, remove }) {
   const context = useFormikContext();
 
   // Column        |           Type           | Collation | Nullable |                    Default
@@ -129,12 +129,14 @@ function Instance({ instance = {}, record, index, edit }) {
       <TableRow className={`instance ${instance.delete ? "deleted" : ""}`}>
         <TableCell className="instance-action">
           <IconButton
-            onClick={() =>
-              context.setFieldValue(
-                `instances[${index}].delete`,
-                !instance.delete
-              )
-            }
+            onClick={() => {
+              instance.instance_id
+                ? context.setFieldValue(
+                    `instances[${index}].delete`,
+                    !instance.delete
+                  )
+                : remove(index);
+            }}
             size="large"
           >
             <Icon>{instance.delete ? "restore" : "delete"}</Icon>
@@ -168,6 +170,7 @@ function Instance({ instance = {}, record, index, edit }) {
             // radioGroup="primary_instance_id"
             name="primary_instance_id"
             value={`${instance.instance_id}`}
+            disabled={!instance.instance_id}
           />
         </TableCell>
         <TableCell>
@@ -255,7 +258,7 @@ function Instances({ record, edit }) {
   return (
     <FieldArray
       name="instances"
-      render={({ push }) => {
+      render={({ push, remove }) => {
         return (
           <>
             <Table size="small" className="instances" sx={{ mb: 2 }}>
@@ -287,6 +290,7 @@ function Instances({ record, edit }) {
                     edit={edit}
                     instance={instance}
                     index={index}
+                    remove={remove}
                   />
                 ))}
               </TableBody>
@@ -377,15 +381,9 @@ function RecordParent() {
   );
 }
 
-function Record({
-  showForm,
-  ro = false,
-  embedded = false,
-  id,
-  newRecord = false,
-}) {
+function Record({ showForm, ro = false, embedded = false, id }) {
   const navigate = useNavigate();
-
+  const newRecord = id === "new";
   const [record, setRecord] = useState(defaultRecord);
   const [edit, setEdit] = useState(!ro);
   const buttonRef = useRef();

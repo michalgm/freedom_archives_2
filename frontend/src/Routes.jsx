@@ -36,7 +36,7 @@ function Routes({ isAuthenticated }) {
           <Route path="/collections/:id" element={<Collection />} />
           <Route exact path="/search" element={<Search />} />
           <Route exact path="/records" element={<Records />} />
-          <Route path="/records/new" element={<Record showForm newRecord />} />
+          {/* <Route path="/records/new" element={<Record showForm newRecord />} /> */}
           <Route path="/records/:id" element={<RecordElement />} />
 
           <Route path="/relationships/:skip" element={<Relationships />} />

@@ -33,6 +33,7 @@ const fullTextSearch = (context) => {
     context.params.knex = knex;
   }
 };
+
 const lookupFilters = async ({
   params: {
     knex,
@@ -189,29 +190,28 @@ const updateRelations = async (context) => {
   if (!Object.keys(data).length) {
     context.result = await trx("records").where("record_id", id).select();
   }
+  const params = { user, transaction: { trx } };
 
   if (relation_data.instances !== undefined) {
-    await Promise.all(
+    const instances = await Promise.all(
       relation_data.instances.map((instance) => {
         if (instance.delete) {
-          return app
-            .service("instances")
-            .remove(instance.instance_id, { user, transaction: { trx } });
+          return app.service("instances").remove(instance.instance_id, params);
         } else if (instance.instance_id) {
           return app
             .service("instances")
-            .patch(instance.instance_id, instance, {
-              user,
-              transaction: { trx },
-            });
+            .patch(instance.instance_id, instance, params);
         }
         delete instance.instance_id;
         instance.record_id ||= id;
-        return app
-          .service("instances")
-          .create(instance, { user, transaction: { trx } });
+        return app.service("instances").create(instance, params);
       })
     );
+    if (instances.length && !data.primary_instance_id) {
+      await app
+        .service("records")
+        ._patch(id, { primary_instance_id: instances[0].instance_id }, params);
+    }
   }
 
   if (relation_data.children !== undefined) {
@@ -220,19 +220,11 @@ const updateRelations = async (context) => {
         if (child.delete) {
           return app
             .service("records")
-            .patch(
-              child.record_id,
-              { parent_record_id: null },
-              { user, transaction: { trx } }
-            );
+            .patch(child.record_id, { parent_record_id: null }, params);
         } else if (child.record_id && !child.parent_record_id) {
           return app
             .service("records")
-            .patch(
-              child.record_id,
-              { parent_record_id: id },
-              { user, transaction: { trx } }
-            );
+            .patch(child.record_id, { parent_record_id: id }, params);
         }
       })
     );
