@@ -279,7 +279,7 @@ function EditList({
           <Box sx={{ flex: "1 1 0" }}>
             <ItemsList
               embedded
-              itemAction={(item) => unshift(item)}
+              itemAction={(_, item) => unshift(item)}
               excludeIds={excludeIds}
               filter={filter}
             />
