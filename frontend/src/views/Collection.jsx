@@ -35,11 +35,15 @@ const defaultCollection = {
   parent: {},
 };
 
-function Collection() {
+function Collection({ id = useParams()["id"], mode = "" }) {
+  const isFeaturedCollections = id == 0 && mode == "featured_collections";
+  const isFeaturedRecords = id == 0 && mode == "featured_records";
+  const defaultTab = isFeaturedCollections ? "subcollections" : "collection";
+
   const [collection, setCollection] = useState(defaultCollection);
   const [edit, setEdit] = useState(true);
-  const [tab, setTab] = useState("collection");
-  const { id } = useParams();
+  const [tab, setTab] = useState(defaultTab);
+
   const buttonRef = useRef();
   const setTitle = useTitle();
   const navigate = useNavigate();
@@ -50,6 +54,10 @@ function Collection() {
   if (!buttonRef.current) {
     buttonRef.current = document.createElement("div");
   }
+
+  useEffect(() => {
+    setTab(defaultTab);
+  }, [id]);
 
   useEffect(() => {
     const fetchCollection = async () => {
@@ -137,24 +145,77 @@ function Collection() {
             ]),
       ]
     : [{ label: "Edit", onClick: () => setEdit(true), type: "button" }];
+
+  const formContents = () => {
+    const featured_records = (
+      <EditList
+        property="featured_records"
+        type="record"
+        reorder
+        filter={
+          id === "new"
+            ? null
+            : {
+                collection: { collection_id: id },
+              }
+        }
+      />
+    );
+    if (isFeaturedRecords) {
+      return featured_records;
+    }
+    if (isFeaturedCollections) {
+      return (
+        <>
+          {tab === "subcollections" && (
+            <EditList property="children" type="collection" reorder />
+          )}
+          {tab === "records" && (
+            <EditList property="child_records" type="record" />
+          )}
+        </>
+      );
+    }
+    return (
+      <>
+        {tab === "collection" && <CollectionFields />}
+        {tab === "featured" && featured_records}
+        {tab === "subcollections" && (
+          <EditList property="children" type="collection" reorder />
+        )}
+        {tab === "records" && (
+          <EditList property="child_records" type="record" />
+        )}
+      </>
+    );
+  };
+
   return (
     <ViewContainer
       item={collection}
       buttonRef={buttonRef}
-      neighborService="collection"
+      neighborService={
+        isFeaturedRecords || isFeaturedCollections ? null : "collection"
+      }
     >
       <Paper sx={{ height: "100%" }}>
         <Stack sx={{ height: "100%" }}>
-          <Tabs
-            sx={{ mb: 2, flex: "0 0 auto" }}
-            value={tab}
-            onChange={(_, tab) => setTab(tab)}
-          >
-            <Tab label="Edit Collection" value="collection"></Tab>
-            <Tab label="Featured Records" value="featured"></Tab>
-            <Tab label="Subcollections" value="subcollections"></Tab>
-            <Tab label="Records" value="records"></Tab>
-          </Tabs>
+          {!isFeaturedRecords && (
+            <Tabs
+              sx={{ mb: 2, flex: "0 0 auto" }}
+              value={tab}
+              onChange={(_, tab) => setTab(tab)}
+            >
+              {!isFeaturedCollections && (
+                <Tab label="Edit Collection" value="collection"></Tab>
+              )}
+              {!isFeaturedCollections && (
+                <Tab label="Featured Records" value="featured"></Tab>
+              )}
+              <Tab label="Subcollections" value="subcollections"></Tab>
+              <Tab label="Records" value="records"></Tab>
+            </Tabs>
+          )}
           <Box sx={{ overflow: "auto", flex: "1 1 auto" }}>
             <Form
               initialValues={collection}
@@ -163,37 +224,12 @@ function Collection() {
               buttons={buttons}
               buttonRef={buttonRef}
             >
-              {tab === "collection" && <CollectionFields />}
-              {tab === "featured" && (
-                <EditList
-                  property="featured_records"
-                  type="record"
-                  reorder
-                  filter={
-                    id === "new"
-                      ? null
-                      : {
-                          collection: { collection_id: id },
-                        }
-                  }
-                />
-              )}
-              {tab === "subcollections" && (
-                <EditList property="children" type="collection" reorder />
-              )}
-              {tab === "records" && (
-                <EditList property="child_records" type="record" />
-              )}
+              {formContents()}
             </Form>
           </Box>
         </Stack>
       </Paper>
     </ViewContainer>
-    // {/* <Grid item xs={12}>
-    //   <pre style={{ textAlign: 'left' }}>
-    //     {JSON.stringify(collection, null, 2)}
-    //   </pre>
-    // </Grid> */}
   );
 }
 

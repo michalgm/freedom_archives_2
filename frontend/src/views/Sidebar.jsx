@@ -14,13 +14,17 @@ const sideBarConfig = {
   Collections: [
     { label: "Manage Collections", icon: "", href: "/collections" },
     { label: "New Collection", icon: "", href: "/collections/new" },
-    { label: "Manage Featured Collections", icon: "", href: "" },
+    {
+      label: "Manage Featured Collections",
+      icon: "",
+      href: "/collections/featured",
+    },
   ],
   Records: [
     { label: "Search Records", icon: "", href: "/search" },
     { label: "Manage Records", icon: "", href: "/records" },
     { label: "New Record", icon: "", href: "/records/new" },
-    { label: "Manage Featured Records", icon: "", href: "" },
+    { label: "Manage Featured Records", icon: "", href: "/records/featured" },
   ],
   "Site Management": [
     { label: "Edit site header text", icon: "", href: "" },

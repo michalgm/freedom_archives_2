@@ -25,7 +25,8 @@ function Breadcrumbs() {
             }
       ),
   ];
-  if (state.title) {
+
+  if (state.title && parts.length !== paths.length) {
     paths.push({ link: location.pathname, title: state.title });
   }
 

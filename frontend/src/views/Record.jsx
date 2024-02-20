@@ -24,6 +24,7 @@ import {
 import { FieldArray, useFormikContext } from "formik";
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import { records, relationships } from "../api";
+import { useNavigate, useParams } from "react-router-dom";
 
 import { ExpandMore } from "@mui/icons-material";
 import Field from "../components/Field";
@@ -36,7 +37,6 @@ import ViewContainer from "../components/ViewContainer";
 import { isArray } from "lodash-es";
 import { startCase } from "lodash-es";
 import { useConfirm } from "material-ui-confirm";
-import { useNavigate } from "react-router-dom";
 import { useTitle } from "../appContext";
 
 const defaultRecord = {
@@ -381,7 +381,12 @@ function RecordParent() {
   );
 }
 
-function Record({ showForm, ro = false, embedded = false, id }) {
+function Record({
+  showForm,
+  id = useParams()["id"],
+  ro = false,
+  embedded = false,
+}) {
   const navigate = useNavigate();
   const newRecord = id === "new";
   const [record, setRecord] = useState(defaultRecord);

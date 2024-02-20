@@ -17,11 +17,6 @@ import Search from "./views/Search";
 const Collection = React.lazy(() => import("./views/Collection"));
 const Users = React.lazy(() => import("./views/Users"));
 
-function RecordElement() {
-  const { id } = useParams();
-  return <Record showForm id={id} />;
-}
-
 function Routes({ isAuthenticated }) {
   const location = useLocation();
 
@@ -32,12 +27,18 @@ function Routes({ isAuthenticated }) {
           <Route exact path="/" element={<Records />} />
           {/* <Route exact path="/test" element={<Test />} /> */}
           <Route exact path="/collections" element={<Collections />} />
-          {/* <Route path="/collections/new" element={<Collection newCollection />} /> */}
+          <Route
+            path="/collections/featured"
+            element={<Collection id={0} mode="featured_collections" />}
+          />
           <Route path="/collections/:id" element={<Collection />} />
           <Route exact path="/search" element={<Search />} />
           <Route exact path="/records" element={<Records />} />
-          {/* <Route path="/records/new" element={<Record showForm newRecord />} /> */}
-          <Route path="/records/:id" element={<RecordElement />} />
+          <Route
+            path="/records/featured"
+            element={<Collection id={0} mode="featured_records" />}
+          />
+          <Route path="/records/:id" element={<Record />} />
 
           <Route path="/relationships/:skip" element={<Relationships />} />
           <Route path="/relationships/" element={<Relationships />} />
