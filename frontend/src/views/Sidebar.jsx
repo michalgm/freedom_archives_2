@@ -73,7 +73,7 @@ function Sidebar() {
   );
 }
 
-function SidebarItem({ label, icon, href = "notalink" }) {
+function SidebarItem({ label, /* icon, */ href = "notalink" }) {
   const { pathname = null } = useResolvedPath(href);
   const location = useLocation();
   // console.log(location)?
@@ -97,7 +97,7 @@ function ListItemLink(props) {
   return (
     <ListItem
       button
-      disabled={!Boolean(props.href)}
+      disabled={!props.href}
       component={props.href ? Link : "div"}
       to={props.href}
       {...props}

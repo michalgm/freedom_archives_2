@@ -35,7 +35,9 @@ const defaultCollection = {
   parent: {},
 };
 
-function Collection({ id = useParams()["id"], mode = "" }) {
+function Collection({ id, mode = "" }) {
+  const { id: paramId } = useParams();
+  id ??= paramId;
   const isFeaturedCollections = id == 0 && mode == "featured_collections";
   const isFeaturedRecords = id == 0 && mode == "featured_records";
   const defaultTab = isFeaturedCollections ? "subcollections" : "collection";
@@ -57,7 +59,7 @@ function Collection({ id = useParams()["id"], mode = "" }) {
 
   useEffect(() => {
     setTab(defaultTab);
-  }, [id]);
+  }, [id, defaultTab]);
 
   useEffect(() => {
     const fetchCollection = async () => {
@@ -98,15 +100,16 @@ function Collection({ id = useParams()["id"], mode = "" }) {
         description: (
           <>
             <Typography component="span" sx={{ display: "block" }} gutterBottom>
-              Are you sure you want to delete collection "
-              <b>{collection.collection_name}</b>"?
+              Are you sure you want to delete collection &quot;
+              <b>{collection.collection_name}</b>&quot;?
             </Typography>
             <Typography
               component="span"
               sx={{ display: "block" }}
               variant="body2"
             >
-              All child records will be moved to the 'Uncategorized' collection
+              All child records will be moved to the &quot;Uncategorized&quot;
+              collection
             </Typography>
           </>
         ),
@@ -116,7 +119,9 @@ function Collection({ id = useParams()["id"], mode = "" }) {
       });
       await collectionsService.remove(id);
       navigate(`/collections`);
-    } catch {}
+    } catch {
+      //empty
+    }
   };
 
   const action = newCollection ? createCollection : updateCollection;
@@ -283,7 +288,7 @@ function EditList({
 
   const excludeIds = useMemo(() => {
     return values[property].map((item) => item[`${type}_id`]);
-  }, [values[property]]);
+  }, [property, type, values]);
 
   const renderFieldArray = ({ unshift }) => {
     return (

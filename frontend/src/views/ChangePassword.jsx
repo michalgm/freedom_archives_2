@@ -84,7 +84,9 @@ function ChangePassword({ open, user: { user_id, username }, handleClose }) {
   return (
     <>
       <Dialog open={open} onClose={handleClose} maxWidth="sm">
-        <DialogTitle>Change password for user "{username}"</DialogTitle>
+        <DialogTitle>
+          Change password for user &quot;{username}&quot;
+        </DialogTitle>
         <DialogContent sx={{ overflowY: "visible", textAlign: "center" }}>
           <Form
             initialValues={{ password1: "", password2: "" }}

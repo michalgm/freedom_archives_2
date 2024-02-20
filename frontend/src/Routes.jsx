@@ -3,7 +3,6 @@ import {
   Route,
   Routes as RouterRoutes,
   useLocation,
-  useParams,
 } from "react-router-dom";
 import React, { Suspense } from "react";
 
@@ -38,7 +37,7 @@ function Routes({ isAuthenticated }) {
             path="/records/featured"
             element={<Collection id={0} mode="featured_records" />}
           />
-          <Route path="/records/:id" element={<Record />} />
+          <Route path="/records/:id" element={<Record showForm />} />
 
           <Route path="/relationships/:skip" element={<Relationships />} />
           <Route path="/relationships/" element={<Relationships />} />

@@ -114,7 +114,6 @@ const Form = ({
       {...props}
     >
       {({ errors }) => {
-        console.log(errors);
         if (Object.keys(errors).length > 0 && !enableValidation) {
           setEnableValidation(true);
         }

@@ -41,12 +41,27 @@
     "publish": "npm run build && scp -Crp build/* freedomarc:work/freedom_archives_2/frontend/build/"
   },
   "eslintConfig": {
-    "extends": "react-app",
+    "env": {
+      "browser": true,
+      "es2021": true
+    },
+    "extends": [
+      "eslint:recommended",
+      "plugin:react/recommended",
+      "plugin:react-hooks/recommended"
+    ],
     "plugins": [
+      "react",
+      "react-hooks",
       "unused-imports"
     ],
     "rules": {
-      "unused-imports/no-unused-imports": "warn"
+      "unused-imports/no-unused-imports": "warn",
+      "indent": "off",
+      "react/prop-types": "off"
+    },
+    "parserOptions": {
+      "sourceType": "module"
     }
   },
   "type": "module",
@@ -64,6 +79,9 @@
     ]
   },
   "devDependencies": {
+    "eslint": "^8.56.0",
+    "eslint-plugin-react": "^7.33.2",
+    "eslint-plugin-react-hooks": "^4.6.0",
     "eslint-plugin-unused-imports": "^3.0.0"
   }
 }

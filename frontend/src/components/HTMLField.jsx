@@ -4,7 +4,7 @@ import React from "react";
 import { TextField } from "@mui/material";
 
 const HtmlEditor = React.forwardRef(function HTMLEditor(
-  { defaultValue, value, setFieldValue, name },
+  { value, setFieldValue, name },
   ref
 ) {
   return (
@@ -43,7 +43,7 @@ const HtmlEditor = React.forwardRef(function HTMLEditor(
         },
         el: ref,
       }}
-      data={value || defaultValue}
+      data={value}
       onChange={(event, editor) => {
         return setFieldValue ? setFieldValue(name, editor.getData()) : null;
       }}

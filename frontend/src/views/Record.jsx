@@ -100,7 +100,7 @@ const defaultRecord = {
   continuations: [],
 };
 
-function Instance({ instance = {}, record, index, edit, remove }) {
+function Instance({ instance = {}, index, edit, remove }) {
   const context = useFormikContext();
 
   // Column        |           Type           | Collation | Nullable |                    Default
@@ -381,12 +381,9 @@ function RecordParent() {
   );
 }
 
-function Record({
-  showForm,
-  id = useParams()["id"],
-  ro = false,
-  embedded = false,
-}) {
+function Record({ showForm, id, ro = false /*  embedded = false */ }) {
+  const { id: paramId } = useParams();
+  id ??= paramId;
   const navigate = useNavigate();
   const newRecord = id === "new";
   const [record, setRecord] = useState(defaultRecord);
@@ -452,7 +449,8 @@ function Record({
       await confirm({
         description: (
           <span>
-            Are you sure you want to delete record "<b>{record.title}</b>"?
+            Are you sure you want to delete record &quot;<b>{record.title}</b>
+            &quot;?
           </span>
         ),
         confirmationButtonProps: {
@@ -461,7 +459,9 @@ function Record({
       });
       await records.remove(id);
       navigate(`/records`);
-    } catch {}
+    } catch {
+      //empty
+    }
   };
 
   const updateRecord = async (data) => {
@@ -469,7 +469,9 @@ function Record({
       await records.patch(id, clean_data(data));
       const updated = await records.get(id);
       loadRecord(updated);
-    } catch {}
+    } catch {
+      //empty
+    }
   };
 
   const action = newRecord ? createRecord : updateRecord;
@@ -524,7 +526,7 @@ function Record({
     if (!values.instances[0] || !values.instances[0].format_item) {
       errors.media = "Records need at least one media with a format value";
     }
-    const required = ["title", "description"].forEach((field) => {
+    ["title", "description"].forEach((field) => {
       const value = values[field];
       const arr = isArray(value);
       if (!value || (arr && value.length == 0)) {

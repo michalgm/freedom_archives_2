@@ -66,7 +66,7 @@ export default function Users() {
 
     return icons.map(([label, Icon, action]) => {
       return (
-        <Tooltip title={label} arrow placement="top">
+        <Tooltip key={label} title={label} arrow placement="top">
           <GridActionsCellItem icon={<Icon />} label={label} onClick={action} />
         </Tooltip>
       );

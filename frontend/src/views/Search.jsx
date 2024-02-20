@@ -74,7 +74,7 @@ function Description({ text }) {
               transform: "rotate(180deg)",
             },
           }}
-          onClick={(e) => setopen(!open)}
+          onClick={() => setopen(!open)}
         >
           <Icon className={open ? "open" : ""}>expand_more</Icon> View{" "}
           {open ? "Less" : "More"}
@@ -128,7 +128,7 @@ function Filter({ type, values = [], addFilter, search }) {
           <Button
             size="small"
             startIcon={<Icon>add</Icon>}
-            onClick={(e) => setlimit(limit + 5)}
+            onClick={() => setlimit(limit + 5)}
             style={{ display: "flex", cursor: "pointer" }}
           >
             Show More...
@@ -231,7 +231,9 @@ function Search() {
           setTime((new Date() - time) / 1000);
           setTotal(total);
         });
-      } catch {}
+      } catch {
+        //empty
+      }
     };
     fetchRecords();
   }, [search, offset]);
@@ -314,7 +316,7 @@ function Search() {
     </div>
   );
 
-  const SearchForm = ({ children }) => (
+  const SearchForm = () => (
     <Paper>
       <Form
         initialValues={search}
