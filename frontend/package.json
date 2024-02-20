@@ -35,7 +35,7 @@
     "vite-tsconfig-paths": "^4.2.3"
   },
   "scripts": {
-    "start": "vite",
+    "start": "vite dev",
     "build": "vite build",
     "preview": "vite preview",
     "publish": "npm run build && scp -Crp build/* freedomarc:work/freedom_archives_2/frontend/build/"
