@@ -1,8 +1,8 @@
 import "./Form.scss";
 
-import { Alert, AlertTitle, Button, Grid, Paper, Portal } from "@mui/material";
+import { Alert, AlertTitle, Button, Grid, Portal } from "@mui/material";
 import { Formik, Form as FormikForm, useFormikContext } from "formik";
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 
 import ReactDOM from "react-dom";
 
@@ -74,7 +74,7 @@ const Form = ({
   const rows = React.Children.toArray(children);
   const [enableValidation, setEnableValidation] = useState(false);
 
-  const renderButtons = (buttons, handleReset) => {
+  const renderButtons = (buttons) => {
     if (!buttons.length) {
       return null;
     }
@@ -113,12 +113,11 @@ const Form = ({
       initialValues={initialValues}
       {...props}
     >
-      {({ errors, touched }) => {
-        useEffect(() => {
-          if (Object.keys(errors).length > 0 && !enableValidation) {
-            setEnableValidation(true);
-          }
-        }, [errors]);
+      {({ errors }) => {
+        console.log(errors);
+        if (Object.keys(errors).length > 0 && !enableValidation) {
+          setEnableValidation(true);
+        }
         return (
           <FormikForm className="form">
             {onChange && <HandleChangeComponent onChange={onChange} />}

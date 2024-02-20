@@ -115,7 +115,6 @@ export function ItemsList({
   items,
   type,
   emptyText,
-  index,
   itemAction,
   link = true,
   ...props
@@ -390,7 +389,6 @@ export function Item({
   missingRecordText = "None",
   index,
   onClick: onClickHandler,
-  itemAction,
   ...props
 }) {
   const list_item_props =

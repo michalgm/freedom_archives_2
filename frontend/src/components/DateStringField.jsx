@@ -1,8 +1,9 @@
-import { IMaskInput } from "react-imask";
+import { IMask, IMaskInput } from "react-imask";
+
 import React from "react";
 import { TextField } from "@mui/material";
 
-const DateStringMask = React.forwardRef((props, ref) => {
+const DateStringMask = React.forwardRef(function DateStringMask(props, ref) {
   const { onChange, ...other } = props;
   const inputRef = React.useRef(null);
 

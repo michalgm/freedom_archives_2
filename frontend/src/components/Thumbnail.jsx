@@ -1,14 +1,12 @@
-import {
-  Avatar,
-} from '@mui/material';
-import { BrokenImage } from '@mui/icons-material';
-import React from 'react'
+import { Avatar } from "@mui/material";
+import { BrokenImage } from "@mui/icons-material";
+import React from "react";
 
 const onError = (event) => {
   event.target.src = `/static/images/nodigital.png`;
 };
 
-export default function Thumbnail({ src, type, width = 75, alt = "" }) {
+export default function Thumbnail({ src, width = 75, alt = "" }) {
   if (src) {
     return (
       <span

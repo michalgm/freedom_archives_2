@@ -28,7 +28,7 @@ function Notifications() {
     dispatch,
   } = useStateValue();
 
-  const hideNotification = (id, message) => {
+  const hideNotification = (id) => {
     dispatch(
       "NOTIFICATIONS",
       notifications.filter(({ id: notification_id }) => notification_id !== id)

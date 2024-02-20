@@ -16,7 +16,7 @@ import { useStateValue } from "../appContext";
 
 const page_size = 10;
 
-function Filter({ filter, index, remove, filterTypes }) {
+function Filter({ index, remove, filterTypes }) {
   const {
     setFieldValue,
     values: { filters },
@@ -114,11 +114,11 @@ function Filter({ filter, index, remove, filterTypes }) {
 }
 
 export default function Manage({
-  renderItem,
+  // renderItem,
   defaultFilter = {},
   filterTypes,
   createQuery,
-  type,
+  // type,
   service,
   embedded,
   itemAction,
@@ -307,6 +307,7 @@ export default function Manage({
       embedded
       footerElements={[
         <PaginationFooter
+          key="pagination"
           type={service}
           total={total}
           digitizedTotal={digitizedTotal}

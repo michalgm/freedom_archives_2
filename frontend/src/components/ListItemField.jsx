@@ -5,29 +5,29 @@ import {
   DialogContent,
   DialogTitle,
   Grid,
-} from '@mui/material';
-import React, { useState } from 'react';
+} from "@mui/material";
+import React, { useState } from "react";
 
-import Field from './Field';
-import FieldRow from './FieldRow';
-import Form from './Form';
-import { createFilterOptions } from '@mui/material/useAutocomplete';
-import { list_items } from '../api';
-import { useFormikContext } from 'formik';
+import Field from "./Field";
+import FieldRow from "./FieldRow";
+import Form from "./Form";
+import { createFilterOptions } from "@mui/material/useAutocomplete";
+import { list_items } from "../api";
+import { useFormikContext } from "formik";
 
 const ListItemField = ({ name, disableNew, listType, isMulti, ...props }) => {
   const [open, toggleOpen] = React.useState(false);
-  const [newValue, setNewValue] = React.useState('');
+  const [newValue, setNewValue] = React.useState("");
 
   const filter = createFilterOptions({ trim: true });
-  const type = listType || name.replace(/s$/, '');
+  const type = listType || name.replace(/s$/, "");
 
   const validateChange = (_, item) => {
     const lastItem = isMulti ? item && item[item.length - 1] : item;
-    if (lastItem && lastItem.list_item_id === 'new' && lastItem.item) {
+    if (lastItem && lastItem.list_item_id === "new" && lastItem.item) {
       toggleOpen(true);
-      setNewValue(lastItem.item.replace(/^Add "(.+)"$/, '$1'));
-      return false
+      setNewValue(lastItem.item.replace(/^Add "(.+)"$/, "$1"));
+      return false;
     } else {
       return true;
     }
@@ -45,30 +45,33 @@ const ListItemField = ({ name, disableNew, listType, isMulti, ...props }) => {
         clearOnBlur
         handleHomeEndKeys
         onChange={(event, option) => {
-          props.onChange && props.onChange(event, option)
-          return validateChange(event, option)
+          props.onChange && props.onChange(event, option);
+          return validateChange(event, option);
         }}
         filterOptions={(options, params) => {
-          const filtered = filter(options, params)
+          const filtered = filter(options, params);
           if (
             !disableNew &&
             options.length &&
-            params.inputValue !== '' &&
-            !filtered.some(({ item }) => item.toLowerCase() === params.inputValue.toLowerCase())
+            params.inputValue !== "" &&
+            !filtered.some(
+              ({ item }) =>
+                item.toLowerCase() === params.inputValue.toLowerCase()
+            )
           ) {
             filtered.push({
               value: params.inputValue,
               item: `Add "${params.inputValue}"`,
-              list_item_id: `new`
+              list_item_id: `new`,
             });
           }
-          return filtered
+          return filtered;
         }}
         size="small"
         {...props}
       />
       <NewListItemDialog
-        handleClose={(...args) => {
+        handleClose={() => {
           toggleOpen(false);
         }}
         initialValue={newValue}
@@ -84,7 +87,6 @@ export const NewListItemDialog = ({
   handleClose,
   open,
   type,
-  ...props
 }) => {
   const [listItem, setListItem] = useState({});
   const { values, isValid, setFieldValue } = useFormikContext();
@@ -92,7 +94,7 @@ export const NewListItemDialog = ({
     setListItem({ [type]: initialValue });
   }, [initialValue, type]);
 
-  const handleSubmit = async updatedValues => {
+  const handleSubmit = async (updatedValues) => {
     const item = updatedValues[type];
     const result = await list_items.create({
       item,
@@ -103,7 +105,7 @@ export const NewListItemDialog = ({
     handleClose(result);
   };
 
-  const validate = async values => {
+  const validate = async (values) => {
     const item = values[type];
 
     const { data } = await list_items.find({

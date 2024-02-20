@@ -49,7 +49,7 @@ function ViewContainer({
   }, [rootPath, type, resetSearch]);
 
   useEffect(() => {
-    const updateNeighbors = async (direction) => {
+    const updateNeighbors = async () => {
       if (neighborService) {
         const id = `${neighborService}_id`;
         const neighborQuery = {

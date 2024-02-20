@@ -1,15 +1,13 @@
-import React from 'react';
-import { Link } from 'react-router-dom';
-import {
-  Button
-} from '@mui/material';
+import { Button } from "@mui/material";
+import { Link } from "react-router-dom";
+import React from "react";
 
-const CollisionLink = React.forwardRef((props, ref) => (
-  <Link ref={ref} {...props} />
-));
+const CollisionLink = React.forwardRef(function CollisionLink(props, ref) {
+  return <Link ref={ref} {...props} />;
+});
 
 function ButtonLink(props) {
-  return <Button component={CollisionLink} {...props} />
+  return <Button component={CollisionLink} {...props} />;
 }
 
 export default ButtonLink;
