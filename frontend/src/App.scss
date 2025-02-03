@@ -16,11 +16,12 @@ body,
   .EdgeHeaderOffset {
     flex: none;
   }
+  header.MuiPaper-root,
+  .MuiDrawer-root .MuiPaper-root {
+    padding: 0px;
+  }
   .MuiContainer-root {
     padding-top: 8px;
-    .MuiPaper-root {
-      padding: 10px;
-    }
   }
   .topnav {
     .logout,

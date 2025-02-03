@@ -7,6 +7,7 @@ import {
 import React, { Suspense } from "react";
 
 import Collections from "./views/Collections";
+import EditLists from "./views/EditLists";
 import Login from "./views/Login";
 import Record from "./views/Record";
 import Records from "./views/Records";
@@ -43,6 +44,7 @@ function Routes({ isAuthenticated }) {
           <Route path="/relationships/" element={<Relationships />} />
           <Route path="/users" element={<Users />} />
           <Route path="/login" element={<Login />} />
+          <Route path="/site/edit-list-values" element={<EditLists />} />
         </RouterRoutes>
       </Suspense>
     );

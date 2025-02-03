@@ -1,10 +1,4 @@
-import React, {
-  createContext,
-  useCallback,
-  useContext,
-  useEffect,
-  useReducer,
-} from "react";
+import React, { createContext, useCallback, useContext, useEffect, useReducer } from "react";
 export const StateContext = createContext();
 const initialState = {
   isAuthenticated: null,
@@ -109,13 +103,17 @@ export const useResetSearch = () => {
 
 export const useAddNotification = () => {
   const { state, dispatch } = useContext(StateContext);
-  return (notification) => {
-    const id = notification.id || (Math.random() + 1).toString(36).substring(7);
-    dispatch({
-      type: "NOTIFICATIONS",
-      payload: [...state.notifications, { ...notification, id }],
-    });
-  };
+  return useCallback(
+    (notification) => {
+      const id = notification.id || (Math.random() + 1).toString(36).substring(7);
+      console.log("add", notification, id);
+      dispatch({
+        type: "NOTIFICATIONS",
+        payload: [...state.notifications, { ...notification, id }],
+      });
+    },
+    [dispatch, state.notifications]
+  );
 };
 
 // export const useTitle = title => {

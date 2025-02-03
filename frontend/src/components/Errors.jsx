@@ -15,7 +15,7 @@ function Errors() {
 
   return (
     error && (
-      <Alert severity="error" onClose={() => clearError()}>
+      <Alert severity="error" onClose={() => clearError()} sx={{ mb: 1 }}>
         <AlertTitle>Error</AlertTitle>
         {error}
       </Alert>

@@ -1,33 +1,21 @@
 import "./App.scss";
 
-import {
-  Box,
-  Button,
-  Container,
-  CssBaseline,
-  Icon,
-  Toolbar,
-  Typography,
-} from "@mui/material";
 import { Content, EdgeTrigger, Header, Root } from "@mui-treasury/layout";
+import { Box, Button, Container, CssBaseline, Icon, Toolbar, Typography } from "@mui/material";
+import { StyledEngineProvider, ThemeProvider, createTheme } from "@mui/material/styles";
+import React from "react";
 import { Link, BrowserRouter as Router } from "react-router-dom";
 import { StateProvider, useStateValue } from "./appContext";
-import {
-  StyledEngineProvider,
-  ThemeProvider,
-  createTheme,
-} from "@mui/material/styles";
 
+import { ConfirmProvider } from "material-ui-confirm";
+import { app } from "./api";
 import Authentication from "./Authentication";
 import Breadcrumbs from "./components/Breadcrumbs";
-import { ConfirmProvider } from "material-ui-confirm";
 import Errors from "./components/Errors";
-import Loading from "./views/Loading";
 import Notifications from "./components/Notifications";
-import React from "react";
 import Routes from "./Routes";
+import Loading from "./views/Loading";
 import Sidebar from "./views/Sidebar";
-import { app } from "./api";
 
 export const theme = createTheme({
   components: {
@@ -35,6 +23,14 @@ export const theme = createTheme({
       defaultProps: {
         size: "small",
       },
+    },
+    MuiPaper: {
+      styleOverrides: {
+        root: {
+          padding: "10px",
+        },
+      },
+      defaultProps: {},
     },
   },
 });
@@ -86,7 +82,12 @@ function App() {
         <CssBaseline>
           <StateProvider>
             <ConfirmProvider>
-              <Router>
+              <Router
+                future={{
+                  v7_startTransition: true,
+                  v7_relativeSplatPath: true,
+                }}
+              >
                 <Root scheme={scheme}>
                   <Layout />
                 </Root>
@@ -152,11 +153,7 @@ function NavBar() {
     <Header color="primary">
       <Toolbar className="topnav">
         <EdgeTrigger target={{ anchor: "left", field: "open" }}>
-          {(open, setOpen) => (
-            <Icon onClick={() => setOpen(!open)}>
-              {open ? "keyboard_arrow_left" : "menu"}
-            </Icon>
-          )}
+          {(open, setOpen) => <Icon onClick={() => setOpen(!open)}>{open ? "keyboard_arrow_left" : "menu"}</Icon>}
         </EdgeTrigger>
         <Breadcrumbs />
         <Logout />

@@ -28,7 +28,7 @@ const sideBarConfig = {
   ],
   "Site Management": [
     { label: "Edit site header text", icon: "", href: "" },
-    { label: "Edit Lists", icon: "", href: "" },
+    { label: "Edit List Values", icon: "", href: "/site/edit-list-values" },
     { label: "Export Collections", icon: "", href: "" },
     { label: "Find Duplicate Records", icon: "", href: "" },
     { label: "Review Changes", icon: "", href: "" },
