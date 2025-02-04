@@ -1,28 +1,19 @@
-import {
-  Box,
-  Divider,
-  Grid,
-  Paper,
-  Stack,
-  Tab,
-  Tabs,
-  Typography,
-} from "@mui/material/";
-import { EditableItem, EditableItemsList } from "../components/RecordItem";
+import { Box, Divider, Grid, Paper, Stack, Tab, Tabs, Typography } from "@mui/material/";
 import { FieldArray, useFormikContext } from "formik";
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
+import { EditableItem, EditableItemsList } from "../components/RecordItem";
 
-import Collections from "../views/Collections";
+import { useConfirm } from "material-ui-confirm";
+import { collections as collectionsService } from "../api";
+import { useTitle } from "../appContext";
 import Field from "../components/Field";
 import FieldRow from "../components/FieldRow";
 import Form from "../components/Form";
 import ListItemField from "../components/ListItemField";
-import Records from "./Records";
 import ViewContainer from "../components/ViewContainer";
-import { collections as collectionsService } from "../api";
-import { useConfirm } from "material-ui-confirm";
-import { useTitle } from "../appContext";
+import Collections from "../views/Collections";
+import Records from "./Records";
 
 const defaultCollection = {
   child_records: [],
@@ -103,13 +94,8 @@ function Collection({ id, mode = "" }) {
               Are you sure you want to delete collection &quot;
               <b>{collection.collection_name}</b>&quot;?
             </Typography>
-            <Typography
-              component="span"
-              sx={{ display: "block" }}
-              variant="body2"
-            >
-              All child records will be moved to the &quot;Uncategorized&quot;
-              collection
+            <Typography component="span" sx={{ display: "block" }} variant="body2">
+              All child records will be moved to the &quot;Uncategorized&quot; collection
             </Typography>
           </>
         ),
@@ -172,12 +158,8 @@ function Collection({ id, mode = "" }) {
     if (isFeaturedCollections) {
       return (
         <>
-          {tab === "subcollections" && (
-            <EditList property="children" type="collection" reorder />
-          )}
-          {tab === "records" && (
-            <EditList property="child_records" type="record" />
-          )}
+          {tab === "subcollections" && <EditList property="children" type="collection" reorder />}
+          {tab === "records" && <EditList property="child_records" type="record" />}
         </>
       );
     }
@@ -185,12 +167,8 @@ function Collection({ id, mode = "" }) {
       <>
         {tab === "collection" && <CollectionFields />}
         {tab === "featured" && featured_records}
-        {tab === "subcollections" && (
-          <EditList property="children" type="collection" reorder />
-        )}
-        {tab === "records" && (
-          <EditList property="child_records" type="record" />
-        )}
+        {tab === "subcollections" && <EditList property="children" type="collection" reorder />}
+        {tab === "records" && <EditList property="child_records" type="record" />}
       </>
     );
   };
@@ -199,36 +177,20 @@ function Collection({ id, mode = "" }) {
     <ViewContainer
       item={collection}
       buttonRef={buttonRef}
-      neighborService={
-        isFeaturedRecords || isFeaturedCollections ? null : "collection"
-      }
+      neighborService={isFeaturedRecords || isFeaturedCollections ? null : "collection"}
     >
       <Paper sx={{ height: "100%" }}>
         <Stack sx={{ height: "100%" }}>
           {!isFeaturedRecords && (
-            <Tabs
-              sx={{ mb: 2, flex: "0 0 auto" }}
-              value={tab}
-              onChange={(_, tab) => setTab(tab)}
-            >
-              {!isFeaturedCollections && (
-                <Tab label="Edit Collection" value="collection"></Tab>
-              )}
-              {!isFeaturedCollections && (
-                <Tab label="Featured Records" value="featured"></Tab>
-              )}
+            <Tabs sx={{ mb: 2, flex: "0 0 auto" }} value={tab} onChange={(_, tab) => setTab(tab)}>
+              {!isFeaturedCollections && <Tab label="Edit Collection" value="collection"></Tab>}
+              {!isFeaturedCollections && <Tab label="Featured Records" value="featured"></Tab>}
               <Tab label="Subcollections" value="subcollections"></Tab>
               <Tab label="Records" value="records"></Tab>
             </Tabs>
           )}
           <Box sx={{ overflow: "auto", flex: "1 1 auto" }}>
-            <Form
-              initialValues={collection}
-              onSubmit={action}
-              ro={!edit}
-              buttons={buttons}
-              buttonRef={buttonRef}
-            >
+            <Form initialValues={collection} onSubmit={action} ro={!edit} buttons={buttons} buttonRef={buttonRef}>
               {formContents()}
             </Form>
           </Box>
@@ -277,12 +239,7 @@ function CollectionFields() {
   );
 }
 
-function EditList({
-  property = "child_records",
-  type = "record",
-  filter,
-  reorder,
-}) {
+function EditList({ property = "child_records", type = "record", filter, reorder }) {
   const { values } = useFormikContext();
   const ItemsList = type === "record" ? Records : Collections;
 
@@ -304,26 +261,16 @@ function EditList({
             <Stack direction="column" sx={{ height: "100%" }}>
               <Box sx={{ flex: "0 0 auto" }}>
                 <Typography variant="subtitle1">
-                  {`${values[property].length} ${type} in Collection`}{" "}
-                  {/* FIXME */}
+                  {`${values[property].length} ${type} in Collection`} {/* FIXME */}
                 </Typography>
               </Box>
               <Box sx={{ flex: "1 1 auto", overflow: "auto" }}>
-                <EditableItemsList
-                  type={type}
-                  name={property}
-                  reorder={reorder}
-                />
+                <EditableItemsList type={type} name={property} reorder={reorder} />
               </Box>
             </Stack>
           </Box>
           <Box sx={{ flex: "1 1 0" }}>
-            <ItemsList
-              embedded
-              itemAction={(_, item) => unshift(item)}
-              excludeIds={excludeIds}
-              filter={filter}
-            />
+            <ItemsList embedded itemAction={(_, item) => unshift(item)} excludeIds={excludeIds} filter={filter} />
           </Box>
         </Stack>
       </Grid>

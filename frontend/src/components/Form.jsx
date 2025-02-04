@@ -21,13 +21,7 @@ const FormButton = ({ label, onClick, ...props }) => {
     }
   };
   return (
-    <Button
-      variant="contained"
-      size="medium"
-      onClick={click}
-      disabled={props.type === "submit" && !isValid}
-      {...props}
-    >
+    <Button variant="contained" size="medium" onClick={click} disabled={props.type === "submit" && !isValid} {...props}>
       {label}
     </Button>
   );
@@ -131,15 +125,10 @@ const Form = ({
               {...gridProps}
             >
               {!buttonsBelow && !buttonRef && renderButtons(buttons)}
-              {rows.map((row) =>
-                row.type && row.type.name === "FieldRow"
-                  ? React.cloneElement(row, { ro })
-                  : row
-              )}
+              {rows.map((row) => (row.type && row.type.name === "FieldRow" ? React.cloneElement(row, { ro }) : row))}
               {buttonsBelow && !buttonRef && renderButtons(buttons)}
             </Grid>
-            {buttonRef &&
-              ReactDOM.createPortal(renderButtons(buttons), buttonRef.current)}
+            {buttonRef && ReactDOM.createPortal(renderButtons(buttons), buttonRef.current)}
           </FormikForm>
         );
       }}

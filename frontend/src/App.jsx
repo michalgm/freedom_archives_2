@@ -117,11 +117,17 @@ function Layout() {
   //   backgroundColor: "#efefef",
   // };
   return (
-    <Box className="App" sx={{ backgroundColor: "#efefef", height: "1vh" }}>
+    <Box className="App" sx={{ backgroundColor: "#efefef", height: "100vh", display: "flex", flexDirection: "column" }}>
       <NavBar />
       {isAuthenticated && <Sidebar />}
-      <Content sx={{ backgroundColor: "#efefef" }} style={style}>
-        <Loading>
+      <Content
+        sx={{
+          backgroundColor: "#efefef",
+        }}
+        className="FlexContainer"
+        style={style}
+      >
+        <Loading fullPage>
           <Main />
         </Loading>
       </Content>
@@ -170,7 +176,7 @@ function Main() {
   // const title = isAuthenticated ? 'Welcome' : 'Login'
   // <h1>{title}</h1>
   return (
-    <Container maxWidth="xl" sx={{ paddingBottom: "8px" }}>
+    <Container maxWidth="xl" sx={{ paddingBottom: "8px" }} className="FlexContainer">
       <Authentication />
       <Errors />
       <Routes isAuthenticated={isAuthenticated} />

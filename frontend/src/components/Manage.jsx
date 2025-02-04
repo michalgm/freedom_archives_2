@@ -1,18 +1,18 @@
 import { Button, Grid, Icon, IconButton, Paper, Stack } from "@mui/material";
 import { FieldArray, useFormikContext } from "formik";
+import { isEqual, startCase } from "lodash-es";
 import React, { useEffect, useState } from "react";
 import { collections, records } from "../api";
-import { isEqual, startCase } from "lodash-es";
 
 import { Close } from "@mui/icons-material";
+import { useDebouncedCallback } from "use-debounce";
+import { useStateValue } from "../appContext";
 import Field from "../components/Field";
 import Form from "../components/Form";
-import { ItemsList } from "./RecordItem";
 import ListItemField from "../components/ListItemField";
 import PaginationFooter from "../components/PaginationFooter";
 import ViewContainer from "../components/ViewContainer";
-import { useDebouncedCallback } from "use-debounce";
-import { useStateValue } from "../appContext";
+import { ItemsList } from "./RecordItem";
 
 const page_size = 10;
 
@@ -83,11 +83,7 @@ function Filter({ index, remove, filterTypes }) {
     <Grid item xs={"auto"} sx={{ bgColor: "grey.200" }}>
       <Paper sx={{ bgcolor: "grey.200", width: 361 }}>
         <Stack direction="row" spacing={1} sx={{ bgColor: "grey.200" }}>
-          <IconButton
-            sx={{ fontSize: 12, pl: 0 }}
-            onClick={() => remove(index)}
-            variant="outlined"
-          >
+          <IconButton sx={{ fontSize: 12, pl: 0 }} onClick={() => remove(index)} variant="outlined">
             <Close fontSize="inherit" />
           </IconButton>
           <div style={{ width: "40%" }}>
@@ -129,74 +125,67 @@ export default function Manage({
   const [offset, setOffset] = useState(0);
   const [filter, setFilter] = useState(defaultFilter);
   const { dispatch } = useStateValue();
-  const lookupItems = useDebouncedCallback(
-    async ({ filter, offset, page_size, service }) => {
-      const { filters } = filter;
-      const query = createQuery(filter);
-      query.$skip = offset;
-      query.$limit = page_size;
+  const lookupItems = useDebouncedCallback(async ({ filter, offset, page_size, service }) => {
+    const { filters } = filter;
+    const query = createQuery(filter);
+    query.$skip = offset;
+    query.$limit = page_size;
 
-      if (filters.length) {
-        filters.forEach(({ field, value }) => {
-          const filter = filterTypes[field];
-          if (
-            filter &&
-            (value !== null || (value !== undefined && filter.allowNull))
-          ) {
-            if (filter.case === "upper" && typeof value === "string") {
-              value = value.toUpperCase();
-            }
-            switch (filter.match) {
-              case "contained":
-                query[field] = {
-                  $contains: [value.list_item_id || value.value || value],
-                };
-                break;
-              case "fuzzy":
-                query[field] = { $ilike: `%${value.replace(/ /g, "%")}%` };
-                break;
-              case "listitem":
-                query[`${field}_search`] = { $contains: [value.item] };
-                break;
-              case "listitem_id":
-                query[`${field.replace(/s$/, "")}_id`] = value.list_item_id;
-                break;
-              default:
-                query[field] = value;
-            }
+    if (filters.length) {
+      filters.forEach(({ field, value }) => {
+        const filter = filterTypes[field];
+        if (filter && (value !== null || (value !== undefined && filter.allowNull))) {
+          if (filter.case === "upper" && typeof value === "string") {
+            value = value.toUpperCase();
           }
-        });
-      }
-      const [{ data, total }, { total: digitizedTotal = 0 }] =
-        await Promise.all([
-          (service === "record" ? records : collections).find({ query }),
-          service === "record"
-            ? records.find({
-                query: {
-                  ...query,
-                  has_digital: true,
-                  $select: [`record_id`],
-                  $limit: 1,
-                },
-              })
-            : {},
-        ]);
-      setItems(data);
+          switch (filter.match) {
+            case "contained":
+              query[field] = {
+                $contains: [value.list_item_id || value.value || value],
+              };
+              break;
+            case "fuzzy":
+              query[field] = { $ilike: `%${value.replace(/ /g, "%")}%` };
+              break;
+            case "listitem":
+              query[`${field}_search`] = { $contains: [value.item] };
+              break;
+            case "listitem_id":
+              query[`${field.replace(/s$/, "")}_id`] = value.list_item_id;
+              break;
+            default:
+              query[field] = value;
+          }
+        }
+      });
+    }
+    const [{ data, total }, { total: digitizedTotal = 0 }] = await Promise.all([
+      (service === "record" ? records : collections).find({ query }),
+      service === "record"
+        ? records.find({
+            query: {
+              ...query,
+              has_digital: true,
+              $select: [`record_id`],
+              $limit: 1,
+            },
+          })
+        : {},
+    ]);
+    setItems(data);
 
-      setTotal(total);
-      setDigitizedTotal(digitizedTotal);
-      if (!embedded) {
-        dispatch("SEARCH", {
-          type: service,
-          query,
-          total,
-          offset,
-          page_size,
-        });
-      }
-    },
-    250
-  );
+    setTotal(total);
+    setDigitizedTotal(digitizedTotal);
+    if (!embedded) {
+      dispatch("SEARCH", {
+        type: service,
+        query,
+        total,
+        offset,
+        page_size,
+      });
+    }
+  }, 250);
 
   useEffect(() => {
     lookupItems({ filter, offset, page_size, service });
@@ -223,14 +212,7 @@ export default function Manage({
           />
         </Grid>
         <Grid item xs={4}>
-          {service === "record" && (
-            <Field
-              name="collection"
-              type="select"
-              searchType="collections"
-              size="small"
-            />
-          )}
+          {service === "record" && <Field name="collection" type="select" searchType="collections" size="small" />}
         </Grid>
         <Grid item xs={3}>
           <div style={{ display: "flex", flexDirection: "column" }}>
@@ -281,13 +263,7 @@ export default function Manage({
                 <Grid item xs={12}>
                   <Grid container spacing={1}>
                     {filter.filters.map((filter, index) => (
-                      <Filter
-                        filterTypes={filterTypes}
-                        filter={filter}
-                        key={index}
-                        index={index}
-                        remove={remove}
-                      />
+                      <Filter filterTypes={filterTypes} filter={filter} key={index} index={index} remove={remove} />
                     ))}
                   </Grid>
                 </Grid>
@@ -300,8 +276,7 @@ export default function Manage({
   };
 
   const link = !itemAction;
-  itemAction =
-    itemAction || ((index) => dispatch("SEARCH_INDEX", offset + index));
+  itemAction = itemAction || ((index) => dispatch("SEARCH_INDEX", offset + index));
   return (
     <ViewContainer
       embedded
@@ -322,13 +297,7 @@ export default function Manage({
       // headerDarkMode
     >
       <Paper>
-        <ItemsList
-          description
-          items={items}
-          itemAction={itemAction}
-          type={service}
-          link={link}
-        />
+        <ItemsList description items={items} itemAction={itemAction} type={service} link={link} />
       </Paper>
     </ViewContainer>
   );

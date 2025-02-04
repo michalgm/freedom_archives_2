@@ -16,17 +16,16 @@ import {
   TableRow,
   Typography,
 } from "@mui/material/";
-import {
-  EditableItem,
-  EditableItemsList,
-  RecordsList,
-} from "../components/RecordItem";
 import { FieldArray, useFormikContext } from "formik";
 import React, { useCallback, useEffect, useRef, useState } from "react";
-import { records, relationships } from "../api";
 import { useNavigate, useParams } from "react-router-dom";
+import { records, relationships } from "../api";
+import { EditableItem, EditableItemsList, RecordsList } from "../components/RecordItem";
 
 import { ExpandMore } from "@mui/icons-material";
+import { isArray, startCase } from "lodash-es";
+import { useConfirm } from "material-ui-confirm";
+import { useTitle } from "../appContext";
 import Field from "../components/Field";
 import FieldRow from "../components/FieldRow";
 import Form from "../components/Form";
@@ -34,10 +33,6 @@ import GridBlock from "../components/GridBlock";
 import Link from "../components/Link";
 import ListItemField from "../components/ListItemField";
 import ViewContainer from "../components/ViewContainer";
-import { isArray } from "lodash-es";
-import { startCase } from "lodash-es";
-import { useConfirm } from "material-ui-confirm";
-import { useTitle } from "../appContext";
 
 const defaultRecord = {
   // date_string: "??/??/????",
@@ -131,10 +126,7 @@ function Instance({ instance = {}, index, edit, remove }) {
           <IconButton
             onClick={() => {
               instance.instance_id
-                ? context.setFieldValue(
-                    `instances[${index}].delete`,
-                    !instance.delete
-                  )
+                ? context.setFieldValue(`instances[${index}].delete`, !instance.delete)
                 : remove(index);
             }}
             size="large"
@@ -174,12 +166,7 @@ function Instance({ instance = {}, index, edit, remove }) {
           />
         </TableCell>
         <TableCell>
-          <Field
-            ro={!edit}
-            fullWidth={false}
-            label=" "
-            name={`instances[${index}].call_number`}
-          />
+          <Field ro={!edit} fullWidth={false} label=" " name={`instances[${index}].call_number`} />
         </TableCell>
         <TableCell>
           <ListItemField
@@ -285,21 +272,13 @@ function Instances({ record, edit }) {
                   </TableRow>
                 )}
                 {instances.map((instance, index) => (
-                  <Instance
-                    key={index}
-                    edit={edit}
-                    instance={instance}
-                    index={index}
-                    remove={remove}
-                  />
+                  <Instance key={index} edit={edit} instance={instance} index={index} remove={remove} />
                 ))}
               </TableBody>
             </Table>
             <Button
               variant="contained"
-              onClick={() =>
-                push({ record_id: record.record_id, no_copies: 1 })
-              }
+              onClick={() => push({ record_id: record.record_id, no_copies: 1 })}
               startIcon={<Icon>add</Icon>}
             >
               Add New Media
@@ -345,9 +324,7 @@ function Relationships({ id, relationships = [] }) {
               <TableRow>
                 <TableCell rowSpan={2}>{index + 1}</TableCell>
                 <TableCell>
-                  <Link to={`/record/${doc_id}`}>
-                    {relation[`title_${side}`]}
-                  </Link>
+                  <Link to={`/record/${doc_id}`}>{relation[`title_${side}`]}</Link>
                 </TableCell>
                 <TableCell>{relation[`generation_${side}`]}</TableCell>
                 <TableCell>{relation[`call_number_${side}`]}</TableCell>
@@ -359,9 +336,7 @@ function Relationships({ id, relationships = [] }) {
                 </TableCell>
               </TableRow>
               <TableRow>
-                <TableCell colSpan={7}>
-                  {relation[`description_${side}`]}
-                </TableCell>
+                <TableCell colSpan={7}>{relation[`description_${side}`]}</TableCell>
               </TableRow>
             </React.Fragment>
           );
@@ -423,9 +398,7 @@ function Record({ showForm, id, ro = false /*  embedded = false */ }) {
     record.instances = record_data.instances;
     record.children = record_data.children;
     record.continuations = record_data.continuations;
-    record.relationships = (
-      <Relationships id={record_data.record_id} relationships={relationships} />
-    );
+    record.relationships = <Relationships id={record_data.record_id} relationships={relationships} />;
     record.primary_instance_id = `${record.primary_instance_id}`;
     // console.log(record.primary_instance_id)
     setRecord(record);
@@ -538,11 +511,7 @@ function Record({ showForm, id, ro = false /*  embedded = false */ }) {
 
   return (
     <div className="record">
-      <ViewContainer
-        item={record}
-        buttonRef={showForm && buttonRef}
-        neighborService="record"
-      >
+      <ViewContainer item={record} buttonRef={showForm && buttonRef} neighborService="record">
         {(record.title || newRecord) && (
           <Form
             initialValues={record}
@@ -576,10 +545,7 @@ function Record({ showForm, id, ro = false /*  embedded = false */ }) {
                     <img
                       style={{ maxWidth: "100%" }}
                       alt=""
-                      src={
-                        "https://search.freedomarchives.org/" +
-                        record.primary_instance_thumbnail
-                      }
+                      src={"https://search.freedomarchives.org/" + record.primary_instance_thumbnail}
                     />
                   </p>
                 </Grid>
@@ -614,11 +580,7 @@ function Record({ showForm, id, ro = false /*  embedded = false */ }) {
               </FieldRow>
             </GridBlock>
             <GridBlock title="Media">
-              <Instances
-                edit={edit}
-                record={record}
-                instances={record.instances || []}
-              />
+              <Instances edit={edit} record={record} instances={record.instances || []} />
             </GridBlock>
             <Grid item xs={12}>
               <Divider />
@@ -629,26 +591,13 @@ function Record({ showForm, id, ro = false /*  embedded = false */ }) {
                 <AccordionDetails>
                   <Grid container spacing={2}>
                     <GridBlock title="Parent Record">
-                      <RecordParent
-                        edit={edit}
-                        record={record}
-                        parent={record.parent || {}}
-                      />
+                      <RecordParent edit={edit} record={record} parent={record.parent || {}} />
                     </GridBlock>
                     <GridBlock title="Child Records">
-                      <EditableItemsList
-                        edit={edit}
-                        record={record}
-                        name="children"
-                        emptyText="No child records"
-                        add
-                      />
+                      <EditableItemsList edit={edit} record={record} name="children" emptyText="No child records" add />
                     </GridBlock>
                     <GridBlock title="Sibling Records">
-                      <RecordsList
-                        records={record.siblings}
-                        emptyText="No Sibling Records"
-                      />
+                      <RecordsList records={record.siblings} emptyText="No Sibling Records" />
                     </GridBlock>
                     <GridBlock title="Continuations">
                       <EditableItemsList
@@ -660,9 +609,7 @@ function Record({ showForm, id, ro = false /*  embedded = false */ }) {
                         add
                       />
                     </GridBlock>
-                    <GridBlock title="Old Relationships">
-                      {record.relationships}
-                    </GridBlock>
+                    <GridBlock title="Old Relationships">{record.relationships}</GridBlock>
                   </Grid>
                 </AccordionDetails>
               </Accordion>

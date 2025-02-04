@@ -122,7 +122,7 @@ export const EditableDataTable = ({
         }
       }
     },
-    [editRow, apiRef, resetEdit, fieldToFocus]
+    [apiRef, resetEdit, fieldToFocus]
   );
 
   const addItem = useCallback(() => {
@@ -231,11 +231,18 @@ export const EditableDataTable = ({
       },
       sx: {
         background: "#fff",
+        "& .MuiDataGrid-footerContainer, & .MuiDataGrid-toolbarContainer, & .MuiDataGrid-topContainer .MuiDataGrid-row--borderBottom":
+          {
+            backgroundColor: "grey.100",
+          },
         "& .MuiDataGrid-columnHeaderTitle": {
           textTransform: "capitalize",
         },
         "& .MuiDataGrid-cell:focus": {
           outline: "none",
+        },
+        "& .MuiDataGrid-main": {
+          overflow: "auto",
         },
         "& .MuiDataGrid-editInputCell": {
           backgroundColor: "rgba(25, 118, 210, 0.08)",
@@ -252,7 +259,7 @@ export const EditableDataTable = ({
   );
 
   return (
-    <Box sx={{ position: "relative" }}>
+    <Box className="FlexContainer" sx={{ position: "relative" }}>
       <AddButton addItem={addItem} itemType={itemType} />
       <DataGrid
         slots={{ toolbar: GridToolbar }}
@@ -273,7 +280,6 @@ export const EditableDataTable = ({
         rows={localRows}
         columns={tableColumns}
         getRowId={getRowId}
-        // rowModesModel={rowModesModel}
         sx={{}}
         {...gridHandlers}
         {...props}

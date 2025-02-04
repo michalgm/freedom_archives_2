@@ -1,4 +1,4 @@
-import { Divider, Paper, Stack, Tab, Tabs } from "@mui/material";
+import { Box, Paper, Tab, Tabs } from "@mui/material";
 
 import React, { useCallback, useEffect, useState } from "react";
 import { list_items_lookup } from "../api";
@@ -113,14 +113,14 @@ function EditLists() {
   const itemType = startCase(type);
 
   return (
-    <Paper>
-      <Tabs value={type} onChange={(_, type) => setType(type.toLowerCase())}>
+    <Paper className="FlexContainer" sx={{ p: 0 }}>
+      <Tabs value={type} variant="scrollable" scrollButtons="auto" onChange={(_, type) => setType(type.toLowerCase())}>
         {types.map(([value, label]) => (
           <Tab key={value} label={label} value={value} />
         ))}
       </Tabs>
 
-      <Stack divider={<Divider flexItem />} spacing={1}>
+      <Box className="FlexContainer" sx={{ p: 1 }}>
         <EditableDataTable
           rows={values.data}
           columns={columns}
@@ -154,7 +154,7 @@ function EditLists() {
           onSortModelChange={handleSortModelChange}
           defaultValues={{ type }}
         />
-      </Stack>
+      </Box>
     </Paper>
   );
 }

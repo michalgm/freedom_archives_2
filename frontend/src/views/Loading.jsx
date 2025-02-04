@@ -1,13 +1,13 @@
 import { Box, LinearProgress } from "@mui/material";
 
+import { debounce } from "lodash-es";
 import React from "react";
 import { app } from "../api";
-import { debounce } from "lodash-es";
 import { useStateValue } from "../appContext";
 
 let loaded = false;
 
-export default function Loading({ children }) {
+export default function Loading({ children, fullPage = false }) {
   const {
     state: { loading },
     dispatch,
@@ -36,9 +36,7 @@ export default function Loading({ children }) {
   // return true && (
   return (
     <>
-      {loading && (
-        <LinearProgress sx={{ width: "100%" }} color="secondary" size={100} />
-      )}
+      {loading && <LinearProgress sx={{ width: "100%" }} color="secondary" size={100} />}
       <Box
         sx={[
           {
@@ -48,6 +46,11 @@ export default function Loading({ children }) {
           loading && {
             marginTop: "-4px",
             opacity: 0.6,
+          },
+          fullPage && {
+            display: "flex",
+            flexDirection: "column",
+            height: "100%",
           },
         ]}
       >

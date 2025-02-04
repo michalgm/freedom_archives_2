@@ -2,13 +2,7 @@ import { Grid, Paper, Typography } from "@mui/material/";
 
 import React from "react";
 
-function GridBlock({
-  children = [],
-  title = "",
-  subtitle = "",
-  width = 12,
-  spacing,
-}) {
+function GridBlock({ children = [], title = "", subtitle = "", width = 12, spacing }) {
   return (
     <Grid item xs={width}>
       <Paper>

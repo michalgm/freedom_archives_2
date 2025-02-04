@@ -1,4 +1,5 @@
 import PasswordIcon from "@mui/icons-material/Password";
+import { Paper } from "@mui/material";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { users as usersService } from "../api";
 import EditableDataTable from "../components/EditableDataTable";
@@ -86,7 +87,7 @@ export default function Users() {
   };
 
   return (
-    <div className="users">
+    <Paper className="users FlexContainer" sx={{ p: 0 }}>
       <EditableDataTable
         {...{
           rows: users,
@@ -107,6 +108,6 @@ export default function Users() {
         autosizeColumns
       />
       <ChangePassword {...editPassword} handleClose={() => setEditPassword({ open: false, user: {} })} />
-    </div>
+    </Paper>
   );
 }

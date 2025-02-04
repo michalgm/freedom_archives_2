@@ -3,32 +3,20 @@ import React, { useEffect } from "react";
 import { collections, records } from "../api";
 import { useResetSearch, useStateValue } from "../appContext";
 
-import ButtonLink from "./ButtonLink";
 import { startCase } from "lodash-es";
 import { useLocation } from "react-router-dom";
+import ButtonLink from "./ButtonLink";
 
 const renderTime = (item, type) => {
   return (
     <Typography variant="caption">
-      {startCase(type)} at{" "}
-      {item[`date_${type}`]
-        ? new Date(item[`date_${type}`]).toLocaleString()
-        : "???"}{" "}
-      by{" "}
-      {item[`${type === "created" ? "creator" : "contributor"}_name`] ||
-        "Unknown"}
+      {startCase(type)} at {item[`date_${type}`] ? new Date(item[`date_${type}`]).toLocaleString() : "???"} by{" "}
+      {item[`${type === "created" ? "creator" : "contributor"}_name`] || "Unknown"}
     </Typography>
   );
 };
 
-function ViewContainer({
-  children,
-  item,
-  buttonRef,
-  neighborService,
-  embedded,
-  ...props
-}) {
+function ViewContainer({ children, item, buttonRef, neighborService, embedded, ...props }) {
   const {
     state: {
       search: { query, type },
@@ -58,10 +46,7 @@ function ViewContainer({
           $limit: 3,
           $select: [id],
         };
-        const { data } = await (neighborService === "record"
-          ? records
-          : collections
-        ).find({ query: neighborQuery });
+        const { data } = await (neighborService === "record" ? records : collections).find({ query: neighborQuery });
         let neighbors = data.map((item) => item[id]);
         if (!search_index) {
           neighbors.unshift(null);
@@ -78,13 +63,7 @@ function ViewContainer({
     const offset = type === "prev" ? -1 : 1;
     if (neighborService) {
       return (
-        <Grid
-          item
-          xs
-          component={Box}
-          textAlign={type === "prev" ? "left" : "right"}
-          style={{ flex: "0 0 auto" }}
-        >
+        <Grid item xs component={Box} textAlign={type === "prev" ? "left" : "right"} style={{ flex: "0 0 auto" }}>
           <ButtonLink
             disabled={!neighbors[type]}
             to={`/${neighborService}s/${neighbors[type]}`}
@@ -102,11 +81,7 @@ function ViewContainer({
   const renderSection = (type) => {
     const sectionElements = props[`${type}Elements`] || [];
     const sectionProps = props[`${type}Props`] || {};
-    if (
-      sectionElements.length ||
-      (type === "footer" && item) ||
-      (type === "header" && buttonRef)
-    ) {
+    if (sectionElements.length || (type === "footer" && item) || (type === "header" && buttonRef)) {
       const section = (
         <Paper {...sectionProps}>
           <Grid item xs={12} style={{ flex: "none" }}>
@@ -114,9 +89,7 @@ function ViewContainer({
               container
               alignContent="center"
               alignItems="center"
-              justifyContent={
-                sectionElements.length === 1 ? "center" : "space-between"
-              }
+              justifyContent={sectionElements.length === 1 ? "center" : "space-between"}
               spacing={2}
               // direction="column"
             >
@@ -138,9 +111,7 @@ function ViewContainer({
                   {item}
                 </Grid>
               ))}
-              {type === "header" && buttonRef && (
-                <Grid item xs ref={buttonRef}></Grid>
-              )}
+              {type === "header" && buttonRef && <Grid item xs ref={buttonRef}></Grid>}
               {type === "footer" && item && (
                 <>
                   <Grid item xs style={{ textAlign: "center" }}>
@@ -159,21 +130,11 @@ function ViewContainer({
   };
   const height = embedded ? "100%" : "calc(100vh - 64px - 16px)";
   return (
-    <Stack
-      direction="column"
-      spacing={4}
-      useFlexGap
-      style={{ height, flexWrap: "nowrap" }}
-    >
+    <Stack direction="column" spacing={2} useFlexGap style={{ height, flexWrap: "nowrap" }}>
       {renderSection("header")}
-      <Grid
-        id="contents"
-        item
-        xs={12}
-        sx={{ overflowX: "auto", padding: "1px", flex: "1 1 auto" }}
-      >
-        <Box sx={{ mb: 2 }}>{children}</Box>
-      </Grid>
+      <Box id="contents" xs={12} sx={{ overflowX: "auto", flex: "1 1 auto", padding: "1px" }}>
+        {children}
+      </Box>
       {!newItem && renderSection("footer")}
     </Stack>
   );
