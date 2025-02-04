@@ -1,28 +1,18 @@
 import "./Search.scss";
 
-import {
-  Box,
-  Button,
-  Card,
-  Divider,
-  Grid,
-  Icon,
-  Link as MULink,
-  Paper,
-  Typography,
-} from "@mui/material";
+import { Box, Button, Card, Divider, Grid, Icon, Link as MULink, Paper, Stack, Typography } from "@mui/material";
 import React, { useEffect, useRef, useState } from "react";
 
+import { useTheme } from "@mui/material/styles";
+import { startCase } from "lodash-es";
+import { unstable_batchedUpdates } from "react-dom";
+import { records as recordsService } from "../api";
 import AutoSave from "../components/AutoSave";
 import Field from "../components/Field";
 import Form from "../components/Form";
 import KVChip from "../components/KVChip";
 import PaginationFooter from "../components/PaginationFooter";
 import Thumbnail from "../components/Thumbnail";
-import { records as recordsService } from "../api";
-import { startCase } from "lodash-es";
-import { unstable_batchedUpdates } from "react-dom";
-import { useTheme } from "@mui/material/styles";
 
 const descriptionMaxLines = 5;
 
@@ -35,9 +25,7 @@ function Description({ text }) {
   const ref = useRef(null);
 
   useEffect(() => {
-    const size = parseFloat(
-      getComputedStyle(ref.current.parentElement).fontSize
-    );
+    const size = parseFloat(getComputedStyle(ref.current.parentElement).fontSize);
     setHeight(ref.current.clientHeight / size);
   }, [setHeight]);
 
@@ -76,8 +64,7 @@ function Description({ text }) {
           }}
           onClick={() => setopen(!open)}
         >
-          <Icon className={open ? "open" : ""}>expand_more</Icon> View{" "}
-          {open ? "Less" : "More"}
+          <Icon className={open ? "open" : ""}>expand_more</Icon> View {open ? "Less" : "More"}
         </Typography>
       )}
     </Box>
@@ -120,9 +107,7 @@ function Filter({ type, values = [], addFilter, search }) {
         <div>
           {(values || [])
             .slice(0, limit)
-            .map(([label, count, value], i) =>
-              renderFilterItem({ value: value || label, label, count, type, i })
-            )}
+            .map(([label, count, value], i) => renderFilterItem({ value: value || label, label, count, type, i }))}
         </div>
         {values && values.length > limit && (
           <Button
@@ -169,15 +154,7 @@ function Search() {
       try {
         const { $fullText, include_non_digitized } = search;
         const query = {
-          $select: [
-            "record_id",
-            "title",
-            "description",
-            "year",
-            "publisher",
-            "producers",
-            "authors",
-          ],
+          $select: ["record_id", "title", "description", "year", "publisher", "producers", "authors"],
           $limit: page_size,
           $fullText: $fullText,
           $skip: offset,
@@ -198,11 +175,7 @@ function Search() {
         if (search.collection) {
           query.collection_id = { $in: search.collection };
         }
-        const {
-          total,
-          data: records,
-          filters = [],
-        } = await recordsService.find({ query });
+        const { total, data: records, filters = [] } = await recordsService.find({ query });
         unstable_batchedUpdates(() => {
           setRecords({
             total,
@@ -260,17 +233,10 @@ function Search() {
     return (
       <Grid item xs={12} key={record.record_id}>
         <Card style={{ display: "flex" }}>
-          <Thumbnail
-            src={`https://search.freedomarchives.org/images/thumbnails/${record.record_id}.jpg`}
-            width={75}
-          />
+          <Thumbnail src={`https://search.freedomarchives.org/images/thumbnails/${record.record_id}.jpg`} width={75} />
           <div style={{ width: "100%" }}>
             <Typography variant="h5">{record.title}</Typography>
-            <Grid
-              container
-              spacing={1}
-              style={{ marginBottom: 3, marginTop: 3 }}
-            >
+            <Grid container spacing={1} style={{ marginBottom: 3, marginTop: 3 }}>
               {(record.details || []).map(([key, value]) => (
                 <Grid item key={key}>
                   <KVChip keyName={startCase(key)} value={value} />
@@ -284,34 +250,14 @@ function Search() {
     );
   };
 
-  const renderResults = () => (
-    <Grid container spacing={2}>
-      {/* {Array.from(new Array(3)).map(renderResult)} */}
-      {records.records.map(renderResult)}
-    </Grid>
-  );
-
   const renderFilters = () => (
     <div>
       <Typography variant="h5">Filters</Typography>
-      <Button
-        color="primary"
-        size="small"
-        variant="contained"
-        onClick={() => clearFilters()}
-      >
+      <Button color="primary" size="small" variant="contained" onClick={() => clearFilters()}>
         Clear Filters
       </Button>
       {filters.map(({ type, values }) => {
-        return (
-          <Filter
-            key={type}
-            type={type}
-            values={values}
-            addFilter={addFilter}
-            search={search[type]}
-          />
-        );
+        return <Filter key={type} type={type} values={values} addFilter={addFilter} search={search[type]} />;
       })}
     </div>
   );
@@ -329,13 +275,7 @@ function Search() {
       >
         <AutoSave timeout={500} />
         <Grid item xs={12}>
-          <Field
-            name="$fullText"
-            label="Search"
-            placeholder="Search Records"
-            width={12}
-            autoFocus
-          />
+          <Field name="$fullText" label="Search" placeholder="Search Records" width={12} autoFocus />
           <Field
             name="include_non_digitized"
             label="Include non-digitized documents"
@@ -352,38 +292,32 @@ function Search() {
   );
 
   return (
-    <div className="records">
-      <Grid container spacing={2}>
-        <Grid item xs={4} lg={3} xl={2}>
+    <Stack direction="row" className="records" sx={{ height: "100%" }} spacing={2}>
+      <Box sx={{ maxWidth: "30%", flexGrow: 1, flexShrink: 0 }} className="FlexScroller">
+        <SearchForm />
+      </Box>
+      <Box sx={{ flexGrow: 1, flexShrink: 1 }} className="FlexContainer">
+        <Stack spacing={2} className="FlexContainer" sx={{ padding: "1px" }}>
           <Paper>
-            <SearchForm />
+            <Box justifyContent="center" display="flex">
+              <PaginationFooter
+                offset={offset}
+                total={total}
+                page_size={page_size}
+                setOffset={setOffset}
+                size="small"
+              />
+            </Box>
+            <Box mt={2} textAlign="center">
+              {records.total} total results ({time} seconds)
+            </Box>
           </Paper>
-        </Grid>
-        <Grid item xs={8} lg={9} xl={10}>
-          <Grid container spacing={2}>
-            <Grid item xs={12}>
-              <Paper>
-                <Box justifyContent="center" display="flex">
-                  <PaginationFooter
-                    offset={offset}
-                    total={total}
-                    page_size={page_size}
-                    setOffset={setOffset}
-                    size="small"
-                  />
-                </Box>
-                <Box mt={2} textAlign="center">
-                  {records.total} total results ({time} seconds)
-                </Box>
-              </Paper>
-            </Grid>
-            <Grid item xs={12}>
-              {renderResults()}
-            </Grid>
-          </Grid>
-        </Grid>
-      </Grid>
-    </div>
+          <Stack spacing={2} className="FlexScroller">
+            {records.records.map(renderResult)}
+          </Stack>
+        </Stack>
+      </Box>
+    </Stack>
   );
 }
 
