@@ -113,17 +113,17 @@ CREATE TABLE featured_records(
 );
 CREATE UNIQUE INDEX featured_records_idx ON featured_records(collection_id, record_id);
 CREATE TABLE records_to_list_items(
-    list_item_id integer NOT NULL REFERENCES list_items,
+    list_item_id integer NOT NULL REFERENCES list_items on DELETE CASCADE,
     record_id integer NOT NULL REFERENCES records ON DELETE CASCADE,
     PRIMARY KEY (list_item_id, record_id)
 );
 CREATE TABLE collections_to_list_items(
-    list_item_id integer NOT NULL REFERENCES list_items,
+    list_item_id integer NOT NULL REFERENCES list_items ON DELETE CASCADE,
     collection_id integer NOT NULL REFERENCES collections ON DELETE CASCADE,
     PRIMARY KEY (list_item_id, collection_id)
 );
 CREATE TABLE instances_to_list_items(
-    list_item_id integer NOT NULL REFERENCES list_items,
+    list_item_id integer NOT NULL REFERENCES list_items ON DELETE CASCADE,
     instance_id integer NOT NULL REFERENCES instances ON DELETE CASCADE,
     PRIMARY KEY (list_item_id, instance_id)
 );
@@ -1032,150 +1032,18 @@ WHERE call_number != ''
 ORDER BY call_number;
 SELECT setval(
         'collections_collection_id_seq',
-(
+        (
             SELECT max(collection_id)
             FROM collections
         )
     );
 SELECT setval(
         'records_record_id_seq',
-(
+        (
             SELECT max(record_id)
             FROM records
         )
     );
--- CREATE OR REPLACE VIEW list_items_lookup AS
--- SELECT
---     list_items.*,
---     CASE WHEN type = ANY ('{author, keyword, producer, subject}') THEN
---     (
---         SELECT
---             count(*)
---         FROM
---             records_to_list_items a
---         WHERE
---             list_items.list_item_id = a.list_item_id)
---     WHEN type = 'program' THEN
---     (
---         SELECT
---             count(program_id)
---         FROM
---             records a
---             JOIN list_items b ON a.program_id = b.list_item_id
---         WHERE
---             b.list_item_id = list_items.list_item_id)
---     WHEN type = 'publisher' THEN
---     (
---         SELECT
---             count(publisher_id)
---         FROM
---             records a
---             JOIN list_items b ON a.publisher_id = b.list_item_id
---         WHERE
---             b.list_item_id = list_items.list_item_id)
--- ELSE
---     0
---     END AS records_count,
---     CASE WHEN type = ANY ('{keyword, subject}') THEN
---     (
---         SELECT
---             count(*)
---         FROM
---             collections_to_list_items a
---         WHERE
---             list_items.list_item_id = a.list_item_id)
---     WHEN type = 'publisher' THEN
---     (
---         SELECT
---             count(publisher_id)
---         FROM
---             collections a
---             JOIN list_items b ON a.publisher_id = b.list_item_id
---         WHERE
---             b.list_item_id = list_items.list_item_id)
---     WHEN type = 'call_number' THEN
---     (
---         SELECT
---             count(call_number)
---         FROM
---             collections a
---             JOIN list_items b ON split_part(a.call_number, ' ', 1) = b.item
---         WHERE
---             b.list_item_id = list_items.list_item_id)
--- ELSE
---     0
---     END AS collections_count
--- FROM
---     list_items
--- CREATE OR REPLACE VIEW list_items_lookup AS
--- WITH records_agg AS (
---     SELECT
---         li.list_item_id,
---         COUNT(*) FILTER (WHERE li.type = ANY ('{author, keyword, producer, subject}')) AS records_count,
---     COUNT(r.program_id) FILTER (WHERE li.type = 'program') AS program_count,
---     COUNT(r.publisher_id) FILTER (WHERE li.type = 'publisher') AS publisher_records_count
--- FROM
---     list_items li
---     LEFT JOIN records_to_list_items rli ON li.list_item_id = rli.list_item_id
---         LEFT JOIN records r ON rli.record_id = r.record_id
---     GROUP BY
---         li.list_item_id
--- ),
--- collections_agg AS (
---     SELECT
---         li.list_item_id,
---         COUNT(*) FILTER (WHERE li.type = ANY ('{keyword, subject}')) AS collections_count,
---     COUNT(c.publisher_id) FILTER (WHERE li.type = 'publisher') AS publisher_collections_count,
---     COUNT(*) FILTER (WHERE li.type = 'call_number'
---         AND split_part(c.call_number, ' ', 1) = li.item) AS call_number_count
--- FROM
---     list_items li
---     LEFT JOIN collections_to_list_items cli ON li.list_item_id = cli.list_item_id
---         LEFT JOIN collections c ON cli.collection_id = c.collection_id
---     GROUP BY
---         li.list_item_id
--- )
--- SELECT
---     li.*,
---     COALESCE(ra.records_count, 0) + COALESCE(ra.program_count, 0) + COALESCE(ra.publisher_records_count, 0) AS records_count,
---     COALESCE(ca.collections_count, 0) + COALESCE(ca.publisher_collections_count, 0) + COALESCE(ca.call_number_count, 0) AS collections_count
--- FROM
---     list_items li
---     LEFT JOIN records_agg ra ON li.list_item_id = ra.list_item_id
---     LEFT JOIN collections_agg ca ON li.list_item_id = ca.list_item_id;
--- SELECT
---     li.list_item_id,
---     COUNT(c.publisher_id) FILTER (WHERE li.type = 'publisher') AS publisher_collections_count
--- FROM
---     list_items li
---     LEFT JOIN collections_to_list_items cli ON li.list_item_id = cli.list_item_id
---     LEFT JOIN collections c ON cli.collection_id = c.collection_id
--- GROUP BY
---     li.list_item_id CREATE OR REPLACE VIEW list_items_lookup AS
---     WITH collections_agg AS (
---         SELECT
---             li.list_item_id,
---             COUNT(*) FILTER (WHERE li.type = ANY ('{keyword, subject}')) AS collections_count,
---         COUNT(DISTINCT c.publisher_id) FILTER (WHERE li.type = 'publisher'
---             AND c.publisher_id IS NOT NULL) AS publisher_collections_count,
---         COUNT(*) FILTER (WHERE li.type = 'call_number'
---             AND split_part(c.call_number, ' ', 1) = li.item) AS call_number_count
---     FROM
---         list_items li
---         LEFT JOIN collections_to_list_items cli ON li.list_item_id = cli.list_item_id
---         LEFT JOIN collections c ON cli.collection_id = c.collection_id
---         LEFT JOIN
---     GROUP BY
---         li.list_item_id
--- )
--- SELECT
---     li.*,
---     ca.collections_count,
---     ca.publisher_collections_count,
---     ca.call_number_count
--- FROM
---     list_items li
---     LEFT JOIN collections_agg ca ON li.list_item_id = ca.list_item_id;
 DROP VIEW IF EXISTS list_items_lookup;
 CREATE OR REPLACE VIEW list_items_lookup AS -- Author items
 SELECT li.list_item_id,

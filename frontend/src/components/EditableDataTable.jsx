@@ -4,31 +4,27 @@ import DeleteIcon from "@mui/icons-material/Delete";
 import EditIcon from "@mui/icons-material/Edit";
 import SaveIcon from "@mui/icons-material/Save";
 import { Box, Button, Tooltip } from "@mui/material";
-import {
-  DataGrid,
-  GridActionsCellItem,
-  GridRowModes,
-  GridToolbarContainer,
-  GridToolbarQuickFilter,
-  useGridApiRef,
-} from "@mui/x-data-grid";
+import { DataGrid, GridActionsCellItem, GridToolbar, useGridApiRef } from "@mui/x-data-grid";
 import { startCase } from "lodash-es";
 import { useConfirm } from "material-ui-confirm";
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import * as API from "../api";
 import { useAddNotification } from "../appContext";
 
-const CustomToolbar = ({ addItem, itemType }) => (
-  <GridToolbarContainer>
-    <Box sx={{ flex: 1 }}>
-      <Button color="primary" variant="contained" startIcon={<Add />} onClick={addItem}>
-        Add {itemType}
-      </Button>
-    </Box>
-    <GridToolbarQuickFilter />
-  </GridToolbarContainer>
-);
-
+const AddButton = ({ itemType, addItem }) => {
+  return (
+    <Button
+      color="primary"
+      size="small"
+      variant="contained"
+      startIcon={<Add />}
+      onClick={addItem}
+      sx={{ position: "absolute", top: "8px", left: "8px", zIndex: 100 }}
+    >
+      Add {itemType}
+    </Button>
+  );
+};
 export const EditableDataTable = ({
   rows,
   columns,
@@ -45,7 +41,6 @@ export const EditableDataTable = ({
   autosizeColumns = false,
   ...props
 }) => {
-  const [rowModesModel, setRowModesModel] = React.useState({});
   const [editRow, setEditRow] = useState(null);
   const [localRows, setLocalRows] = useState(rows);
   const [columnWidths, setColumnWidths] = useState({});
@@ -56,23 +51,23 @@ export const EditableDataTable = ({
   const onUpdateRef = useRef(onUpdate);
   const apiRef = useGridApiRef();
   const addNotification = useAddNotification();
-
+  const fieldToFocus = columns?.[0].field;
   useEffect(() => {
     setLocalRows(rows);
   }, [rows]);
 
-  useEffect(() => {
-    if (localRows.length) {
-      const rowModesModel = localRows.reduce((acc, row) => {
-        const id = row[idField];
-        acc[id] = {
-          mode: id === editRow ? GridRowModes.Edit : GridRowModes.View,
-        };
-        return acc;
-      }, {});
-      setRowModesModel(rowModesModel);
-    }
-  }, [localRows, editRow, idField]);
+  const resetEdit = useCallback(
+    (newRow = {}) => {
+      if (localRows[0]?.[idField] === -1) {
+        setLocalRows((rows) => rows.slice(1));
+      } else if (newRow.delete) {
+        setLocalRows((rows) => rows.filter((row) => row[idField] !== newRow[idField]));
+      }
+      delete newRow.delete;
+      setEditRow(null);
+    },
+    [idField, localRows]
+  );
 
   const processRowUpdate = useCallback(
     async (newRow, oldRow) => {
@@ -100,22 +95,12 @@ export const EditableDataTable = ({
         addNotification({ message: `${itemType} "${name}" ${action.toLowerCase()}d!` });
         await onUpdateRef.current();
       } catch (err) {
-        return oldRow;
+        newRow = oldRow;
       }
-      if (localRows[0][idField] === -1 || newRow.delete) {
-        setLocalRows((rows) => rows.slice(1));
-        setRowModesModel((prev) => {
-          delete prev[id];
-          setRowModesModel((prev) => ({ ...prev }));
-        });
-      } else {
-        setRowModesModel((prev) => ({ ...prev, [id]: { mode: GridRowModes.View } }));
-      }
-      delete newRow.delete;
-      setEditRow(null);
+      resetEdit(newRow);
       return newRow;
     },
-    [addNotification, model, itemType, getItemName, idField, confirm, prepareItem, localRows]
+    [addNotification, model, itemType, getItemName, idField, confirm, prepareItem, resetEdit]
   );
 
   const deleteRow = useCallback(
@@ -125,17 +110,20 @@ export const EditableDataTable = ({
     [processRowUpdate]
   );
 
-  const updateRow = useCallback((id, view = false, cancel = false) => {
-    if (cancel && id === -1) {
-      setLocalRows((rows) => rows.slice(1));
-    }
-    const updateModesModel = {
-      mode: view ? GridRowModes.View : GridRowModes.Edit,
-      ignoreModifications: cancel,
-    };
-    setEditRow(view ? null : id);
-    setRowModesModel((prev) => ({ ...prev, [id]: updateModesModel }));
-  }, []);
+  const updateRow = useCallback(
+    (id, action = "edit") => {
+      if (action === "edit") {
+        apiRef.current.startRowEditMode({ id, fieldToFocus });
+        setEditRow(id);
+      } else {
+        apiRef.current.stopRowEditMode({ id, ignoreModifications: action === "cancel" });
+        if (action === "cancel") {
+          resetEdit();
+        }
+      }
+    },
+    [editRow, apiRef, resetEdit, fieldToFocus]
+  );
 
   const addItem = useCallback(() => {
     const newItem = {
@@ -144,8 +132,10 @@ export const EditableDataTable = ({
     };
     setLocalRows([newItem, ...localRows]);
     setEditRow(-1);
-    setRowModesModel((prev) => ({ ...prev, [-1]: { mode: GridRowModes.Edit } }));
-  }, [localRows, defaultValues, idField]);
+    setTimeout(() => {
+      apiRef.current.startRowEditMode({ id: -1 });
+    }, 1);
+  }, [localRows, defaultValues, idField, apiRef]);
 
   const getRowId = useCallback(
     (row) => {
@@ -159,8 +149,8 @@ export const EditableDataTable = ({
       const isInEditMode = id === editRow;
       const icons = isInEditMode
         ? [
-            ["Save", SaveIcon, () => updateRow(id, true)],
-            ["Cancel", CancelIcon, () => updateRow(id, true, true)],
+            ["Save", SaveIcon, () => updateRow(id, "save")],
+            ["Cancel", CancelIcon, () => updateRow(id, "cancel")],
           ]
         : [
             ["Edit", EditIcon, () => updateRow(id)],
@@ -168,9 +158,13 @@ export const EditableDataTable = ({
             ...extraActions.map(([label, Icon, action]) => [label, Icon, () => action(row)]),
           ];
 
-      const actions = icons.map(([label, Icon, action]) => (
-        <Tooltip key={label} title={label} arrow placement="top">
-          <GridActionsCellItem key={label} icon={<Icon />} label={label} onClick={action} />
+      const actions = icons.map(([label, Icon, action], index) => (
+        <Tooltip key={index} title={label} arrow placement="top">
+          <GridActionsCellItem
+            icon={<Icon color={label === "Save" ? "primary" : "default"} />}
+            label={label}
+            onClick={action}
+          />
         </Tooltip>
       ));
       return actions;
@@ -245,20 +239,28 @@ export const EditableDataTable = ({
         },
         "& .MuiDataGrid-editInputCell": {
           backgroundColor: "rgba(25, 118, 210, 0.08)",
+          ".MuiInputBase-input": {
+            p: 0,
+            mx: "10px",
+            borderBottom: 1,
+            height: "auto",
+          },
         },
       },
     }),
     []
   );
 
-  //   console.log(autosizeColumns, columnWidths, tableColumns);
   return (
-    <>
+    <Box sx={{ position: "relative" }}>
+      <AddButton addItem={addItem} itemType={itemType} />
       <DataGrid
-        slots={{
-          toolbar: CustomToolbar,
+        slots={{ toolbar: GridToolbar }}
+        slotProps={{
+          toolbar: {
+            showQuickFilter: true,
+          },
         }}
-        slotProps={{ toolbar: { addItem, itemType } }}
         processRowUpdate={processRowUpdate}
         loading={loading}
         apiRef={apiRef}
@@ -271,12 +273,12 @@ export const EditableDataTable = ({
         rows={localRows}
         columns={tableColumns}
         getRowId={getRowId}
-        rowModesModel={rowModesModel}
+        // rowModesModel={rowModesModel}
         sx={{}}
         {...gridHandlers}
         {...props}
       />
-    </>
+    </Box>
   );
 };
 

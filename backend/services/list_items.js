@@ -25,20 +25,35 @@ module.exports = function (app) {
 
   const service = app.service("list_items");
 
-  const updateRecords = async (context) => {
+  const findRelations = async (context) => {
     const {
       id,
       params: {
         transaction: { trx },
       },
     } = context;
-
-    return Promise.all(
-      ["record", "collection"].map(async (table) => {
+    context.params.related_items = await Promise.all(
+      ["record", "collection", "instance"].map(async (table) => {
         const ids = await trx(`${table}s_to_list_items`)
           .where("list_item_id", id)
           .select([`${table}_id`]);
+        return [table, ids];
+      })
+    );
+    console.log(context.params.related_items);
+    return context;
+  };
 
+  const updateRecords = async (context) => {
+    const {
+      params: {
+        transaction: { trx },
+        related_items = [],
+      },
+    } = context;
+
+    return Promise.all(
+      related_items.map(async ([table, ids]) => {
         return Promise.all(
           ids.map(async (res) => {
             const id = res[`${table}_id`];
@@ -59,13 +74,16 @@ module.exports = function (app) {
   service.hooks({
     before: {
       all: [],
-      patch: [transaction.start()],
+      patch: [transaction.start(), findRelations],
+      remove: [transaction.start(), findRelations],
     },
     after: {
       patch: [updateRecords, transaction.end()],
+      remove: [updateRecords, transaction.end()],
     },
     error: {
       patch: [transaction.rollback()],
+      remove: [transaction.rollback()],
     },
   });
 };

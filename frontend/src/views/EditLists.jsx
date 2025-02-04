@@ -18,7 +18,7 @@ const item_types = {
   quality: { description: true, instances: true },
 };
 
-const types = Object.keys(item_types);
+const types = Object.keys(item_types).map((t) => [t, startCase(t)]);
 
 const prepareItem = (item) => {
   const prepared = { ...item };
@@ -66,6 +66,7 @@ function EditLists() {
   const [order, setOrder] = useState(initialOrder);
   const [pagination, setPagination] = useState(initialPage);
   const [loading, setLoading] = useState(true);
+
   useEffect(() => {
     setOrder(initialOrder);
     setPagination(initialPage);
@@ -109,12 +110,13 @@ function EditLists() {
   const handlePaginationModelChange = ({ page, pageSize }) => {
     setPagination({ skip: page * pageSize, limit: pageSize });
   };
+  const itemType = startCase(type);
 
   return (
     <Paper>
-      <Tabs value={type} onChange={(_, type) => setType(type)}>
-        {types.map((t) => (
-          <Tab key={t} label={startCase(t)} value={t} />
+      <Tabs value={type} onChange={(_, type) => setType(type.toLowerCase())}>
+        {types.map(([value, label]) => (
+          <Tab key={value} label={label} value={value} />
         ))}
       </Tabs>
 
@@ -124,7 +126,7 @@ function EditLists() {
           columns={columns}
           idField="list_item_id"
           model="list_items"
-          itemType={type}
+          itemType={itemType}
           getItemName={(row) => row.item}
           onFilterModelChange={onFilterChange}
           filterMode="server"
