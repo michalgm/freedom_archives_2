@@ -1,12 +1,12 @@
-import { MenuItem, TextField } from "@mui/material";
+import { Box, MenuItem, TextField } from "@mui/material";
 import RecordItem, { CollectionItem } from "./RecordItem";
 
-import { Autocomplete } from "formik-mui";
 import { Field } from "formik";
+import { Autocomplete } from "formik-mui";
 import React from "react";
-import { services } from "../api";
 import { useDebouncedCallback } from "use-debounce";
 import useDeepCompareEffect from "use-deep-compare-effect";
+import { services } from "../api";
 
 const searchTypes = {
   list_items: {
@@ -17,9 +17,7 @@ const searchTypes = {
     id: "collection_id",
     label: "collection_name",
     fields: ["collection_id", "collection_name", "thumbnail", "parent"],
-    renderOption: (item) => (
-      <CollectionItem collection={item} component="div" dense />
-    ),
+    renderOption: (item) => <CollectionItem collection={item} component="div" dense />,
   },
   records: {
     id: "record_id",
@@ -39,6 +37,13 @@ const searchTypes = {
     id: "value",
     label: "value",
   },
+  users: {
+    id: "user_id",
+    label: "full_name",
+    fields: ["user_id", "full_name"],
+    renderOption: (item) => <Box>{item.full_name}</Box>,
+    searchFields: ["username", "full_name", "email"],
+  },
 };
 
 let active = false;
@@ -54,7 +59,7 @@ const SelectField = ({
   // onBlur,
   searchType,
   setFieldValue,
-  searchParams,
+  searchParams = {},
   fetchAll,
   // autoHighlight,
   excludeIds,
@@ -66,25 +71,16 @@ const SelectField = ({
   helperText,
   ...props
 }) => {
-  const {
-    id: typeId,
-    label: typeLabel,
-    renderOption,
-    fields,
-  } = searchTypes[searchType];
+  const { id: typeId, label: typeLabel, renderOption, fields, searchFields = [] } = searchTypes[searchType];
   const [open, setOpen] = React.useState(props.autoFocus || false);
   const [inputValue, setInputValue] = React.useState("");
   const [options, setOptions] = React.useState([]);
   const has_options = options.length !== 0;
   const loading = Boolean(open && inputValue);
 
-  const value =
-    inputValue ||
-    (defaultValue && defaultValue[typeLabel] ? defaultValue[typeLabel] : null);
+  const value = inputValue || (defaultValue && defaultValue[typeLabel] ? defaultValue[typeLabel] : null);
 
-  const currentValues = (
-    Array.isArray(defaultValue) ? defaultValue : [defaultValue]
-  ).map((item) => item[typeLabel]);
+  const currentValues = (Array.isArray(defaultValue) ? defaultValue : [defaultValue]).map((item) => item[typeLabel]);
 
   const $select = fields || [typeId, typeLabel];
   const query = {
@@ -95,7 +91,11 @@ const SelectField = ({
   };
 
   if (!fetchAll) {
-    query[typeLabel] = { $ilike: `%${value}%` };
+    if (searchFields.length) {
+      query.$or = searchFields.map((field) => ({ [field]: { $ilike: `%${value}%` } }));
+    } else {
+      query[typeLabel] = { $ilike: `%${value}%` };
+    }
   }
   if (excludeIds) {
     query[typeId] = { $nin: excludeIds };
@@ -146,8 +146,7 @@ const SelectField = ({
 
   const onChange = React.useCallback(
     async (event, option) => {
-      const customResults =
-        customOnChange && (await customOnChange(event, option));
+      const customResults = customOnChange && (await customOnChange(event, option));
       if (clearOnChange && customResults !== false) {
         await setFieldValue(name, null);
       }
@@ -170,14 +169,13 @@ const SelectField = ({
       onClose={() => {
         setOpen(false);
       }}
+      filterOptions={(x) => x}
       getOptionLabel={(item) => item[typeLabel] || ""}
       isOptionEqualToValue={(option, value) => {
         if (!value[typeId] && !option[typeId]) {
           return true;
         }
-        return value[typeLabel]
-          ? option[typeLabel] === value[typeLabel]
-          : option[typeLabel] === value;
+        return value[typeLabel] ? option[typeLabel] === value[typeLabel] : option[typeLabel] === value;
       }}
       options={options}
       renderInput={(params) => (
@@ -198,14 +196,22 @@ const SelectField = ({
       )}
       onChange={onChange}
       renderOption={(props, option) => {
-        props.key = option[typeId];
-        if (option.hidden || !props.key) {
+        const key = option[typeId];
+        if (option.hidden || !key) {
           return null;
         }
         if (renderOption) {
-          return <MenuItem {...props}>{renderOption(option)}</MenuItem>;
+          return (
+            <MenuItem {...props} key={key}>
+              {renderOption(option)}
+            </MenuItem>
+          );
         } else {
-          return <MenuItem {...props}>{option[typeLabel]}</MenuItem>;
+          return (
+            <MenuItem {...props} key={key}>
+              {option[typeLabel]}
+            </MenuItem>
+          );
         }
       }}
       onInputChange={(_, option) => {
@@ -221,10 +227,6 @@ const SelectField = ({
       {...props}
     />
   );
-};
-
-SelectField.defaultProps = {
-  searchParams: {},
 };
 
 export default React.memo(SelectField);
