@@ -3,8 +3,15 @@ const { authenticate } = require("@feathersjs/authentication").hooks;
 const {
   hooks: { transaction },
 } = require("feathers-knex");
+const { allowAnonymous } = require("./services/common_hooks");
+
+const public_services = ["public_records"];
+
 const checkAuth = async (context) => {
-  if (context.path !== "authentication") {
+  if (public_services.includes(context.path)) {
+    allowAnonymous()(context);
+    return authenticate("jwt", "anonymous")(context);
+  } else if (context.path !== "authentication") {
     return authenticate("jwt")(context);
   }
   return context;
@@ -34,11 +41,16 @@ module.exports = {
   error: {
     all: [
       async (context) => {
-        console.error(
-          `Error in ${context.path} calling ${context.method}  method on ${context.id}`,
-          context.error.message,
-          context.error.stack
-        );
+        console.log("!!!", context.error.message);
+        if (context.path === "authentication" && ["NotAuthenticated: jwt expired"].includes(context.error.message)) {
+          console.error(`Auth error: ${context.error.message}`);
+        } else {
+          console.error(
+            `Error in ${context.path} calling ${context.method} method on ${context.id}`,
+            context.error.message,
+            context.error.stack
+          );
+        }
         return context;
       },
     ],
