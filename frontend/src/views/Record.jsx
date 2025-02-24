@@ -551,6 +551,11 @@ function Record({ showForm, id, ro = false /*  embedded = false */ }) {
                 </Grid>
               }
               <FieldRow>
+                <Field type="checkbox" name="is_hidden" />
+                <Field type="checkbox" name="needs_review" />
+              </FieldRow>
+
+              <FieldRow>
                 <ListItemField name="authors" isMulti />
                 <ListItemField name="producers" isMulti />
               </FieldRow>
