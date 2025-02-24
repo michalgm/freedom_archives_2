@@ -5,6 +5,7 @@ import { Formik, Form as FormikForm, useFormikContext } from "formik";
 import React, { useState } from "react";
 
 import ReactDOM from "react-dom";
+import { useDebouncedCallback } from "use-debounce";
 
 const FormButton = ({ label, onClick, ...props }) => {
   const { handleReset, handleSubmit, isValid } = useFormikContext();
@@ -27,11 +28,12 @@ const FormButton = ({ label, onClick, ...props }) => {
   );
 };
 
-const HandleChangeComponent = ({ onChange }) => {
+const HandleChangeComponent = ({ onChange, debounce = 0 }) => {
   const { values } = useFormikContext();
+  const debouncedOnChange = useDebouncedCallback(onChange, debounce);
   React.useEffect(() => {
-    onChange(values);
-  }, [values, onChange]);
+    debouncedOnChange(values);
+  }, [values, debouncedOnChange]);
   return null;
 };
 
@@ -62,6 +64,7 @@ const Form = ({
   buttonsBelow,
   buttonRef,
   onChange,
+  debounce = 0,
   gridProps = {},
   ...props
 }) => {
@@ -113,7 +116,7 @@ const Form = ({
         }
         return (
           <FormikForm className="form">
-            {onChange && <HandleChangeComponent onChange={onChange} />}
+            {onChange && <HandleChangeComponent onChange={onChange} debounce={debounce} />}
             <Portal container={() => document.getElementById("form-errors")}>
               <Errors errors={errors} />
             </Portal>
