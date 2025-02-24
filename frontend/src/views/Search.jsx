@@ -1,12 +1,11 @@
 import "./Search.scss";
 
 import { Box, Button, Card, Divider, Grid, Icon, Link as MULink, Paper, Stack, Typography } from "@mui/material";
-import React, { useEffect, useRef, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 
 import { useTheme } from "@mui/material/styles";
 import { startCase } from "lodash-es";
-import { unstable_batchedUpdates } from "react-dom";
-import { records as recordsService } from "../api";
+import { public_records as recordsService } from "../api";
 import AutoSave from "../components/AutoSave";
 import Field from "../components/Field";
 import Form from "../components/Form";
@@ -14,9 +13,24 @@ import KVChip from "../components/KVChip";
 import PaginationFooter from "../components/PaginationFooter";
 import Thumbnail from "../components/Thumbnail";
 
-const descriptionMaxLines = 5;
+const DESCRIPTION_MAX_LINES = 5;
 
-const page_size = 10;
+const PAGE_SIZE = 10;
+
+const INITIAL_FILTER_DISPLAY_COUNT = 5;
+
+const FILTER_TYPE_LABELS = {
+  collection_id: "collection",
+  media_type: "media_type",
+  format: "source_format",
+  year: "year",
+  title: "title",
+  subject_ids: "subject",
+  author_ids: "author",
+  keyword_ids: "keyword",
+};
+
+const FILTER_TYPES = Object.keys(FILTER_TYPE_LABELS);
 
 function Description({ text }) {
   const theme = useTheme();
@@ -29,7 +43,7 @@ function Description({ text }) {
     setHeight(ref.current.clientHeight / size);
   }, [setHeight]);
 
-  const lineHeight = descriptionMaxLines * theme.typography.body2.lineHeight;
+  const lineHeight = DESCRIPTION_MAX_LINES * theme.typography.body2.lineHeight;
 
   return (
     <Box sx={{ width: "100%" }}>
@@ -71,12 +85,10 @@ function Description({ text }) {
   );
 }
 
-function Filter({ type, values = [], addFilter, search }) {
-  const [limit, setlimit] = useState(5);
-
-  const renderFilterItem = ({ value, label, count, i, type }) => (
+const RenderFilterItem = ({ value, label, count, type, addFilter, search }) => {
+  return (
     <Box
-      key={i}
+      key={value}
       onClick={() => addFilter({ type, value })}
       sx={{
         display: "flex",
@@ -87,7 +99,7 @@ function Filter({ type, values = [], addFilter, search }) {
       <MULink
         href=""
         onClick={(e) => e.preventDefault()}
-        style={{ fontWeight: (search || []).includes(value) ? 800 : 400 }}
+        style={{ fontWeight: (search[type] || []).includes(value) ? 800 : 400 }}
         underline="hover"
       >
         {label || "???"}
@@ -97,17 +109,21 @@ function Filter({ type, values = [], addFilter, search }) {
       </Typography>
     </Box>
   );
+};
 
+const Filter = ({ type, values = [], addFilter, search }) => {
+  const [limit, setlimit] = useState(INITIAL_FILTER_DISPLAY_COUNT);
+  console.log(type, values);
   return (
     <div key={type} style={{ flexGrow: 1, marginBottom: 10 }}>
       <Typography variant="h6" gutterBottom>
-        {startCase(type)}
+        {startCase(FILTER_TYPE_LABELS[type] || type)}
       </Typography>
       <div style={{ paddingLeft: 10 }}>
         <div>
-          {(values || [])
-            .slice(0, limit)
-            .map(([label, count, value], i) => renderFilterItem({ value: value || label, label, count, type, i }))}
+          {(values || []).slice(0, limit).map(([label, count, value]) => (
+            <RenderFilterItem key={label} {...{ value: value || label, label, count, type, addFilter, search }} />
+          ))}
         </div>
         {values && values.length > limit && (
           <Button
@@ -123,146 +139,32 @@ function Filter({ type, values = [], addFilter, search }) {
       <Divider></Divider>
     </div>
   );
-}
+};
 
-function Search() {
-  const [records, setRecords] = useState({ count: 0, records: [] });
-  const [filters, setFilters] = useState([]);
-  const [search, setSearch] = useState({
-    $fullText: "",
-    include_non_digitized: false,
-  });
-  const [total, setTotal] = useState(0);
-  const [offset, setOffset] = useState(0);
-  const [time, setTime] = useState(0);
-
-  // const searchRef = useRef(search);
-  // // console.log(searchRef.current, search, records, filters, total, offset, time)
-  // if (!isEqual(search, searchRef.current)) {
-  //   searchRef.current = search;
-  // }
-
-  useEffect(() => {
-    setOffset(0);
-    // }, [searchRef.current]);
-  }, [search]);
-
-  useEffect(() => {
-    // console.log('search?')
-    const fetchRecords = async () => {
-      const time = new Date();
-      try {
-        const { $fullText, include_non_digitized } = search;
-        const query = {
-          $select: ["record_id", "title", "description", "year", "publisher", "producers", "authors"],
-          $limit: page_size,
-          $fullText: $fullText,
-          $skip: offset,
-        };
-        if (!include_non_digitized) {
-          query.has_digital = true;
-        }
-        ["keyword", "subject", "author", "producer"].forEach((type) => {
-          if (search[type]) {
-            query[`${type}s_search`] = { $contains: search[type] };
-          }
-        });
-        ["year", "title"].forEach((type) => {
-          if (search[type]) {
-            query[type] = { $in: search[type] };
-          }
-        });
-        if (search.collection) {
-          query.collection_id = { $in: search.collection };
-        }
-        const { total, data: records, filters = [] } = await recordsService.find({ query });
-        unstable_batchedUpdates(() => {
-          setRecords({
-            total,
-            records: records.map((record) => {
-              const keys = ["year", "producers", "publisher", "authors"];
-              record.details = [];
-              keys.forEach((key) => {
-                let value = record[key];
-                if (value) {
-                  if (Array.isArray(value)) {
-                    if (value.length) {
-                      value = value.map(({ item }) => item).join(", ");
-                    }
-                  } else if (typeof value === "object") {
-                    value = value.item;
-                  }
-                }
-                if (value && value.toString().trim()) {
-                  record.details.push([key, value]);
-                }
-              });
-              return record;
-            }),
-          });
-          setFilters(filters);
-          setTime((new Date() - time) / 1000);
-          setTotal(total);
-        });
-      } catch {
-        //empty
+const SearchForm = ({ search, setSearch, filters }) => {
+  const addFilter = useCallback(
+    ({ type, value }) => {
+      let newFilter = [...(search[type] || [])];
+      if (newFilter.includes(value)) {
+        newFilter = newFilter.filter((v) => v !== value);
+      } else {
+        newFilter.push(value);
       }
-    };
-    fetchRecords();
-  }, [search, offset]);
-
-  const addFilter = ({ type, value }) => {
-    let newFilter = [...(search[type] || [])];
-    if (newFilter.includes(value)) {
-      newFilter = newFilter.filter((v) => v !== value);
-    } else {
-      newFilter.push(value);
-    }
-    setSearch({ ...search, ...{ [type]: newFilter } });
-  };
-
-  const clearFilters = () => {
-    const newFilters = {};
-    filters.forEach(({ type }) => {
-      newFilters[type] = [];
-    });
-    setSearch({ ...search, ...newFilters });
-  };
-
-  const renderResult = (record = {}) => {
-    return (
-      <Grid item xs={12} key={record.record_id}>
-        <Card style={{ display: "flex" }}>
-          <Thumbnail src={`https://search.freedomarchives.org/images/thumbnails/${record.record_id}.jpg`} width={75} />
-          <div style={{ width: "100%" }}>
-            <Typography variant="h5">{record.title}</Typography>
-            <Grid container spacing={1} style={{ marginBottom: 3, marginTop: 3 }}>
-              {(record.details || []).map(([key, value]) => (
-                <Grid item key={key}>
-                  <KVChip keyName={startCase(key)} value={value} />
-                </Grid>
-              ))}
-            </Grid>
-            <Description text={record.description} />
-          </div>
-        </Card>
-      </Grid>
-    );
-  };
-
-  const renderFilters = () => (
-    <div>
-      <Typography variant="h5">Filters</Typography>
-      <Button color="primary" size="small" variant="contained" onClick={() => clearFilters()}>
-        Clear Filters
-      </Button>
-      {filters.map(({ type, values }) => {
-        return <Filter key={type} type={type} values={values} addFilter={addFilter} search={search[type]} />;
-      })}
-    </div>
+      setSearch({ ...search, ...{ [type]: newFilter } });
+    },
+    [search, setSearch]
   );
 
-  const SearchForm = () => (
+  const clearFilters = useCallback(() => {
+    const newFilters = {};
+    FILTER_TYPES.forEach((type) => {
+      newFilters[type] = [];
+    });
+    // console.log(search, newFilters);
+    setSearch({ ...search, ...newFilters });
+  }, [search, setSearch]);
+
+  return (
     <Paper>
       <Form
         initialValues={search}
@@ -285,16 +187,155 @@ function Search() {
           />
         </Grid>
         <Grid item xs={12}>
-          {renderFilters()}
+          <Typography variant="h5">Filters</Typography>
+          <Button color="primary" size="small" variant="contained" onClick={clearFilters}>
+            Clear Filters
+          </Button>
+          {FILTER_TYPES.map((type) => {
+            return <Filter key={type} type={type} values={filters[type]} addFilter={addFilter} search={search} />;
+          })}
         </Grid>
       </Form>
     </Paper>
   );
+};
+
+function Search() {
+  const [records, setRecords] = useState({ count: 0, records: [] });
+  const [total, setTotal] = useState(0);
+  const [offset, setOffset] = useState(0);
+  const [time, setTime] = useState(0);
+
+  const [search, setSearch] = useState({
+    $fullText: "",
+    include_non_digitized: false,
+  });
+  const [filters, setFilters] = useState([]);
+
+  // const searchRef = useRef(search);
+  // // console.log(searchRef.current, search, records, filters, total, offset, time)
+  // if (!isEqual(search, searchRef.current)) {
+  //   searchRef.current = search;
+  // }
+
+  useEffect(() => {
+    setOffset(0);
+    // }, [searchRef.current]);
+  }, [search]);
+
+  useEffect(() => {
+    const fetchRecords = async () => {
+      console.log("search?", search);
+      const time = new Date();
+      try {
+        const { $fullText, include_non_digitized } = search;
+        const query = {
+          $select: [
+            "record_id",
+            "title",
+            "description",
+            "year",
+            "publisher",
+            "producers",
+            "authors",
+            "program",
+            "call_number",
+            "vol_number",
+          ],
+          $limit: PAGE_SIZE,
+          $fullText: $fullText,
+          $skip: offset,
+        };
+        if (!include_non_digitized) {
+          query.has_digital = true;
+        }
+        FILTER_TYPES.forEach((type) => {
+          if (search[type]) {
+            if (["year", "title", "collection_id", "format", "media_type"].includes(type)) {
+              query[type] = search[type][0];
+            } else {
+              query[type] = { $contains: search[type] };
+            }
+          }
+        });
+
+        const { total, data: records, nonDigitizedTotal = 0, filters = [] } = await recordsService.find({ query });
+        setRecords({
+          total,
+          nonDigitizedTotal,
+          records: records.map((record) => {
+            const keys = [
+              "year",
+              "producers",
+              "publisher",
+              "authors",
+              "call_number",
+              "vol_number",
+              "format",
+              "program",
+            ];
+            record.details = [];
+            keys.forEach((key) => {
+              let value = record[key];
+              if (value) {
+                if (Array.isArray(value)) {
+                  if (value.length) {
+                    value = value.map(({ item }) => item).join(", ");
+                  }
+                } else if (typeof value === "object") {
+                  value = value.item;
+                }
+              }
+              console.log(key, value);
+              if (value && value.toString().trim()) {
+                record.details.push([key, value]);
+              }
+            });
+            return record;
+          }),
+        });
+        setFilters(filters);
+        setTime((new Date() - time) / 1000);
+        setTotal(total);
+      } catch {
+        //empty
+      }
+    };
+    fetchRecords();
+  }, [search, offset, setFilters]);
+
+  const renderResult = (record = {}) => {
+    return (
+      <Grid item xs={12} key={record.record_id}>
+        <Card>
+          <Stack spacing={2} direction="row">
+            <Thumbnail
+              src={`https://search.freedomarchives.org/images/thumbnails/${record.record_id}.jpg`}
+              width={75}
+            />
+            <Box>
+              <Typography variant="h5">
+                {record.title} ({record.score})
+              </Typography>
+              <Grid container spacing={1} style={{ marginBottom: 3, marginTop: 3 }}>
+                {(record.details || []).map(([key, value]) => (
+                  <Grid item key={key}>
+                    <KVChip keyName={startCase(key)} value={value} />
+                  </Grid>
+                ))}
+              </Grid>
+              <Description text={record.description} />
+            </Box>
+          </Stack>
+        </Card>
+      </Grid>
+    );
+  };
 
   return (
     <Stack direction="row" className="records" sx={{ height: "100%" }} spacing={2}>
       <Box sx={{ maxWidth: "30%", flexGrow: 1, flexShrink: 0 }} className="FlexScroller">
-        <SearchForm />
+        <SearchForm {...{ search, setSearch, filters, setFilters }} />
       </Box>
       <Box sx={{ flexGrow: 1, flexShrink: 1 }} className="FlexContainer">
         <Stack spacing={2} className="FlexContainer" sx={{ padding: "1px" }}>
@@ -303,13 +344,19 @@ function Search() {
               <PaginationFooter
                 offset={offset}
                 total={total}
-                page_size={page_size}
+                page_size={PAGE_SIZE}
                 setOffset={setOffset}
                 size="small"
               />
             </Box>
             <Box mt={2} textAlign="center">
               {records.total} total results ({time} seconds)
+              {!search.include_non_digitized && (
+                <>
+                  <br />
+                  {records.nonDigitizedTotal} non-digitized
+                </>
+              )}
             </Box>
           </Paper>
           <Stack spacing={2} className="FlexScroller">
