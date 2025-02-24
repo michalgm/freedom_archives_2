@@ -62,7 +62,8 @@ const FieldComponent = ({
   const { errors, setFieldValue } = context || {};
   const variant = props.variant || ro ? "filled" : "outlined";
   let field;
-  const error = Boolean(errors[name]);
+  delete props.raw;
+  const error = Boolean(errors?.name);
   helperText += error ? errors[name] : "";
   props.onChange = React.useCallback(
     async (event, option) => {

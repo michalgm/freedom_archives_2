@@ -1,10 +1,11 @@
-import { Divider, Grid, Paper, Typography } from '@mui/material';
-import React, { useEffect, useState } from 'react';
+import { Divider, Grid, Paper, Typography } from "@mui/material";
+import React, { useEffect, useState } from "react";
 
-import Field from '../components/Field';
-import Link from '../components/Link';
-import Record from './Record';
-import { relationships } from '../api';
+import { relationships } from "../api";
+import Field from "../components/Field";
+import Form from "../components/Form";
+import Link from "../components/Link";
+import Record from "./Record";
 
 function Relationship({ id }) {
   const [relation, setRelation] = useState({});
@@ -24,47 +25,33 @@ function Relationship({ id }) {
   return (
     <div>
       <Grid container spacing={2}>
-        {[1, 2].map(num => {
+        {[1, 2].map((num) => {
           const other_num = num === 1 ? 2 : 1;
           return (
             <Grid item xs={6} key={num}>
               <Paper>
-                <Typography variant="h4">Record {num}</Typography>
-                <Typography variant="subtitle1">
-                  <Link to={`/record/${relation[`docid_${num}`]}`}>
-                    (ID {relation[`docid_${num}`]})
-                  </Link>
-                  <Link
-                    target="_blank"
-                    href={`https://search.freedomarchives.org/admin/#/documents/${relation[`docid_${num}`]
-                      }`}
-                  >
-                    (Live DB Link)
-                  </Link>
-                </Typography>
-                <Field
-                  raw
-                  label="Relation Title"
-                  value={relation[`title_${other_num}`]}
-                />
-                <Field
-                  raw
-                  multiline
-                  label="Relation description"
-                  value={relation[`description_${other_num}`]}
-                />
-                <Field
-                  raw
-                  label="Relation Track Number"
-                  value={relation[`track_number_${other_num}`]}
-                />
-                <Divider />
+                <Form>
+                  <Typography variant="h4">Record {num}</Typography>
+                  <Typography variant="subtitle1">
+                    <Link to={`/record/${relation[`docid_${num}`]}`}>(ID {relation[`docid_${num}`]})</Link>
+                    <Link
+                      target="_blank"
+                      href={`https://search.freedomarchives.org/admin/#/documents/${relation[`docid_${num}`]}`}
+                    >
+                      (Live DB Link)
+                    </Link>
+                  </Typography>
+                  <Field raw label="Relation Title" value={relation[`title_${other_num}`]} />
+                  <Field raw multiline label="Relation description" value={relation[`description_${other_num}`]} />
+                  <Field raw label="Relation Track Number" value={relation[`track_number_${other_num}`]} />
+                  <Divider />
+                </Form>
               </Paper>
             </Grid>
           );
         })}
 
-        {[1, 2].map(num => (
+        {[1, 2].map((num) => (
           <Grid item xs={6} key={num}>
             <Paper>
               <div style={{ padding: 4 }}>
