@@ -1,10 +1,8 @@
-const { authenticate } = require('@feathersjs/authentication').hooks;
+const { authenticate } = require("@feathersjs/authentication").hooks;
 
-const {
-  hashPassword, protect
-} = require('@feathersjs/authentication-local').hooks;
+const { hashPassword, protect } = require("@feathersjs/authentication-local").hooks;
 
-const setArchive = context => {
+const setArchive = (context) => {
   const {
     data,
     method,
@@ -19,7 +17,9 @@ const setArchive = context => {
 };
 
 const validateUser = (context) => {
-  const { data: { password } } = context;
+  const {
+    data: { password },
+  } = context;
   if (password) {
     if (password.length < 8) {
       throw new Error("Password must be at least 8 characters long");
@@ -29,10 +29,18 @@ const validateUser = (context) => {
   }
   return context;
 };
+const cleanData = (context) => {
+  if (context.data) {
+    ["full_name", "user_search"].forEach((key) => {
+      delete context.data[key];
+    });
+  }
+  return context;
+};
 
 module.exports = {
   before: {
-    all: [],
+    all: [cleanData],
     find: [],
     get: [],
     create: [hashPassword("password"), setArchive, authenticate("jwt")],

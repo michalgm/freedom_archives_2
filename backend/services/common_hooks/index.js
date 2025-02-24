@@ -1,9 +1,10 @@
-const { child } = require("winston");
 const { writeThumbnail, writeThumbnailFromUrl } = require("./thumbnailer");
+const allowAnonymous = require("./allowAnonymous");
 
 module.exports = {
   writeThumbnail,
   writeThumbnailFromUrl,
+  allowAnonymous,
   setUser: (context) => {
     const {
       data = {},
@@ -57,9 +58,7 @@ module.exports = {
         }
       });
       if ("collection" in data) {
-        data.collection_id = data.collection
-          ? data.collection.collection_id
-          : null;
+        data.collection_id = data.collection ? data.collection.collection_id : null;
         delete data.collection;
       }
     }
@@ -80,38 +79,28 @@ module.exports = {
     const id = context.id || context.result[`${table}_id`];
     for (const type of ["subjects", "keywords", "producers", "authors"]) {
       if (relation_data && relation_data[type] !== undefined) {
-        // console.log('UPDATE', relation_data);
-
         const ids = trx
           .from(`${table}s_to_list_items`)
-          .join(
-            "list_items",
-            `${table}s_to_list_items.list_item_id`,
-            "list_items.list_item_id"
-          )
+          .join("list_items", `${table}s_to_list_items.list_item_id`, "list_items.list_item_id")
           .where("type", type.replace(/s$/, ""))
           .andWhere(`${table}_id`, id)
           .select(`${table}s_to_list_items.list_item_id`);
-
-        await trx(`${table}s_to_list_items`)
-          .whereIn("list_item_id", ids)
-          .delete();
-
-        await trx(`${table}s_to_list_items`).insert(
-          relation_data[type].map(({ list_item_id }) => ({
-            list_item_id,
-            [`${table}_id`]: id,
-          }))
-        );
-        // console.log('UPDATE', context.data);
+        await trx(`${table}s_to_list_items`).whereIn("list_item_id", ids).delete();
+        if (relation_data[type].length) {
+          await trx(`${table}s_to_list_items`).insert(
+            relation_data[type].map(({ list_item_id }) => ({
+              list_item_id,
+              [`${table}_id`]: id,
+            }))
+          );
+        }
       }
     }
-
     if (!Object.keys(data).length) {
       context.result = await trx(`${table}s`).where(`${table}_id`, id).select();
     }
 
-    // console.log('UPDATE DONE', context.result);
+    // console.log("UPDATE DONE", context.result);
     return context;
   },
 
@@ -131,23 +120,14 @@ module.exports = {
       await trx(`_unified_${table}s`).where(`${table}_id`, id).delete();
     }
     if (["update", "patch", "create"].includes(method)) {
-      const [current_data = {}] = await trx(`${table}s_view`)
-        .where(`${table}_id`, id)
-        .select();
+      const [current_data = {}] = await trx(`${table}s_view`).where(`${table}_id`, id).select();
       const encoded = {};
       Object.keys(current_data).forEach((key) => {
         if (
           current_data[key] &&
           typeof current_data[key] === "object" &&
           !key.includes("_search") &&
-          ![
-            "call_numbers",
-            "formats",
-            "qualitys",
-            "generations",
-            "media_types",
-            "siblings",
-          ].includes(key)
+          !["call_numbers", "formats", "qualitys", "generations", "media_types", "siblings"].includes(key)
         ) {
           encoded[key] = JSON.stringify(current_data[key]);
         } else {

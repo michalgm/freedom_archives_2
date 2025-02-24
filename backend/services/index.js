@@ -8,6 +8,9 @@ const unified_records = require("./unified_records.js");
 const unified_collections = require("./unified_collections.js");
 const value_lookup = require("./value_lookup.js");
 const list_items_lookup = require("./list_items_lookup.js");
+const review_changes = require("./review_changes.js");
+const public_records = require("./public_records.js");
+const snapshots = require("./snapshots.js");
 
 // eslint-disable-next-line no-unused-vars
 module.exports = function (app) {
@@ -21,4 +24,7 @@ module.exports = function (app) {
   app.configure(unified_collections);
   app.configure(value_lookup);
   app.configure(list_items_lookup);
+  app.configure(review_changes);
+  app.configure(public_records);
+  app.configure(snapshots);
 };

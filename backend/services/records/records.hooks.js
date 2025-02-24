@@ -15,17 +15,12 @@ const {
 const fullTextSearch = (context) => {
   if (context.params.query.$fullText !== undefined) {
     const { $fullText, ...query } = context.params.query;
-    const knex = context.app
-      .service(`unified_${context.path}`)
-      .createQuery({ ...context.params, query });
+    const knex = context.app.service(`unified_${context.path}`).createQuery({ ...context.params, query });
     if ($fullText) {
       const fullTextQuery = tsquery($fullText);
       context.fullText = fullTextQuery;
       knex.select(
-        context.service.Model.raw(
-          `ts_rank_cd(fulltext, to_tsquery('english', ?)) AS score`,
-          [fullTextQuery]
-        )
+        context.service.Model.raw(`ts_rank_cd(fulltext, to_tsquery('english', ?)) AS score`, [fullTextQuery])
       );
       knex.whereRaw(`fulltext @@ to_tsquery('english', ?)`, [fullTextQuery]);
       knex.orderBy("score", "desc");
@@ -46,11 +41,7 @@ const lookupFilters = async ({
   // console.log('AFTER FIND');
 
   if ($fullText !== undefined) {
-    const ids = await knex
-      .clearSelect()
-      .clearOrder()
-      .select("record_id")
-      .toString();
+    const ids = await knex.clearSelect().clearOrder().select("record_id").toString();
 
     // await trx.raw(
     //   `create temp table search_results3  on commit drop as ${ids}`
@@ -112,15 +103,9 @@ const prepData = (context) => {
     // remove calculated fields
     Object.keys(data).forEach((key) => {
       if (
-        [
-          "call_numbers",
-          "formats",
-          "qualitys",
-          "generations",
-          "media_types",
-          "siblings",
-          "relationships",
-        ].includes(key) ||
+        ["call_numbers", "formats", "qualitys", "generations", "media_types", "siblings", "relationships"].includes(
+          key
+        ) ||
         key.match("_search")
       ) {
         delete data[key];
@@ -146,23 +131,13 @@ const prepData = (context) => {
       }
     });
     if ("collection" in data) {
-      data.collection_id = data.collection
-        ? data.collection.collection_id
-        : null;
+      data.collection_id = data.collection ? data.collection.collection_id : null;
     }
     if ("parent" in data) {
       data.parent_record_id = data.parent ? data.parent.record_id : null;
     }
 
-    [
-      "instances",
-      "children",
-      "continuations",
-      "program",
-      "publisher",
-      "collection",
-      "parent",
-    ].forEach((key) => {
+    ["instances", "children", "continuations", "program", "publisher", "collection", "parent"].forEach((key) => {
       if (data[key]) {
         relation_data[key] = data[key];
         delete data[key];
@@ -198,9 +173,7 @@ const updateRelations = async (context) => {
         if (instance.delete) {
           return app.service("instances").remove(instance.instance_id, params);
         } else if (instance.instance_id) {
-          return app
-            .service("instances")
-            .patch(instance.instance_id, instance, params);
+          return app.service("instances").patch(instance.instance_id, instance, params);
         }
         delete instance.instance_id;
         instance.record_id ||= id;
@@ -208,9 +181,7 @@ const updateRelations = async (context) => {
       })
     );
     if (instances.length && !data.primary_instance_id) {
-      await app
-        .service("records")
-        ._patch(id, { primary_instance_id: instances[0].instance_id }, params);
+      await app.service("records")._patch(id, { primary_instance_id: instances[0].instance_id }, params);
     }
   }
 
@@ -218,13 +189,9 @@ const updateRelations = async (context) => {
     await Promise.all(
       relation_data.children.map((child) => {
         if (child.delete) {
-          return app
-            .service("records")
-            .patch(child.record_id, { parent_record_id: null }, params);
+          return app.service("records").patch(child.record_id, { parent_record_id: null }, params);
         } else if (child.record_id && !child.parent_record_id) {
-          return app
-            .service("records")
-            .patch(child.record_id, { parent_record_id: id }, params);
+          return app.service("records").patch(child.record_id, { parent_record_id: id }, params);
         }
       })
     );
@@ -238,9 +205,7 @@ const updateRelations = async (context) => {
       .map((record) => record.record_id);
 
     if (continuation_id) {
-      await trx("continuations")
-        .where({ continuation_id })
-        .update({ continuation_records });
+      await trx("continuations").where({ continuation_id }).update({ continuation_records });
     } else {
       await trx("continuations").insert({
         continuation_records: [id, ...continuation_records],
@@ -270,13 +235,7 @@ module.exports = {
     get: [fetchUnified],
     create: [transaction.start(), setUser, setArchive],
     update: [transaction.start()],
-    patch: [
-      transaction.start(),
-      setUser,
-      updateListItemRelations,
-      updateRelations,
-      updateThumbnail,
-    ],
+    patch: [transaction.start(), setUser, updateListItemRelations, updateRelations, updateThumbnail],
     remove: [transaction.start()],
   },
 
@@ -293,13 +252,7 @@ module.exports = {
     ],
     find: [lookupFilters],
     get: [],
-    create: [
-      updateListItemRelations,
-      updateRelations,
-      updateThumbnail,
-      refreshView,
-      transaction.end(),
-    ],
+    create: [updateListItemRelations, updateRelations, updateThumbnail, refreshView, transaction.end()],
     update: [refreshView, transaction.end()],
     patch: [refreshView, transaction.end()],
     remove: [refreshView, transaction.end()],

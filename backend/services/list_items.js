@@ -40,7 +40,6 @@ module.exports = function (app) {
         return [table, ids];
       })
     );
-    console.log(context.params.related_items);
     return context;
   };
 
