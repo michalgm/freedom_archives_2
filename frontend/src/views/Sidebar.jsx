@@ -1,11 +1,5 @@
-import {
-  Divider,
-  List,
-  ListItem,
-  ListItemText,
-  Typography,
-} from "@mui/material";
 import { EdgeSidebar, SidebarContent } from "@mui-treasury/layout";
+import { Divider, List, ListItem, ListItemText, Typography } from "@mui/material";
 import { Link, useLocation, useMatch, useResolvedPath } from "react-router-dom";
 
 import React from "react";
@@ -31,15 +25,14 @@ const sideBarConfig = {
     { label: "Edit List Values", icon: "", href: "/site/edit-list-values" },
     { label: "Export Collections", icon: "", href: "" },
     { label: "Find Duplicate Records", icon: "", href: "" },
-    { label: "Review Changes", icon: "", href: "" },
+    { label: "Review Changes", icon: "", href: "/site/review-changes" },
   ],
   Admin: [
     { label: "Update Unknown Relationships", icon: "", href: "/relationships" },
-    { label: "Update Thumbnails", icon: "", href: "" },
-    { label: "Update Keywords", icon: "", href: "" },
-    { label: "Backup Database", icon: "", href: "" },
-    { label: "Manage Users", href: "/users" },
-    { label: "Publish/Restore Live Site" },
+    // { label: "Update Thumbnails", icon: "", href: "" },
+    // { label: "Update Keywords", icon: "", href: "" },
+    { label: "Manage Users", href: "/admin/users" },
+    { label: "Publish/Restore Live Site", href: "/admin/publish-site" },
   ],
 };
 
@@ -56,12 +49,7 @@ function Sidebar() {
                   <Typography variant="h5">{title}</Typography>
                 </ListItem>
                 {sideBarConfig[title].map(({ label, href, icon }) => (
-                  <SidebarItem
-                    key={label}
-                    label={label}
-                    href={href}
-                    icon={icon}
-                  />
+                  <SidebarItem key={label} label={label} href={href} icon={icon} />
                 ))}
               </List>
             </div>
@@ -79,10 +67,7 @@ function SidebarItem({ label, /* icon, */ href = "notalink" }) {
   // console.log(location)?
   // console.log(useMatch({path: pathname || ''}))
   const current =
-    Boolean(
-      useMatch({ path: pathname || "" }) !== null ||
-        (location.pathname === "/" && href === "/records")
-    ) && href;
+    Boolean(useMatch({ path: pathname || "" }) !== null || (location.pathname === "/" && href === "/records")) && href;
   // const home = Boolean(useMatch({path: href==='records' ? '/' : 'notalink'}))
 
   // console.log({href, pathname, current, home})
@@ -94,15 +79,7 @@ function SidebarItem({ label, /* icon, */ href = "notalink" }) {
 }
 
 function ListItemLink(props) {
-  return (
-    <ListItem
-      button
-      disabled={!props.href}
-      component={props.href ? Link : "div"}
-      to={props.href}
-      {...props}
-    />
-  );
+  return <ListItem button disabled={!props.href} component={props.href ? Link : "div"} to={props.href} {...props} />;
 }
 
 export default Sidebar;
