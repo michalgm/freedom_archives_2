@@ -4,38 +4,29 @@ import {
   FormControlLabel,
   FormGroup,
   FormHelperText,
+  FormLabel,
   Radio,
+  RadioGroup,
   TextField,
 } from "@mui/material";
 import { Field as FormikField, useFormikContext } from "formik";
 
+import { DatePicker, DateTimePicker } from "@mui/x-date-pickers";
 import { Autocomplete } from "formik-mui";
+import { startCase } from "lodash-es";
+import React from "react";
 import DateStringField from "./DateStringField";
 import HTMLField from "./HTMLField";
-import React from "react";
 import SelectField from "./SelectField";
-import { startCase } from "lodash-es";
 
 const selectOptions = {
   day: Array.from({ length: 32 }, (v, k) => ({
     id: k || null,
     label: `${k || "??"}`,
   })),
-  month: [
-    "??",
-    "Jan",
-    "Feb",
-    "Mar",
-    "Apr",
-    "May",
-    "Jun",
-    "Jul",
-    "Aug",
-    "Sep",
-    "Oct",
-    "Nov",
-    "Dec",
-  ].map((label, index) => ({ id: index || null, label })),
+  month: ["??", "Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"].map(
+    (label, index) => ({ id: index || null, label })
+  ),
   year: [
     { id: null, label: "??" },
     ...Array.from({ length: new Date().getFullYear() - 1900 }, (v, k) => ({
@@ -64,11 +55,10 @@ const FieldComponent = ({
   // raw,
   context,
   helperText = "",
+  fullWidth = true,
   ...props
 }) => {
-  const labelValue =
-    label === " " ? null : (label || startCase(name)).replace("_value", "");
-
+  const labelValue = label === " " ? null : (label || startCase(name)).replace("_value", "");
   const { errors, setFieldValue } = context || {};
   const variant = props.variant || ro ? "filled" : "outlined";
   let field;
@@ -76,11 +66,15 @@ const FieldComponent = ({
   helperText += error ? errors[name] : "";
   props.onChange = React.useCallback(
     async (event, option) => {
-      const { value, checked } = event.currentTarget;
+      const { value, checked } = event?.currentTarget ? event.currentTarget : { value: event };
       const results = customOnChange && (await customOnChange(event, option));
       if (results !== false) {
         const newValue =
-          type === "checkbox" ? checked : option !== undefined ? option : value;
+          type === "checkbox"
+            ? checked
+            : option !== undefined && option?.validationError === undefined
+            ? option
+            : value;
         if (["checkbox", "radio"].includes(type)) {
           await defaultOnChange(event, option);
         } else {
@@ -94,10 +88,10 @@ const FieldComponent = ({
 
   if (type === "select") {
     field = (
-      <FormControl disabled={ro} margin="dense" fullWidth>
+      <FormControl disabled={ro} margin="dense" fullWidth={fullWidth}>
         <FormGroup>
           <SelectField
-            fullWidth
+            fullWidth={fullWidth}
             className="select-input"
             margin={margin || "dense"}
             disabled={ro}
@@ -132,11 +126,11 @@ const FieldComponent = ({
     }
 
     field = (
-      <FormControl disabled={ro} margin="dense" fullWidth>
+      <FormControl disabled={ro} margin="dense" fullWidth={fullWidth}>
         <FormGroup>
           <FormikField
             component={Autocomplete}
-            fullWidth
+            fullWidth={fullWidth}
             autoHighlight
             className="select-input"
             margin={margin || "dense"}
@@ -185,12 +179,7 @@ const FieldComponent = ({
     );
   } else if (type === "checkbox") {
     field = (
-      <FormControl
-        component="fieldset"
-        disabled={ro}
-        margin={margin || "dense"}
-        error={error}
-      >
+      <FormControl component="fieldset" disabled={ro} margin={margin || "dense"} error={error}>
         <FormGroup>
           <FormControlLabel
             control={<Checkbox {...{ name, value }} {...props} />}
@@ -202,8 +191,47 @@ const FieldComponent = ({
       </FormControl>
     );
   } else if (type === "radio") {
+    field = <Radio disabled={ro} {...{ name, value: value || "" }} {...props} />;
+  } else if (type === "radiogroup") {
+    const { options, ...radioProps } = props;
     field = (
-      <Radio disabled={ro} {...{ name, value: value || "" }} {...props} />
+      <FormControl>
+        <FormLabel>{labelValue}</FormLabel>
+        <RadioGroup name={name} value={value || ""} row {...radioProps}>
+          {options.map((option, index) => (
+            <FormControlLabel key={index} control={<Radio />} {...option} />
+          ))}
+        </RadioGroup>
+      </FormControl>
+    );
+  } else if (type === "date" || type === "datetime") {
+    const Component = type === "date" ? DatePicker : DateTimePicker;
+
+    field = (
+      <Component
+        variant={variant}
+        disabled={ro}
+        label={labelValue}
+        InputLabelProps={{ shrink: true }}
+        value={value || null}
+        name={name}
+        error={error}
+        views={["year", "month", "day", "hours", "minutes"]}
+        helperText={helperText}
+        {...props}
+        onChange={(value) => props.onChange({ currentTarget: { value } })}
+        slotProps={{
+          textField: {
+            fullWidth,
+            color: "primary",
+            margin: margin || "dense",
+            clearable: true,
+            InputProps: props.InputProps || {},
+
+            // sx: props.sx || {},
+          },
+        }}
+      />
     );
   } else {
     let FieldComponent = TextField;
@@ -219,7 +247,7 @@ const FieldComponent = ({
         label={labelValue}
         InputLabelProps={{ shrink: true }}
         autoComplete="off"
-        fullWidth
+        fullWidth={fullWidth}
         type={type || "text"}
         {...{
           error,
