@@ -572,7 +572,7 @@ function Record({ showForm, id, ro = false /*  embedded = false */ }) {
                   name="date_string"
                   label="Date"
                   type="datestring"
-                  helperText="MM/DD/YYYY format - enter '0' for unknown"
+                  helperText="MM/DD/YYYY format - enter '00' for unknown day or month"
                 />
               </FieldRow>
               <FieldRow>
