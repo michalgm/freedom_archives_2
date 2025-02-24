@@ -5,7 +5,7 @@ import EditIcon from "@mui/icons-material/Edit";
 import SaveIcon from "@mui/icons-material/Save";
 import { Box, Button, Tooltip } from "@mui/material";
 import { DataGrid, GridActionsCellItem, GridToolbar, useGridApiRef } from "@mui/x-data-grid";
-import { startCase } from "lodash-es";
+import { merge, startCase } from "lodash-es";
 import { useConfirm } from "material-ui-confirm";
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import * as API from "../api";
@@ -39,6 +39,8 @@ export const EditableDataTable = ({
   getItemName,
   prepareItem,
   autosizeColumns = false,
+  readonly = false,
+  sx = {},
   ...props
 }) => {
   const [editRow, setEditRow] = useState(null);
@@ -46,7 +48,6 @@ export const EditableDataTable = ({
   const [columnWidths, setColumnWidths] = useState({});
   const confirm = useConfirm();
 
-  const sized = useRef(false);
   const onNewRef = useRef(onNew);
   const onUpdateRef = useRef(onUpdate);
   const apiRef = useGridApiRef();
@@ -169,16 +170,20 @@ export const EditableDataTable = ({
       ));
       return actions;
     };
+    const updateColumns = columns.map((column) => {
+      const { flex, ...rest } = column; // eslint-disable-line no-unused-vars
+      rest.headerName = rest.headerName || startCase(rest.field);
+      if (!autosizeColumns) {
+        rest.flex = flex;
+        return rest;
+      }
+      return { ...rest, width: columnWidths[column.field] };
+    });
+    if (readonly) {
+      return updateColumns;
+    }
     return [
-      ...columns.map((column) => {
-        const { flex, ...rest } = column; // eslint-disable-line no-unused-vars
-        rest.headerName = rest.headerName || startCase(rest.field);
-        if (!autosizeColumns) {
-          rest.flex = flex;
-          return rest;
-        }
-        return { ...rest, width: columnWidths[column.field] };
-      }),
+      ...updateColumns,
       {
         field: "actions",
         type: "actions",
@@ -187,11 +192,11 @@ export const EditableDataTable = ({
         width: columnWidths["actions"] || (2 + extraActions.length) * 40,
       },
     ];
-  }, [editRow, columns, deleteRow, extraActions, updateRow, columnWidths, autosizeColumns]);
+  }, [editRow, columns, deleteRow, extraActions, updateRow, columnWidths, autosizeColumns, readonly]);
 
   useEffect(() => {
-    if (autosizeColumns && !loading && localRows.length > 0 && !sized.current && apiRef.current) {
-      sized.current = true;
+    if (autosizeColumns && !loading && localRows.length > 0 && apiRef.current) {
+      console.log("resize");
       setTimeout(() => {
         apiRef.current.autosizeColumns({
           includeHeaders: true,
@@ -229,45 +234,46 @@ export const EditableDataTable = ({
           printOptions: { disableToolbarButton: true },
         },
       },
-      sx: {
-        background: "#fff",
-        "& .MuiDataGrid-footerContainer, & .MuiDataGrid-toolbarContainer, & .MuiDataGrid-topContainer .MuiDataGrid-row--borderBottom":
-          {
-            backgroundColor: "grey.100",
+      sx: merge(
+        {
+          background: "#fff",
+          // maxWidth: "800px",
+
+          "& .MuiDataGrid-footerContainer, & .MuiDataGrid-toolbarContainer, & .MuiDataGrid-topContainer .MuiDataGrid-row--borderBottom":
+            {
+              backgroundColor: "grey.100",
+            },
+          "& .MuiDataGrid-columnHeaderTitle": {
+            textTransform: "capitalize",
           },
-        "& .MuiDataGrid-columnHeaderTitle": {
-          textTransform: "capitalize",
-        },
-        "& .MuiDataGrid-cell:focus": {
-          outline: "none",
-        },
-        "& .MuiDataGrid-main": {
-          overflow: "auto",
-        },
-        "& .MuiDataGrid-editInputCell": {
-          backgroundColor: "rgba(25, 118, 210, 0.08)",
-          ".MuiInputBase-input": {
-            p: 0,
-            mx: "10px",
-            borderBottom: 1,
-            height: "auto",
+          "& .MuiDataGrid-cell:focus": {
+            outline: "none",
+          },
+          "& .MuiDataGrid-main": {
+            overflow: "auto",
+            // maxWidth: "800px",
+          },
+          "& .MuiDataGrid-editInputCell": {
+            backgroundColor: "rgba(25, 118, 210, 0.08)",
+            ".MuiInputBase-input": {
+              p: 0,
+              mx: "10px",
+              borderBottom: 1,
+              height: "auto",
+            },
           },
         },
-      },
+        sx
+      ),
     }),
-    []
+    [sx]
   );
 
   return (
     <Box className="FlexContainer" sx={{ position: "relative" }}>
-      <AddButton addItem={addItem} itemType={itemType} />
+      {!readonly && <AddButton addItem={addItem} itemType={itemType} />}
       <DataGrid
         slots={{ toolbar: GridToolbar }}
-        slotProps={{
-          toolbar: {
-            showQuickFilter: true,
-          },
-        }}
         processRowUpdate={processRowUpdate}
         loading={loading}
         apiRef={apiRef}
@@ -280,7 +286,6 @@ export const EditableDataTable = ({
         rows={localRows}
         columns={tableColumns}
         getRowId={getRowId}
-        sx={{}}
         {...gridHandlers}
         {...props}
       />
