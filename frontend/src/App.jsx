@@ -3,6 +3,8 @@ import "./App.scss";
 import { Content, EdgeTrigger, Header, Root } from "@mui-treasury/layout";
 import { Box, Button, Container, CssBaseline, Icon, Toolbar, Typography } from "@mui/material";
 import { StyledEngineProvider, ThemeProvider, createTheme } from "@mui/material/styles";
+import { LocalizationProvider } from "@mui/x-date-pickers";
+import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import React from "react";
 import { Link, BrowserRouter as Router } from "react-router-dom";
 import { StateProvider, useStateValue } from "./appContext";
@@ -11,6 +13,7 @@ import { ConfirmProvider } from "material-ui-confirm";
 import { app } from "./api";
 import Authentication from "./Authentication";
 import Breadcrumbs from "./components/Breadcrumbs";
+import ErrorBoundary from "./components/ErrorBoundary";
 import Errors from "./components/Errors";
 import Notifications from "./components/Notifications";
 import Routes from "./Routes";
@@ -80,20 +83,22 @@ function App() {
     <StyledEngineProvider injectFirst>
       <ThemeProvider theme={theme}>
         <CssBaseline>
-          <StateProvider>
-            <ConfirmProvider>
-              <Router
-                future={{
-                  v7_startTransition: true,
-                  v7_relativeSplatPath: true,
-                }}
-              >
-                <Root scheme={scheme}>
-                  <Layout />
-                </Root>
-              </Router>
-            </ConfirmProvider>
-          </StateProvider>
+          <LocalizationProvider dateAdapter={AdapterDayjs}>
+            <StateProvider>
+              <ConfirmProvider>
+                <Router
+                  future={{
+                    v7_startTransition: true,
+                    v7_relativeSplatPath: true,
+                  }}
+                >
+                  <Root scheme={scheme}>
+                    <Layout />
+                  </Root>
+                </Router>
+              </ConfirmProvider>
+            </StateProvider>
+          </LocalizationProvider>
         </CssBaseline>
       </ThemeProvider>
     </StyledEngineProvider>
@@ -179,7 +184,9 @@ function Main() {
     <Container maxWidth="xl" sx={{ paddingBottom: "8px" }} className="FlexContainer">
       <Authentication />
       <Errors />
-      <Routes isAuthenticated={isAuthenticated} />
+      <ErrorBoundary>
+        <Routes isAuthenticated={isAuthenticated} />
+      </ErrorBoundary>
       <Notifications />
     </Container>
   );

@@ -1,8 +1,7 @@
-import { FetchClient } from "@feathersjs/rest-client";
 import auth from "@feathersjs/authentication-client";
 import { feathers } from "@feathersjs/feathers";
+import rest, { FetchClient } from "@feathersjs/rest-client";
 import qs from "qs";
-import rest from "@feathersjs/rest-client";
 
 export const app = feathers();
 
@@ -31,6 +30,9 @@ export const collections = app.service("/api/collections");
 export const value_lookup = app.service("/api/value_lookup");
 export const users = app.service("/api/users");
 export const list_items_lookup = app.service("/api/list_items_lookup");
+export const review_changes = app.service("/api/review_changes");
+export const public_records = app.service("/api/public_records");
+export const snapshots = app.service("/api/snapshots");
 
 export const authenticate = async (username, password) => {
   return app
@@ -53,6 +55,11 @@ export const services = {
   list_items,
   collections,
   value_lookup,
+  users,
+  list_items_lookup,
+  review_changes,
+  public_records,
+  snapshots,
 };
 
 export const getAuthentication = app.get("/api/authentication");

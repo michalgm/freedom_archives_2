@@ -1,17 +1,14 @@
-import {
-  Navigate,
-  Route,
-  Routes as RouterRoutes,
-  useLocation,
-} from "react-router-dom";
 import React, { Suspense } from "react";
+import { Navigate, Route, Routes as RouterRoutes, useLocation } from "react-router-dom";
 
 import Collections from "./views/Collections";
 import EditLists from "./views/EditLists";
 import Login from "./views/Login";
+import PublishSite from "./views/PublishSite";
 import Record from "./views/Record";
 import Records from "./views/Records";
 import Relationships from "./views/Relationships";
+import ReviewChanges from "./views/ReviewChanges";
 import Search from "./views/Search";
 
 const Collection = React.lazy(() => import("./views/Collection"));
@@ -27,24 +24,20 @@ function Routes({ isAuthenticated }) {
           <Route exact path="/" element={<Records />} />
           {/* <Route exact path="/test" element={<Test />} /> */}
           <Route exact path="/collections" element={<Collections />} />
-          <Route
-            path="/collections/featured"
-            element={<Collection id={0} mode="featured_collections" />}
-          />
+          <Route path="/collections/featured" element={<Collection id={0} mode="featured_collections" />} />
           <Route path="/collections/:id" element={<Collection />} />
           <Route exact path="/search" element={<Search />} />
           <Route exact path="/records" element={<Records />} />
-          <Route
-            path="/records/featured"
-            element={<Collection id={0} mode="featured_records" />}
-          />
+          <Route path="/records/featured" element={<Collection id={0} mode="featured_records" />} />
           <Route path="/records/:id" element={<Record showForm />} />
 
           <Route path="/relationships/:skip" element={<Relationships />} />
           <Route path="/relationships/" element={<Relationships />} />
-          <Route path="/users" element={<Users />} />
           <Route path="/login" element={<Login />} />
           <Route path="/site/edit-list-values" element={<EditLists />} />
+          <Route path="/site/review-changes" element={<ReviewChanges />} />
+          <Route path="/admin/publish-site" element={<PublishSite />} />
+          <Route path="/admin/users" element={<Users />} />
         </RouterRoutes>
       </Suspense>
     );
@@ -52,11 +45,7 @@ function Routes({ isAuthenticated }) {
     return (
       <RouterRoutes>
         <Route path="/login" element={<Login />} />
-        <Route
-          path="*"
-          index
-          element={<Navigate to={"/login"} state={{ referrer: location }} />}
-        />
+        <Route path="*" index element={<Navigate to={"/login"} state={{ referrer: location }} />} />
       </RouterRoutes>
     );
   }
