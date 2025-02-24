@@ -15,7 +15,9 @@
     "@mui/icons-material": "^5.4.2",
     "@mui/material": "^5.4.2",
     "@mui/x-data-grid": "^7.24.1",
+    "@mui/x-date-pickers": "^7.27.0",
     "@vitejs/plugin-react": "^4.2.1",
+    "dayjs": "^1.11.13",
     "deep-object-diff": "^1.1.7",
     "formik": "^2.4.5",
     "formik-mui": "^4.0.0-alpha.3",
@@ -25,6 +27,7 @@
     "qs": "^6.10.3",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
+    "react-error-boundary": "^5.0.0",
     "react-helmet": "^6.1.0",
     "react-imask": "^7.3.0",
     "react-router-dom": "^6.2.1",
@@ -52,11 +55,9 @@
     ],
     "plugins": [
       "react",
-      "react-hooks",
-      "unused-imports"
+      "react-hooks"
     ],
     "rules": {
-      "unused-imports/no-unused-imports": "warn",
       "indent": "off",
       "react/prop-types": "off"
     },
@@ -82,6 +83,7 @@
     "eslint": "^8.56.0",
     "eslint-plugin-react": "^7.33.2",
     "eslint-plugin-react-hooks": "^4.6.0",
-    "eslint-plugin-unused-imports": "^3.0.0"
+    "eslint-plugin-unused-imports": "^3.0.0",
+    "vite-bundle-analyzer": "^0.17.1"
   }
 }
