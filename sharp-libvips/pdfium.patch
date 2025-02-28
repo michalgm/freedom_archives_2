@@ -1,0 +1,55 @@
+diff --git a/build/lin.sh b/build/lin.sh
+index bed28ed..f357553 100755
+--- a/build/lin.sh
++++ b/build/lin.sh
+@@ -119,6 +119,7 @@ VERSION_RSVG=2.58.93
+ VERSION_AOM=3.9.1
+ VERSION_HEIF=1.18.2
+ VERSION_CGIF=0.4.1
++VERSION_PDFIUM=7033
+ 
+ # Remove patch version component
+ without_patch() {
+@@ -444,6 +445,25 @@ CFLAGS="${CFLAGS} -O3" meson setup _build --default-library=static --buildtype=r
+   -Dtests=false
+ meson install -C _build --tag devel
+ 
++mkdir ${DEPS}/pdfium
++$CURL https://github.com/bblanchon/pdfium-binaries/releases/download/chromium%2F${VERSION_PDFIUM}/pdfium-$(echo "$PLATFORM" | sed -E 's/musl/-musl/g; s/v[6-8]//g; s/darwin/mac/g').tgz | tar xzC ${TARGET}
++cd ${DEPS}/pdfium
++
++mkdir -p ${TARGET}/lib/pkgconfig
++ls -l ${TARGET}/lib/pkgconfig
++cat > ${TARGET}/lib/pkgconfig/pdfium.pc << EOF
++prefix=${TARGET}
++exec_prefix=\${prefix}
++libdir=\${exec_prefix}/lib
++includedir=\${prefix}/include
++Name: pdfium
++Description: pdfium
++Version: ${VERSION_PDFIUM}
++Requires:
++Libs: -L\${libdir} -lpdfium
++Cflags: -I\${includedir}
++EOF
++
+ mkdir ${DEPS}/vips
+ $CURL https://github.com/libvips/libvips/releases/download/v${VERSION_VIPS}/vips-$(without_prerelease $VERSION_VIPS).tar.xz | tar xJC ${DEPS}/vips --strip-components=1
+ cd ${DEPS}/vips
+@@ -467,7 +487,7 @@ sed -i'.bak' "/subdir('man')/{N;N;N;N;d;}" meson.build
+ CFLAGS="${CFLAGS} -O3" CXXFLAGS="${CXXFLAGS} -O3" meson setup _build --default-library=shared --buildtype=release --strip --prefix=${TARGET} ${MESON} \
+   -Ddeprecated=false -Dexamples=false -Dintrospection=disabled -Dmodules=disabled -Dcfitsio=disabled -Dfftw=disabled -Djpeg-xl=disabled \
+   ${WITHOUT_HIGHWAY:+-Dhighway=disabled} -Dorc=disabled -Dmagick=disabled -Dmatio=disabled -Dnifti=disabled -Dopenexr=disabled \
+-  -Dopenjpeg=disabled -Dopenslide=disabled -Dpdfium=disabled -Dpoppler=disabled -Dquantizr=disabled \
++  -Dopenjpeg=disabled -Dopenslide=disabled -Dpoppler=disabled -Dquantizr=disabled \
+   -Dppm=false -Danalyze=false -Dradiance=false \
+   ${LINUX:+-Dcpp_link_args="$LDFLAGS -Wl,-Bsymbolic-functions -Wl,--version-script=$DEPS/vips/vips.map $EXCLUDE_LIBS"}
+ meson install -C _build --tag runtime,devel
+@@ -541,6 +561,7 @@ printf "{\n\
+   \"lcms\": \"${VERSION_LCMS2}\",\n\
+   \"mozjpeg\": \"${VERSION_MOZJPEG}\",\n\
+   \"pango\": \"${VERSION_PANGO}\",\n\
++  \"pdfium\": \"${VERSION_PDFIUM}\",\n\
+   \"pixman\": \"${VERSION_PIXMAN}\",\n\
+   \"png\": \"${VERSION_PNG16}\",\n\
+   \"proxy-libintl\": \"${VERSION_PROXY_LIBINTL}\",\n\
