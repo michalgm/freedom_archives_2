@@ -3,6 +3,7 @@
   "description": "Freedom Archives database backend",
   "version": "0.0.0",
   "homepage": "",
+  "private": true,
   "main": "backend",
   "keywords": [
     "feathers"
@@ -16,6 +17,20 @@
   },
   "contributors": [],
   "bugs": {},
+  "engines": {
+    "node": ">= 20.18.1"
+  },
+  "feathers": {
+    "language": "js",
+    "packager": "npm",
+    "database": "postgresql",
+    "framework": "express",
+    "transports": [
+      "rest",
+      "websockets"
+    ],
+    "schema": "typebox"
+  },
   "directories": {
     "lib": "backend",
     "test": "test/",
@@ -23,12 +38,15 @@
   },
   "scripts": {
     "preinstall": "npm install --no-save ${CL_APP_ROOT:+$HOME/$CL_APP_ROOT/}./sharp-libvips/img-sharp-libvips-linux-x64-1.0.2.tgz",
-    "test": "npm run eslint && npm run mocha",
     "eslint": "eslint backend/. test/. --config .eslintrc.json",
     "dev": "LD_PRELOAD=$LD_PRELOAD:/usr/lib/x86_64-linux-gnu/libjemalloc.so nodemon -d 1 -w config/ -w backend/ -w package.json backend/index.js",
     "start": "concurrently -k \"npm run dev\" \"cd ./frontend; npm run start\"",
     "start:prod": "node backend/",
-    "mocha": "mocha test/ --recursive --exit"
+    "mocha": "cross-env NODE_ENV=test mocha test/ --recursive --exit",
+    "test": "cross-env NODE_ENV=test npm run migrate && npm run mocha",
+    "bundle:client": "npm pack --pack-destination ./public",
+    "migrate": "knex migrate:latest",
+    "migrate:make": "knex migrate:make -x mjs"
   },
   "dependencies": {
     "@feathersjs/authentication": "^5.0.12",
