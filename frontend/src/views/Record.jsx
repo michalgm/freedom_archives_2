@@ -545,7 +545,8 @@ function Record({ showForm, id, ro = false /*  embedded = false */ }) {
                     <img
                       style={{ maxWidth: "100%" }}
                       alt=""
-                      src={"https://search.freedomarchives.org/" + record.primary_instance_thumbnail}
+                      src={`/images/thumbnails/${record.record_id}.jpg`}
+                      // src={"https://search.freedomarchives.org/" + record.primary_instance_thumbnail}
                     />
                   </p>
                 </Grid>

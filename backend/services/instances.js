@@ -2,7 +2,6 @@ const { Service } = require("feathers-knex");
 const {
   hooks: { transaction },
 } = require("feathers-knex");
-const { writeThumbnailFromUrl } = require("./common_hooks/");
 class Instances extends Service {
   constructor(options) {
     super({
@@ -37,9 +36,7 @@ module.exports = function (app) {
       },
     } = context;
     if (!id) {
-      await app
-        .service("records")
-        .patch(data.record_id, {}, { user, transaction: { trx } });
+      await app.service("records").patch(data.record_id, {}, { user, transaction: { trx } });
     }
   };
 
@@ -52,24 +49,9 @@ module.exports = function (app) {
       }
     });
 
-    [
-      "contributor_name",
-      "contributor_username",
-      "creator_name",
-      "creator_username",
-      "is_primary",
-      "delete",
-    ].forEach((key) => delete data[key]);
-    return context;
-  };
-
-  const updateThumbnail = async (context) => {
-    const {
-      data: { url, record_id },
-    } = context;
-    if (url) {
-      await writeThumbnailFromUrl({ url, filename: record_id });
-    }
+    ["contributor_name", "contributor_username", "creator_name", "creator_username", "is_primary", "delete"].forEach(
+      (key) => delete data[key]
+    );
     return context;
   };
 
@@ -80,8 +62,8 @@ module.exports = function (app) {
       patch: [transaction.start(), cleanupMeta],
     },
     after: {
-      create: [updateThumbnail, updateView, transaction.end()],
-      patch: [updateThumbnail, updateView, transaction.end()],
+      create: [updateView, transaction.end()],
+      patch: [updateView, transaction.end()],
       remove: [updateView, transaction.end()],
     },
     error: {

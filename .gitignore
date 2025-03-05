@@ -118,6 +118,10 @@ dbtools/bak/
 interferencedb/
 ck_editor/public.bak
 public.bak
-thumbnails/*
+public/img/thumbnails/*
 
 .mysql-opts
+
+sharp-libvips/archive
+sharp-libvips/sharp-libvips
+

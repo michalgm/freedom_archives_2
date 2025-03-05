@@ -9,7 +9,8 @@ export default defineConfig({
     server: {    
         port: 4040, 
         proxy: {
-            '/api': "http://localhost:3030"
+            '/api': "http://localhost:3030",
+            '/images/': "http://localhost:3030"
         }
     },
 })

@@ -7,7 +7,7 @@ const {
   updateListItemRelations,
   prepListItemRelations,
   refreshView,
-  updateThumbnailFromUrl,
+  writeThumbnailsFromUrl,
   fetchUnified,
   setArchive,
 } = require("../common_hooks/");
@@ -219,10 +219,12 @@ const updateRelations = async (context) => {
 };
 
 const updateThumbnail = async (context) => {
-  if (context.params.url) {
-    return updateThumbnailFromUrl({
-      url: context.params.url,
+  const instance = (context.relation_data?.instances || []).find((instance) => instance.is_primary);
+  if (instance && instance.url) {
+    await writeThumbnailsFromUrl({
+      url: instance.url,
       filename: context.id,
+      basedir: context.app.get("public"),
     });
   }
   return context;
@@ -233,9 +235,9 @@ module.exports = {
     all: [prepData],
     find: [fullTextSearch, fetchUnified],
     get: [fetchUnified],
-    create: [transaction.start(), setUser, setArchive],
+    create: [transaction.start(), setUser, setArchive, updateThumbnail],
     update: [transaction.start()],
-    patch: [transaction.start(), setUser, updateListItemRelations, updateRelations, updateThumbnail],
+    patch: [transaction.start(), setUser, updateListItemRelations, updateThumbnail, updateRelations],
     remove: [transaction.start()],
   },
 
@@ -252,7 +254,7 @@ module.exports = {
     ],
     find: [lookupFilters],
     get: [],
-    create: [updateListItemRelations, updateRelations, updateThumbnail, refreshView, transaction.end()],
+    create: [updateListItemRelations, updateRelations, refreshView, transaction.end()],
     update: [refreshView, transaction.end()],
     patch: [refreshView, transaction.end()],
     remove: [refreshView, transaction.end()],

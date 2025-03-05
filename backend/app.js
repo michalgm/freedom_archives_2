@@ -5,17 +5,11 @@ const helmet = require("helmet");
 const cors = require("cors");
 const logger = require("./logger");
 const qs = require("qs");
+const thumbnailProxy = require("./middleware/thumbnail-proxy");
 
 const { feathers } = require("@feathersjs/feathers");
 const configuration = require("@feathersjs/configuration");
-const {
-  default: express,
-  json,
-  urlencoded,
-  notFound,
-  errorHandler,
-  rest,
-} = require("@feathersjs/express");
+const { default: express, json, urlencoded, notFound, errorHandler, rest } = require("@feathersjs/express");
 
 const middleware = require("./middleware");
 const services = require("./services");
@@ -64,6 +58,7 @@ app.use(favicon(path.join(publicPath, "favicon.ico")));
 // Host the public folder
 app.use("/", express.static(publicPath));
 app.use("/api", api);
+app.use("/images/thumbnails", thumbnailProxy(app, publicPath));
 
 app.get("*", function (request, response) {
   response.sendFile(path.join(publicPath, "index.html"));

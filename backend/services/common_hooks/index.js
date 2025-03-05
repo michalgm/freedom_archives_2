@@ -1,9 +1,8 @@
-const { writeThumbnail, writeThumbnailFromUrl } = require("./thumbnailer");
+const { writeThumbnailsFromUrl } = require("./thumbnailer");
 const allowAnonymous = require("./allowAnonymous");
 
 module.exports = {
-  writeThumbnail,
-  writeThumbnailFromUrl,
+  writeThumbnailsFromUrl,
   allowAnonymous,
   setUser: (context) => {
     const {

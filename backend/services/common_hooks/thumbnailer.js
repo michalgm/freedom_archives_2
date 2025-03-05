@@ -1,54 +1,51 @@
 const axios = require("axios");
 const sharp = require("sharp");
-const resize = require("sharp/lib/resize");
+const fs = require("fs").promises;
+const path = require("path");
 
-const sizes = {
+const OUTPUT_DIR = "../../../public/img/thumbnails/";
+const SIZES = {
+  default: 75,
   large: 250,
-  small: 75
 };
+const OUTPUT_FORMAT = "webp";
 
-const filepath = "./thumbnails";
+const base_path = path.resolve(__dirname, OUTPUT_DIR);
 
 const fetchExternalImage = async (url) => {
   const { data } = await axios({ url, responseType: "arraybuffer" });
   return data;
 };
 
-const writeThumbnailFromUrl = async ({ url, filename }) => {
+const writeThumbnailsFromUrl = async ({ url, filename }) => {
   const data = await fetchExternalImage(url);
-  return writeThumbnail({ data, filename });
+  return writeThumbnails({ data, filename });
 };
 
-const writeThumbnail = async ({ data, filename }) => {
-  const buffer = Buffer.from(data, 'base64');
-  const results = await Object
-    .keys(sizes)
-    .reduce(async (prev, size) => {
-      const paths = await prev;
-      const path = `${filepath}/${filename}-${size}.png`;
-      const image = sharp(buffer);
-      try {
-        const res = await image
-          .resize({ width: sizes[size] })
-          .withMetadata()
-          .toFile(path);
-      } catch (e) {
-        console.error(e);
-      }
-      paths.push(path);
-      return paths;
-    }, Promise.resolve([]));
-
-  return results;
+const writeThumbnailsFromPath = async ({ path, filename }) => {
+  const data = await fs.readFile(path);
+  return writeThumbnails({ data, filename });
 };
 
+const writeThumbnails = async ({ data, filename }) => {
+  const buffer = Buffer.from(data, "base64");
+  const image = sharp(buffer);
+
+  return Promise.all(Object.keys(SIZES).map(async (size) => writeThumbnail({ image, filename, size })));
+};
+
+const writeThumbnail = async ({ image, filename, size }) => {
+  const output_name = `${filename}${size === "default" ? "" : `-${size}`}.${OUTPUT_FORMAT}`;
+  const output_path = path.join(base_path, output_name);
+  console.log(output_path);
+  await image.resize({ width: SIZES[size] }).withMetadata().toFile(output_path);
+  return output_path;
+};
 
 module.exports = {
-  writeThumbnail,
-  writeThumbnailFromUrl
+  writeThumbnailsFromPath,
+  writeThumbnailsFromUrl,
 };
-
-
 
 // function updateThumbnail($doc_id, $check = 0) {
 //   global $production;

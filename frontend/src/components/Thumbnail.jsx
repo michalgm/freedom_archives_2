@@ -1,5 +1,5 @@
-import { Avatar } from "@mui/material";
 import { BrokenImage } from "@mui/icons-material";
+import { Avatar } from "@mui/material";
 import React from "react";
 
 const onError = (event) => {
@@ -7,11 +7,10 @@ const onError = (event) => {
 };
 
 export default function Thumbnail({ src, width = 75, alt = "" }) {
+  const flex = `0 0 ${width}px`;
   if (src) {
     return (
-      <span
-        style={{ width, minWidth: width, display: "block", marginRight: 10 }}
-      >
+      <span style={{ width, minWidth: width, display: "block", flex }}>
         <img
           style={{
             maxWidth: "100%",
@@ -24,7 +23,7 @@ export default function Thumbnail({ src, width = 75, alt = "" }) {
     );
   } else {
     return (
-      <Avatar style={{ width, height: width }}>
+      <Avatar style={{ width, height: width, flex }}>
         <BrokenImage style={{ fontSize: width * 0.6 }} />
       </Avatar>
     );
