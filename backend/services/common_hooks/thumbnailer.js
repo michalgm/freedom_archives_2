@@ -3,41 +3,39 @@ const sharp = require("sharp");
 const fs = require("fs").promises;
 const path = require("path");
 
-const OUTPUT_DIR = "../../../public/img/thumbnails/";
+const OUTPUT_DIR = "img/thumbnails/";
 const SIZES = {
   default: 75,
   large: 250,
 };
-const OUTPUT_FORMAT = "webp";
-
-const base_path = path.resolve(__dirname, OUTPUT_DIR);
+const OUTPUT_FORMAT = "jpg";
 
 const fetchExternalImage = async (url) => {
   const { data } = await axios({ url, responseType: "arraybuffer" });
   return data;
 };
 
-const writeThumbnailsFromUrl = async ({ url, filename }) => {
+const writeThumbnailsFromUrl = async ({ url, filename, basedir }) => {
   const data = await fetchExternalImage(url);
-  return writeThumbnails({ data, filename });
+  return writeThumbnails({ data, filename, basedir });
 };
 
-const writeThumbnailsFromPath = async ({ path, filename }) => {
+const writeThumbnailsFromPath = async ({ path, filename, basedir }) => {
   const data = await fs.readFile(path);
-  return writeThumbnails({ data, filename });
+  return writeThumbnails({ data, filename, basedir });
 };
 
-const writeThumbnails = async ({ data, filename }) => {
+const writeThumbnails = async ({ data, filename, basedir }) => {
   const buffer = Buffer.from(data, "base64");
   const image = sharp(buffer);
 
-  return Promise.all(Object.keys(SIZES).map(async (size) => writeThumbnail({ image, filename, size })));
+  return Promise.all(Object.keys(SIZES).map(async (size) => writeThumbnail({ image, filename, size, basedir })));
 };
 
-const writeThumbnail = async ({ image, filename, size }) => {
+const writeThumbnail = async ({ image, filename, size, basedir }) => {
   const output_name = `${filename}${size === "default" ? "" : `-${size}`}.${OUTPUT_FORMAT}`;
-  const output_path = path.join(base_path, output_name);
-  console.log(output_path);
+  const base_path = path.resolve(__dirname, path.join("../../", basedir));
+  const output_path = path.join(base_path, OUTPUT_DIR, output_name);
   await image.resize({ width: SIZES[size] }).withMetadata().toFile(output_path);
   return output_path;
 };
