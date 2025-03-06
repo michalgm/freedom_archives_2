@@ -156,7 +156,7 @@ const SelectField = ({
   );
 
   return (
-    <Field
+    (<Field
       component={Autocomplete}
       handleHomeEndKeys
       loading={active}
@@ -183,16 +183,18 @@ const SelectField = ({
           {...params}
           name={name}
           label={label}
-          InputLabelProps={{ ...params.InputLabelProps, shrink: true }}
           helperText={helperText}
           error={error}
-          InputProps={{
-            ...params.InputProps,
-            ...(InputProps || {}),
-          }}
           variant={props.variant || "outlined"}
           autoFocus={props.autoFocus || false}
-        />
+          slotProps={{
+            input: {
+              ...params.InputProps,
+              ...(InputProps || {}),
+            },
+
+            inputLabel: { ...params.InputLabelProps, shrink: true }
+          }} />
       )}
       onChange={onChange}
       renderOption={(props, option) => {
@@ -225,7 +227,7 @@ const SelectField = ({
       blurOnSelect
       componentsProps={{ paper: { sx: { width: "max-content" } } }}
       {...props}
-    />
+    />)
   );
 };
 

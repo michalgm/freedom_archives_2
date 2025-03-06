@@ -1,16 +1,15 @@
 import React, { Suspense } from "react";
 import { Navigate, Route, Routes as RouterRoutes, useLocation } from "react-router-dom";
 
-import Collections from "./views/Collections";
-import EditLists from "./views/EditLists";
-import Login from "./views/Login";
-import PublishSite from "./views/PublishSite";
-import Record from "./views/Record";
-import Records from "./views/Records";
-import Relationships from "./views/Relationships";
-import ReviewChanges from "./views/ReviewChanges";
-import Search from "./views/Search";
-
+const Collections = React.lazy(() => import("./views/Collections"));
+const EditLists = React.lazy(() => import("./views/EditLists"));
+const Login = React.lazy(() => import("./views/Login"));
+const PublishSite = React.lazy(() => import("./views/PublishSite"));
+const Record = React.lazy(() => import("./views/Record"));
+const Records = React.lazy(() => import("./views/Records"));
+const Relationships = React.lazy(() => import("./views/Relationships"));
+const ReviewChanges = React.lazy(() => import("./views/ReviewChanges"));
+const Search = React.lazy(() => import("./views/Search"));
 const Collection = React.lazy(() => import("./views/Collection"));
 const Users = React.lazy(() => import("./views/Users"));
 

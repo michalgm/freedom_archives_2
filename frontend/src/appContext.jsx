@@ -33,7 +33,6 @@ const reducer = (state, action) => {
         error: null,
       };
     case "LOGOUT":
-      console.log("LOGOUT!");
       localStorage.clear();
       return { ...state, isAuthenticated: false, user: null };
     case "INITIALIZE_HOOKS":
@@ -106,7 +105,6 @@ export const useAddNotification = () => {
   return useCallback(
     (notification) => {
       const id = notification.id || (Math.random() + 1).toString(36).substring(7);
-      console.log("add", notification, id);
       dispatch({
         type: "NOTIFICATIONS",
         payload: [...state.notifications, { ...notification, id }],

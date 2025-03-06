@@ -1,8 +1,8 @@
-import { Box, Chip } from "@mui/material";
+import { Chip, Stack } from "@mui/material";
 
 import { Pagination } from "@mui/material";
-import React from "react";
 import { startCase } from "lodash-es";
+import React from "react";
 
 function PaginationFooter({
   total,
@@ -11,22 +11,20 @@ function PaginationFooter({
   type = "record",
   setOffset,
   digitizedTotal,
+  embedded,
   ...props
 }) {
   const label = `${total} ${startCase(type)}s ${
-    type === "record" && digitizedTotal !== undefined
-      ? `(${digitizedTotal} digitized)`
-      : ""
+    type === "record" && digitizedTotal !== undefined ? `(${digitizedTotal} digitized)` : ""
   }`;
   return (
-    <Box
-      sx={{
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "space-between",
-      }}
+    <Stack
+      direction="row"
+      justifyContent={embedded ? "center" : "space-between"}
+      alignItems="center"
+      sx={{ width: "100%" }}
     >
-      <Chip variant="outlined" label={label} />
+      {!embedded && <Chip variant="outlined" label={label} />}
       <Pagination
         page={offset / page_size + 1}
         count={Math.round(total / page_size)}
@@ -38,13 +36,8 @@ function PaginationFooter({
         variant="outlined"
         {...props}
       />
-      <Chip
-        sx={{ visibility: "hidden" }}
-        className="spacer-chip"
-        variant="outlined"
-        label={label}
-      />
-    </Box>
+      {!embedded && <Chip sx={{ visibility: "hidden" }} className="spacer-chip" variant="outlined" label={label} />}
+    </Stack>
   );
 }
 

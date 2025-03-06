@@ -1,11 +1,4 @@
-import {
-  Add,
-  Delete,
-  KeyboardArrowDown,
-  KeyboardArrowUp,
-  Restore,
-} from "@mui/icons-material";
-import { Link as DOMLink, useNavigate } from "react-router-dom";
+import { Add, Delete, KeyboardArrowDown, KeyboardArrowUp, Restore } from "@mui/icons-material";
 import {
   Divider,
   FormControl,
@@ -17,17 +10,18 @@ import {
   List,
   ListItem,
   ListItemAvatar,
-  ListItemSecondaryAction,
+  ListItemButton,
   ListItemText,
   Stack,
   Typography,
 } from "@mui/material";
 import { FieldArray, useFormikContext } from "formik";
 import React, { useState } from "react";
+import { Link as DOMLink, useNavigate } from "react-router-dom";
 
+import { startCase } from "lodash-es";
 import Field from "../components/Field";
 import Thumbnail from "../components/Thumbnail";
-import { startCase } from "lodash-es";
 
 export function RecordsList({ records, ...props }) {
   return <ItemsList type="record" items={records} {...props} />;
@@ -74,8 +68,7 @@ export function EditableItem({ service, name, label = "" }) {
     );
   } else {
     const { tag: ItemTag, itemName } = services[service];
-    const missingText =
-      name === "parent" ? `Parent ${startCase(itemName)}` : "Collection";
+    const missingText = name === "parent" ? `Parent ${startCase(itemName)}` : "Collection";
 
     return (
       <FormControl variant="outlined" fullWidth size="small" margin="dense">
@@ -111,14 +104,7 @@ export function EditableItem({ service, name, label = "" }) {
   }
 }
 
-export function ItemsList({
-  items,
-  type,
-  emptyText,
-  itemAction,
-  link = true,
-  ...props
-}) {
+export function ItemsList({ items, type, emptyText, itemAction, link = true, ...props }) {
   const ItemTag = type === "record" ? RecordItem : CollectionItem;
   emptyText = emptyText || `No ${startCase(type)}s Found`;
   return (
@@ -158,13 +144,7 @@ function EditableItemsListAction({ icon, size = "small", ...props }) {
   );
 }
 
-export function EditableItemsList({
-  name,
-  emptyText,
-  reorder = false,
-  type = "record",
-  add,
-}) {
+export function EditableItemsList({ name, emptyText, reorder = false, type = "record", add }) {
   const [showAdd, setShowAdd] = useState(false);
 
   const { values, setFieldValue } = useFormikContext();
@@ -179,9 +159,7 @@ export function EditableItemsList({
           const actions = [
             <EditableItemsListAction
               key="remove"
-              onClick={() =>
-                setFieldValue(`${name}[${index}].delete`, !item.delete)
-              }
+              onClick={() => setFieldValue(`${name}[${index}].delete`, !item.delete)}
               // disabled={index === 0}
               icon={item.delete ? "Restore" : "Delete"}
               size={reorder ? "small" : "large"}
@@ -224,10 +202,7 @@ export function EditableItemsList({
             size="small"
             clearOnChange
             managed
-            excludeIds={[
-              values[`${type}_id`],
-              ...values[name].map((item) => item[`${type}_id`]),
-            ]}
+            excludeIds={[values[`${type}_id`], ...values[name].map((item) => item[`${type}_id`])]}
             onChange={(_, child) => {
               if (child) {
                 push(child);
@@ -264,12 +239,7 @@ export function EditableItemsList({
   );
 }
 
-export default function RecordItem({
-  record = {},
-  description: showDescription,
-  itemAction,
-  ...props
-}) {
+export default function RecordItem({ record = {}, description: showDescription, itemAction, ...props }) {
   const {
     title,
     record_id,
@@ -300,14 +270,8 @@ export default function RecordItem({
   );
 }
 
-export function CollectionItem({
-  collection = {},
-  description: showDescription,
-  itemAction,
-  ...props
-}) {
-  const { collection_name, collection_id, thumbnail, description, parent } =
-    collection;
+export function CollectionItem({ collection = {}, description: showDescription, itemAction, ...props }) {
+  const { collection_name, collection_id, thumbnail, description, parent } = collection;
   const details =
     parent && parent.collection_id
       ? [
@@ -347,11 +311,7 @@ function RecordItemDetails({ details, dense }) {
             {type}:&nbsp;
             <b> {label} </b>
             {link && !dense && (
-              <Icon
-                onClick={navigateTo(link)}
-                color="primary"
-                style={{ fontSize: "inherit" }}
-              >
+              <Icon onClick={navigateTo(link)} color="primary" style={{ fontSize: "inherit" }}>
                 launch
               </Icon>
             )}
@@ -366,11 +326,7 @@ function RecordItemDetails({ details, dense }) {
   }, []);
 
   return (
-    <Stack
-      direction="row"
-      divider={<Divider orientation="vertical" flexItem />}
-      spacing={1}
-    >
+    <Stack direction="row" divider={<Divider orientation="vertical" flexItem />} spacing={1}>
       {items}
     </Stack>
   );
@@ -391,61 +347,64 @@ export function Item({
   onClick: onClickHandler,
   ...props
 }) {
-  const list_item_props =
-    link && id
-      ? { component: DOMLink, to: `/${type}s/${id}`, button: true }
-      : {};
-  list_item_props.button = Boolean(id || onClickHandler);
-  const onClick = onClickHandler
-    ? (event) => {
-        onClickHandler(index, event);
-      }
-    : null;
+  const list_item_props = {};
+  let Container = React.Fragment;
+
+  if ((link && id) || onClickHandler) {
+    if (link && id) {
+      list_item_props.component = DOMLink;
+      list_item_props.to = `/${type}s/${id}`;
+    }
+    if (onClickHandler) {
+      list_item_props.onClick = (e) => onClickHandler(index, e);
+    }
+    list_item_props.alignItems = "flex-start";
+    list_item_props.dense = dense;
+    Container = ListItemButton;
+  }
+  if (action) {
+    props.secondaryAction = action();
+  }
 
   return (
-    <ListItem
-      {...list_item_props}
-      alignItems="flex-start"
-      dense={dense}
-      onClick={onClick}
-      {...props}
-    >
-      {Boolean(id) && (
-        <ListItemAvatar style={{ minWidth: dense ? 35 : null }}>
-          <Thumbnail
-            src={
-              thumbnail ? `https://search.freedomarchives.org/${thumbnail}` : ""
-            }
-            alt={`${title} Thumbnail`}
-            width={dense ? 20 : 40}
-          />
-        </ListItemAvatar>
-      )}
-      <ListItemText
-        disableTypography
-        primary={id ? title : missingRecordText}
-        secondary={
-          <>
-            <RecordItemDetails details={details} dense={dense} />
-            {description && (
-              <Typography
-                variant="body2"
-                color="textSecondary"
-                style={{
-                  marginTop: 4.9,
-                  maxHeight: 100,
-                  // overflowX: "auto"
-                  overflow: "hidden",
-                }}
-                dangerouslySetInnerHTML={{
-                  __html: description,
-                }}
-              />
-            )}
-          </>
-        }
-      />
-      {action && <ListItemSecondaryAction>{action()}</ListItemSecondaryAction>}
+    <ListItem {...props} dense={dense} disablePadding alignItems="flex-start">
+      <Container {...list_item_props}>
+        {Boolean(id) && (
+          <ListItemAvatar style={{ minWidth: dense ? 35 : null }}>
+            <Thumbnail
+              src={thumbnail ? `https://search.freedomarchives.org/${thumbnail}` : ""}
+              alt={`${title} Thumbnail`}
+              width={dense ? 20 : 40}
+            />
+          </ListItemAvatar>
+        )}
+        <ListItemText
+          disableTypography
+          primary={id ? title : missingRecordText}
+          secondary={
+            <>
+              <RecordItemDetails details={details} dense={dense} />
+              {description && (
+                <Typography
+                  variant="body2"
+                  color="textSecondary"
+                  style={{
+                    marginTop: 4.9,
+                    maxHeight: 100,
+                    // overflowX: "auto"
+                    overflow: "hidden",
+                  }}
+                  dangerouslySetInnerHTML={{
+                    __html: description,
+                  }}
+                />
+              )}
+            </>
+          }
+        />
+      </Container>
+
+      {/* {action && <ListItemSecondaryAction>{action()}</ListItemSecondaryAction>} */}
     </ListItem>
   );
 }

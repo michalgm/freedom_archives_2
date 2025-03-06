@@ -1,5 +1,5 @@
-import { Button, Grid, Icon, IconButton, Paper, Stack } from "@mui/material";
-import { FieldArray, useFormikContext } from "formik";
+import { Button, Grid2, Icon, IconButton, Paper, Stack } from "@mui/material";
+import { FieldArray, Formik, useFormikContext } from "formik";
 import { isEqual, startCase } from "lodash-es";
 import React, { useEffect, useState } from "react";
 import { collections, records } from "../api";
@@ -8,10 +8,10 @@ import { Close } from "@mui/icons-material";
 import { useDebouncedCallback } from "use-debounce";
 import { useStateValue } from "../appContext";
 import Field from "../components/Field";
-import Form from "../components/Form";
 import ListItemField from "../components/ListItemField";
 import PaginationFooter from "../components/PaginationFooter";
 import ViewContainer from "../components/ViewContainer";
+import AutoSubmit from "./AutoSubmit";
 import { ItemsList } from "./RecordItem";
 
 const page_size = 10;
@@ -80,7 +80,7 @@ function Filter({ index, remove, filterTypes }) {
     );
   }
   return (
-    <Grid item xs={"auto"} sx={{ bgColor: "grey.200" }}>
+    <Grid2 size={"auto"} sx={{ bgColor: "grey.200" }}>
       <Paper sx={{ bgcolor: "grey.200", width: 361 }}>
         <Stack direction="row" spacing={1} sx={{ bgColor: "grey.200" }}>
           <IconButton sx={{ fontSize: 12, pl: 0 }} onClick={() => remove(index)} variant="outlined">
@@ -105,7 +105,7 @@ function Filter({ index, remove, filterTypes }) {
           <div style={{ width: "60%" }}>{value_field}</div>
         </Stack>
       </Paper>
-    </Grid>
+    </Grid2>
   );
 }
 
@@ -193,85 +193,91 @@ export default function Manage({
 
   const renderFilterBar = () => {
     return (
-      <Form
+      <Formik
         initialValues={filter}
-        onChange={(values) => {
+        enableReinitialize
+        onSubmit={(values) => {
           if (!isEqual(values, filter)) {
             setFilter(values);
             setOffset(0);
           }
         }}
       >
-        <Grid item xs={3}>
-          <Field
-            size="small"
-            name="search"
-            type="search"
-            label="Quick Search"
-            helperText="Search title, description. keywords, producers, and call number"
-          />
-        </Grid>
-        <Grid item xs={4}>
-          {service === "record" && <Field name="collection" type="select" searchType="collections" size="small" />}
-        </Grid>
-        <Grid item xs={3}>
-          <div style={{ display: "flex", flexDirection: "column" }}>
-            {service === "record" && (
+        {() => (
+          <Grid2 container spacing={2}>
+            <AutoSubmit />
+            <Grid2 size={3}>
               <Field
-                type="checkbox"
-                name="non_digitized"
-                label="Include non-digitized"
-                margin="none"
                 size="small"
-                style={{ paddingBottom: 4, paddingTop: 4 }}
+                name="search"
+                type="search"
+                label="Quick Search"
+                helperText="Search title, description. keywords, producers, and call number"
               />
-            )}
-            <Field
-              type="checkbox"
-              name="hidden"
-              label="Include Hidden"
-              margin="none"
-              size="small"
-              style={{ paddingBottom: 4, paddingTop: 4 }}
+            </Grid2>
+            <Grid2 size={4}>
+              {service === "record" && <Field name="collection" type="select" searchType="collections" size="small" />}
+            </Grid2>
+            <Grid2 size={3}>
+              <div style={{ display: "flex", flexDirection: "column" }}>
+                {service === "record" && (
+                  <Field
+                    type="checkbox"
+                    name="non_digitized"
+                    label="Include non-digitized"
+                    margin="none"
+                    size="small"
+                    style={{ paddingBottom: 4, paddingTop: 4 }}
+                  />
+                )}
+                <Field
+                  type="checkbox"
+                  name="hidden"
+                  label="Include Hidden"
+                  margin="none"
+                  size="small"
+                  style={{ paddingBottom: 4, paddingTop: 4 }}
+                />
+                <Field
+                  type="checkbox"
+                  name="needs_review"
+                  label="Needs Review"
+                  margin="none"
+                  size="small"
+                  style={{ paddingBottom: 4, paddingTop: 4 }}
+                />
+              </div>
+            </Grid2>
+            <FieldArray
+              name="filters"
+              render={({ push, remove }) => {
+                return (
+                  <>
+                    <Grid2 size={2}>
+                      <Button
+                        variant="outlined"
+                        startIcon={<Icon>add</Icon>}
+                        onClick={() => {
+                          push({ field: null, value: null });
+                        }}
+                      >
+                        Add Filter
+                      </Button>
+                    </Grid2>
+                    <Grid2 size={12}>
+                      <Grid2 container spacing={1}>
+                        {filter.filters.map((filter, index) => (
+                          <Filter filterTypes={filterTypes} filter={filter} key={index} index={index} remove={remove} />
+                        ))}
+                      </Grid2>
+                    </Grid2>
+                  </>
+                );
+              }}
             />
-            <Field
-              type="checkbox"
-              name="needs_review"
-              label="Needs Review"
-              margin="none"
-              size="small"
-              style={{ paddingBottom: 4, paddingTop: 4 }}
-            />
-          </div>
-        </Grid>
-        <FieldArray
-          name="filters"
-          render={({ push, remove }) => {
-            return (
-              <>
-                <Grid item xs={2} lg={2}>
-                  <Button
-                    variant="outlined"
-                    startIcon={<Icon>add</Icon>}
-                    onClick={() => {
-                      push({ field: null, value: null });
-                    }}
-                  >
-                    Add Filter
-                  </Button>
-                </Grid>
-                <Grid item xs={12}>
-                  <Grid container spacing={1}>
-                    {filter.filters.map((filter, index) => (
-                      <Filter filterTypes={filterTypes} filter={filter} key={index} index={index} remove={remove} />
-                    ))}
-                  </Grid>
-                </Grid>
-              </>
-            );
-          }}
-        />
-      </Form>
+          </Grid2>
+        )}
+      </Formik>
     );
   };
 
@@ -279,7 +285,7 @@ export default function Manage({
   itemAction = itemAction || ((index) => dispatch("SEARCH_INDEX", offset + index));
   return (
     <ViewContainer
-      embedded
+      embedded={embedded}
       footerElements={[
         <PaginationFooter
           key="pagination"
@@ -289,6 +295,7 @@ export default function Manage({
           offset={offset}
           page_size={page_size}
           setOffset={setOffset}
+          embedded={embedded}
         />,
       ]}
       headerElements={[renderFilterBar()]}

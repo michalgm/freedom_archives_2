@@ -62,26 +62,29 @@ function HTMLField({
   ...props
 }) {
   return (
-    <TextField
+    (<TextField
       {...props}
-      InputLabelProps={{
-        ...InputLabelProps,
-        sx: {
-          backgroundColor: "#fff",
+      slotProps={{
+        input: {
+          ...InputProps,
+          inputComponent: HtmlEditor,
         },
-      }}
-      inputProps={{
-        ...inputProps,
-        value,
-        name,
-        defaultValue,
-        setFieldValue,
-      }}
-      InputProps={{
-        ...InputProps,
-        inputComponent: HtmlEditor,
-      }}
-    />
+
+        htmlInput: {
+          ...inputProps,
+          value,
+          name,
+          defaultValue,
+          setFieldValue,
+        },
+
+        inputLabel: {
+          ...InputLabelProps,
+          sx: {
+            backgroundColor: "#fff",
+          },
+        }
+      }} />)
   );
 }
 

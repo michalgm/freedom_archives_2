@@ -37,7 +37,7 @@ function Notifications() {
 
   return (
     <div className="notifications">
-      {notifications.map(({ id, ...props }, index) => (
+      {notifications.map(({ id, ownerState: _, ...props }, index) => (
         <Notification
           key={id}
           index={index}

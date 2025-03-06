@@ -113,7 +113,6 @@ const RenderFilterItem = ({ value, label, count, type, addFilter, search }) => {
 
 const Filter = ({ type, values = [], addFilter, search }) => {
   const [limit, setlimit] = useState(INITIAL_FILTER_DISPLAY_COUNT);
-  console.log(type, values);
   return (
     <div key={type} style={{ flexGrow: 1, marginBottom: 10 }}>
       <Typography variant="h6" gutterBottom>
@@ -225,7 +224,6 @@ function Search() {
 
   useEffect(() => {
     const fetchRecords = async () => {
-      console.log("search?", search);
       const time = new Date();
       try {
         const { $fullText, include_non_digitized } = search;
@@ -286,7 +284,6 @@ function Search() {
                   value = value.item;
                 }
               }
-              console.log(key, value);
               if (value && value.toString().trim()) {
                 record.details.push([key, value]);
               }

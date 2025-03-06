@@ -173,6 +173,8 @@ function Collection({ id, mode = "" }) {
     );
   };
 
+  const currentTab = isFeaturedCollections && ["collection", "featured"].includes(tab) ? defaultTab : tab;
+
   return (
     <ViewContainer
       item={collection}
@@ -182,7 +184,7 @@ function Collection({ id, mode = "" }) {
       <Paper sx={{ height: "100%" }}>
         <Stack sx={{ height: "100%" }}>
           {!isFeaturedRecords && (
-            <Tabs sx={{ mb: 2, flex: "0 0 auto" }} value={tab} onChange={(_, tab) => setTab(tab)}>
+            <Tabs sx={{ mb: 2, flex: "0 0 auto" }} value={currentTab} onChange={(_, tab) => setTab(tab)}>
               {!isFeaturedCollections && <Tab label="Edit Collection" value="collection"></Tab>}
               {!isFeaturedCollections && <Tab label="Featured Records" value="featured"></Tab>}
               <Tab label="Subcollections" value="subcollections"></Tab>

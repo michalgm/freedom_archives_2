@@ -159,8 +159,8 @@ export const EditableDataTable = ({
             ...extraActions.map(([label, Icon, action]) => [label, Icon, () => action(row)]),
           ];
 
-      const actions = icons.map(([label, Icon, action], index) => (
-        <Tooltip key={index} title={label} arrow placement="top">
+      const actions = icons.map(([label, Icon, action]) => (
+        <Tooltip key={label} title={label} arrow placement="top">
           <GridActionsCellItem
             icon={<Icon color={label === "Save" ? "primary" : "default"} />}
             label={label}
@@ -171,7 +171,7 @@ export const EditableDataTable = ({
       return actions;
     };
     const updateColumns = columns.map((column) => {
-      const { flex, ...rest } = column; // eslint-disable-line no-unused-vars
+      const { flex, ...rest } = column;
       rest.headerName = rest.headerName || startCase(rest.field);
       if (!autosizeColumns) {
         rest.flex = flex;
@@ -196,7 +196,6 @@ export const EditableDataTable = ({
 
   useEffect(() => {
     if (autosizeColumns && !loading && localRows.length > 0 && apiRef.current) {
-      console.log("resize");
       setTimeout(() => {
         apiRef.current.autosizeColumns({
           includeHeaders: true,

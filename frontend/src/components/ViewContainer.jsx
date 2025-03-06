@@ -1,4 +1,4 @@
-import { Box, Grid, Icon, Paper, Stack, Typography } from "@mui/material";
+import { Box, Grid2, Icon, Paper, Stack, Typography } from "@mui/material";
 import React, { useEffect } from "react";
 import { collections, records } from "../api";
 import { useResetSearch, useStateValue } from "../appContext";
@@ -47,7 +47,7 @@ function ViewContainer({ children, item, buttonRef, neighborService, embedded, .
           $select: [id],
         };
         const { data } = await (neighborService === "record" ? records : collections).find({ query: neighborQuery });
-        let neighbors = data.map((item) => item[id]);
+        const neighbors = data.map((item) => item[id]);
         if (!search_index) {
           neighbors.unshift(null);
         }
@@ -63,7 +63,7 @@ function ViewContainer({ children, item, buttonRef, neighborService, embedded, .
     const offset = type === "prev" ? -1 : 1;
     if (neighborService) {
       return (
-        <Grid item xs component={Box} textAlign={type === "prev" ? "left" : "right"} style={{ flex: "0 0 auto" }}>
+        <Grid2 size="grow" component={Box} textAlign={type === "prev" ? "left" : "right"} style={{ flex: "0 0 auto" }}>
           <ButtonLink
             disabled={!neighbors[type]}
             to={`/${neighborService}s/${neighbors[type]}`}
@@ -73,7 +73,7 @@ function ViewContainer({ children, item, buttonRef, neighborService, embedded, .
           >
             {type}
           </ButtonLink>
-        </Grid>
+        </Grid2>
       );
     }
   };
@@ -84,8 +84,8 @@ function ViewContainer({ children, item, buttonRef, neighborService, embedded, .
     if (sectionElements.length || (type === "footer" && item) || (type === "header" && buttonRef)) {
       const section = (
         <Paper {...sectionProps}>
-          <Grid item xs={12} style={{ flex: "none" }}>
-            <Grid
+          <Grid2 size="grow" style={{ flex: "none" }}>
+            <Grid2
               container
               alignContent="center"
               alignItems="center"
@@ -96,33 +96,32 @@ function ViewContainer({ children, item, buttonRef, neighborService, embedded, .
               {type === "footer" && item && (
                 <>
                   {renderNeighborLink("prev")}
-                  <Grid item xs style={{ textAlign: "center" }}>
+                  <Grid2 size="grow" style={{ textAlign: "center" }}>
                     {renderTime(item, "created")}
-                  </Grid>
+                  </Grid2>
                 </>
               )}
               {sectionElements.map((item, index) => (
-                <Grid
-                  item
-                  xs
+                <Grid2
                   key={`${type}-${index}`}
+                  flex="1 1 auto"
                   // style={{ textAlign: 'center' }}
                 >
                   {item}
-                </Grid>
+                </Grid2>
               ))}
-              {type === "header" && buttonRef && <Grid item xs ref={buttonRef}></Grid>}
+              {type === "header" && buttonRef && <Grid2 size="grow" ref={buttonRef}></Grid2>}
               {type === "footer" && item && (
                 <>
-                  <Grid item xs style={{ textAlign: "center" }}>
+                  <Grid2 size="grow" style={{ textAlign: "center" }}>
                     {renderTime(item, "modified")}
-                  </Grid>
+                  </Grid2>
                   {renderNeighborLink("next")}
                 </>
               )}
-            </Grid>
+            </Grid2>
             {type === "header" && <div id={`form-errors`} />}
-          </Grid>
+          </Grid2>
         </Paper>
       );
       return section;
@@ -132,7 +131,7 @@ function ViewContainer({ children, item, buttonRef, neighborService, embedded, .
   return (
     <Stack direction="column" spacing={2} useFlexGap style={{ height, flexWrap: "nowrap" }}>
       {renderSection("header")}
-      <Box id="contents" xs={12} sx={{ overflowX: "auto", flex: "1 1 auto", padding: "1px" }}>
+      <Box id="contents" size="grow" sx={{ overflowX: "auto", flex: "100 100 auto", padding: "1px" }}>
         {children}
       </Box>
       {!newItem && renderSection("footer")}

@@ -21,9 +21,8 @@
     "@feathersjs/authentication-client": "^5.0.12",
     "@feathersjs/feathers": "^5.0.12",
     "@feathersjs/rest-client": "^5.0.12",
-    "@mui-treasury/layout": "^5.0.0-alpha.21",
-    "@mui/icons-material": "^5.4.2",
-    "@mui/material": "^5.4.2",
+    "@mui/icons-material": "^6.4.6",
+    "@mui/material": "^6.4.6",
     "@mui/x-data-grid": "^7.24.1",
     "@mui/x-date-pickers": "^7.27.0",
     "@vitejs/plugin-react": "^4.2.1",
@@ -49,32 +48,11 @@
   },
   "devDependencies": {
     "eslint": "^8.56.0",
+    "eslint-plugin-import": "^2.31.0",
     "eslint-plugin-react": "^7.33.2",
     "eslint-plugin-react-hooks": "^4.6.0",
     "eslint-plugin-unused-imports": "^3.0.0",
     "vite-bundle-analyzer": "^0.17.1"
-  },
-  "eslintConfig": {
-    "env": {
-      "browser": true,
-      "es2021": true
-    },
-    "extends": [
-      "eslint:recommended",
-      "plugin:react/recommended",
-      "plugin:react-hooks/recommended"
-    ],
-    "plugins": [
-      "react",
-      "react-hooks"
-    ],
-    "rules": {
-      "indent": "off",
-      "react/prop-types": "off"
-    },
-    "parserOptions": {
-      "sourceType": "module"
-    }
   },
   "proxy": "http://localhost:3030",
   "browserslist": {

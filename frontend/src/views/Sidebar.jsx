@@ -1,5 +1,4 @@
-import { EdgeSidebar, SidebarContent } from "@mui-treasury/layout";
-import { Divider, List, ListItem, ListItemText, Typography } from "@mui/material";
+import { Box, Divider, Drawer, List, ListItem, ListItemButton, ListItemText, Toolbar, Typography } from "@mui/material";
 import { Link, useLocation, useMatch, useResolvedPath } from "react-router-dom";
 
 import React from "react";
@@ -36,10 +35,11 @@ const sideBarConfig = {
   ],
 };
 
-function Sidebar() {
+function Sidebar({ ...props }) {
   return (
-    <EdgeSidebar anchor="left">
-      <SidebarContent>
+    <Drawer {...props}>
+      <Toolbar />
+      <Box sx={{ overflow: "auto" }}>
         {Object.keys(sideBarConfig).map((title) => {
           return (
             <div key={title}>
@@ -55,9 +55,8 @@ function Sidebar() {
             </div>
           );
         })}
-      </SidebarContent>
-      {/* <EdgeTrigger target={{ anchor: "left", field: "collapsed" }} /> */}
-    </EdgeSidebar>
+      </Box>
+    </Drawer>
   );
 }
 
@@ -72,14 +71,14 @@ function SidebarItem({ label, /* icon, */ href = "notalink" }) {
 
   // console.log({href, pathname, current, home})
   return (
-    <ListItemLink button selected={Boolean(current)} href={href}>
+    <ListItemLink selected={Boolean(current)} href={href}>
       <ListItemText>{label}</ListItemText>
     </ListItemLink>
   );
 }
 
 function ListItemLink(props) {
-  return <ListItem button disabled={!props.href} component={props.href ? Link : "div"} to={props.href} {...props} />;
+  return <ListItemButton disabled={!props.href} component={props.href ? Link : "div"} to={props.href} {...props} />;
 }
 
 export default Sidebar;

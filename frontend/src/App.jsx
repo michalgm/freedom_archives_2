@@ -1,12 +1,10 @@
-import "./App.scss";
-
-import { Content, EdgeTrigger, Header, Root } from "@mui-treasury/layout";
-import { Box, Button, Container, CssBaseline, Icon, Toolbar, Typography } from "@mui/material";
+import { AppBar, Box, Button, Container, CssBaseline, Icon, Stack, Toolbar, Typography } from "@mui/material";
 import { StyledEngineProvider, ThemeProvider, createTheme } from "@mui/material/styles";
 import { LocalizationProvider } from "@mui/x-date-pickers";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import React from "react";
 import { Link, BrowserRouter as Router } from "react-router-dom";
+import "./App.scss";
 import { StateProvider, useStateValue } from "./appContext";
 
 import { ConfirmProvider } from "material-ui-confirm";
@@ -19,6 +17,8 @@ import Notifications from "./components/Notifications";
 import Routes from "./Routes";
 import Loading from "./views/Loading";
 import Sidebar from "./views/Sidebar";
+
+const DRAWERWIDTH = 256;
 
 export const theme = createTheme({
   components: {
@@ -43,41 +43,6 @@ export const darkTheme = createTheme({
   },
 });
 
-// console.log(theme)
-const scheme = {
-  header: {
-    config: {
-      xs: {
-        position: "fixed",
-        height: 64,
-        clipped: true,
-      },
-    },
-  },
-  leftEdgeSidebar: {
-    autoCollapse: "sm",
-    config: {
-      xs: {
-        variant: "temporary",
-        width: 256,
-        collapsible: false,
-        persistentBehavior: "fit",
-      },
-      md: {
-        variant: "permanent",
-        persistentBehavior: "fit",
-        width: 256,
-        collapsible: false,
-      },
-    },
-  },
-  initialState: {
-    leftEdgeSidebar: {
-      open: true,
-    },
-  },
-};
-
 function App() {
   return (
     <StyledEngineProvider injectFirst>
@@ -92,9 +57,7 @@ function App() {
                     v7_relativeSplatPath: true,
                   }}
                 >
-                  <Root scheme={scheme}>
-                    <Layout />
-                  </Root>
+                  <Layout />
                 </Router>
               </ConfirmProvider>
             </StateProvider>
@@ -115,27 +78,34 @@ function Layout() {
         marginLeft: 0,
         width: "100%",
       };
-  // const style = {
-  // height: "100vh",
-  // marginLeft: 0,
 
-  //   backgroundColor: "#efefef",
-  // };
   return (
     <Box className="App" sx={{ backgroundColor: "#efefef", height: "100vh", display: "flex", flexDirection: "column" }}>
       <NavBar />
-      {isAuthenticated && <Sidebar />}
-      <Content
-        sx={{
-          backgroundColor: "#efefef",
-        }}
-        className="FlexContainer"
-        style={style}
-      >
-        <Loading fullPage>
-          <Main />
-        </Loading>
-      </Content>
+      <Stack direction="row" sx={{ flex: 1 }}>
+        {isAuthenticated && (
+          <Sidebar
+            variant="permanent"
+            sx={{
+              width: DRAWERWIDTH,
+            }}
+            slotProps={{
+              paper: { sx: { width: DRAWERWIDTH } },
+            }}
+          />
+        )}
+        <Box
+          sx={{
+            backgroundColor: "#efefef",
+          }}
+          className="FlexContainer"
+          style={style}
+        >
+          <Loading fullPage>
+            <Main />
+          </Loading>
+        </Box>
+      </Stack>
     </Box>
   );
 }
@@ -161,15 +131,17 @@ function Logout() {
 
 function NavBar() {
   return (
-    <Header color="primary">
+    <AppBar
+      color="primary"
+      position="fixed"
+      elevation={0}
+      sx={{ zIndex: (theme) => theme.zIndex.drawer + 1, position: "relative" }}
+    >
       <Toolbar className="topnav">
-        <EdgeTrigger target={{ anchor: "left", field: "open" }}>
-          {(open, setOpen) => <Icon onClick={() => setOpen(!open)}>{open ? "keyboard_arrow_left" : "menu"}</Icon>}
-        </EdgeTrigger>
         <Breadcrumbs />
         <Logout />
       </Toolbar>
-    </Header>
+    </AppBar>
   );
 }
 
@@ -177,9 +149,6 @@ function Main() {
   const {
     state: { isAuthenticated },
   } = useStateValue();
-  // console.log(isAuthenticated);
-  // const title = isAuthenticated ? 'Welcome' : 'Login'
-  // <h1>{title}</h1>
   return (
     <Container maxWidth="xl" sx={{ paddingBottom: "8px" }} className="FlexContainer">
       <Authentication />

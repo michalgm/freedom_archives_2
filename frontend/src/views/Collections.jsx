@@ -1,14 +1,9 @@
-import {
-  Avatar,
-  ListItemAvatar,
-  ListItemText,
-  Typography,
-} from "@mui/material";
+import { Avatar, ListItemAvatar, ListItemText, Typography } from "@mui/material";
 import React, { useCallback } from "react";
 
 import { BrokenImage } from "@mui/icons-material";
-import Manage from "../components/Manage";
 import { merge } from "lodash-es";
+import Manage from "../components/Manage";
 
 const filter_types = {
   collection_name: { input: "text", match: "fuzzy" },
@@ -37,13 +32,7 @@ function Collections({ embedded, itemAction, filter = {}, excludeIds = [] }) {
         needs_review: needs_review ? needs_review : undefined,
         collection_id: { $nin: excludeIds },
         $sort: { display_order: 1, collection_name: 1 },
-        $select: [
-          "collection_id",
-          "collection_name",
-          "description",
-          "thumbnail",
-          "parent",
-        ],
+        $select: ["collection_id", "collection_name", "description", "thumbnail", "parent"],
       };
       if (search) {
         const $ilike = `%${search.replace(/ /g, "%")}%`;
@@ -79,7 +68,6 @@ function Collections({ embedded, itemAction, filter = {}, excludeIds = [] }) {
         </ListItemAvatar>
         <ListItemText
           primary={collection.collection_name}
-          secondaryTypographyProps={{ component: "div" }}
           secondary={
             <>
               <Typography variant="subtitle2" gutterBottom>
@@ -94,6 +82,9 @@ function Collections({ embedded, itemAction, filter = {}, excludeIds = [] }) {
               ></Typography>
             </>
           }
+          slotProps={{
+            secondary: { component: "div" },
+          }}
         ></ListItemText>
       </>
     );

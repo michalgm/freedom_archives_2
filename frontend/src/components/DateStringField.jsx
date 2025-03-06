@@ -53,7 +53,7 @@ const DateStringMask = React.forwardRef(function DateStringMask(props, ref) {
     }
     const click = event.detail > 0;
     const relatedTarget = event.relatedTarget;
-    let back =
+    const back =
       !click &&
       relatedTarget &&
       document.activeElement.compareDocumentPosition(relatedTarget) === Node.DOCUMENT_POSITION_FOLLOWING;
@@ -113,14 +113,17 @@ const DateStringMask = React.forwardRef(function DateStringMask(props, ref) {
 const DateStringField = ({ ...props }) => {
   return (
     <TextField
-      InputLabelProps={{ shrink: true }}
       autoComplete="off"
       fullWidth
       type={"text"}
-      InputProps={{
-        inputComponent: DateStringMask,
-      }}
       {...props}
+      slotProps={{
+        input: {
+          inputComponent: DateStringMask,
+        },
+
+        inputLabel: { shrink: true },
+      }}
     />
   );
 };

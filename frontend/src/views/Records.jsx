@@ -81,68 +81,68 @@ function Records({ embedded, itemAction, filter = {}, excludeIds = [] }) {
   );
 
   const renderItem = (record) => {
-    return (
-      <>
-        <ListItemAvatar>
-          <Thumbnail
-            src={
-              record.has_digital
-                ? `https://search.freedomarchives.org/images/thumbnails/${record.record_id}.jpg`
-                : ""
-            }
-            alt={`${record.title} Thumbnail`}
-            width={40}
-          />
-        </ListItemAvatar>
-        <ListItemText
-          primary={
+    return (<>
+      <ListItemAvatar>
+        <Thumbnail
+          src={
+            record.has_digital
+              ? `https://search.freedomarchives.org/images/thumbnails/${record.record_id}.jpg`
+              : ""
+          }
+          alt={`${record.title} Thumbnail`}
+          width={40}
+        />
+      </ListItemAvatar>
+      <ListItemText
+        primary={
+          <Grid
+            container
+            justifyContent="space-between"
+            style={{ flexWrap: "inherit" }}
+          >
+            <Grid item>{record.title}</Grid>
+            <Grid item>
+              <Typography variant="body2">
+                ID:&nbsp;{record.record_id}
+              </Typography>
+            </Grid>
+          </Grid>
+        }
+        secondary={
+          <>
             <Grid
               container
               justifyContent="space-between"
               style={{ flexWrap: "inherit" }}
             >
-              <Grid item>{record.title}</Grid>
               <Grid item>
-                <Typography variant="body2">
-                  ID:&nbsp;{record.record_id}
+                <Typography variant="subtitle2" gutterBottom>
+                  Collection: {record.collection.collection_name}
                 </Typography>
               </Grid>
-            </Grid>
-          }
-          secondaryTypographyProps={{ component: "div" }}
-          secondary={
-            <>
-              <Grid
-                container
-                justifyContent="space-between"
-                style={{ flexWrap: "inherit" }}
-              >
+              {record.call_number && (
                 <Grid item>
-                  <Typography variant="subtitle2" gutterBottom>
-                    Collection: {record.collection.collection_name}
+                  <Typography variant="body2">
+                    CN:&nbsp;{record.call_number}
                   </Typography>
                 </Grid>
-                {record.call_number && (
-                  <Grid item>
-                    <Typography variant="body2">
-                      CN:&nbsp;{record.call_number}
-                    </Typography>
-                  </Grid>
-                )}
-              </Grid>
+              )}
+            </Grid>
 
-              <Typography
-                style={{ maxHeight: 100, overflowX: "auto" }}
-                variant="body2"
-                dangerouslySetInnerHTML={{
-                  __html: record.description,
-                }}
-              ></Typography>
-            </>
-          }
-        ></ListItemText>
-      </>
-    );
+            <Typography
+              style={{ maxHeight: 100, overflowX: "auto" }}
+              variant="body2"
+              dangerouslySetInnerHTML={{
+                __html: record.description,
+              }}
+            ></Typography>
+          </>
+        }
+        slotProps={{
+          secondary: { component: "div" }
+        }}
+      ></ListItemText>
+    </>);
   };
   return (
     <Manage

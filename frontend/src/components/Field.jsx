@@ -16,8 +16,8 @@ import { Autocomplete } from "formik-mui";
 import { startCase } from "lodash-es";
 import React from "react";
 import DateStringField from "./DateStringField";
-import HTMLField from "./HTMLField";
 import SelectField from "./SelectField";
+const HTMLField = React.lazy(() => import("./HTMLField"));
 
 const selectOptions = {
   day: Array.from({ length: 32 }, (v, k) => ({
@@ -113,8 +113,8 @@ const FieldComponent = ({
       </FormControl>
     );
   } else if (type === "simpleSelect") {
-    let { InputProps, options, selectType, inputProps, ...selectProps } = props;
-
+    const { InputProps, selectType, inputProps, ...selectProps } = props;
+    let { options } = props;
     if (!options) {
       options = selectOptions[selectType] || [];
     }
@@ -144,14 +144,17 @@ const FieldComponent = ({
               <TextField
                 {...{ helperText, error, ...params }}
                 name={name}
-                InputLabelProps={{ ...params.InputLabelProps, shrink: true }}
                 label={label}
                 variant={props.variant || "outlined"}
-                InputProps={{
-                  ...params.InputProps,
-                  ...(InputProps || {}),
+                slotProps={{
+                  input: {
+                    ...params.InputProps,
+                    ...(InputProps || {}),
+                  },
+
+                  htmlInput: { ...params.inputProps, ...(inputProps || {}) },
+                  inputLabel: { ...params.InputLabelProps, shrink: true },
                 }}
-                inputProps={{ ...params.inputProps, ...(inputProps || {}) }}
               />
             )}
             {...{
@@ -199,8 +202,8 @@ const FieldComponent = ({
       <FormControl>
         <FormLabel>{labelValue}</FormLabel>
         <RadioGroup name={name} value={value || ""} row {...radioProps}>
-          {options.map((option, index) => (
-            <FormControlLabel key={index} control={<Radio />} {...option} />
+          {options.map((option) => (
+            <FormControlLabel key={option.value} control={<Radio />} {...option} />
           ))}
         </RadioGroup>
       </FormControl>
