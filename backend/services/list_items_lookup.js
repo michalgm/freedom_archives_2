@@ -13,7 +13,7 @@ class ValueLookup extends Service {
 module.exports = function (app) {
   const options = {
     id: "list_item_id",
-    Model: app.get("knexClient"),
+    Model: app.get("postgresqlClient"),
     paginate: app.get("paginate"),
   };
 

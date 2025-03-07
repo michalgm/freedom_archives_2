@@ -14,7 +14,7 @@ class Instances extends Service {
 module.exports = function (app) {
   const options = {
     id: "instance_id",
-    Model: app.get("knexClient"),
+    Model: app.get("postgresqlClient"),
     paginate: app.get("paginate"),
     multi: true,
   };

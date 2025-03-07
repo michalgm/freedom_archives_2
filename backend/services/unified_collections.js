@@ -1,5 +1,5 @@
 // Initializes the `collections` service on path `/collections`
-const {Service} = require('feathers-knex');
+const { Service } = require("feathers-knex");
 
 class UnifiedCollections extends Service {
   constructor(options) {
@@ -15,12 +15,11 @@ class UnifiedCollections extends Service {
 
 module.exports = function (app) {
   const options = {
-    id: 'collection_id',
-    Model: app.get('knexClient'),
-    paginate: app.get('paginate'),
+    id: "collection_id",
+    Model: app.get("postgresqlClient"),
+    paginate: app.get("paginate"),
   };
 
   // Initialize our service with any options it requires
-  app.use('/unified_collections', new UnifiedCollections(options, app));
-
+  app.use("/unified_collections", new UnifiedCollections(options, app));
 };

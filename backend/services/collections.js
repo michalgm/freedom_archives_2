@@ -24,7 +24,7 @@ class Collections extends Service {
 module.exports = function (app) {
   const options = {
     id: "collection_id",
-    Model: app.get("knexClient"),
+    Model: app.get("postgresqlClient"),
     paginate: app.get("paginate"),
   };
 
@@ -47,9 +47,7 @@ module.exports = function (app) {
     const id = context.id || context.result.collection_id;
 
     if (!Object.keys(data).length) {
-      context.result = await trx("collections")
-        .where("collections_id", id)
-        .select();
+      context.result = await trx("collections").where("collections_id", id).select();
     }
 
     if (relation_data.children !== undefined) {
@@ -59,11 +57,7 @@ module.exports = function (app) {
           if (child.delete) {
             return app
               .service("collections")
-              .patch(
-                child.collection_id,
-                { parent_collection_id: null },
-                { user, transaction: { trx } }
-              );
+              .patch(child.collection_id, { parent_collection_id: null }, { user, transaction: { trx } });
           } else if (child.collection_id) {
             return app
               .service("collections")
@@ -83,54 +77,35 @@ module.exports = function (app) {
           if (child.delete) {
             return app
               .service("records")
-              .patch(
-                child.record_id,
-                { collection_id: 1000 },
-                { user, transaction: { trx } }
-              );
+              .patch(child.record_id, { collection_id: 1000 }, { user, transaction: { trx } });
           } else if (child.record_id) {
-            return app
-              .service("records")
-              .patch(
-                child.record_id,
-                { collection_id: id },
-                { user, transaction: { trx } }
-              );
+            return app.service("records").patch(child.record_id, { collection_id: id }, { user, transaction: { trx } });
           }
         })
       );
     }
 
     if (relation_data.featured_records !== undefined) {
-      const { deleteIds, updateRecords } =
-        relation_data.featured_records.reduce(
-          (acc, record) => {
-            if (record.delete) {
-              acc.deleteIds.push(record.record_id);
-            } else {
-              acc.updateRecords.push({
-                record_id: record.record_id,
-                collection_id: id,
-                record_order: acc.updateRecords.length + 1,
-                label: record.label,
-              });
-            }
-            return acc;
-          },
-          { deleteIds: [], updateRecords: [] }
-        );
+      const { deleteIds, updateRecords } = relation_data.featured_records.reduce(
+        (acc, record) => {
+          if (record.delete) {
+            acc.deleteIds.push(record.record_id);
+          } else {
+            acc.updateRecords.push({
+              record_id: record.record_id,
+              collection_id: id,
+              record_order: acc.updateRecords.length + 1,
+              label: record.label,
+            });
+          }
+          return acc;
+        },
+        { deleteIds: [], updateRecords: [] }
+      );
 
-      await trx
-        .from("featured_records")
-        .where("collection_id", id)
-        .whereIn("record_id", deleteIds)
-        .delete();
+      await trx.from("featured_records").where("collection_id", id).whereIn("record_id", deleteIds).delete();
 
-      await trx
-        .from("featured_records")
-        .insert(updateRecords)
-        .onConflict(["collection_id", "record_id"])
-        .merge();
+      await trx.from("featured_records").insert(updateRecords).onConflict(["collection_id", "record_id"]).merge();
     }
 
     return context;
@@ -146,9 +121,7 @@ module.exports = function (app) {
 
     await Promise.all(
       children.map(({ record_id }) => {
-        return app
-          .service("records")
-          .patch(record_id, { collection_id: 1000 }, { user, transaction });
+        return app.service("records").patch(record_id, { collection_id: 1000 }, { user, transaction });
       })
     );
 
@@ -175,9 +148,7 @@ module.exports = function (app) {
       });
 
       if ("publisher" in data) {
-        data[`publisher_id`] = data["publisher"]
-          ? data["publisher"].list_item_id
-          : null;
+        data[`publisher_id`] = data["publisher"] ? data["publisher"].list_item_id : null;
         delete data["publisher"];
       }
       // if ('collection' in data) {
@@ -185,9 +156,7 @@ module.exports = function (app) {
       //   delete data.collection;
       // }
       if ("parent" in data) {
-        data.parent_collection_id = data.parent
-          ? data.parent.collection_id
-          : null;
+        data.parent_collection_id = data.parent ? data.parent.collection_id : null;
         delete data.parent;
       }
 

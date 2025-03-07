@@ -15,7 +15,7 @@ class Snapshots extends KnexService {
 module.exports = function (app) {
   const options = {
     id: "snapshot_id",
-    Model: app.get("knexClient"),
+    Model: app.get("postgresqlClient"),
   };
 
   app.use("/snapshots", new Snapshots(options, app), { methods: ["create", "find", "patch"] });

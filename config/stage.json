@@ -7,10 +7,9 @@
       "audience": "freedomarchives.styrotopia.net"
     }
   },
-  "postgres": {
+  "postgresql": {
     "client": "pg",
     "debug": true,
-    "backdoorPassword": "letmein",
     "searchPath": [
       "freedom_archives"
     ],

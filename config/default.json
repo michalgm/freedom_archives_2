@@ -28,16 +28,21 @@
       "passwordField": "password"
     }
   },
-  "postgres": {
+  "postgresql": {
     "client": "pg",
     "debug": true,
-    "backdoorPassword": "letmein",
     "searchPath": [
       "freedom_archives"
     ],
     "connection": {
       "host": "127.0.0.1",
       "password": "1234"
+    },
+    "migrations": {
+      "loadExtensions": [
+        ".js",
+        ".mjs"
+      ]
     }
   }
 }

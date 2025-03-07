@@ -18,7 +18,7 @@ const channels = require("./channels");
 
 const authentication = require("./authentication");
 
-const knex = require("./knex");
+const knex = require("./postgresql");
 
 const api = express(feathers());
 api.configure(configuration());

@@ -5,7 +5,7 @@
     "authentication": {
         "secret": "SECRET"
     },
-    "postgres": {
+    "postgresql": {
         "connection": {
             "password": "PGPASSWORD",
             "user": "PGUSER",
