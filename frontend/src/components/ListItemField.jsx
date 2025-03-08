@@ -1,19 +1,12 @@
-import {
-  Button,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogTitle,
-  Grid,
-} from "@mui/material";
+import { Button, Dialog, DialogActions, DialogContent, DialogTitle, Grid2 } from "@mui/material";
 import React, { useState } from "react";
 
+import { createFilterOptions } from "@mui/material/useAutocomplete";
+import { useFormikContext } from "formik";
+import { list_items } from "../api";
 import Field from "./Field";
 import FieldRow from "./FieldRow";
 import Form from "./Form";
-import { createFilterOptions } from "@mui/material/useAutocomplete";
-import { list_items } from "../api";
-import { useFormikContext } from "formik";
 
 const ListItemField = ({ name, disableNew, listType, isMulti, ...props }) => {
   const [open, toggleOpen] = React.useState(false);
@@ -54,10 +47,7 @@ const ListItemField = ({ name, disableNew, listType, isMulti, ...props }) => {
             !disableNew &&
             options.length &&
             params.inputValue !== "" &&
-            !filtered.some(
-              ({ item }) =>
-                item.toLowerCase() === params.inputValue.toLowerCase()
-            )
+            !filtered.some(({ item }) => item.toLowerCase() === params.inputValue.toLowerCase())
           ) {
             filtered.push({
               value: params.inputValue,
@@ -82,12 +72,7 @@ const ListItemField = ({ name, disableNew, listType, isMulti, ...props }) => {
   );
 };
 
-export const NewListItemDialog = ({
-  initialValue,
-  handleClose,
-  open,
-  type,
-}) => {
+export const NewListItemDialog = ({ initialValue, handleClose, open, type }) => {
   const [listItem, setListItem] = useState({});
   const { values, isValid, setFieldValue } = useFormikContext();
   React.useEffect(() => {
@@ -123,11 +108,7 @@ export const NewListItemDialog = ({
   };
 
   return (
-    <Dialog
-      open={open}
-      onClose={handleClose}
-      aria-labelledby="form-dialog-title"
-    >
+    <Dialog open={open} onClose={handleClose} aria-labelledby="form-dialog-title">
       <Form
         initialValues={listItem}
         onSubmit={handleSubmit}
@@ -136,7 +117,7 @@ export const NewListItemDialog = ({
         validate={validate}
         validateOnMount
       >
-        <Grid item xs={12}>
+        <Grid2 size={12}>
           <DialogTitle id="form-dialog-title">Add a new {type}</DialogTitle>
           <DialogContent>
             <FieldRow>
@@ -151,7 +132,7 @@ export const NewListItemDialog = ({
               Add
             </Button>
           </DialogActions>
-        </Grid>
+        </Grid2>
       </Form>
     </Dialog>
   );

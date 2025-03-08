@@ -1,6 +1,6 @@
 import "./Form.scss";
 
-import { Alert, AlertTitle, Button, Grid, Portal } from "@mui/material";
+import { Alert, AlertTitle, Button, Grid, Grid2, Portal } from "@mui/material";
 import { Formik, Form as FormikForm, useFormikContext } from "formik";
 import React, { useState } from "react";
 
@@ -77,13 +77,13 @@ const Form = ({
     }
 
     return (
-      <Grid container className="buttons" spacing={1} justifyContent="flex-end">
+      <Grid2 container className="buttons" spacing={1} justifyContent="flex-end">
         {buttons.map(({ ...props }, key) => (
-          <Grid item key={key}>
+          <Grid2 key={key}>
             <FormButton {...props} />
-          </Grid>
+          </Grid2>
         ))}
-      </Grid>
+      </Grid2>
     );
   };
 
@@ -120,7 +120,7 @@ const Form = ({
             <Portal container={() => document.getElementById("form-errors")}>
               <Errors errors={errors} />
             </Portal>
-            <Grid
+            <Grid2
               container
               style={{ textAlign: "left", height: "100%" }}
               spacing={2}
@@ -130,7 +130,7 @@ const Form = ({
               {!buttonsBelow && !buttonRef && renderButtons(buttons)}
               {rows.map((row) => (row.type && row.type.name === "FieldRow" ? React.cloneElement(row, { ro }) : row))}
               {buttonsBelow && !buttonRef && renderButtons(buttons)}
-            </Grid>
+            </Grid2>
             {buttonRef && ReactDOM.createPortal(renderButtons(buttons), buttonRef.current)}
           </FormikForm>
         );

@@ -1,9 +1,9 @@
-import { Grid, ListItemAvatar, ListItemText, Typography } from "@mui/material";
+import { Grid2, ListItemAvatar, ListItemText, Typography } from "@mui/material";
 import React, { useCallback } from "react";
 
+import { merge } from "lodash-es";
 import Manage from "../components/Manage";
 import Thumbnail from "../components/Thumbnail";
-import { merge } from "lodash-es";
 
 const filter_types = {
   day: { input: "simpleSelect", match: "exact", allowNull: true },
@@ -40,13 +40,7 @@ function Records({ embedded, itemAction, filter = {}, excludeIds = [] }) {
 
   const createQuery = useCallback(
     (filter) => {
-      const {
-        search,
-        non_digitized,
-        hidden,
-        needs_review,
-        collection = {},
-      } = filter;
+      const { search, non_digitized, hidden, needs_review, collection = {} } = filter;
       const query = {
         has_digital: non_digitized ? undefined : true,
         is_hidden: hidden ? undefined : false,
@@ -81,68 +75,56 @@ function Records({ embedded, itemAction, filter = {}, excludeIds = [] }) {
   );
 
   const renderItem = (record) => {
-    return (<>
-      <ListItemAvatar>
-        <Thumbnail
-          src={
-            record.has_digital
-              ? `https://search.freedomarchives.org/images/thumbnails/${record.record_id}.jpg`
-              : ""
+    return (
+      <>
+        <ListItemAvatar>
+          <Thumbnail
+            src={
+              record.has_digital ? `https://search.freedomarchives.org/images/thumbnails/${record.record_id}.jpg` : ""
+            }
+            alt={`${record.title} Thumbnail`}
+            width={40}
+          />
+        </ListItemAvatar>
+        <ListItemText
+          primary={
+            <Grid2 container justifyContent="space-between" style={{ flexWrap: "inherit" }}>
+              <Grid2>{record.title}</Grid2>
+              <Grid2>
+                <Typography variant="body2">ID:&nbsp;{record.record_id}</Typography>
+              </Grid2>
+            </Grid2>
           }
-          alt={`${record.title} Thumbnail`}
-          width={40}
-        />
-      </ListItemAvatar>
-      <ListItemText
-        primary={
-          <Grid
-            container
-            justifyContent="space-between"
-            style={{ flexWrap: "inherit" }}
-          >
-            <Grid item>{record.title}</Grid>
-            <Grid item>
-              <Typography variant="body2">
-                ID:&nbsp;{record.record_id}
-              </Typography>
-            </Grid>
-          </Grid>
-        }
-        secondary={
-          <>
-            <Grid
-              container
-              justifyContent="space-between"
-              style={{ flexWrap: "inherit" }}
-            >
-              <Grid item>
-                <Typography variant="subtitle2" gutterBottom>
-                  Collection: {record.collection.collection_name}
-                </Typography>
-              </Grid>
-              {record.call_number && (
-                <Grid item>
-                  <Typography variant="body2">
-                    CN:&nbsp;{record.call_number}
+          secondary={
+            <>
+              <Grid2 container justifyContent="space-between" style={{ flexWrap: "inherit" }}>
+                <Grid2>
+                  <Typography variant="subtitle2" gutterBottom>
+                    Collection: {record.collection.collection_name}
                   </Typography>
-                </Grid>
-              )}
-            </Grid>
+                </Grid2>
+                {record.call_number && (
+                  <Grid2>
+                    <Typography variant="body2">CN:&nbsp;{record.call_number}</Typography>
+                  </Grid2>
+                )}
+              </Grid2>
 
-            <Typography
-              style={{ maxHeight: 100, overflowX: "auto" }}
-              variant="body2"
-              dangerouslySetInnerHTML={{
-                __html: record.description,
-              }}
-            ></Typography>
-          </>
-        }
-        slotProps={{
-          secondary: { component: "div" }
-        }}
-      ></ListItemText>
-    </>);
+              <Typography
+                style={{ maxHeight: 100, overflowX: "auto" }}
+                variant="body2"
+                dangerouslySetInnerHTML={{
+                  __html: record.description,
+                }}
+              ></Typography>
+            </>
+          }
+          slotProps={{
+            secondary: { component: "div" },
+          }}
+        ></ListItemText>
+      </>
+    );
   };
   return (
     <Manage

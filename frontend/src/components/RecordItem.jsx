@@ -2,7 +2,7 @@ import { Add, Delete, KeyboardArrowDown, KeyboardArrowUp, Restore } from "@mui/i
 import {
   Divider,
   FormControl,
-  Grid,
+  Grid2,
   Icon,
   IconButton,
   InputAdornment,
@@ -184,9 +184,9 @@ export function EditableItemsList({ name, emptyText, reorder = false, type = "re
             );
           }
           item.action = () => (
-            <Grid container direction="column">
+            <Grid2 container direction="column">
               {actions}
-            </Grid>
+            </Grid2>
           );
           return item;
         });
@@ -306,7 +306,7 @@ function RecordItemDetails({ details, dense }) {
   const items = details.reduce((acc, { label, type, link }) => {
     if (label) {
       const item = (
-        <Grid key={type} item style={{ paddingTop: 0, paddingBottom: 0 }}>
+        <Grid2 key={type} style={{ paddingTop: 0, paddingBottom: 0 }}>
           <Typography color="textSecondary" variant="caption">
             {type}:&nbsp;
             <b> {label} </b>
@@ -316,7 +316,7 @@ function RecordItemDetails({ details, dense }) {
               </Icon>
             )}
           </Typography>
-        </Grid>
+        </Grid2>
       );
       // return acc === null ? [item] : [acc, item]
       return [...acc, item];

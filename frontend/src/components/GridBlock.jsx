@@ -1,36 +1,36 @@
-import { Grid, Paper, Typography } from "@mui/material/";
+import { Grid2, Paper, Typography } from "@mui/material/";
 
 import React from "react";
 
 function GridBlock({ children = [], title = "", subtitle = "", width = 12, spacing }) {
   return (
-    <Grid item xs={width}>
+    <Grid2 size={width}>
       <Paper>
         {(title || subtitle) && (
-          <Grid container spacing={subtitle ? 4 : 0} alignItems="baseline">
+          <Grid2 container spacing={subtitle ? 4 : 0} alignItems="baseline">
             {title && (
-              <Grid item>
+              <Grid2>
                 <Typography variant="h6">{title}</Typography>
-              </Grid>
+              </Grid2>
             )}
             {subtitle && (
-              <Grid item>
+              <Grid2>
                 <Typography variant="subtitle1" color="text.secondary">
                   {subtitle}
                 </Typography>
-              </Grid>
+              </Grid2>
             )}
-          </Grid>
+          </Grid2>
         )}
         {spacing ? (
-          <Grid container spacing={spacing}>
+          <Grid2 container spacing={spacing}>
             {children}
-          </Grid>
+          </Grid2>
         ) : (
           children
         )}
       </Paper>
-    </Grid>
+    </Grid2>
   );
 }
 

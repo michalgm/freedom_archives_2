@@ -1,4 +1,4 @@
-import { Box, Divider, Grid, Paper, Stack, Tab, Tabs, Typography } from "@mui/material/";
+import { Box, Divider, Grid2, Paper, Stack, Tab, Tabs, Typography } from "@mui/material/";
 import { FieldArray, useFormikContext } from "formik";
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
@@ -251,7 +251,7 @@ function EditList({ property = "child_records", type = "record", filter, reorder
 
   const renderFieldArray = ({ unshift }) => {
     return (
-      <Grid item sx={{ height: "100%" }}>
+      <Grid2 size={{ height: "100%" }}>
         <Stack
           direction={"row"}
           sx={{ height: "100%" }}
@@ -275,7 +275,7 @@ function EditList({ property = "child_records", type = "record", filter, reorder
             <ItemsList embedded itemAction={(_, item) => unshift(item)} excludeIds={excludeIds} filter={filter} />
           </Box>
         </Stack>
-      </Grid>
+      </Grid2>
     );
   };
 

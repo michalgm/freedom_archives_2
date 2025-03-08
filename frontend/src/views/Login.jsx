@@ -1,10 +1,10 @@
-import { Grid, Paper, Typography } from "@mui/material/";
+import { Grid2, Paper, Typography } from "@mui/material/";
 import { useLocation, useNavigate } from "react-router-dom";
 
-import Field from "../components/Field";
-import Form from "../components/Form";
 import React from "react";
 import { authenticate } from "../api";
+import Field from "../components/Field";
+import Form from "../components/Form";
 
 function Login() {
   const buttons = [{ label: "Log In", type: "submit", color: "primary" }];
@@ -25,25 +25,19 @@ function Login() {
   };
 
   return (
-    <Grid container justifyContent="center">
-      <Grid item md={7} lg={5}>
+    <Grid2 container justifyContent="center">
+      <Grid2 size={{ md: 7, lg: 5 }}>
         <Paper style={{ padding: "20px 28px" }}>
           <Typography variant="h4" align="center" gutterBottom>
             Log in
           </Typography>
-          <Form
-            initialValues={{ username: "greg", password: "letmein" }}
-            onSubmit={login}
-            noUpdateCheck
-            buttonsBelow
-            buttons={buttons}
-          >
+          <Form initialValues={{}} onSubmit={login} noUpdateCheck buttonsBelow buttons={buttons}>
             <Field name="username" placeholder="username" />
             <Field name="password" placeholder="password" type="password" />
           </Form>
         </Paper>
-      </Grid>
-    </Grid>
+      </Grid2>
+    </Grid2>
   );
 }
 

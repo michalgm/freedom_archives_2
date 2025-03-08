@@ -1,4 +1,4 @@
-import { Grid } from "@mui/material";
+import { Grid2 } from "@mui/material";
 import React from "react";
 
 function FieldRow({ children, ro = false, ...props }) {
@@ -7,14 +7,9 @@ function FieldRow({ children, ro = false, ...props }) {
   return fields.map((element, index) => {
     // const label = (element.props.label || element.props.name).replace('_value', '')
     return (
-      <Grid
-        item
-        key={element.props.name || index}
-        xs={element.props.width || width}
-        {...props}
-      >
+      <Grid2 key={element.props.name || index} size={element.props.width || width} {...props}>
         {React.cloneElement(element, { ro })}
-      </Grid>
+      </Grid2>
     );
 
     // if (label) {

@@ -6,7 +6,7 @@ import {
   AccordionSummary,
   Button,
   Divider,
-  Grid,
+  Grid2,
   Icon,
   IconButton,
   Table,
@@ -348,11 +348,11 @@ function Relationships({ id, relationships = [] }) {
 
 function RecordParent() {
   return (
-    <Grid container justifyContent="center" alignItems="center" spacing={4}>
-      <Grid item xs={12}>
+    <Grid2 container justifyContent="center" alignItems="center" spacing={4}>
+      <Grid2 size={12}>
         <EditableItem service="records" name="parent" />
-      </Grid>
-    </Grid>
+      </Grid2>
+    </Grid2>
   );
 }
 
@@ -522,18 +522,18 @@ function Record({ showForm, id, ro = false /*  embedded = false */ }) {
             validate={validate}
           >
             <GridBlock title="" spacing={2}>
-              <Grid item xs={10}>
-                <Grid container spacing={2}>
-                  <Grid item xs={12}>
+              <Grid2 size={10}>
+                <Grid2 container spacing={2}>
+                  <Grid2 size={12}>
                     <Field name="title" />
-                  </Grid>
-                  <Grid item xs={12}>
+                  </Grid2>
+                  <Grid2 size={12}>
                     <Field name="description" multiline rows={4} />
-                  </Grid>
-                </Grid>
-              </Grid>
+                  </Grid2>
+                </Grid2>
+              </Grid2>
               {
-                <Grid item xs={2} className="record-thumbnail">
+                <Grid2 size={2} className="record-thumbnail">
                   <Button
                     variant="outlined"
                     href={`https://search.freedomarchives.org/admin/#/documents/${record.record_id}`}
@@ -549,7 +549,7 @@ function Record({ showForm, id, ro = false /*  embedded = false */ }) {
                       // src={"https://search.freedomarchives.org/" + record.primary_instance_thumbnail}
                     />
                   </p>
-                </Grid>
+                </Grid2>
               }
               <FieldRow>
                 <Field type="checkbox" name="is_hidden" />
@@ -588,14 +588,14 @@ function Record({ showForm, id, ro = false /*  embedded = false */ }) {
             <GridBlock title="Media">
               <Instances edit={edit} record={record} instances={record.instances || []} />
             </GridBlock>
-            <Grid item xs={12}>
+            <Grid2 size={12}>
               <Divider />
               <Accordion>
                 <AccordionSummary expandIcon={<ExpandMore />}>
                   <Typography variant="h5">Relationships</Typography>
                 </AccordionSummary>
                 <AccordionDetails>
-                  <Grid container spacing={2}>
+                  <Grid2 container spacing={2}>
                     <GridBlock title="Parent Record">
                       <RecordParent edit={edit} record={record} parent={record.parent || {}} />
                     </GridBlock>
@@ -616,10 +616,10 @@ function Record({ showForm, id, ro = false /*  embedded = false */ }) {
                       />
                     </GridBlock>
                     <GridBlock title="Old Relationships">{record.relationships}</GridBlock>
-                  </Grid>
+                  </Grid2>
                 </AccordionDetails>
               </Accordion>
-            </Grid>
+            </Grid2>
           </Form>
         )}
       </ViewContainer>

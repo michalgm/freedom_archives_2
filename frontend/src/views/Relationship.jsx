@@ -1,4 +1,4 @@
-import { Divider, Grid, Paper, Typography } from "@mui/material";
+import { Divider, Grid2, Paper, Typography } from "@mui/material";
 import React, { useEffect, useState } from "react";
 
 import { relationships } from "../api";
@@ -24,11 +24,11 @@ function Relationship({ id }) {
 
   return (
     <div>
-      <Grid container spacing={2}>
+      <Grid2 container spacing={2}>
         {[1, 2].map((num) => {
           const other_num = num === 1 ? 2 : 1;
           return (
-            <Grid item xs={6} key={num}>
+            <Grid2 size={6} key={num}>
               <Paper>
                 <Form>
                   <Typography variant="h4">Record {num}</Typography>
@@ -47,20 +47,20 @@ function Relationship({ id }) {
                   <Divider />
                 </Form>
               </Paper>
-            </Grid>
+            </Grid2>
           );
         })}
 
         {[1, 2].map((num) => (
-          <Grid item xs={6} key={num}>
+          <Grid2 size={6} key={num}>
             <Paper>
               <div style={{ padding: 4 }}>
                 <Record id={relation[`docid_${num}`]} ro embedded />
               </div>
             </Paper>
-          </Grid>
+          </Grid2>
         ))}
-      </Grid>
+      </Grid2>
     </div>
   );
 }

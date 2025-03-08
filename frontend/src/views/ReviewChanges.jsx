@@ -1,4 +1,4 @@
-import { Box, Button, Grid, Paper, Stack, Typography } from "@mui/material";
+import { Box, Button, Grid2, Paper, Stack, Typography } from "@mui/material";
 
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { collections, records, review_changes, snapshots } from "../api";
@@ -140,7 +140,7 @@ function ReviewChangesForm({ filter, setFilter, publishDate }) {
         {fields.map((field) => {
           if (field.name === "date_modified") {
             return (
-              <Grid key="date_modified" item xs={12} md={9}>
+              <Grid2 key="date_modified" size={{ xs: 12, md: 9 }}>
                 <Field
                   type="radiogroup"
                   row
@@ -158,13 +158,13 @@ function ReviewChangesForm({ filter, setFilter, publishDate }) {
                     { value: "custom", label: customLabel },
                   ]}
                 />
-              </Grid>
+              </Grid2>
             );
           } else {
             return (
-              <Grid item key={field.name} xs={12} md={2.4}>
+              <Grid2 key={field.name} size={{ xs: 12, md: 2.4 }}>
                 <Field {...field} />
-              </Grid>
+              </Grid2>
             );
           }
         })}
@@ -246,7 +246,7 @@ function ReviewChanges() {
         field: "title",
         flex: 2,
         renderCell: ({ value, row: { type, id } }) => (
-          <Link target="_blank" to={`/${type}s/${id}`}>
+          <Link target="_blank" to={`/${type.toLowerCase()}s/${id}`}>
             {value}
           </Link>
         ),

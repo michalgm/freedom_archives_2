@@ -1,6 +1,6 @@
 import "./Search.scss";
 
-import { Box, Button, Card, Divider, Grid, Icon, Link as MULink, Paper, Stack, Typography } from "@mui/material";
+import { Box, Button, Card, Divider, Grid2, Icon, Link as MULink, Paper, Stack, Typography } from "@mui/material";
 import React, { useCallback, useEffect, useRef, useState } from "react";
 
 import { useTheme } from "@mui/material/styles";
@@ -175,7 +175,7 @@ const SearchForm = ({ search, setSearch, filters }) => {
         }}
       >
         <AutoSave timeout={500} />
-        <Grid item xs={12}>
+        <Grid2 size={12}>
           <Field name="$fullText" label="Search" placeholder="Search Records" width={12} autoFocus />
           <Field
             name="include_non_digitized"
@@ -184,8 +184,8 @@ const SearchForm = ({ search, setSearch, filters }) => {
             // autoSubmit
             width={12}
           />
-        </Grid>
-        <Grid item xs={12}>
+        </Grid2>
+        <Grid2 size={12}>
           <Typography variant="h5">Filters</Typography>
           <Button color="primary" size="small" variant="contained" onClick={clearFilters}>
             Clear Filters
@@ -193,7 +193,7 @@ const SearchForm = ({ search, setSearch, filters }) => {
           {FILTER_TYPES.map((type) => {
             return <Filter key={type} type={type} values={filters[type]} addFilter={addFilter} search={search} />;
           })}
-        </Grid>
+        </Grid2>
       </Form>
     </Paper>
   );
@@ -303,7 +303,7 @@ function Search() {
 
   const renderResult = (record = {}) => {
     return (
-      <Grid item xs={12} key={record.record_id}>
+      <Grid2 size={12} key={record.record_id}>
         <Card>
           <Stack spacing={2} direction="row">
             <Thumbnail
@@ -314,18 +314,18 @@ function Search() {
               <Typography variant="h5">
                 {record.title} ({record.score})
               </Typography>
-              <Grid container spacing={1} style={{ marginBottom: 3, marginTop: 3 }}>
+              <Grid2 container spacing={1} style={{ marginBottom: 3, marginTop: 3 }}>
                 {(record.details || []).map(([key, value]) => (
-                  <Grid item key={key}>
+                  <Grid2 key={key}>
                     <KVChip keyName={startCase(key)} value={value} />
-                  </Grid>
+                  </Grid2>
                 ))}
-              </Grid>
+              </Grid2>
               <Description text={record.description} />
             </Box>
           </Stack>
         </Card>
-      </Grid>
+      </Grid2>
     );
   };
 

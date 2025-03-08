@@ -1,21 +1,12 @@
 import "./Relationships.scss";
 
-import {
-  Box,
-  Button,
-  Grid,
-  LinearProgress,
-  MenuItem,
-  Paper,
-  TextField,
-  Typography,
-} from "@mui/material";
+import { Box, Button, Grid2, LinearProgress, MenuItem, Paper, TextField, Typography } from "@mui/material";
 import React, { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 
+import { relationships } from "../api";
 import ButtonLink from "../components/ButtonLink";
 import Relationship from "./Relationship";
-import { relationships } from "../api";
 
 function LinearProgressWithLabel(props) {
   return (
@@ -24,9 +15,7 @@ function LinearProgressWithLabel(props) {
         <LinearProgress variant="determinate" {...props} />
       </Box>
       <Box minWidth={35}>
-        <Typography variant="body2" color="textSecondary">{`${Math.round(
-          props.value
-        )}%`}</Typography>
+        <Typography variant="body2" color="textSecondary">{`${Math.round(props.value)}%`}</Typography>
       </Box>
     </Box>
   );
@@ -148,43 +137,22 @@ function Relationships() {
 
   return (
     <div className="relationships">
-      <Grid
-        container
-        spacing={4}
-        justifyContent="center"
-        alignItems="center"
-        direction="row"
-      >
+      <Grid2 container spacing={4} justifyContent="center" alignItems="center" direction="row">
         <Paper>
-          <Grid item xs={12}>
-            <Grid
-              container
-              spacing={4}
-              justifyContent="center"
-              alignItems="center"
-              direction="row"
-            >
-              <Grid item xs={12} style={{ paddingBottom: 0 }}>
+          <Grid2 size={12}>
+            <Grid2 container spacing={4} justifyContent="center" alignItems="center" direction="row">
+              <Grid2 size={12} style={{ paddingBottom: 0 }}>
                 <LinearProgressWithLabel value={complete} />
-              </Grid>
-              <Grid item xs={12}>
-                <ButtonLink
-                  to={`/relationships/${$skip - 1}`}
-                  disabled={$skip <= 1}
-                >
+              </Grid2>
+              <Grid2 size={12}>
+                <ButtonLink to={`/relationships/${$skip - 1}`} disabled={$skip <= 1}>
                   Prev
                 </ButtonLink>
                 {$skip} out of {idList.length}
-                <ButtonLink
-                  to={`/relationships/${$skip + 1}`}
-                  disabled={$skip >= idList.length + 1}
-                >
+                <ButtonLink to={`/relationships/${$skip + 1}`} disabled={$skip >= idList.length + 1}>
                   Next
                 </ButtonLink>
-                <ButtonLink
-                  to={`/relationships/${nextUnreviewed}`}
-                  disabled={!nextUnreviewed}
-                >
+                <ButtonLink to={`/relationships/${nextUnreviewed}`} disabled={!nextUnreviewed}>
                   Next Unreviewed
                 </ButtonLink>
                 <div>
@@ -205,8 +173,8 @@ function Relationships() {
                   </TextField>
                 </div>
                 {info[type]?.desc}
-              </Grid>
-              <Grid item xs={6}>
+              </Grid2>
+              <Grid2 size={6}>
                 <TextField
                   variant="outlined"
                   value={notes}
@@ -216,31 +184,25 @@ function Relationships() {
                   onChange={updateNotes}
                   fullWidth
                 />
-              </Grid>
-              <Grid item xs={4}>
-                <Button
-                  variant="outlined"
-                  disabled={!type}
-                  color="primary"
-                  onClick={setRelationType}
-                >
+              </Grid2>
+              <Grid2 size={4}>
+                <Button variant="outlined" disabled={!type} color="primary" onClick={setRelationType}>
                   Save Relation Type
                 </Button>
                 {relation.user && (
                   <p>
-                    Updated at{" "}
-                    <b>{new Date(relation.updated_at).toLocaleString()} </b>
+                    Updated at <b>{new Date(relation.updated_at).toLocaleString()} </b>
                     by <b>{relation.user}</b>
                   </p>
                 )}
-              </Grid>
-            </Grid>
-          </Grid>
+              </Grid2>
+            </Grid2>
+          </Grid2>
         </Paper>
-        <Grid item xs={12}>
+        <Grid2 size={12}>
           <Relationship id={relation.id} />
-        </Grid>
-      </Grid>
+        </Grid2>
+      </Grid2>
     </div>
   );
 }
