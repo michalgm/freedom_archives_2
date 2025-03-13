@@ -1,9 +1,6 @@
-const { Service } = require("feathers-knex");
-const {
-  hooks: { transaction },
-} = require("feathers-knex");
+const { KnexService, transaction } = require("@feathersjs/knex");
 
-class Relationships extends Service {
+class Relationships extends KnexService {
   constructor(options) {
     super({
       ...options,
@@ -20,10 +17,10 @@ module.exports = function (app) {
   };
 
   // Initialize our service with any options it requires
-  app.use("/relationships", new Relationships(options, app));
+  app.use("/api/relationships", new Relationships(options, app));
 
   // Get our initialized service so that we can register hooks
-  const service = app.service("relationships");
+  const service = app.service("api/relationships");
 
   const updateRelations = async (context) => {
     const {
@@ -34,21 +31,21 @@ module.exports = function (app) {
     } = context;
     if (type === "unknown") {
     } else if (type === "parent") {
-      await app.service("records").patch(result.docid_2, { parent_record_id: result.docid_1 }, { user });
-      await app.service("records").patch(result.docid_1, {}, { user });
+      awaitapp.service("api/records").patch(result.docid_2, { parent_record_id: result.docid_1 }, { user });
+      awaitapp.service("api/records").patch(result.docid_1, {}, { user });
     } else if (type === "child") {
-      await app.service("records").patch(result.docid_1, { parent_record_id: result.docid_2 }, { user });
-      await app.service("records").patch(result.docid_2, {}, { user });
+      awaitapp.service("api/records").patch(result.docid_1, { parent_record_id: result.docid_2 }, { user });
+      awaitapp.service("api/records").patch(result.docid_2, {}, { user });
     } else if (type === "sibling") {
-      const record1 = await app.service("records").get(result.docid_1);
+      const record1 = awaitapp.service("api/records").get(result.docid_1);
       let parent_id = record1.parent_record_id;
       if (!parent_id) {
-        const record2 = await app.service("records").get(result.docid_2);
+        const record2 = awaitapp.service("api/records").get(result.docid_2);
         parent_id = record2.parent_record_id;
       }
       if (parent_id) {
-        await app.service("records").patch(result.docid_1, { parent_record_id: parent_id }, { user });
-        await app.service("records").patch(result.docid_2, { parent_record_id: parent_id }, { user });
+        awaitapp.service("api/records").patch(result.docid_1, { parent_record_id: parent_id }, { user });
+        awaitapp.service("api/records").patch(result.docid_2, { parent_record_id: parent_id }, { user });
       }
     } else if (type === "original") {
       await app

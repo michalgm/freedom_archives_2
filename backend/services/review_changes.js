@@ -1,6 +1,6 @@
-const { Service } = require("feathers-knex");
+const { KnexService } = require("@feathersjs/knex");
 
-class ReviewChanges extends Service {
+class ReviewChanges extends KnexService {
   constructor(options) {
     super({
       ...options,
@@ -18,5 +18,5 @@ module.exports = function (app) {
   };
 
   // Initialize our service with any options it requires
-  app.use("/review_changes", new ReviewChanges(options, app));
+  app.use("/api/review_changes", new ReviewChanges(options, app));
 };

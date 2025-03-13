@@ -11,8 +11,8 @@ const list_items_lookup = require("./list_items_lookup.js");
 const review_changes = require("./review_changes.js");
 const public_records = require("./public_records.js");
 const snapshots = require("./snapshots.js");
+const settings = require("./settings");
 
-// eslint-disable-next-line no-unused-vars
 module.exports = function (app) {
   app.configure(users);
   app.configure(records);
@@ -27,4 +27,5 @@ module.exports = function (app) {
   app.configure(review_changes);
   app.configure(public_records);
   app.configure(snapshots);
+  app.configure(settings);
 };

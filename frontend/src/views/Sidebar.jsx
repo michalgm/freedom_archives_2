@@ -20,7 +20,7 @@ const sideBarConfig = {
     { label: "Manage Featured Records", icon: "", href: "/records/featured" },
   ],
   "Site Management": [
-    { label: "Edit site header text", icon: "", href: "" },
+    { label: "Site Settings", icon: "", href: "/site/settings" },
     { label: "Edit List Values", icon: "", href: "/site/edit-list-values" },
     { label: "Export Collections", icon: "", href: "" },
     { label: "Find Duplicate Records", icon: "", href: "" },

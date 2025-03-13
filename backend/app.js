@@ -11,7 +11,7 @@ const { feathers } = require("@feathersjs/feathers");
 const configuration = require("@feathersjs/configuration");
 const { default: express, json, urlencoded, notFound, errorHandler, rest } = require("@feathersjs/express");
 
-const middleware = require("./middleware");
+// const middleware = require("./middleware");
 const services = require("./services");
 const appHooks = require("./app.hooks");
 const channels = require("./channels");
@@ -20,24 +20,11 @@ const authentication = require("./authentication");
 
 const knex = require("./postgresql");
 
-const api = express(feathers());
-api.configure(configuration());
+const app = express(feathers());
+app.configure(configuration());
 // Set up Plugins and providers
-api.configure(rest());
-api.configure(knex);
 
-// Configure other middleware (see `middleware/index.js`)
-api.configure(middleware);
-api.configure(authentication);
-// Set up our services (see `services/index.js`)
-api.configure(services);
-// Set up event channels (see channels.js)
-api.configure(channels);
-api.hooks(appHooks);
-
-const publicPath = path.resolve(__dirname, api.get("public")); // Adjust relative path as necessary
-
-const app = express();
+const publicPath = path.resolve(__dirname, app.get("public")); // Adjust relative path as necessary
 
 app.set("query parser", function (str) {
   return qs.parse(str, { strictNullHandling: true, arrayLimit: Infinity });
@@ -57,8 +44,20 @@ app.use(urlencoded({ extended: true }));
 app.use(favicon(path.join(publicPath, "favicon.ico")));
 // Host the public folder
 app.use("/", express.static(publicPath));
-app.use("/api", api);
 app.use("/images/thumbnails", thumbnailProxy(app, publicPath));
+
+// Configure a middleware for 404s and the error handler
+app.configure(rest());
+app.configure(knex);
+
+// Configure other middleware (see `middleware/index.js`)
+// app.configure(middleware);
+app.configure(authentication);
+// Set up our services (see `services/index.js`)
+app.configure(services);
+// Set up event channels (see channels.js)
+app.configure(channels);
+app.hooks(appHooks);
 
 app.get("*", function (request, response) {
   response.sendFile(path.join(publicPath, "index.html"));
@@ -78,7 +77,4 @@ app.use(
 
 // api.setup(server);
 
-module.exports = {
-  app,
-  api,
-};
+module.exports = app;

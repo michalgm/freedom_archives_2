@@ -18,9 +18,9 @@ module.exports = function (app) {
     Model: app.get("postgresqlClient"),
   };
 
-  app.use("/snapshots", new Snapshots(options, app), { methods: ["create", "find", "patch"] });
+  app.use("/api/snapshots", new Snapshots(options, app), { methods: ["create", "find", "patch"] });
 
-  const service = app.service("snapshots");
+  const service = app.service("api/snapshots");
 
   service.hooks({
     before: {

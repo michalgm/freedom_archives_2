@@ -156,7 +156,7 @@ const SelectField = ({
   );
 
   return (
-    (<Field
+    <Field
       component={Autocomplete}
       handleHomeEndKeys
       loading={active}
@@ -193,8 +193,9 @@ const SelectField = ({
               ...(InputProps || {}),
             },
 
-            inputLabel: { ...params.InputLabelProps, shrink: true }
-          }} />
+            inputLabel: { ...params.InputLabelProps, shrink: true },
+          }}
+        />
       )}
       onChange={onChange}
       renderOption={(props, option) => {
@@ -225,9 +226,11 @@ const SelectField = ({
       loadingText="Loading...."
       inputValue={inputValue}
       blurOnSelect
-      componentsProps={{ paper: { sx: { width: "max-content" } } }}
+      slotProps={{
+        paper: { sx: { width: "max-content" } },
+      }}
       {...props}
-    />)
+    />
   );
 };
 

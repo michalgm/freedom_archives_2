@@ -1,17 +1,15 @@
 // Application hooks that run for every service
 const { authenticate } = require("@feathersjs/authentication").hooks;
-const {
-  hooks: { transaction },
-} = require("feathers-knex");
-const { allowAnonymous } = require("./services/common_hooks");
+const { transaction } = require("@feathersjs/knex");
+const { allowAnonymous, validateArchive } = require("./services/common_hooks");
 
-const public_services = ["public_records"];
+const public_services = ["api/public_records"];
 
 const checkAuth = async (context) => {
   if (public_services.includes(context.path)) {
     allowAnonymous()(context);
     return authenticate("jwt", "anonymous")(context);
-  } else if (context.path !== "authentication") {
+  } else if (context.path !== "api/authentication") {
     return authenticate("jwt")(context);
   }
   return context;
@@ -42,7 +40,10 @@ module.exports = {
     all: [
       async (context) => {
         console.log("!!!", context.error.message);
-        if (context.path === "authentication" && ["NotAuthenticated: jwt expired"].includes(context.error.message)) {
+        if (
+          context.path === "api/authentication" &&
+          ["NotAuthenticated: jwt expired"].includes(context.error.message)
+        ) {
           console.error(`Auth error: ${context.error.message}`);
         } else {
           console.error(

@@ -1,8 +1,5 @@
-const { Service } = require("feathers-knex");
-const {
-  hooks: { transaction },
-} = require("feathers-knex");
-class Instances extends Service {
+const { KnexService, transaction } = require("@feathersjs/knex");
+class Instances extends KnexService {
   constructor(options) {
     super({
       ...options,
@@ -20,10 +17,10 @@ module.exports = function (app) {
   };
 
   // Initialize our service with any options it requires
-  app.use("/instances", new Instances(options, app));
+  app.use("/api/instances", new Instances(options, app));
 
   // Get our initialized service so that we can register hooks
-  const service = app.service("instances");
+  const service = app.service("api/instances");
 
   const updateView = async (context) => {
     const {
@@ -36,7 +33,7 @@ module.exports = function (app) {
       },
     } = context;
     if (!id) {
-      await app.service("records").patch(data.record_id, {}, { user, transaction: { trx } });
+      awaitapp.service("api/records").patch(data.record_id, {}, { user, transaction: { trx } });
     }
   };
 

@@ -1,6 +1,6 @@
-const { Service } = require("feathers-knex");
+const { KnexService } = require("@feathersjs/knex");
 
-class ValueLookup extends Service {
+class ValueLookup extends KnexService {
   constructor(options) {
     super({
       ...options,
@@ -17,5 +17,5 @@ module.exports = function (app) {
   };
 
   // Initialize our service with any options it requires
-  app.use("/value_lookup", new ValueLookup(options, app));
+  app.use("/api/value_lookup", new ValueLookup(options, app));
 };

@@ -6,11 +6,9 @@ const setArchive = (context) => {
   const {
     data,
     method,
-    params: {
-      user: { archive_id },
-    },
+    params: { user: { archive_id } = {} },
   } = context;
-  if (method === "create") {
+  if (archive_id && method === "create") {
     data.archive_id = archive_id;
   }
   return context;

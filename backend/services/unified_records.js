@@ -1,7 +1,7 @@
 // Initializes the `records` service on path `/records`
-const { Service } = require("feathers-knex");
+const { KnexService } = require("@feathersjs/knex");
 
-class UnifiedRecords extends Service {
+class UnifiedRecords extends KnexService {
   constructor(options) {
     super({
       ...options,
@@ -21,5 +21,5 @@ module.exports = function (app) {
   };
 
   // Initialize our service with any options it requires
-  app.use("/unified_records", new UnifiedRecords(options, app));
+  app.use("/api/unified_records", new UnifiedRecords(options, app));
 };

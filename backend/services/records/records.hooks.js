@@ -1,7 +1,6 @@
 const tsquery = require("pg-tsquery")();
-const {
-  hooks: { transaction },
-} = require("feathers-knex");
+const { transaction } = require("@feathersjs/knex");
+
 const {
   setUser,
   updateListItemRelations,
@@ -13,9 +12,12 @@ const {
 } = require("../common_hooks/");
 
 const fullTextSearch = (context) => {
+  const {
+    service: { fullName },
+  } = context;
   if (context.params.query.$fullText !== undefined) {
     const { $fullText, ...query } = context.params.query;
-    const knex = context.app.service(`unified_${context.path}`).createQuery({ ...context.params, query });
+    const knex = context.app.service(`unified_${fullName}`).createQuery({ ...context.params, query });
     if ($fullText) {
       const fullTextQuery = tsquery($fullText);
       context.fullText = fullTextQuery;
@@ -171,17 +173,17 @@ const updateRelations = async (context) => {
     const instances = await Promise.all(
       relation_data.instances.map((instance) => {
         if (instance.delete) {
-          return app.service("instances").remove(instance.instance_id, params);
+          return app.service("api/instances").remove(instance.instance_id, params);
         } else if (instance.instance_id) {
-          return app.service("instances").patch(instance.instance_id, instance, params);
+          return app.service("api/instances").patch(instance.instance_id, instance, params);
         }
         delete instance.instance_id;
         instance.record_id ||= id;
-        return app.service("instances").create(instance, params);
+        return app.service("api/instances").create(instance, params);
       })
     );
     if (instances.length && !data.primary_instance_id) {
-      await app.service("records")._patch(id, { primary_instance_id: instances[0].instance_id }, params);
+      await app.service("api/records")._patch(id, { primary_instance_id: instances[0].instance_id }, params);
     }
   }
 
@@ -189,9 +191,9 @@ const updateRelations = async (context) => {
     await Promise.all(
       relation_data.children.map((child) => {
         if (child.delete) {
-          return app.service("records").patch(child.record_id, { parent_record_id: null }, params);
+          return app.service("api/records").patch(child.record_id, { parent_record_id: null }, params);
         } else if (child.record_id && !child.parent_record_id) {
-          return app.service("records").patch(child.record_id, { parent_record_id: id }, params);
+          return app.service("api/records").patch(child.record_id, { parent_record_id: id }, params);
         }
       })
     );

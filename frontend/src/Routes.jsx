@@ -12,6 +12,7 @@ const ReviewChanges = React.lazy(() => import("./views/ReviewChanges"));
 const Search = React.lazy(() => import("./views/Search"));
 const Collection = React.lazy(() => import("./views/Collection"));
 const Users = React.lazy(() => import("./views/Users"));
+const SiteSettings = React.lazy(() => import("./views/SiteSettings"));
 
 function Routes({ isAuthenticated }) {
   const location = useLocation();
@@ -35,6 +36,7 @@ function Routes({ isAuthenticated }) {
           <Route path="/login" element={<Login />} />
           <Route path="/site/edit-list-values" element={<EditLists />} />
           <Route path="/site/review-changes" element={<ReviewChanges />} />
+          <Route path="/site/settings" element={<SiteSettings />} />
           <Route path="/admin/publish-site" element={<PublishSite />} />
           <Route path="/admin/users" element={<Users />} />
         </RouterRoutes>

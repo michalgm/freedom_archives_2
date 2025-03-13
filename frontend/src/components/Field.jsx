@@ -16,6 +16,7 @@ import { Autocomplete } from "formik-mui";
 import { startCase } from "lodash-es";
 import React from "react";
 import DateStringField from "./DateStringField";
+import { EditableItem } from "./RecordItem";
 import SelectField from "./SelectField";
 const HTMLField = React.lazy(() => import("./HTMLField"));
 
@@ -40,6 +41,12 @@ const selectOptions = {
   })),
 };
 
+export const formatLabel = (label) => {
+  return startCase(label)
+    .replace("_value", "")
+    .replace(/\bid\b/i, "ID");
+};
+
 const FieldComponent = ({
   type,
   ro,
@@ -58,7 +65,7 @@ const FieldComponent = ({
   fullWidth = true,
   ...props
 }) => {
-  const labelValue = label === " " ? null : (label || startCase(name)).replace("_value", "");
+  const labelValue = formatLabel(label ?? name);
   const { errors, setFieldValue } = context || {};
   const variant = props.variant || ro ? "filled" : "outlined";
   let field;
@@ -74,8 +81,8 @@ const FieldComponent = ({
           type === "checkbox"
             ? checked
             : option !== undefined && option?.validationError === undefined
-            ? option
-            : value;
+              ? option
+              : value;
         if (["checkbox", "radio"].includes(type)) {
           await defaultOnChange(event, option);
         } else {
@@ -183,7 +190,7 @@ const FieldComponent = ({
     );
   } else if (type === "checkbox") {
     field = (
-      <FormControl component="fieldset" disabled={ro} margin={margin || "dense"} error={error}>
+      <FormControl component="fieldset" disabled={ro} margin={"dense"} error={error}>
         <FormGroup>
           <FormControlLabel
             control={<Checkbox {...{ name, value }} {...props} />}
@@ -199,7 +206,7 @@ const FieldComponent = ({
   } else if (type === "radiogroup") {
     const { options, ...radioProps } = props;
     field = (
-      <FormControl>
+      <FormControl margin="dense">
         <FormLabel>{labelValue}</FormLabel>
         <RadioGroup name={name} value={value || ""} row {...radioProps}>
           {options.map((option) => (
@@ -237,6 +244,17 @@ const FieldComponent = ({
         }}
       />
     );
+  } else if (type === "editableItem") {
+    field = (
+      <EditableItem
+        name={name}
+        value={value || ""}
+        label={labelValue}
+        error={error}
+        helperText={helperText}
+        {...props}
+      />
+    );
   } else {
     let FieldComponent = TextField;
     if (type === "html") {
@@ -249,7 +267,11 @@ const FieldComponent = ({
         disabled={ro}
         margin={margin || "dense"}
         label={labelValue}
-        InputLabelProps={{ shrink: true }}
+        slotProps={{
+          inputLabel: {
+            shrink: true,
+          },
+        }}
         autoComplete="off"
         fullWidth={fullWidth}
         type={type || "text"}

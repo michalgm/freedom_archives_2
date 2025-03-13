@@ -1,5 +1,6 @@
 import { Add, Delete, KeyboardArrowDown, KeyboardArrowUp, Restore } from "@mui/icons-material";
 import {
+  Box,
   Divider,
   FormControl,
   Grid2,
@@ -31,7 +32,7 @@ export function CollectionsList({ collections, ...props }) {
   return <ItemsList type="collection" items={collections} {...props} />;
 }
 
-export function EditableItem({ service, name, label = "" }) {
+export function EditableItem({ service, name, link = true, label }) {
   const { values, setFieldValue } = useFormikContext();
   const [edit, setEdit] = useState(false);
   const services = {
@@ -47,6 +48,7 @@ export function EditableItem({ service, name, label = "" }) {
   if (!service) {
     return;
   }
+  label = label ?? name;
   if (edit) {
     return (
       <Field
@@ -54,7 +56,7 @@ export function EditableItem({ service, name, label = "" }) {
         type="select"
         searchType={`${service}`}
         size="small"
-        label={name}
+        label={label}
         autoFocus
         selectOnFocus
         excludeIds={[values.record_id]}
@@ -73,7 +75,7 @@ export function EditableItem({ service, name, label = "" }) {
     return (
       <FormControl variant="outlined" fullWidth size="small" margin="dense">
         <InputLabel sx={{ backgroundColor: "#fff" }} shrink>
-          {startCase(label || name)}
+          {startCase(label)}
         </InputLabel>
         <List
           sx={{
@@ -85,7 +87,7 @@ export function EditableItem({ service, name, label = "" }) {
         >
           <ItemTag
             {...{ [itemName]: values[name] }}
-            link
+            link={link}
             missingRecordText={`No ${missingText}`}
             action={() => (
               <IconButton
@@ -256,6 +258,9 @@ export default function RecordItem({ record = {}, description: showDescription, 
     },
     { type: "Format", label: primary_instance_format_text },
   ];
+  if (itemAction) {
+    props.onClick = () => itemAction(record);
+  }
   return (
     <Item
       id={record_id}
@@ -264,7 +269,6 @@ export default function RecordItem({ record = {}, description: showDescription, 
       title={title}
       description={showDescription && description}
       {...props}
-      onClick={() => itemAction(record)}
       type="record"
     />
   );
@@ -282,7 +286,9 @@ export function CollectionItem({ collection = {}, description: showDescription, 
           },
         ]
       : [];
-
+  if (itemAction) {
+    props.onClick = () => itemAction(collection);
+  }
   return (
     <Item
       id={collection_id}
@@ -291,7 +297,6 @@ export function CollectionItem({ collection = {}, description: showDescription, 
       description={showDescription && description}
       details={details}
       {...props}
-      onClick={() => itemAction(collection)}
       type="collection"
     />
   );
@@ -347,8 +352,17 @@ export function Item({
   onClick: onClickHandler,
   ...props
 }) {
-  const list_item_props = {};
-  let Container = React.Fragment;
+  const list_item_props = {
+    sx: {
+      display: "flex",
+      // px: 1,
+      // py: 0,
+      ".MuiListItemText-root": {
+        // margin: 0,
+      },
+    },
+  };
+  let Container = Box;
 
   if ((link && id) || onClickHandler) {
     if (link && id) {
@@ -361,6 +375,8 @@ export function Item({
     list_item_props.alignItems = "flex-start";
     list_item_props.dense = dense;
     Container = ListItemButton;
+  } else {
+    list_item_props.sx = { display: "flex", px: 2, py: 1 };
   }
   if (action) {
     props.secondaryAction = action();
@@ -369,15 +385,13 @@ export function Item({
   return (
     <ListItem {...props} dense={dense} disablePadding alignItems="flex-start">
       <Container {...list_item_props}>
-        {Boolean(id) && (
-          <ListItemAvatar style={{ minWidth: dense ? 35 : null }}>
-            <Thumbnail
-              src={thumbnail ? `https://search.freedomarchives.org/${thumbnail}` : ""}
-              alt={`${title} Thumbnail`}
-              width={dense ? 20 : 40}
-            />
-          </ListItemAvatar>
-        )}
+        <ListItemAvatar style={{ minWidth: dense ? 35 : null }}>
+          <Thumbnail
+            src={thumbnail ? `https://search.freedomarchives.org/${thumbnail}` : ""}
+            alt={`${title} Thumbnail`}
+            width={dense ? 20 : 40}
+          />
+        </ListItemAvatar>
         <ListItemText
           disableTypography
           primary={id ? title : missingRecordText}

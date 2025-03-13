@@ -1,8 +1,8 @@
-const { Service } = require("feathers-knex");
+const { KnexService } = require("@feathersjs/knex");
 const tsquery = require("pg-tsquery")();
 
 const archive_id = 1;
-class PublicRecords extends Service {
+class PublicRecords extends KnexService {
   constructor(options) {
     super({
       ...options,
@@ -24,11 +24,11 @@ module.exports = function (app) {
   };
 
   // Initialize our service with any options it requires
-  app.use("/public_records", new PublicRecords(options, app), {
+  app.use("/api/public_records", new PublicRecords(options, app), {
     methods: ["find"],
   });
 
-  const service = app.service("public_records");
+  const service = app.service("api/public_records");
 
   service.hooks(hooks);
 };

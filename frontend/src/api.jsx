@@ -33,6 +33,7 @@ export const list_items_lookup = app.service("/api/list_items_lookup");
 export const review_changes = app.service("/api/review_changes");
 export const public_records = app.service("/api/public_records");
 export const snapshots = app.service("/api/snapshots");
+export const settings = app.service("/api/settings");
 
 export const authenticate = async (username, password) => {
   return app
@@ -60,6 +61,7 @@ export const services = {
   review_changes,
   public_records,
   snapshots,
+  settings,
 };
 
 export const getAuthentication = app.get("/api/authentication");

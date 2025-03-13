@@ -1,4 +1,4 @@
-const { Service } = require("feathers-knex");
+const { KnexService } = require("@feathersjs/knex");
 
 const {
   setUser,
@@ -9,7 +9,7 @@ const {
   // setArchive,
 } = require("./common_hooks/");
 
-class Collections extends Service {
+class Collections extends KnexService {
   constructor(options) {
     super({
       ...options,
@@ -29,10 +29,10 @@ module.exports = function (app) {
   };
 
   // Initialize our service with any options it requires
-  app.use("/collections", new Collections(options, app));
+  app.use("/api/collections", new Collections(options, app));
 
   // Get our initialized service so that we can register hooks
-  const service = app.service("collections");
+  const service = app.service("api/collections");
 
   const updateRelations = async (context) => {
     const {
@@ -79,7 +79,9 @@ module.exports = function (app) {
               .service("records")
               .patch(child.record_id, { collection_id: 1000 }, { user, transaction: { trx } });
           } else if (child.record_id) {
-            return app.service("records").patch(child.record_id, { collection_id: id }, { user, transaction: { trx } });
+            return app
+              .service("api/records")
+              .patch(child.record_id, { collection_id: id }, { user, transaction: { trx } });
           }
         })
       );
@@ -114,14 +116,14 @@ module.exports = function (app) {
   const updateChildren = async (context) => {
     const { id, params, app } = context;
     const { user, transaction } = params;
-    const children = await app.service("records").find({
+    const children = await app.service("api/records").find({
       query: { $select: ["record_id"], collection_id: id },
       paginate: false,
     });
 
     await Promise.all(
       children.map(({ record_id }) => {
-        return app.service("records").patch(record_id, { collection_id: 1000 }, { user, transaction });
+        return app.service("api/records").patch(record_id, { collection_id: 1000 }, { user, transaction });
       })
     );
 

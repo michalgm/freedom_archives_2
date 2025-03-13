@@ -1,9 +1,20 @@
 const { writeThumbnailsFromUrl } = require("./thumbnailer");
 const allowAnonymous = require("./allowAnonymous");
+const { hooks: schemaHooks, resolve, virtual } = require("@feathersjs/schema");
+
+const archiveResolver = resolve({
+  archive_id: (_value, _query, context) => {
+    if (context.params.user) {
+      return context.params.user.archive_id;
+    }
+  },
+});
 
 module.exports = {
   writeThumbnailsFromUrl,
   allowAnonymous,
+  setArchiveQuery: schemaHooks.resolveQuery(archiveResolver),
+  setArchiveData: schemaHooks.resolveData(archiveResolver),
   setUser: (context) => {
     const {
       data = {},
@@ -38,12 +49,20 @@ module.exports = {
   },
 
   fetchUnified: async (context) => {
-    const { id, app, method, params, path } = context;
+    const {
+      id,
+      app,
+      method,
+      params,
+      service: { fullName },
+    } = context;
+
+    const service = `api/unified_${fullName}`;
     // context.params.knex = context.app.service(`unified_${path}`).createQuery(context.params);
     if (method === "get") {
-      context.result = await app.service(`unified_${path}`).get(id, params);
+      context.result = await app.service(service).get(id, params);
     } else {
-      context.result = await app.service(`unified_${path}`).find(params);
+      context.result = await app.service(service).find(params);
     }
     return context;
   },
@@ -68,13 +87,13 @@ module.exports = {
     const {
       data,
       relation_data,
-      path,
       params: {
         transaction: { trx },
       },
+      service: { fullName },
     } = context;
 
-    const table = path.slice(0, -1);
+    const table = fullName.slice(0, -1);
     const id = context.id || context.result[`${table}_id`];
     for (const type of ["subjects", "keywords", "producers", "authors"]) {
       if (relation_data && relation_data[type] !== undefined) {
@@ -107,13 +126,13 @@ module.exports = {
     const {
       result,
       method,
-      path,
       params: {
         transaction: { trx },
       },
+      service: { fullName },
     } = context;
 
-    const table = path.slice(0, -1);
+    const table = fullName.slice(0, -1);
     const id = context.id || result[`${table}_id`];
     if (["update", "patch", "remove", "create"].includes(method)) {
       await trx(`_unified_${table}s`).where(`${table}_id`, id).delete();
@@ -138,5 +157,24 @@ module.exports = {
       await trx(`_unified_${table}s`).insert(encoded);
       return context;
     }
+  },
+  validateArchive: (context) => {
+    const {
+      params: {
+        user: { archive_id } = {},
+        query: { archive_id: query_archive_id } = {},
+        data: { archive_id: data_archive_id } = {},
+      },
+      method,
+    } = context;
+    if (!archive_id) {
+      return;
+    }
+    console.log({ query_archive_id, data_archive_id, archive_id, method });
+    [query_archive_id, data_archive_id].forEach((input) => {
+      if (input && input !== archive_id) {
+        throw new Error("Archive mismatch");
+      }
+    });
   },
 };

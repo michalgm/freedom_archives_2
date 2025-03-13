@@ -1,8 +1,8 @@
 // Initializes the `users` service on path `/users`
-const { Service } = require("feathers-knex");
+const { KnexService } = require("@feathersjs/knex");
 const hooks = require("./users.hooks");
 
-class Users extends Service {
+class Users extends KnexService {
   constructor(options) {
     super({
       ...options,
@@ -19,10 +19,10 @@ module.exports = function (app) {
   };
 
   // Initialize our service with any options it requires
-  app.use("/users", new Users(options, app));
+  app.use("/api/users", new Users(options, app));
 
   // Get our initialized service so that we can register hooks
-  const service = app.service("users");
+  const service = app.service("api/users");
 
   service.hooks(hooks);
 };

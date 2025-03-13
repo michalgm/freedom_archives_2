@@ -1,7 +1,7 @@
 // Initializes the `collections` service on path `/collections`
-const { Service } = require("feathers-knex");
+const { KnexService } = require("@feathersjs/knex");
 
-class UnifiedCollections extends Service {
+class UnifiedCollections extends KnexService {
   constructor(options) {
     super({
       ...options,
@@ -21,5 +21,5 @@ module.exports = function (app) {
   };
 
   // Initialize our service with any options it requires
-  app.use("/unified_collections", new UnifiedCollections(options, app));
+  app.use("/api/unified_collections", new UnifiedCollections(options, app));
 };

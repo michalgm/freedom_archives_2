@@ -43,12 +43,14 @@
     "start": "concurrently -k \"npm run dev\" \"cd ./frontend; npm run start\"",
     "start:prod": "node backend/",
     "mocha": "NODE_ENV=test mocha test/ --recursive --exit",
-    "test": "cross-env NODE_ENV=test npm run migrate && npm run mocha",
+    "test": "NODE_ENV=test npm run migrate && npm run mocha",
     "bundle:client": "npm pack --pack-destination ./public",
     "migrate": "knex migrate:latest",
     "migrate:make": "knex migrate:make -x mjs"
   },
   "dependencies": {
+    "@ckeditor/ckeditor5-build-classic": "^44.3.0",
+    "@ckeditor/ckeditor5-react": "^9.5.0",
     "@feathersjs/authentication": "^5.0.33",
     "@feathersjs/authentication-local": "^5.0.33",
     "@feathersjs/authentication-oauth": "^5.0.33",
@@ -58,11 +60,11 @@
     "@feathersjs/express": "^5.0.33",
     "@feathersjs/feathers": "^5.0.33",
     "@feathersjs/knex": "^5.0.33",
+    "@img/sharp-libvips-linux-x64": "file:sharp-libvips/img-sharp-libvips-linux-x64-1.0.2.tgz",
     "compression": "^1.8.0",
     "cors": "^2.8.5",
     "eslint-plugin-react-hooks": "^5.2.0",
     "eslint-plugin-unused-imports": "^4.1.4",
-    "feathers-knex": "github:michalgm/feathers-knex#add-overlap-operator",
     "helmet": "^8.0.0",
     "knex": "^3.1.0",
     "node-addon-api": "^8.3.1",
@@ -83,6 +85,7 @@
     "eslint": "^9.21.0",
     "globals": "^16.0.0",
     "mocha": "^11.1.0",
-    "nodemon": "^3.1.9"
+    "nodemon": "^3.1.9",
+    "sinon": "^19.0.2"
   }
 }

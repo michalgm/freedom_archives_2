@@ -8,7 +8,7 @@
   },
   "authentication": {
     "entity": "user",
-    "service": "users",
+    "service": "/api/users",
     "secret": "ioqzin8r0wL5fwn8eZokpJVI13U=",
     "authStrategies": [
       "jwt",
@@ -30,7 +30,7 @@
   },
   "postgresql": {
     "client": "pg",
-    "debug": true,
+    "debug": false,
     "searchPath": [
       "freedom_archives"
     ],

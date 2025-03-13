@@ -1,10 +1,7 @@
-const { Service } = require("feathers-knex");
-const {
-  hooks: { transaction },
-} = require("feathers-knex");
+const { KnexService, transaction } = require("@feathersjs/knex");
 
 const { refreshView } = require("./common_hooks/");
-class ListItems extends Service {
+class ListItems extends KnexService {
   constructor(options) {
     super({
       ...options,
@@ -21,9 +18,9 @@ module.exports = function (app) {
   };
 
   // Initialize our service with any options it requires
-  app.use("/list_items", new ListItems(options, app));
+  app.use("/api/list_items", new ListItems(options, app));
 
-  const service = app.service("list_items");
+  const service = app.service("api/list_items");
 
   const findRelations = async (context) => {
     const {
