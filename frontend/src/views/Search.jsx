@@ -306,10 +306,7 @@ function Search() {
       <Grid2 size={12} key={record.record_id}>
         <Card>
           <Stack spacing={2} direction="row">
-            <Thumbnail
-              src={`https://search.freedomarchives.org/images/thumbnails/${record.record_id}.jpg`}
-              width={75}
-            />
+            <Thumbnail src={`/images/thumbnails/${record.record_id}.jpg`} width={75} />
             <Box>
               <Typography variant="h5">
                 {record.title} ({record.score})

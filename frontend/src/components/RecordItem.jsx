@@ -382,15 +382,14 @@ export function Item({
     props.secondaryAction = action();
   }
 
+  const thumbnail_source =
+    type === "collection" ? `https://search.freedomarchives.org/${thumbnail}` : `/images/thumbnails/${id}.jpg`; // FIXME
+
   return (
     <ListItem {...props} dense={dense} disablePadding alignItems="flex-start">
       <Container {...list_item_props}>
         <ListItemAvatar style={{ minWidth: dense ? 35 : null }}>
-          <Thumbnail
-            src={thumbnail ? `https://search.freedomarchives.org/${thumbnail}` : ""}
-            alt={`${title} Thumbnail`}
-            width={dense ? 20 : 40}
-          />
+          <Thumbnail src={thumbnail_source} alt={`${title} Thumbnail`} width={dense ? 20 : 40} />
         </ListItemAvatar>
         <ListItemText
           disableTypography

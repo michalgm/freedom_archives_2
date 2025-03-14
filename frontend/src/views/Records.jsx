@@ -1,9 +1,7 @@
-import { Grid2, ListItemAvatar, ListItemText, Typography } from "@mui/material";
 import React, { useCallback } from "react";
 
 import { merge } from "lodash-es";
 import Manage from "../components/Manage";
-import Thumbnail from "../components/Thumbnail";
 
 const filter_types = {
   day: { input: "simpleSelect", match: "exact", allowNull: true },
@@ -74,61 +72,8 @@ function Records({ embedded, itemAction, filter = {}, excludeIds = [] }) {
     [excludeIds]
   );
 
-  const renderItem = (record) => {
-    return (
-      <>
-        <ListItemAvatar>
-          <Thumbnail
-            src={
-              record.has_digital ? `https://search.freedomarchives.org/images/thumbnails/${record.record_id}.jpg` : ""
-            }
-            alt={`${record.title} Thumbnail`}
-            width={40}
-          />
-        </ListItemAvatar>
-        <ListItemText
-          primary={
-            <Grid2 container justifyContent="space-between" style={{ flexWrap: "inherit" }}>
-              <Grid2>{record.title}</Grid2>
-              <Grid2>
-                <Typography variant="body2">ID:&nbsp;{record.record_id}</Typography>
-              </Grid2>
-            </Grid2>
-          }
-          secondary={
-            <>
-              <Grid2 container justifyContent="space-between" style={{ flexWrap: "inherit" }}>
-                <Grid2>
-                  <Typography variant="subtitle2" gutterBottom>
-                    Collection: {record.collection.collection_name}
-                  </Typography>
-                </Grid2>
-                {record.call_number && (
-                  <Grid2>
-                    <Typography variant="body2">CN:&nbsp;{record.call_number}</Typography>
-                  </Grid2>
-                )}
-              </Grid2>
-
-              <Typography
-                style={{ maxHeight: 100, overflowX: "auto" }}
-                variant="body2"
-                dangerouslySetInnerHTML={{
-                  __html: record.description,
-                }}
-              ></Typography>
-            </>
-          }
-          slotProps={{
-            secondary: { component: "div" },
-          }}
-        ></ListItemText>
-      </>
-    );
-  };
   return (
     <Manage
-      renderItem={renderItem}
       defaultFilter={defaultFilter}
       createQuery={createQuery}
       filterTypes={filter_types}

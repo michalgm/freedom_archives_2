@@ -10,7 +10,7 @@ export default function Thumbnail({ src, width = 75, alt = "" }) {
   const flex = `0 0 ${width}px`;
   if (src) {
     return (
-      <span style={{ width, minWidth: width, display: "flex", flex }}>
+      <span style={{ width, minWidth: width, display: "flex", flex, alignItems: "start" }}>
         <img
           style={{
             maxWidth: "100%",

@@ -127,7 +127,7 @@ function ViewContainer({ children, item, buttonRef, neighborService, embedded, .
       return section;
     }
   };
-  const height = embedded ? "100%" : "calc(100vh - 64px - 16px)";
+  const height = embedded ? "100%" : "100%";
   return (
     <Stack direction="column" spacing={2} useFlexGap style={{ height, flexWrap: "nowrap" }}>
       {renderSection("header")}
