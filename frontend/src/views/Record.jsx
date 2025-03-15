@@ -510,7 +510,7 @@ function Record({ showForm, id, ro = false /*  embedded = false */ }) {
   };
 
   return (
-    <div className="record">
+    <div className="record FlexContainer">
       <ViewContainer item={record} buttonRef={showForm && buttonRef} neighborService="record">
         {(record.title || newRecord) && (
           <Form

@@ -7,6 +7,19 @@ import Form from "../components/Form";
 import GridBlock from "../components/GridBlock";
 import ViewContainer from "../components/ViewContainer";
 
+const FormRow = ({ name, ...props }) => {
+  return (
+    <>
+      <Grid2 size={3} sx={{ mt: 1, textAlign: "right" }}>
+        <FormLabel>{formatLabel(name)}</FormLabel>
+      </Grid2>
+      <Grid2 size={9}>
+        <Field name={name} size="small" {...props} label=" " />
+      </Grid2>
+    </>
+  );
+};
+
 const SiteSettings = () => {
   const buttonRef = useRef(document.createElement("div"));
   const [settings, setSettings] = useState({});
@@ -53,7 +66,7 @@ const SiteSettings = () => {
     [archive_id, settings]
   );
   return (
-    <div className="site-settings flexContainer">
+    <div className="site-settings FlexContainer">
       <ViewContainer item={settings} buttonRef={buttonRef}>
         <Form initialValues={settings} onSubmit={action} buttons={buttons} buttonRef={buttonRef} validate={validate}>
           <GridBlock title="Site Settings" spacing={2} sx={{ height: "100%" }} gutterBottom={true}>
@@ -72,16 +85,4 @@ const SiteSettings = () => {
   );
 };
 
-const FormRow = ({ name, ...props }) => {
-  return (
-    <>
-      <Grid2 size={3} sx={{ mt: 1, textAlign: "right" }}>
-        <FormLabel>{formatLabel(name)}</FormLabel>
-      </Grid2>
-      <Grid2 size={9}>
-        <Field name={name} size="small" {...props} label=" " />
-      </Grid2>
-    </>
-  );
-};
 export default SiteSettings;

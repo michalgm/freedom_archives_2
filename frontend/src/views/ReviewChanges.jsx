@@ -123,7 +123,7 @@ function ReviewChangesForm({ filter, setFilter, publishDate }) {
     return;
   }
   return (
-    <Paper>
+    <Paper sx={{ flex: "0 0 auto" }}>
       <Typography variant="h6">Filter Changes</Typography>
       <Form
         initialValues={initialValues}

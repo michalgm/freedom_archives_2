@@ -110,7 +110,6 @@ function Filter({ index, remove, filterTypes }) {
 }
 
 export default function Manage({
-  // renderItem,
   defaultFilter = {},
   filterTypes,
   createQuery,

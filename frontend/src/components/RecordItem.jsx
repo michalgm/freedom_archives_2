@@ -383,7 +383,13 @@ export function Item({
   }
 
   const thumbnail_source =
-    type === "collection" ? `https://search.freedomarchives.org/${thumbnail}` : `/images/thumbnails/${id}.jpg`; // FIXME
+    type === "collection"
+      ? thumbnail
+        ? `https://search.freedomarchives.org/${thumbnail}`
+        : null
+      : id
+        ? `/images/thumbnails/${id}.jpg`
+        : null; // FIXME
 
   return (
     <ListItem {...props} dense={dense} disablePadding alignItems="flex-start">

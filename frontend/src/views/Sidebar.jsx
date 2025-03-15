@@ -1,4 +1,15 @@
-import { Box, Divider, Drawer, List, ListItem, ListItemButton, ListItemText, Toolbar, Typography } from "@mui/material";
+import {
+  Box,
+  Divider,
+  Drawer,
+  List,
+  ListItem,
+  ListItemButton,
+  ListItemText,
+  Stack,
+  Toolbar,
+  Typography,
+} from "@mui/material";
 import { Link, useLocation, useMatch, useResolvedPath } from "react-router-dom";
 
 import React from "react";
@@ -38,24 +49,26 @@ const sideBarConfig = {
 function Sidebar({ ...props }) {
   return (
     <Drawer {...props}>
-      <Toolbar />
-      <Box sx={{ overflow: "auto" }}>
-        {Object.keys(sideBarConfig).map((title) => {
-          return (
-            <div key={title}>
-              <Divider />
-              <List>
-                <ListItem>
-                  <Typography variant="h5">{title}</Typography>
-                </ListItem>
-                {sideBarConfig[title].map(({ label, href, icon }) => (
-                  <SidebarItem key={label} label={label} href={href} icon={icon} />
-                ))}
-              </List>
-            </div>
-          );
-        })}
-      </Box>
+      <Stack className="FlexContainer">
+        <Toolbar />
+        <Box sx={{ overflow: "auto" }} className="FlexContainer">
+          {Object.keys(sideBarConfig).map((title) => {
+            return (
+              <div key={title}>
+                <Divider />
+                <List>
+                  <ListItem>
+                    <Typography variant="h5">{title}</Typography>
+                  </ListItem>
+                  {sideBarConfig[title].map(({ label, href, icon }) => (
+                    <SidebarItem key={label} label={label} href={href} icon={icon} />
+                  ))}
+                </List>
+              </div>
+            );
+          })}
+        </Box>
+      </Stack>
     </Drawer>
   );
 }

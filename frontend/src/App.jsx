@@ -82,10 +82,11 @@ function Layout() {
   return (
     <Box className="App" sx={{ backgroundColor: "#efefef", height: "100vh", display: "flex", flexDirection: "column" }}>
       <NavBar />
-      <Stack direction="row" sx={{ flex: 1 }}>
+      <Stack direction="row" sx={{ overflow: "hidden", height: "100%" }}>
         {isAuthenticated && (
           <Sidebar
             variant="permanent"
+            className="sidebar"
             sx={{
               width: DRAWERWIDTH,
             }}
@@ -94,17 +95,16 @@ function Layout() {
             }}
           />
         )}
-        <Box
+        <Stack
           sx={{
             backgroundColor: "#efefef",
           }}
           className="FlexContainer"
           style={style}
         >
-          <Loading fullPage>
-            <Main />
-          </Loading>
-        </Box>
+          <Toolbar />
+          <Loading>{({ loading }) => <Main loading={loading} />}</Loading>
+        </Stack>
       </Stack>
     </Box>
   );
@@ -131,12 +131,7 @@ function Logout() {
 
 function NavBar() {
   return (
-    <AppBar
-      color="primary"
-      position="fixed"
-      elevation={0}
-      sx={{ zIndex: (theme) => theme.zIndex.drawer + 1, position: "relative" }}
-    >
+    <AppBar color="primary" position="fixed" elevation={0} sx={{ zIndex: (theme) => theme.zIndex.drawer + 1 }}>
       <Toolbar className="topnav">
         <Breadcrumbs />
         <Logout />
@@ -145,12 +140,24 @@ function NavBar() {
   );
 }
 
-function Main() {
+function Main({ loading }) {
   const {
     state: { isAuthenticated },
   } = useStateValue();
+  const loadingStyle = loading ? { opacity: 0.6, marginTop: "-4px" } : {};
   return (
-    <Container maxWidth="xl" sx={{ paddingBottom: "8px" }} className="FlexContainer">
+    <Container
+      maxWidth="xl"
+      sx={{
+        opacity: 1,
+        transition: "opacity 0.3s",
+        paddingBottom: "8px",
+        overflow: "hidden",
+        flex: "1 1 auto",
+
+        ...loadingStyle,
+      }}
+    >
       <Authentication />
       <Errors />
       <ErrorBoundary>
