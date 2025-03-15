@@ -1,12 +1,9 @@
-import { CKEditor } from "@ckeditor/ckeditor5-react";
 import ClassicEditor from "@ckeditor/ckeditor5-build-classic";
-import React from "react";
+import { CKEditor } from "@ckeditor/ckeditor5-react";
 import { TextField } from "@mui/material";
+import React from "react";
 
-const HtmlEditor = React.forwardRef(function HTMLEditor(
-  { value, setFieldValue, name },
-  ref
-) {
+const HtmlEditor = React.forwardRef(function HTMLEditor({ value, setFieldValue, name, disabled }, ref) {
   return (
     <CKEditor
       editor={ClassicEditor}
@@ -20,7 +17,6 @@ const HtmlEditor = React.forwardRef(function HTMLEditor(
           "EasyImage",
           "CKFinder",
           "CKFinderUploadAdapter",
-          // 'Image',
         ],
         toolbar: {
           items: [
@@ -43,6 +39,7 @@ const HtmlEditor = React.forwardRef(function HTMLEditor(
         },
         el: ref,
       }}
+      disabled={disabled}
       data={value}
       onChange={(event, editor) => {
         return setFieldValue ? setFieldValue(name, editor.getData()) : null;
@@ -51,19 +48,15 @@ const HtmlEditor = React.forwardRef(function HTMLEditor(
   );
 });
 
-function HTMLField({
-  defaultValue,
-  value,
-  setFieldValue,
-  name,
-  inputProps,
-  InputProps,
-  InputLabelProps,
-  ...props
-}) {
+function HTMLField({ defaultValue, value, setFieldValue, name, inputProps, InputProps, InputLabelProps, ...props }) {
   return (
-    (<TextField
+    <TextField
       {...props}
+      sx={{
+        ".ck.ck-editor": {
+          width: "100%",
+        },
+      }}
       slotProps={{
         input: {
           ...InputProps,
@@ -76,15 +69,18 @@ function HTMLField({
           name,
           defaultValue,
           setFieldValue,
+          ...props,
         },
 
         inputLabel: {
           ...InputLabelProps,
+          shrink: true,
           sx: {
             backgroundColor: "#fff",
           },
-        }
-      }} />)
+        },
+      }}
+    />
   );
 }
 
