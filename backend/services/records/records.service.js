@@ -11,36 +11,9 @@ const getOptions = (app) => ({
   id: "record_id",
   multi: true,
   operators: ["$fullText", "$contains"],
-  filters: {
-    $fullText: (v) => v,
-    $contains: (v) => v,
-  },
 });
-//   constructor(options) {
-//     super({
-//       ...options,
-//       // filters: {
-//       //   $fullText: (v) => v,
-//       //   $contains: (v) => v,
-//       // },
-//       operators: ["$fullText", "$contains"],
-//     });
-//   }
-// }
 
 module.exports = function (app) {
-  // const options = {
-  //   id: "record_id",
-  //   Model: app.get("postgresqlClient"),
-  //   paginate: app.get("paginate"),
-  //   multi: true,
-  //   // filters: {
-  //   //   $fullText: (v) => v,
-  //   //   $contains: (v) => v,
-  //   // },
-  //   operators: ["$fullText", "$contains"],
-  // };
-
   // Initialize our service with any options it requires
   app.use("/api/records", new Records(getOptions(app)));
 

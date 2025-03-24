@@ -6,9 +6,7 @@ class UnifiedRecords extends KnexService {
     super({
       ...options,
       name: "unified_records",
-      filters: {
-        $fullText: (v) => v,
-      },
+      operators: ["$fullText", "$contains"],
     });
   }
 }

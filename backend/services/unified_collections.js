@@ -6,9 +6,7 @@ class UnifiedCollections extends KnexService {
     super({
       ...options,
       name: "unified_collections",
-      filters: {
-        $fullText: (v) => v,
-      },
+      operators: ["$fullText"],
     });
   }
 }
