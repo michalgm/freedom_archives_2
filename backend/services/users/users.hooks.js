@@ -1,6 +1,7 @@
 const { authenticate } = require("@feathersjs/authentication").hooks;
 
 const { hashPassword, protect } = require("@feathersjs/authentication-local").hooks;
+const { generateRandomString } = require("../../utils");
 
 const setArchive = (context) => {
   const {
@@ -27,11 +28,16 @@ const validateUser = (context) => {
   }
   return context;
 };
+
 const cleanData = (context) => {
   if (context.data) {
     ["full_name", "user_search"].forEach((key) => {
       delete context.data[key];
     });
+  }
+
+  if (context.method === "create" && !context.data.password) {
+    context.data.password = generateRandomString();
   }
   return context;
 };

@@ -39,7 +39,8 @@ module.exports = {
   error: {
     all: [
       async (context) => {
-        console.log("!!!", context.error.message);
+        console.error("ERROR", context.error?.message);
+        console.error("ERROR", context.error?.data);
         if (
           context.path === "api/authentication" &&
           ["NotAuthenticated: jwt expired"].includes(context.error.message)

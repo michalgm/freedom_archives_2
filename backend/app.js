@@ -40,6 +40,7 @@ app.use(
 app.use(cors());
 app.use(compress());
 app.use(json());
+app.configure(rest());
 app.use(urlencoded({ extended: true }));
 app.use(favicon(path.join(publicPath, "favicon.ico")));
 // Host the public folder
@@ -47,7 +48,6 @@ app.use("/", express.static(publicPath));
 app.use("/images/thumbnails", thumbnailProxy(app, publicPath));
 
 // Configure a middleware for 404s and the error handler
-app.configure(rest());
 app.configure(knex);
 
 // Configure other middleware (see `middleware/index.js`)

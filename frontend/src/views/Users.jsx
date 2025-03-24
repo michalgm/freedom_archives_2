@@ -83,7 +83,6 @@ export default function Users() {
     email: "",
     role: "intern",
     active: true,
-    isNew: true,
   };
 
   return (
@@ -99,7 +98,7 @@ export default function Users() {
           onNew: (row) => {
             setEditPassword({ open: true, user: row });
           },
-          isCellEditable: (params) => params.field !== "username" || params.row.isNew,
+          isCellEditable: (params) => params.field !== "username" || params.row.user_id === -1,
         }}
         extraActions={extraActions}
         model="users"
