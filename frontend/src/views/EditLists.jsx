@@ -58,7 +58,7 @@ const columns = [
 ];
 
 const initialOrder = { field: "item", sort: "asc" };
-const initialPage = { skip: 0, limit: 15 };
+const initialPage = { skip: 0, limit: 100 };
 function EditLists() {
   const [values, setValues] = useState({ data: [], total: 0 });
   const [type, setType] = useState("author");
