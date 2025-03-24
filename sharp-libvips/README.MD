@@ -11,4 +11,4 @@ The process looks like this:
    - runs `npm pack` to create a tar.gz file containing the patched sharp-libvips source
    - cleans up the checkout
 
-2. there is an npm preinstall script that installs the tar.gz file from step 1 into the npm package directory as @img/sharp-libvips-linux-x64 - this is the same dependency that is used by the sharp npm package for libvips
+2. to get around strange issues with the cpanel/cloud-linux's node setup, we install the package from a github url - this is the same dependency that is used by the sharp npm package for libvips

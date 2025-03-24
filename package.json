@@ -37,7 +37,6 @@
     "config": "config/"
   },
   "scripts": {
-    "preinstall": "npm install --no-save ${CL_APP_ROOT:+$HOME/$CL_APP_ROOT/}./sharp-libvips/img-sharp-libvips-linux-x64-1.0.2.tgz",
     "eslint": "eslint backend/. test/. --config .eslintrc.json",
     "dev": "LD_PRELOAD=$LD_PRELOAD:/usr/lib/x86_64-linux-gnu/libjemalloc.so nodemon -d 1 -w config/ -w backend/ -w package.json backend/index.js",
     "start": "concurrently -k \"npm run dev\" \"cd ./frontend; npm run start\"",
@@ -59,8 +58,10 @@
     "@feathersjs/errors": "^5.0.33",
     "@feathersjs/express": "^5.0.33",
     "@feathersjs/feathers": "^5.0.33",
-    "@feathersjs/knex": "^5.0.33",
-    "@img/sharp-libvips-linux-x64": "file:sharp-libvips/img-sharp-libvips-linux-x64-1.0.2.tgz",
+    "@feathersjs/knex": "https://gitpkg.vercel.app/michalgm/feathers/packages/knex?prebuilt",
+    "@feathersjs/schema": "^5.0.33",
+    "@feathersjs/typebox": "^5.0.33",
+    "@img/sharp-libvips-linux-x64": "https://raw.githubusercontent.com/michalgm/freedom_archives_2/master/sharp-libvips/img-sharp-libvips-linux-x64-1.0.2.tgz",
     "compression": "^1.8.0",
     "cors": "^2.8.5",
     "eslint-plugin-react-hooks": "^5.2.0",
