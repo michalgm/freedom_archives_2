@@ -31,21 +31,21 @@ module.exports = function (app) {
     } = context;
     if (type === "unknown") {
     } else if (type === "parent") {
-      awaitapp.service("api/records").patch(result.docid_2, { parent_record_id: result.docid_1 }, { user });
-      awaitapp.service("api/records").patch(result.docid_1, {}, { user });
+      await app.service("api/records").patch(result.docid_2, { parent_record_id: result.docid_1 }, { user });
+      await app.service("api/records").patch(result.docid_1, {}, { user });
     } else if (type === "child") {
-      awaitapp.service("api/records").patch(result.docid_1, { parent_record_id: result.docid_2 }, { user });
-      awaitapp.service("api/records").patch(result.docid_2, {}, { user });
+      await app.service("api/records").patch(result.docid_1, { parent_record_id: result.docid_2 }, { user });
+      await app.service("api/records").patch(result.docid_2, {}, { user });
     } else if (type === "sibling") {
-      const record1 = awaitapp.service("api/records").get(result.docid_1);
+      const record1 = await app.service("api/records").get(result.docid_1);
       let parent_id = record1.parent_record_id;
       if (!parent_id) {
-        const record2 = awaitapp.service("api/records").get(result.docid_2);
+        const record2 = await app.service("api/records").get(result.docid_2);
         parent_id = record2.parent_record_id;
       }
       if (parent_id) {
-        awaitapp.service("api/records").patch(result.docid_1, { parent_record_id: parent_id }, { user });
-        awaitapp.service("api/records").patch(result.docid_2, { parent_record_id: parent_id }, { user });
+        await app.service("api/records").patch(result.docid_1, { parent_record_id: parent_id }, { user });
+        await app.service("api/records").patch(result.docid_2, { parent_record_id: parent_id }, { user });
       }
     } else if (type === "original") {
       await app

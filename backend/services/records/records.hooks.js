@@ -1,5 +1,7 @@
 const tsquery = require("pg-tsquery")();
 const { transaction } = require("@feathersjs/knex");
+const { recordsQueryValidator } = require("../../validators");
+const { hooks: schemaHooks, resolve, virtual } = require("@feathersjs/schema");
 
 const {
   setUser,
@@ -114,9 +116,9 @@ const prepData = (context) => {
       }
     });
 
-    if (data.date_string) {
+    if ("date_string" in data) {
       let parts = ["month", "day", "year"];
-      data.date_string.split("/").forEach((part, index) => {
+      data.date_string?.split("/").forEach((part, index) => {
         if (["00", "MM", "DD", "YYYY"].includes(part)) {
           data[parts[index]] = null;
         } else {
@@ -130,17 +132,20 @@ const prepData = (context) => {
     ["program", "publisher"].forEach((key) => {
       if (key in data) {
         data[`${key}_id`] = data[key] ? data[key].list_item_id : null;
+        delete data[key];
       }
     });
     if ("collection" in data) {
       data.collection_id = data.collection ? data.collection.collection_id : null;
+      delete data.collection;
     }
     if ("parent" in data) {
       data.parent_record_id = data.parent ? data.parent.record_id : null;
+      delete data.parent;
     }
 
-    ["instances", "children", "continuations", "program", "publisher", "collection", "parent"].forEach((key) => {
-      if (data[key]) {
+    ["instances", "children", "continuations", "authors", "producers", "keywords", "subjects"].forEach((key) => {
+      if (key in data) {
         relation_data[key] = data[key];
         delete data[key];
       }
@@ -237,10 +242,10 @@ module.exports = {
     all: [prepData],
     find: [fullTextSearch, fetchUnified],
     get: [fetchUnified],
-    create: [transaction.start(), setUser, setArchive, updateThumbnail],
-    update: [transaction.start()],
-    patch: [transaction.start(), setUser, updateListItemRelations, updateThumbnail, updateRelations],
-    remove: [transaction.start()],
+    create: [setUser, setArchive, updateThumbnail],
+    update: [],
+    patch: [setUser, updateListItemRelations, updateThumbnail, updateRelations],
+    remove: [],
   },
 
   after: {
@@ -256,19 +261,22 @@ module.exports = {
     ],
     find: [lookupFilters],
     get: [],
-    create: [updateListItemRelations, updateRelations, refreshView, transaction.end()],
-    update: [refreshView, transaction.end()],
-    patch: [refreshView, transaction.end()],
-    remove: [refreshView, transaction.end()],
+    create: [updateListItemRelations, updateRelations, refreshView],
+    update: [refreshView],
+    patch: [refreshView],
+    remove: [refreshView],
   },
 
   error: {
     all: [],
     find: [],
     get: [],
-    create: [transaction.rollback()],
-    update: [transaction.rollback()],
-    patch: [transaction.rollback()],
-    remove: [transaction.rollback()],
+    create: [],
+    update: [],
+    patch: [],
+    remove: [],
   },
+  // around: {
+  //   all: [schemaHooks.validateQuery(recordsQueryValidator)],
+  // },
 };

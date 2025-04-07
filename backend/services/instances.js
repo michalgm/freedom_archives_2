@@ -33,7 +33,7 @@ module.exports = function (app) {
       },
     } = context;
     if (!id) {
-      awaitapp.service("api/records").patch(data.record_id, {}, { user, transaction: { trx } });
+      await app.service("api/records").patch(data.record_id, {}, { user, transaction: { trx } });
     }
   };
 

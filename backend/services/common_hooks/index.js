@@ -38,11 +38,10 @@ module.exports = {
     const {
       data,
       method,
-      params: {
-        user: { archive_id },
-      },
+      service,
+      params: { user: { archive_id } = {} },
     } = context;
-    if (method === "create") {
+    if (method === "create" && service !== "api/authenticate") {
       data.archive_id = archive_id;
     }
     return context;
@@ -94,18 +93,23 @@ module.exports = {
     } = context;
 
     const table = fullName.slice(0, -1);
-    const id = context.id || context.result[`${table}_id`];
+    const id = parseInt(context.id || context.result[`${table}_id`], 10);
     for (const type of ["subjects", "keywords", "producers", "authors"]) {
       if (relation_data && relation_data[type] !== undefined) {
-        const ids = trx
-          .from(`${table}s_to_list_items`)
-          .join("list_items", `${table}s_to_list_items.list_item_id`, "list_items.list_item_id")
+        const join_table = `${table}s_to_list_items`;
+
+        const res = await trx
+          .from(join_table)
+          .join("list_items", `${join_table}.list_item_id`, "list_items.list_item_id")
           .where("type", type.replace(/s$/, ""))
           .andWhere(`${table}_id`, id)
-          .select(`${table}s_to_list_items.list_item_id`);
-        await trx(`${table}s_to_list_items`).whereIn("list_item_id", ids).delete();
+          .delete();
+        // .select(`${join_table}.list_item_id`)
+        // console.log(ids);
+        // const res = await trx(`${join_table}`).whereIn("list_item_id", ids).delete();
+
         if (relation_data[type].length) {
-          await trx(`${table}s_to_list_items`).insert(
+          await trx(join_table).insert(
             relation_data[type].map(({ list_item_id }) => ({
               list_item_id,
               [`${table}_id`]: id,
@@ -124,6 +128,7 @@ module.exports = {
 
   refreshView: async (context) => {
     const {
+      app,
       result,
       method,
       params: {
@@ -153,8 +158,9 @@ module.exports = {
           // delete current_data[key]; //FIXME?
         }
       });
-      context.result = current_data;
+      // context.result = current_data;
       await trx(`_unified_${table}s`).insert(encoded);
+      context.result = (await trx(`unified_${fullName}`).where(`${table}_id`, id).select()?.[0]) || {};
       return context;
     }
   },

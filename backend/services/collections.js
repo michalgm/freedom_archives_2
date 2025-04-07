@@ -6,6 +6,7 @@ const {
   refreshView,
   fetchUnified,
   prepListItemRelations,
+  setArchive,
   // setArchive,
 } = require("./common_hooks/");
 
@@ -14,9 +15,7 @@ class Collections extends KnexService {
     super({
       ...options,
       name: "collections",
-      filters: {
-        $fullText: (v) => v,
-      },
+      operators: ["$fullText"],
     });
   }
 }
@@ -56,11 +55,11 @@ module.exports = function (app) {
         relation_data.children.map((child) => {
           if (child.delete) {
             return app
-              .service("collections")
+              .service("api/collections")
               .patch(child.collection_id, { parent_collection_id: null }, { user, transaction: { trx } });
           } else if (child.collection_id) {
             return app
-              .service("collections")
+              .service("api/collections")
               .patch(
                 child.collection_id,
                 { parent_collection_id: id, display_order: index++ },
@@ -76,7 +75,7 @@ module.exports = function (app) {
         relation_data.child_records.map((child) => {
           if (child.delete) {
             return app
-              .service("records")
+              .service("api/records")
               .patch(child.record_id, { collection_id: 1000 }, { user, transaction: { trx } });
           } else if (child.record_id) {
             return app
@@ -94,6 +93,7 @@ module.exports = function (app) {
             acc.deleteIds.push(record.record_id);
           } else {
             acc.updateRecords.push({
+              archive_id: user.archive_id,
               record_id: record.record_id,
               collection_id: id,
               record_order: acc.updateRecords.length + 1,
@@ -104,10 +104,16 @@ module.exports = function (app) {
         },
         { deleteIds: [], updateRecords: [] }
       );
-
-      await trx.from("featured_records").where("collection_id", id).whereIn("record_id", deleteIds).delete();
-
-      await trx.from("featured_records").insert(updateRecords).onConflict(["collection_id", "record_id"]).merge();
+      if (deleteIds.length) {
+        await trx.from("featured_records").where("collection_id", id).whereIn("record_id", deleteIds).delete();
+      }
+      if (updateRecords.length) {
+        await trx
+          .from("featured_records")
+          .insert(updateRecords)
+          .onConflict(["archive_id", "collection_id", "record_id"])
+          .merge();
+      }
     }
 
     return context;
@@ -124,6 +130,19 @@ module.exports = function (app) {
     await Promise.all(
       children.map(({ record_id }) => {
         return app.service("api/records").patch(record_id, { collection_id: 1000 }, { user, transaction });
+      })
+    );
+
+    const childCollections = await app.service("api/collections").find({
+      query: { $select: ["collection_id"], parent_collection_id: id },
+      paginate: false,
+    });
+
+    await Promise.all(
+      childCollections.map(({ collection_id }) => {
+        return app
+          .service("api/collections")
+          .patch(collection_id, { parent_collection_id: null }, { user, transaction });
       })
     );
 

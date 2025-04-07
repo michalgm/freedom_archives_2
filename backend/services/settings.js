@@ -2,8 +2,9 @@ const { KnexService } = require("@feathersjs/knex");
 const { setArchive, setArchiveData } = require("./common_hooks");
 const { keyBy } = require("lodash");
 const { hooks: schemaHooks, resolve, virtual } = require("@feathersjs/schema");
+const { feathers } = require("@feathersjs/feathers");
 
-const settingsResolver = resolve({
+const settingsResultResolver = resolve({
   featured_collection: virtual(async ({ settings }, context) => {
     if (settings.featured_collection_id) {
       return await context.app
@@ -30,7 +31,7 @@ module.exports = function (app) {
   };
 
   // Initialize our service with any options it requires
-  app.use("/api/settings", new Settings(options, app), { methods: ["get", "update"] });
+  app.use("/api/settings", new Settings(options, app), { methods: ["get", "update", "patch"] });
 
   const service = app.service("api/settings");
 
@@ -49,12 +50,13 @@ module.exports = function (app) {
 
   service.hooks({
     around: {
-      all: [schemaHooks.resolveResult(settingsResolver), setArchiveData],
+      all: [schemaHooks.resolveResult(settingsResultResolver), setArchiveData],
     },
     before: {
       all: [],
       get: [verifyArchive],
       update: [verifyArchive],
+      patch: [verifyArchive],
     },
     after: {},
   });

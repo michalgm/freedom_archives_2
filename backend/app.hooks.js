@@ -1,7 +1,7 @@
 // Application hooks that run for every service
 const { authenticate } = require("@feathersjs/authentication").hooks;
 const { transaction } = require("@feathersjs/knex");
-const { allowAnonymous, validateArchive } = require("./services/common_hooks");
+const { allowAnonymous, validateArchive, setArchive } = require("./services/common_hooks");
 
 const public_services = ["api/public_records"];
 
@@ -20,7 +20,7 @@ module.exports = {
     all: [checkAuth],
     find: [],
     get: [],
-    create: [transaction.start()],
+    create: [transaction.start(), setArchive], //FIXME for new archives/archive users
     update: [transaction.start()],
     patch: [transaction.start()],
     remove: [transaction.start()],
