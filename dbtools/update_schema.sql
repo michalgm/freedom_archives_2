@@ -3,6 +3,7 @@ BEGIN;
 -- CREATE TEMP TABLE parent_lookup as select record_id, parent_record_id from records where parent_record_id is not null;
 -- select * from `parent_lookup`;
 DROP SCHEMA IF EXISTS freedom_archives CASCADE;
+DROP SCHEMA IF EXISTS public_search CASCADE;
 
 CREATE SCHEMA freedom_archives;
 
@@ -20,13 +21,13 @@ CREATE TABLE
     users (
         user_id serial PRIMARY KEY,
         archive_id INTEGER NOT NULL REFERENCES archives,
-        username VARCHAR(50) NOT NULL,
+        username VARCHAR(50) NOT NULL UNIQUE,
         firstname VARCHAR(50) DEFAULT NULL,
         lastname VARCHAR(50) DEFAULT NULL,
         ROLE user_role DEFAULT NULL,
         PASSWORD VARCHAR(200) DEFAULT NULL,
         active BOOLEAN DEFAULT FALSE,
-        email VARCHAR(100) DEFAULT NULL,
+        email VARCHAR(100) DEFAULT NULL UNIQUE,
         full_name VARCHAR GENERATED ALWAYS AS (TRIM(firstname || ' ' || lastname)) STORED,
         user_search VARCHAR GENERATED ALWAYS AS (
             TRIM(
@@ -52,8 +53,9 @@ CREATE TABLE
         description VARCHAR(200) DEFAULT NULL
     );
 
-CREATE INDEX list_items_type_idx ON list_items (
-    TYPE
+CREATE UNIQUE INDEX list_items_type_idx ON list_items (
+    TYPE,
+    item
 );
 
 CREATE TABLE
@@ -138,10 +140,10 @@ CREATE INDEX instances_media_type ON instances (media_type);
 
 CREATE TABLE
     featured_records (
-        record_id INTEGER REFERENCES records ON DELETE CASCADE,
-        archive_id INTEGER REFERENCES archives ON DELETE CASCADE,
+        record_id INTEGER NOT NULL REFERENCES records ON DELETE CASCADE,
+        archive_id INTEGER NOT NULL REFERENCES archives ON DELETE CASCADE,
         collection_id INTEGER NOT NULL REFERENCES collections ON DELETE CASCADE,
-        record_order INTEGER DEFAULT NULL,
+        record_order INTEGER NOT NULL DEFAULT NULL,
         LABEL VARCHAR(60) DEFAULT NULL
     );
 
@@ -1341,7 +1343,7 @@ SELECT
             WHERE
                 a.parent_record_id = parent.record_id
         ),
-        '{}'
+        null
     ) AS parent,
     COALESCE(
         ARRAY (
@@ -1441,6 +1443,18 @@ SELECT
                 MAX(record_id)
             FROM
                 records
+        )
+    );
+
+
+SELECT
+    SETVAL(
+        'users_user_id_seq',
+        (
+            SELECT
+                MAX(user_id)
+            FROM
+                users
         )
     );
 
