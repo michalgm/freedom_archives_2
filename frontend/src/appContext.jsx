@@ -1,4 +1,4 @@
-import React, { createContext, useCallback, useContext, useEffect, useReducer } from "react";
+import { createContext, useCallback, useContext, useEffect, useReducer } from "react";
 export const StateContext = createContext();
 const initialState = {
   isAuthenticated: null,
@@ -114,11 +114,25 @@ export const useAddNotification = () => {
   );
 };
 
+export const useDisplayError = () => {
+  const { state, dispatch } = useContext(StateContext);
+  return useCallback(
+    (message) => {
+      const id = (Math.random() + 1).toString(36).substring(7);
+      dispatch({
+        type: "NOTIFICATIONS",
+        payload: [...state.notifications, { severity: "error", message, id }],
+      });
+    },
+    [dispatch, state.notifications]
+  );
+};
+
 // export const useTitle = title => {
 //   const {dispatch} = useContext(StateContext);
-//   console.log('use', title)
+//   logger.log('use', title)
 //   useEffect(() => {
-//     console.log('dis', title)
+//     logger.log('dis', title)
 //     dispatch({type: 'TITLE', payload: title})
 //   }, title)
 //   return null

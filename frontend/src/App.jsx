@@ -2,25 +2,43 @@ import { AppBar, Box, Button, Container, CssBaseline, Icon, Stack, Toolbar, Typo
 import { StyledEngineProvider, ThemeProvider, createTheme } from "@mui/material/styles";
 import { LocalizationProvider } from "@mui/x-date-pickers";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
-import React from "react";
-import { Link, BrowserRouter as Router } from "react-router-dom";
+import {
+  Link,
+  Outlet,
+  Route,
+  RouterProvider,
+  createBrowserRouter,
+  createRoutesFromElements,
+  useLocation,
+} from "react-router-dom";
+import logger from "src/utils/logger";
 import "./App.scss";
 import { StateProvider, useStateValue } from "./appContext";
 
 import { ConfirmProvider } from "material-ui-confirm";
+import { useMemo } from "react";
+import Routes from "src/Routes";
 import { app } from "./api";
 import Authentication from "./Authentication";
 import Breadcrumbs from "./components/Breadcrumbs";
 import ErrorBoundary from "./components/ErrorBoundary";
 import Errors from "./components/Errors";
 import Notifications from "./components/Notifications";
-import Routes from "./Routes";
 import Loading from "./views/Loading";
 import Sidebar from "./views/Sidebar";
 
 const DRAWERWIDTH = 256;
 
 export const theme = createTheme({
+  cssVariables: true,
+  typography: {
+    h1: { fontSize: "2.5rem" },
+    h2: { fontSize: "2.2rem" },
+    h3: { fontSize: "1.9rem" },
+    h4: { fontSize: "1.6rem" },
+    h5: { fontSize: "1.4rem" },
+    h6: { fontSize: "1.2rem" },
+  },
   components: {
     MuiTextField: {
       defaultProps: {
@@ -34,6 +52,58 @@ export const theme = createTheme({
         },
       },
       defaultProps: {},
+    },
+    MuiFormControl: {
+      // variants: [
+      //   {
+      //     props: { size: "x-small" },
+      //     style: xSmallInputStyles,
+      //   },
+      // ],
+      styleOverrides: {
+        root: {
+          "& .MuiFormLabel-colorSuccess": {
+            color: "var(--mui-palette-success-main)", // Success color for default state
+          },
+          "&:has(.MuiCheckbox-colorSuccess).MuiFormControl-root": {
+            width: "100%",
+            outline: "1px solid var(--mui-palette-success-main)",
+            borderRadius: "2px",
+            backgroundColor: "rgba(var(--mui-palette-success-lightChannel) / 0.1) !important",
+          },
+          "& .MuiCheckbox-colorSuccess": {
+            color: "var(--mui-palette-success-main)", // Success color for default state
+          },
+          "& .MuiInputBase-colorSuccess": {
+            "&": {
+              backgroundColor: "rgba(var(--mui-palette-success-lightChannel) / 0.1) !important",
+            },
+            "& .MuiOutlinedInput-notchedOutline": {
+              borderColor: "var(--mui-palette-success-main)", // Success color for default state
+            },
+          },
+          "& .MuiFormLabel-colorWarning": {
+            color: "var(--mui-palette-warning-main)", // Success color for default state
+          },
+          "&:has(.MuiCheckbox-colorWarning).MuiFormControl-root": {
+            width: "100%",
+            outline: "1px solid var(--mui-palette-warning-main)",
+            borderRadius: "2px",
+            backgroundColor: "rgba(var(--mui-palette-warning-lightChannel) / 0.1) !important",
+          },
+          "& .MuiCheckbox-colorWarning": {
+            color: "var(--mui-palette-warning-main)", // Success color for default state
+          },
+          "& .MuiInputBase-colorWarning": {
+            "&": {
+              backgroundColor: "rgba(var(--mui-palette-warning-lightChannel) / 0.1) !important",
+            },
+            "& .MuiOutlinedInput-notchedOutline": {
+              borderColor: "var(--mui-palette-warning-main)", // Success color for default state
+            },
+          },
+        },
+      },
     },
   },
 });
@@ -50,21 +120,39 @@ function App() {
         <CssBaseline>
           <LocalizationProvider dateAdapter={AdapterDayjs}>
             <StateProvider>
-              <ConfirmProvider>
-                <Router
-                  future={{
-                    v7_startTransition: true,
-                    v7_relativeSplatPath: true,
-                  }}
-                >
-                  <Layout />
-                </Router>
+              <ConfirmProvider defaultOptions={{ confirmationButtonProps: { variant: "contained" } }}>
+                <Router />
               </ConfirmProvider>
             </StateProvider>
           </LocalizationProvider>
         </CssBaseline>
       </ThemeProvider>
     </StyledEngineProvider>
+  );
+}
+
+function Router() {
+  const {
+    state: { isAuthenticated },
+  } = useStateValue();
+
+  const router = useMemo(
+    () =>
+      createBrowserRouter(createRoutesFromElements(<Route element={<Layout />}>{Routes({ isAuthenticated })}</Route>), {
+        future: {
+          v7_relativeSplatPath: true,
+        },
+      }),
+    [isAuthenticated]
+  );
+  return (
+    <RouterProvider
+      key={isAuthenticated}
+      router={router}
+      future={{
+        v7_startTransition: true,
+      }}
+    />
   );
 }
 
@@ -78,7 +166,7 @@ function Layout() {
         marginLeft: 0,
         width: "100%",
       };
-
+  logger.log("Layout RENDER");
   return (
     <Box className="App" sx={{ backgroundColor: "#efefef", height: "100vh", display: "flex", flexDirection: "column" }}>
       <NavBar />
@@ -141,10 +229,13 @@ function NavBar() {
 }
 
 function Main({ loading }) {
-  const {
-    state: { isAuthenticated },
-  } = useStateValue();
+  // const {
+  //   state: { isAuthenticated },
+  // } = useStateValue();
+  const { location } = useLocation();
   const loadingStyle = loading ? { opacity: 0.6, marginTop: "-4px" } : {};
+  logger.log("Main RENDER");
+
   return (
     <Container
       maxWidth="xl"
@@ -161,7 +252,7 @@ function Main({ loading }) {
       <Authentication />
       <Errors />
       <ErrorBoundary>
-        <Routes isAuthenticated={isAuthenticated} />
+        <Outlet context={{ location }} />
       </ErrorBoundary>
       <Notifications />
     </Container>
