@@ -2,16 +2,16 @@ diff --git a/build/lin.sh b/build/lin.sh
 index bed28ed..f357553 100755
 --- a/build/lin.sh
 +++ b/build/lin.sh
-@@ -119,6 +119,7 @@ VERSION_RSVG=2.58.93
- VERSION_AOM=3.9.1
- VERSION_HEIF=1.18.2
- VERSION_CGIF=0.4.1
-+VERSION_PDFIUM=7033
+@@ -119,6 +119,7 @@ VERSION_RSVG=2.60.0
+ VERSION_AOM=3.12.0
+ VERSION_HEIF=1.19.7
+ VERSION_CGIF=0.5.0
++VERSION_PDFIUM=7113
  
- # Remove patch version component
- without_patch() {
-@@ -444,6 +445,25 @@ CFLAGS="${CFLAGS} -O3" meson setup _build --default-library=static --buildtype=r
-   -Dtests=false
+ # Check for newer versions
+ # Skip by setting the VERSION_LATEST_REQUIRED environment variable to "false"
+@@ -444,6 +445,25 @@ CFLAGS="${CFLAGS} -O3" meson setup _build --default-library=static --buildtype=release --strip --prefix=${TARGET} ${MESON} \
+   -Dexamples=false -Dtests=false
  meson install -C _build --tag devel
  
 +mkdir ${DEPS}/pdfium
@@ -34,7 +34,7 @@ index bed28ed..f357553 100755
 +EOF
 +
  mkdir ${DEPS}/vips
- $CURL https://github.com/libvips/libvips/releases/download/v${VERSION_VIPS}/vips-$(without_prerelease $VERSION_VIPS).tar.xz | tar xJC ${DEPS}/vips --strip-components=1
+ $CURL https://github.com/libvips/libvips/releases/download/v${VERSION_VIPS}/vips-${VERSION_VIPS}.tar.xz | tar xJC ${DEPS}/vips --strip-components=1
  cd ${DEPS}/vips
 @@ -467,7 +487,7 @@ sed -i'.bak' "/subdir('man')/{N;N;N;N;d;}" meson.build
  CFLAGS="${CFLAGS} -O3" CXXFLAGS="${CXXFLAGS} -O3" meson setup _build --default-library=shared --buildtype=release --strip --prefix=${TARGET} ${MESON} \

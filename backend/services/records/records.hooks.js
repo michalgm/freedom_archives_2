@@ -1,7 +1,7 @@
 const tsquery = require("pg-tsquery")();
 const { transaction } = require("@feathersjs/knex");
-const { recordsQueryValidator } = require("../../validators");
-const { hooks: schemaHooks, resolve, virtual } = require("@feathersjs/schema");
+// const { recordsQueryValidator } = require("../../validators");
+// const { hooks: schemaHooks, resolve, virtual } = require("@feathersjs/schema");
 
 const {
   setUser,
