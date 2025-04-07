@@ -75,7 +75,8 @@
     "pg-tsquery": "^8.4.2",
     "serve-favicon": "^2.5.0",
     "sharp": "^0.33.5",
-    "winston": "^3.17.0"
+    "winston": "^3.17.0",
+    "zod": "^3.24.2"
   },
   "devDependencies": {
     "@babel/eslint-parser": "^7.26.8",
@@ -88,5 +89,10 @@
     "mocha": "^11.1.0",
     "nodemon": "^3.1.9",
     "sinon": "^19.0.2"
+  },
+  "msw": {
+    "workerDirectory": [
+      "frontend/public"
+    ]
   }
 }
