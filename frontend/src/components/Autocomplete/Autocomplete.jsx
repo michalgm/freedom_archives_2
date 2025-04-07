@@ -1,6 +1,7 @@
 import { memo, useCallback, useMemo, useState } from "react";
 
 import {
+  Box,
   Button,
   CircularProgress,
   Dialog,
@@ -19,9 +20,9 @@ import { AutocompleteElement, FormProvider, useForm, useFormContext } from "reac
 import { useDisplayError } from "../../appContext";
 // import { useDisplayError } from "../SnackBar";
 import { services } from "../../api";
+import RecordItem, { CollectionItem } from "../EditableItemsList";
 import FieldRow from "../FieldRow";
 import { Field } from "../form/Field";
-import RecordItem, { CollectionItem } from "../RecordItem";
 
 const searchTypes = {
   default: {
@@ -72,6 +73,7 @@ const queryApi = async ({
   excludeIds = [],
   isMulti = false,
   fetchAll = false,
+  value,
 }) => {
   const { id, label = "item", fields, searchFields = [] } = searchTypes[searchType];
   const $select = fields || [id, label];
@@ -81,7 +83,7 @@ const queryApi = async ({
   const query = {
     $select,
     $sort: { [label]: 1 },
-    $fields: fields,
+    // $fields: fields,
     $limit: fetchAll ? 10000 : 15,
     ...searchParams,
   };
@@ -98,7 +100,7 @@ const queryApi = async ({
   }
   if (isMulti) {
     query[id] = {
-      $nin: defaultValue.map((item) => item[id]).filter((v) => v !== "new"),
+      $nin: value.map((item) => item[id]).filter((v) => v !== "new"),
     };
   }
 
@@ -213,10 +215,9 @@ const Autocomplete = ({
   textFieldProps,
   options: staticOptions,
   autocompleteProps: defaultAutocompleteProps,
-  // storeFullObject = false,
   // query,
   value,
-  // onChange: customOnChange,
+  onChange: customOnChange,
   helperText,
   isRHF = false,
   service = "default",
@@ -224,6 +225,7 @@ const Autocomplete = ({
   createParams,
   fetchAll = false,
   create = false,
+  clearOnSelect = false,
   ...props
 }) => {
   const displayError = useDisplayError();
@@ -232,13 +234,13 @@ const Autocomplete = ({
   const [customValue, setCustomValue] = useState(null);
 
   const currentValue = isRHF && getValues ? getValues(name) : value;
-  const typeLabel = label.replace(/s$/, "").toLowerCase();
-  const { id: idField, label: labelField } = searchTypes?.[service];
+  const typeLabel = (label || "").replace(/s$/, "").toLowerCase();
+  const { id: idField, label: labelField } = searchTypes[service];
 
   const renderOption = useCallback(
     (props, option) => {
       const key = option[idField];
-      const renderOption = searchTypes?.[service]?.renderOption || ((item) => item[labelField]);
+      const renderOption = searchTypes[service]?.renderOption || ((item) => item[labelField]);
       if (option.hidden || !key) {
         return null;
       }
@@ -284,6 +286,7 @@ const Autocomplete = ({
           searchType: service,
           searchParams,
           fetchAll,
+          value: currentValue,
         });
         if (searchTerm && create && !options.some((option) => option[labelField] === searchTerm)) {
           options.push({ [labelField]: `Create new ${typeLabel}`, [idField]: "new", searchTerm });
@@ -294,7 +297,7 @@ const Autocomplete = ({
       }
       setLoading(false);
     },
-    [staticOptions, fetchAll, service, searchParams, displayError, labelField, idField, typeLabel, create]
+    [staticOptions, fetchAll, service, searchParams, displayError, labelField, idField, typeLabel, create, currentValue]
   );
 
   const debouncedSearch = useMemo(
@@ -326,20 +329,28 @@ const Autocomplete = ({
     return combinedOptions;
   }, [options, currentValue, staticOptions, props.multiple, idField]);
 
-  // const onChange = useCallback(
-  //   async (_, value) => {
-  //     // customOnChange && customOnChange(storeFullObject ? value : value?.id || null);
-  //     // setOptions([]);
-  //   },
-  //   [customOnChange, storeFullObject]
-  // );
+  const onChange = useCallback(
+    async (e, value) => {
+      customOnChange && customOnChange(value);
+      if (clearOnSelect) {
+        setTimeout(() => {
+          logger.log("onChange", value, clearOnSelect);
+          setValue(name, null);
+          setOptions([]);
+        });
+      }
+    },
+    [customOnChange, clearOnSelect, setValue, name]
+  );
 
   const autocompleteProps = {
     // disableClearable: true,
     handleHomeEndKeys: true,
     filterSelectedOptions: true,
     disableCloseOnSelect: false,
-    clearOnBlur: false,
+    clearOnBlur: true,
+    blurOnSelect: false,
+    onChange,
     disabled: props.disabled,
     autoHighlight: true,
     isOptionEqualToValue: (option = {}, value = {}) => {
@@ -430,7 +441,7 @@ const Autocomplete = ({
           setCustomValue(null);
           if (result) {
             const updatedValue = props.multiple ? [...getValues(name), result] : result;
-            setValue(name, updatedValue);
+            setValue(name, updatedValue, { shouldValidate: true, shouldDirty: true, shouldTouch: true });
           }
         }}
         service={service}

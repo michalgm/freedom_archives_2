@@ -1,6 +1,5 @@
 import { Alert, Snackbar } from "@mui/material";
 
-import React from "react";
 import { useStateValue } from "../appContext";
 
 function Notification({ severity = "success", index, message, onClose }) {
@@ -37,16 +36,17 @@ function Notifications() {
 
   return (
     <div className="notifications">
-      {notifications.map(({ id, ownerState: _, ...props }, index) => (
+      {notifications.map(({ id, severity, message }, index) => (
         <Notification
           key={id}
           index={index}
+          severity={severity}
+          message={message}
           onClose={(_, reason) => {
             if (!["clickaway", "escapeKeyDown"].includes(reason)) {
-              hideNotification(id, props.message);
+              hideNotification(id, message);
             }
           }}
-          {...props}
         />
       ))}
     </div>

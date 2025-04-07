@@ -29,7 +29,7 @@ function ViewContainer({ children, item, buttonRef, neighborService, embedded, .
   const resetSearch = useResetSearch();
   const [, rootPath, id] = location.pathname.split("/");
   const newItem = id === "new";
-
+  logger.log("VIEW CONTAINER RENDER");
   useEffect(() => {
     if (rootPath !== `${type}s`) {
       resetSearch();

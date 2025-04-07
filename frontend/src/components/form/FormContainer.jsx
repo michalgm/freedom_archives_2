@@ -71,7 +71,7 @@ const FormContainer = ({
       autoComplete={autoComplete}
       formConfig={{
         schema,
-        modelType: displayConfig?.type,
+        service: displayConfig?.type,
         namePath: displayConfig.namePath,
         createMutation,
         updateMutation,
@@ -108,7 +108,7 @@ const FormContainer = ({
               {layout.map(({ fields: sectionFields, title, sectionActions }, groupIndex) => {
                 const { columns, fullSpan } = fieldsToColumns(sectionFields, schema, columnCount);
                 return (
-                  <FormSection key={groupIndex} title={title} sectionActions={sectionActions}>
+                  <FormSection key={title} title={title} sectionActions={sectionActions}>
                     <Grid2 container sx={{ alignItems: "start" }} size={12}>
                       {columns.map((fieldSet, columnIndex) => (
                         <Grid2 key={columnIndex} container size={12 / columnCount}>

@@ -1,7 +1,7 @@
 import { Button, Grid2, Icon, IconButton, Paper, Stack } from "@mui/material";
 import { FieldArray, Formik, useFormikContext } from "formik";
 import { isEqual, startCase } from "lodash-es";
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { collections, records } from "../api";
 
 import { Close } from "@mui/icons-material";
@@ -10,9 +10,9 @@ import { useStateValue } from "../appContext";
 import Field from "../components/Field";
 import ListItemField from "../components/ListItemField";
 import PaginationFooter from "../components/PaginationFooter";
-import ViewContainer from "../components/ViewContainer";
 import AutoSubmit from "./AutoSubmit";
-import { ItemsList } from "./RecordItem";
+import { ItemsList } from "./EditableItemsList";
+import ViewContainer from "./ViewContainer";
 
 const page_size = 10;
 
@@ -129,6 +129,7 @@ export default function Manage({
     const query = createQuery(filter);
     query.$skip = offset;
     query.$limit = page_size;
+    const noLoading = Boolean(embedded);
 
     if (filters.length) {
       filters.forEach(({ field, value }) => {
@@ -159,9 +160,10 @@ export default function Manage({
       });
     }
     const [{ data, total }, { total: digitizedTotal = 0 }] = await Promise.all([
-      (service === "record" ? records : collections).find({ query }),
+      (service === "record" ? records : collections).find({ noLoading, query }),
       service === "record"
         ? records.find({
+            noLoading,
             query: {
               ...query,
               has_digital: true,

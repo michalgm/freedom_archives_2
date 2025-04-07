@@ -1,7 +1,6 @@
 import { Grid2, Paper, Typography } from "@mui/material/";
 import { useLocation, useNavigate } from "react-router-dom";
 
-import React from "react";
 import { authenticate } from "../api";
 import Field from "../components/Field";
 import Form from "../components/Form";

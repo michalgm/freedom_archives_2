@@ -16,8 +16,8 @@ import { Autocomplete } from "formik-mui";
 import { startCase } from "lodash-es";
 import React from "react";
 import DateStringField from "./DateStringField";
-import { EditableItem } from "./RecordItem";
 import SelectField from "./SelectField";
+import { EditableItem } from "./form/EditableItem";
 const HTMLField = React.lazy(() => import("./HTMLField"));
 
 const selectOptions = {
@@ -72,6 +72,9 @@ const FieldComponent = ({
   delete props.raw;
   const error = Boolean(errors?.[name]);
   helperText += error ? errors[name] : "";
+  // const style = {
+  //   backgroundColor: "secondary.main",
+  // };
   props.onChange = React.useCallback(
     async (event, option) => {
       const { value, checked } = event?.currentTarget ? event.currentTarget : { value: event };
@@ -206,7 +209,7 @@ const FieldComponent = ({
   } else if (type === "radiogroup") {
     const { options, ...radioProps } = props;
     field = (
-      <FormControl margin="dense">
+      <FormControl margin="dense" disabled={ro} error={error}>
         <FormLabel>{labelValue}</FormLabel>
         <RadioGroup name={name} value={value || ""} row {...radioProps}>
           {options.map((option) => (
@@ -217,17 +220,19 @@ const FieldComponent = ({
     );
   } else if (type === "date" || type === "datetime") {
     const Component = type === "date" ? DatePicker : DateTimePicker;
-
+    const views = ["year", "month", "day"];
+    if (type === "datetime") {
+      views.push("hours", "minutes");
+    }
     field = (
       <Component
-        variant={variant}
         disabled={ro}
         label={labelValue}
         InputLabelProps={{ shrink: true }}
         value={value || null}
         name={name}
         error={error}
-        views={["year", "month", "day", "hours", "minutes"]}
+        views={views}
         helperText={helperText}
         {...props}
         onChange={(value) => props.onChange({ currentTarget: { value } })}
@@ -237,6 +242,7 @@ const FieldComponent = ({
             color: "primary",
             margin: margin || "dense",
             clearable: true,
+            variant: variant,
             InputProps: props.InputProps || {},
 
             // sx: props.sx || {},

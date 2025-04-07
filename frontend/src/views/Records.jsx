@@ -1,4 +1,4 @@
-import React, { useCallback } from "react";
+import { useCallback } from "react";
 
 import { merge } from "lodash-es";
 import Manage from "../components/Manage";
@@ -58,6 +58,7 @@ function Records({ embedded, itemAction, filter = {}, excludeIds = [] }) {
       };
       if (search) {
         const $ilike = `%${search.replace(/ /g, "%")}%`;
+        // query.keywords_text = { $ilike };
         query.$or = [
           { keywords_text: { $ilike } },
           { producers_text: { $ilike } },

@@ -1,32 +1,37 @@
-import { useEffect, useState } from 'react'
+import { useEffect } from "react";
 
-import { useConfirm } from 'material-ui-confirm'
+import { useConfirm } from "material-ui-confirm";
+import { useBlocker } from "react-router-dom";
 
-export const FormStateHandler = ({ blocker }) => {
-  const confirm = useConfirm()
-  const [isDialogOpen, setIsDialogOpen] = useState(false)
+export const FormStateHandler = ({ shouldBlockNavigation }) => {
+  const blocker = useBlocker(shouldBlockNavigation);
+
+  const confirm = useConfirm();
 
   useEffect(() => {
     const handleNav = async () => {
-      if (isDialogOpen) return
-
-      setIsDialogOpen(true)
       try {
         await confirm({
-          title: 'You have unsaved changes. ',
-          description:
-            'Are you sure you want to leave this page? Changes you made will be lost if you navigate away.',
-        })
-        blocker.confirm()
+          title: "You have unsaved changes. ",
+          description: "Are you sure you want to leave this page? Changes you made will be lost if you navigate away.",
+        });
+        blocker.proceed();
       } catch (e) {
-        blocker.abort()
-      } finally {
-        setIsDialogOpen(false)
+        blocker.reset();
       }
+    };
+    if (blocker.state === "blocked") {
+      handleNav();
     }
-    if (blocker.state === 'BLOCKED') {
-      handleNav()
-    }
-  }, [blocker, confirm, isDialogOpen])
-  return null
-}
+    return blocker.reset;
+  }, [blocker, confirm]);
+
+  useEffect(() => {
+    // ensure the blocker is reset at unmount
+    return () => {
+      if (blocker.state == "blocked") blocker.reset();
+    };
+  }, [blocker]);
+
+  return null;
+};

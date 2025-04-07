@@ -1,5 +1,5 @@
 import { Box, MenuItem, TextField } from "@mui/material";
-import RecordItem, { CollectionItem } from "./RecordItem";
+import RecordItem, { CollectionItem } from "./EditableItemsList";
 
 import { Field } from "formik";
 import { Autocomplete } from "formik-mui";

@@ -159,7 +159,7 @@ const SearchForm = ({ search, setSearch, filters }) => {
     FILTER_TYPES.forEach((type) => {
       newFilters[type] = [];
     });
-    // console.log(search, newFilters);
+    // logger.log(search, newFilters);
     setSearch({ ...search, ...newFilters });
   }, [search, setSearch]);
 
@@ -212,7 +212,7 @@ function Search() {
   const [filters, setFilters] = useState([]);
 
   // const searchRef = useRef(search);
-  // // console.log(searchRef.current, search, records, filters, total, offset, time)
+  // // logger.log(searchRef.current, search, records, filters, total, offset, time)
   // if (!isEqual(search, searchRef.current)) {
   //   searchRef.current = search;
   // }

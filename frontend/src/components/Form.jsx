@@ -96,15 +96,15 @@ const Form = ({
         if (noUpdateCheck) {
           return onSubmit(values);
         }
-        const updated = Object.keys(values).reduce((updated, key) => {
-          if (values[key] !== initialValues[key]) {
-            updated[key] = values[key];
-          }
-          return updated;
-        }, {});
+        // const updated = Object.keys(values).reduce((updated, key) => {
+        //   if (values[key] !== initialValues[key]) {
+        //     updated[key] = values[key];
+        //   }
+        //   return updated;
+        // }, {});
         // const updated = diff(initialValues, values);
-        if (Object.keys(updated).length) {
-          return onSubmit(updated);
+        if (Object.keys(values).length) {
+          return onSubmit(values);
         }
       }}
       initialValues={initialValues}

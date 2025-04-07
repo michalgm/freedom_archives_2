@@ -56,9 +56,9 @@ function Sidebar({ ...props }) {
             return (
               <div key={title}>
                 <Divider />
-                <List>
+                <List dense>
                   <ListItem>
-                    <Typography variant="h5">{title}</Typography>
+                    <Typography variant="h6">{title}</Typography>
                   </ListItem>
                   {sideBarConfig[title].map(({ label, href, icon }) => (
                     <SidebarItem key={label} label={label} href={href} icon={icon} />
@@ -76,13 +76,13 @@ function Sidebar({ ...props }) {
 function SidebarItem({ label, /* icon, */ href = "notalink" }) {
   const { pathname = null } = useResolvedPath(href);
   const location = useLocation();
-  // console.log(location)?
-  // console.log(useMatch({path: pathname || ''}))
+  // logger.log(location)?
+  // logger.log(useMatch({path: pathname || ''}))
   const current =
     Boolean(useMatch({ path: pathname || "" }) !== null || (location.pathname === "/" && href === "/records")) && href;
   // const home = Boolean(useMatch({path: href==='records' ? '/' : 'notalink'}))
 
-  // console.log({href, pathname, current, home})
+  // logger.log({href, pathname, current, home})
   return (
     <ListItemLink selected={Boolean(current)} href={href}>
       <ListItemText>{label}</ListItemText>

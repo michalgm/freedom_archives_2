@@ -1,7 +1,7 @@
 import { IMask, IMaskInput } from "react-imask";
 
-import { TextField } from "@mui/material";
 import React, { useCallback, useRef } from "react";
+import { TextFieldElement } from "react-hook-form-mui";
 
 const maskSelections = [
   { start: 0, end: 2 }, // Month
@@ -33,7 +33,7 @@ const blocks = {
   },
   Y: {
     mask: IMask.MaskedRange,
-    from: 1800,
+    from: 0,
     to: 2100,
     placeholderChar: "Y",
     autofix: true,
@@ -100,7 +100,8 @@ const DateStringMask = React.forwardRef(function DateStringMask(props, ref) {
       overwrite={true}
       inputRef={ref}
       onAccept={(value) => {
-        return onChange({ currentTarget: { name: props.name, value } });
+        const target = { name: props.name, value, type: "text" };
+        return onChange({ target, currentTarget: target });
       }}
       onMouseDown={handleClick}
       onMouseUp={handleClick}
@@ -112,7 +113,7 @@ const DateStringMask = React.forwardRef(function DateStringMask(props, ref) {
 
 const DateStringField = ({ ...props }) => {
   return (
-    <TextField
+    <TextFieldElement
       autoComplete="off"
       fullWidth
       type={"text"}
@@ -120,8 +121,10 @@ const DateStringField = ({ ...props }) => {
       slotProps={{
         input: {
           inputComponent: DateStringMask,
+          sx: { color: props.error ? "error.main" : "inherit" },
         },
 
+        error: props.error,
         inputLabel: { shrink: true },
       }}
     />

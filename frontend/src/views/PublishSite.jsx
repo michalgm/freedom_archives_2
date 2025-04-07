@@ -2,7 +2,7 @@ import { Publish, Restore } from "@mui/icons-material";
 import { Button, DialogContentText, Paper, Stack, Typography } from "@mui/material";
 import { startCase } from "lodash-es";
 import { useConfirm } from "material-ui-confirm";
-import React, { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { snapshots as snapshotsService } from "../api";
 import { useAddNotification } from "../appContext";
 import { EditableDataTable } from "../components/EditableDataTable";
@@ -59,7 +59,7 @@ const PublishSite = () => {
 
   const restoreSnapshot = useCallback(
     async ({ title, snapshot_id, date_published }) => {
-      console.log("restore", snapshot_id);
+      logger.log("restore", snapshot_id);
       await confirm({
         title: `Restore snapshot "${startCase(title)}"?`,
         description: `This will replace the current live site with the records and collections from ${new Date(

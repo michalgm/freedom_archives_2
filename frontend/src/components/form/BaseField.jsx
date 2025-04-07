@@ -30,13 +30,11 @@ import {
 } from "react-hook-form-mui";
 import { DatePickerElement, DateTimePickerElement } from "react-hook-form-mui/date-pickers";
 
-// import ActionChooser from '../Autocomplete/ActionChooser'
-// import ArrestChooser from '../Autocomplete/ArrestChooser'
-import Autocomplete from "../Autocomplete/Autocomplete";
-// import UserChooser from '../Autocomplete/UserChooser'
 import { renderToStaticMarkup } from "react-dom/server";
+import Autocomplete from "../Autocomplete/Autocomplete";
 
 import DateStringField from "../DateStringField";
+import { EditableItem } from "./EditableItem";
 import RichTextInput from "./RichTextInput";
 
 export const convertSvgToDataUrl = (Icon, color = "white") => {
@@ -52,9 +50,15 @@ const selectOptions = {
     label: id,
   })),
 };
-export const formatLabel = (label) => {
-  const index = label.lastIndexOf(".");
-  return label
+export const formatLabel = (label, name) => {
+  if (label?.trim() === "") {
+    return null;
+  } else if (label) {
+    return label;
+  }
+
+  const index = name.lastIndexOf(".");
+  return name
     .slice(index + 1)
     .replace(/_/g, " ")
     .replace(/\w+/g, (word) => {
@@ -94,7 +98,7 @@ export const BaseField = ({
 }) => {
   // const { setValue, getValues } = useFormContext()
 
-  props.label = props.label?.trim() === "" ? null : props.label || formatLabel(name);
+  props.label = formatLabel(props.label, name);
   props.disabled = Boolean(props.disabled || ro) ? true : undefined; //FIXME;
   const disabled = Boolean(props.disabled);
 
@@ -108,8 +112,9 @@ export const BaseField = ({
   const textFieldProps = useMemo(() => {
     const textFieldProps = {
       name,
+      margin: margin || "dense",
       helperText,
-      variant: "outlined",
+      variant: props.variant || "outlined",
       fullWidth: fullWidth,
       size: "small",
       color,
@@ -127,7 +132,18 @@ export const BaseField = ({
       });
     }
     return textFieldProps;
-  }, [color, defaultTextFieldProps, fullWidth, helperText, name, tabIndex, endAdornment, startAdornment]);
+  }, [
+    color,
+    defaultTextFieldProps,
+    fullWidth,
+    helperText,
+    name,
+    tabIndex,
+    endAdornment,
+    startAdornment,
+    margin,
+    props.variant,
+  ]);
 
   const renderDatePicker = () => {
     const Component = isRHF
@@ -154,39 +170,30 @@ export const BaseField = ({
     );
   };
 
-  const renderAutocomplete = (extraProps = {}) => {
+  const renderAutocomplete = () => {
     const options = transformOptions(defaultOptions);
+
+    if (field_type === "list_item") {
+      const { itemType } = props;
+      props.service = "list_items";
+      props.searchParams = {
+        ...(props.searchParams || {}),
+        type: itemType,
+      };
+      props.createParams = {
+        ...(props.createParams || {}),
+        type: itemType,
+      };
+    }
     return (
       <Autocomplete
         name={name}
         options={options}
         label={props.label}
-        // matchId={!props.storeFullObject}
         textFieldProps={textFieldProps}
         isRHF={isRHF}
         onChange={onChange}
         value={value}
-        {...props}
-        {...extraProps}
-      />
-    );
-  };
-
-  const renderChooser = () => {
-    const components = {
-      action_chooser: ActionChooser,
-      arrest_chooser: ArrestChooser,
-      user_chooser: UserChooser,
-    };
-    const Component = components[field_type] || Autocomplete;
-    return (
-      <Component
-        name={name}
-        helperText={helperText}
-        isRHF={isRHF}
-        onChange={onChange}
-        value={value}
-        textFieldProps={textFieldProps}
         {...props}
       />
     );
@@ -417,6 +424,7 @@ export const BaseField = ({
         label={props.label}
         // error={error}
         helperText={helperText}
+        {...textFieldProps}
         {...props}
       />
     );
@@ -427,12 +435,13 @@ export const BaseField = ({
       <DateStringField
         variant={variant}
         disabled={disabled}
-        margin={margin || "dense"}
         label={props.label}
-        value={value || ""}
+        value={value}
         name={name}
         // error={error}
         helperText={helperText}
+        onChange={onChange}
+        {...textFieldProps}
         {...props}
       />
     );
@@ -458,14 +467,12 @@ export const BaseField = ({
     case "date":
       return renderDatePicker();
     case "richtext":
+    case "html":
       return renderRichTextField();
+    case "list_item":
     case "select":
     case "autocomplete":
       return renderAutocomplete();
-    case "action_chooser":
-    case "arrest_chooser":
-    case "user_chooser":
-      return renderChooser();
     case "togglebutton":
       return renderToggleButton();
     case "editableItem":
