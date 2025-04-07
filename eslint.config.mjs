@@ -2,8 +2,8 @@ import js from "@eslint/js";
 import importPlugin from 'eslint-plugin-import';
 import reactPlugin from "eslint-plugin-react";
 import reactHooks from 'eslint-plugin-react-hooks';
+import storybook from 'eslint-plugin-storybook';
 import globals from "globals";
-
 // const __filename = fileURLToPath(import.meta.url);
 // const __dirname = path.dirname(__filename);
 // const compat = new FlatCompat({
@@ -13,10 +13,12 @@ import globals from "globals";
 // });
 
 export default [
+    ...storybook.configs['flat/recommended'],
     {
         name: "recommended",
         ignores: ["sharp-libvips", "frontend/dist/**/*"],
         ...js.configs.recommended,
+        ...importPlugin.flatConfigs.recommended,
         plugins: {
             'import': importPlugin
         },
@@ -55,9 +57,10 @@ export default [
             globals: {
                 ...globals.browser,
                 ...globals.mocha,
+                "logger": "readonly"
             },
-            // ecmaVersion: 2021,
-            // sourceType: "module",
+            ecmaVersion: 2022,
+            sourceType: "module",
             parserOptions: {
                 ecmaFeatures: {
                     jsx: true,
@@ -65,12 +68,12 @@ export default [
                 sourceType: 'module',
             },
         },
-        plugins: { 'react-hooks': reactHooks, 'react': reactPlugin },
+        plugins: { "react-hooks": reactHooks, react: reactPlugin, import: importPlugin },
         ignores: ["frontend/dist/**/*"],
         rules: {
             "react-hooks/rules-of-hooks": "error",
             "react-hooks/exhaustive-deps": "warn",
-            "react/jsx-uses-react": "error",
+            "react/jsx-uses-react": "off",
             "react/jsx-uses-vars": "error",
             "no-console": ["warn", { "allow": ["warn", "error"] }],
             "no-unused-expressions": ["error", { "allowShortCircuit": true, "allowTernary": true }],
@@ -78,12 +81,23 @@ export default [
             "react/no-array-index-key": "warn",
             "react/no-danger": "warn",
             "react/jsx-key": "error",
+            "import/no-unresolved": "off",
+            'import/named': 'error',
+            'import/default': 'error',
+            'import/no-named-as-default': 'warn',
+            "no-undef": "error",
             "no-unused-vars": ["warn", {
+                "caughtErrors": "none",
                 "varsIgnorePattern": "^_",
                 "argsIgnorePattern": "^_",
                 "destructuredArrayIgnorePattern": "^_",
             }],
-        }
+        },
+        settings: {
+            react: {
+                version: 'detect',
+            },
+        },
 
     },
 ];
