@@ -19,7 +19,7 @@ import {
 import { startCase } from "lodash-es";
 import React, { useState } from "react";
 import { useFieldArray, useFormContext } from "react-hook-form";
-import { Link as DOMLink, useNavigate } from "react-router-dom";
+import { Link as DOMLink, useNavigate } from "react-router";
 import { Field } from "./form/Field";
 import Thumbnail from "./Thumbnail";
 

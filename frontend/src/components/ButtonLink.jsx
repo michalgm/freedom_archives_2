@@ -1,6 +1,6 @@
 import { Button } from "@mui/material";
-import { Link } from "react-router-dom";
 import React from "react";
+import { Link } from "react-router";
 
 const CollisionLink = React.forwardRef(function CollisionLink(props, ref) {
   return <Link ref={ref} {...props} />;

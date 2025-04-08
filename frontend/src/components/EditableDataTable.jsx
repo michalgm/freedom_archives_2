@@ -7,7 +7,7 @@ import { Box, Button, Tooltip } from "@mui/material";
 import { DataGrid, GridActionsCellItem, GridToolbar, useGridApiRef } from "@mui/x-data-grid";
 import { merge, startCase } from "lodash-es";
 import { useConfirm } from "material-ui-confirm";
-import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import * as API from "../api";
 import { useAddNotification } from "../appContext";
 
@@ -292,4 +292,4 @@ export const EditableDataTable = ({
   );
 };
 
-export default React.memo(EditableDataTable);
+export default EditableDataTable;

@@ -4,7 +4,7 @@ import { collections, records } from "../api";
 import { useResetSearch, useStateValue } from "../appContext";
 
 import { startCase } from "lodash-es";
-import { useLocation } from "react-router-dom";
+import { useLocation } from "react-router";
 import ButtonLink from "./ButtonLink";
 
 const renderTime = (item, type) => {

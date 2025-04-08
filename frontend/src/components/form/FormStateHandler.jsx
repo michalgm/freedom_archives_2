@@ -1,7 +1,7 @@
 import { useEffect } from "react";
 
 import { useConfirm } from "material-ui-confirm";
-import { useBlocker } from "react-router-dom";
+import { useBlocker } from "react-router";
 
 export const FormStateHandler = ({ shouldBlockNavigation }) => {
   const blocker = useBlocker(shouldBlockNavigation);

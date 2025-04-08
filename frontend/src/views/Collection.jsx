@@ -1,7 +1,7 @@
 import { Box, Divider, Grid2, Stack, Tab, Tabs, Typography } from "@mui/material/";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useFieldArray, useFormContext } from "react-hook-form";
-import { useNavigate, useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router";
 import GridBlock from "src/components/GridBlock";
 import { BaseForm } from "src/components/form/BaseForm";
 import ButtonsHeader from "src/components/form/ButtonsHeader";

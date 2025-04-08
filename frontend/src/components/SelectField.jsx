@@ -234,4 +234,4 @@ const SelectField = ({
   );
 };
 
-export default React.memo(SelectField);
+export default SelectField;

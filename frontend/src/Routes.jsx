@@ -1,5 +1,8 @@
-import React, { Suspense } from "react";
-import { Navigate, Outlet, Route, useLocation } from "react-router-dom";
+import React, { Suspense, useMemo } from "react";
+import { Navigate, Outlet, Route, createBrowserRouter, createRoutesFromElements, useLocation } from "react-router";
+import { RouterProvider } from "react-router/dom";
+import { useStateValue } from "./appContext";
+import Layout from "./Layout";
 
 const Collections = React.lazy(() => import("./views/Collections"));
 const EditLists = React.lazy(() => import("./views/EditLists"));
@@ -18,6 +21,22 @@ const SiteSettings = React.lazy(() => import("./views/SiteSettings"));
 function LoginRedirect() {
   const location = useLocation();
   return <Navigate to="/login" state={{ referrer: location }} />;
+}
+
+export default function Router() {
+  const {
+    state: { isAuthenticated },
+  } = useStateValue();
+
+  const router = useMemo(
+    () =>
+      // createBrowserRouter(
+      //   createRoutesFromElements(<Route element={<div>hi</div>}>{Routes({ isAuthenticated })}</Route>)
+      // ),
+      createBrowserRouter(createRoutesFromElements(<Route element={<Layout />}>{Routes({ isAuthenticated })}</Route>)),
+    [isAuthenticated]
+  );
+  return <RouterProvider key={isAuthenticated} router={router} />;
 }
 
 function Routes({ isAuthenticated }) {
@@ -63,5 +82,3 @@ function Routes({ isAuthenticated }) {
 
   return <Route path="/*" element={<div>Loading...</div>} />;
 }
-
-export default Routes;

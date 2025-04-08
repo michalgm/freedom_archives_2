@@ -20,7 +20,7 @@ import {
 } from "@mui/material/";
 import React, { useRef } from "react";
 import { useFieldArray, useFormContext } from "react-hook-form-mui";
-import { useNavigate, useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router";
 import { useTitle } from "../appContext";
 import { Field } from "../components/form/Field";
 
@@ -366,7 +366,11 @@ function Record({ showForm, id /*  embedded = false */ }) {
                         >
                           Old Admin Link
                         </Button>
-                        <p>{id && <img style={{ maxWidth: "100%" }} alt="" src={`/images/thumbnails/${id}.jpg`} />}</p>
+                        <p>
+                          {!newRecord && (
+                            <img style={{ maxWidth: "100%" }} alt="" src={`/images/thumbnails/${id}.jpg`} />
+                          )}
+                        </p>
                       </Grid2>
                     }
                     <FieldRow>

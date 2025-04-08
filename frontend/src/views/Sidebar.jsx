@@ -10,7 +10,7 @@ import {
   Toolbar,
   Typography,
 } from "@mui/material";
-import { Link, useLocation, useMatch, useResolvedPath } from "react-router-dom";
+import { Link, useLocation, useMatch, useResolvedPath } from "react-router";
 
 import React from "react";
 
@@ -33,14 +33,14 @@ const sideBarConfig = {
   "Site Management": [
     { label: "Site Settings", icon: "", href: "/site/settings" },
     { label: "Edit List Values", icon: "", href: "/site/edit-list-values" },
-    { label: "Export Collections", icon: "", href: "" },
-    { label: "Find Duplicate Records", icon: "", href: "" },
+    { label: "Export Collections", icon: "" },
+    { label: "Find Duplicate Records", icon: "" },
     { label: "Review Changes", icon: "", href: "/site/review-changes" },
   ],
   Admin: [
     { label: "Update Unknown Relationships", icon: "", href: "/relationships" },
-    // { label: "Update Thumbnails", icon: "", href: "" },
-    // { label: "Update Keywords", icon: "", href: "" },
+    // { label: "Update Thumbnails", icon: "",  },
+    // { label: "Update Keywords", icon: "",  },
     { label: "Manage Users", href: "/admin/users" },
     { label: "Publish/Restore Live Site", href: "/admin/publish-site" },
   ],
@@ -73,7 +73,7 @@ function Sidebar({ ...props }) {
   );
 }
 
-function SidebarItem({ label, /* icon, */ href = "notalink" }) {
+function SidebarItem({ label, /* icon, */ href }) {
   const { pathname = null } = useResolvedPath(href);
   const location = useLocation();
   // logger.log(location)?

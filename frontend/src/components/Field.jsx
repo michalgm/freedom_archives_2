@@ -18,7 +18,6 @@ import React from "react";
 import DateStringField from "./DateStringField";
 import SelectField from "./SelectField";
 import { EditableItem } from "./form/EditableItem";
-const HTMLField = React.lazy(() => import("./HTMLField"));
 
 const selectOptions = {
   day: Array.from({ length: 32 }, (v, k) => ({
@@ -262,13 +261,12 @@ const FieldComponent = ({
       />
     );
   } else {
-    let FieldComponent = TextField;
-    if (type === "html") {
-      FieldComponent = HTMLField;
-      props.setFieldValue = setFieldValue;
-    }
+    // if (type === "html") {
+    //   FieldComponent = HTMLField;
+    //   props.setFieldValue = setFieldValue;
+    // }
     field = (
-      <FieldComponent
+      <TextField
         variant={variant}
         disabled={ro}
         margin={margin || "dense"}

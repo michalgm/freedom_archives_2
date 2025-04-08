@@ -1,5 +1,5 @@
 import { Grid2, Paper, Typography } from "@mui/material/";
-import { useLocation, useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router";
 
 import { authenticate } from "../api";
 import Field from "../components/Field";
