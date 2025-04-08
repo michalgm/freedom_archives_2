@@ -85,7 +85,11 @@ const instanceSchema = z.object({
   instance_id: z.number().nullable().optional(),
   archive_id: z.number().nullable().optional(),
   record_id: z.number(),
-  call_number: z.string().nullable().optional(),
+  call_number: z
+    .string()
+    .regex(/^\w{1,2} \d{1,3}$/)
+    .nullable()
+    .optional(),
   format: z.number().nullable().optional(),
   no_copies: z.number().min(1).nullable().optional().describe("Copies Count"),
   quality: z.string().nullable().optional(),

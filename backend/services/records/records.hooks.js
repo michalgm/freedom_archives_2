@@ -221,16 +221,17 @@ const updateRelations = async (context) => {
 
     // delete data.new_continuation; FIXME?
   }
-
   return context;
 };
 
 const updateThumbnail = async (context) => {
-  const instance = (context.relation_data?.instances || []).find((instance) => instance.is_primary);
+  const { relation_data } = context;
+
+  const instance = relation_data?.instances?.[0];
   if (instance && instance.url) {
     await writeThumbnailsFromUrl({
       url: instance.url,
-      filename: context.id,
+      filename: context.id || context.result.record_id,
       basedir: context.app.get("public"),
     });
   }
@@ -242,8 +243,7 @@ module.exports = {
     all: [prepData],
     find: [fullTextSearch, fetchUnified],
     get: [fetchUnified],
-    create: [setUser, setArchive, updateThumbnail],
-    update: [],
+    create: [setUser, setArchive],
     patch: [setUser, updateListItemRelations, updateThumbnail, updateRelations],
     remove: [],
   },
@@ -261,8 +261,7 @@ module.exports = {
     ],
     find: [lookupFilters],
     get: [],
-    create: [updateListItemRelations, updateRelations, refreshView],
-    update: [refreshView],
+    create: [updateListItemRelations, updateThumbnail, updateRelations, refreshView],
     patch: [refreshView],
     remove: [refreshView],
   },
@@ -272,7 +271,6 @@ module.exports = {
     find: [],
     get: [],
     create: [],
-    update: [],
     patch: [],
     remove: [],
   },

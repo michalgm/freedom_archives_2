@@ -160,7 +160,7 @@ module.exports = {
       });
       // context.result = current_data;
       await trx(`_unified_${table}s`).insert(encoded);
-      context.result = (await trx(`unified_${fullName}`).where(`${table}_id`, id).select()?.[0]) || {};
+      context.result = (await trx(`unified_${fullName}`).where(`${table}_id`, id).select())?.[0] || {};
       return context;
     }
   },
@@ -176,7 +176,6 @@ module.exports = {
     if (!archive_id) {
       return;
     }
-    console.log({ query_archive_id, data_archive_id, archive_id, method });
     [query_archive_id, data_archive_id].forEach((input) => {
       if (input && input !== archive_id) {
         throw new Error("Archive mismatch");

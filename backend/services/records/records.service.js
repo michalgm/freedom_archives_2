@@ -11,6 +11,7 @@ const getOptions = (app) => ({
   id: "record_id",
   multi: true,
   operators: ["$fullText", "$contains"],
+  methods: ["find", "get", "create", "patch", "remove"],
 });
 
 module.exports = function (app) {
