@@ -83,7 +83,7 @@ export const getDefaultValuesFromSchema = (schemaName, userDefaults = {}) => {
   const schemaDefaults = extractExplicitDefaults(schema) || {};
   const mergedDefaults = merge(schemaDefaults, userDefaults);
   const cleanedDefaults = removeNulls(mergedDefaults);
-  logger.log({ mergedDefaults, cleanedDefaults });
+  // logger.log({ mergedDefaults, cleanedDefaults });
   return cleanedDefaults;
 };
 
