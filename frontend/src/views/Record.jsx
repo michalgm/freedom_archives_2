@@ -1,6 +1,6 @@
 import "./Record.scss";
 
-import { ExpandMore } from "@mui/icons-material";
+import { ExpandMore, RadioButtonCheckedOutlined, RadioButtonUncheckedOutlined } from "@mui/icons-material";
 import {
   Accordion,
   AccordionDetails,
@@ -93,10 +93,10 @@ import { BaseForm } from "../components/form/BaseForm";
 //   continuations: [],
 // };
 
-function Instance({ instance = {}, index, remove, update }) {
+function Instance({ instance = {}, index, actions: { remove, update, move } }) {
   const edit = !instance.delete;
   return (
-    <>
+    <React.Fragment key={`${instance.instance_id}-${index}`}>
       <TableRow className={`instance ${instance.delete ? "deleted" : ""}`}>
         <TableCell className="instance-action">
           <IconButton
@@ -109,17 +109,12 @@ function Instance({ instance = {}, index, remove, update }) {
           </IconButton>
         </TableCell>
         <TableCell>
-          <Field
-            ro={!edit}
-            field_type="radio"
-            toNumber={true}
-            name="primary_instance_id"
-            value={instance.instance_id}
-            disabled={!instance.instance_id} //FIXME
-          />
+          <IconButton onClick={() => move(index, 0)} size="large">
+            {index === 0 ? <RadioButtonCheckedOutlined /> : <RadioButtonUncheckedOutlined />}
+          </IconButton>
         </TableCell>
         <TableCell>
-          <Field ro={!edit} fullWidth={false} label=" " name={`instances[${index}].call_number`} />
+          <Field ro={!edit} fullWidth={false} label=" " name={`instances.${index}.call_number`} />
         </TableCell>
         <TableCell>
           <Field
@@ -128,8 +123,7 @@ function Instance({ instance = {}, index, remove, update }) {
             itemType="generation"
             ro={!edit}
             label="Generation"
-            name={`instances[${index}].generation_item`}
-            variant="filled"
+            name={`instances.${index}.generation_item`}
           />
         </TableCell>
         <TableCell>
@@ -140,8 +134,7 @@ function Instance({ instance = {}, index, remove, update }) {
             ro={!edit}
             label="Format"
             service="list_items"
-            name={`instances[${index}].format_item`}
-            variant="filled"
+            name={`instances.${index}.format_item`}
           />
         </TableCell>
         <TableCell>
@@ -152,8 +145,7 @@ function Instance({ instance = {}, index, remove, update }) {
             ro={!edit}
             label="Quality"
             service="list_items"
-            name={`instances[${index}].quality_item`}
-            variant="filled"
+            name={`instances.${index}.quality_item`}
           />
         </TableCell>
         <TableCell>
@@ -162,14 +154,14 @@ function Instance({ instance = {}, index, remove, update }) {
             type="number"
             inputProps={{ min: 0, style: { width: 40 } }}
             label=" "
-            name={`instances[${index}].no_copies`}
+            name={`instances.${index}.no_copies`}
           />
         </TableCell>
       </TableRow>
       <TableRow className={instance.delete ? "deleted" : ""}>
         <TableCell />
         <TableCell>
-          {instance.url && (
+          {instance.url && instance.record_id && (
             <Link href={instance.url} target="_blank" rel="noopener noreferrer">
               <Icon>open_in_new</Icon>
             </Link>
@@ -177,7 +169,7 @@ function Instance({ instance = {}, index, remove, update }) {
         </TableCell>
         <TableCell>{instance.media_type}</TableCell>
         <TableCell colSpan={5}>
-          <Field ro={!edit} label="URL" name={`instances[${index}].url`} />
+          <Field ro={!edit} label="URL" name={`instances.${index}.url`} />
         </TableCell>
         {/* <TableCell colSpan={2}>
       <pre>
@@ -185,7 +177,7 @@ function Instance({ instance = {}, index, remove, update }) {
       </pre>
       </TableCell> */}
       </TableRow>
-    </>
+    </React.Fragment>
   );
 }
 
@@ -194,7 +186,8 @@ function Instances({ record }) {
     control,
     formState: { errors },
   } = useFormContext();
-  const { fields, append, remove, update } = useFieldArray({
+
+  const { fields, ...actions } = useFieldArray({
     name: "instances",
     control,
   });
@@ -222,14 +215,14 @@ function Instances({ record }) {
             </TableRow>
           )}
           {fields.map((instance, index) => (
-            <Instance key={instance.id} instance={instance} index={index} remove={remove} update={update} />
+            <Instance key={instance.id} instance={instance} index={index} actions={actions} />
           ))}
         </TableBody>
       </Table>
       <Box sx={{ color: "error.main" }}>{errors.instances && errors.instances.message}</Box>
       <Button
         variant="contained"
-        onClick={() => append({ record_id: record.id, no_copies: 1 })}
+        onClick={() => actions.append({ record_id: record.id, no_copies: 1 })}
         startIcon={<Icon>add</Icon>}
       >
         Add New Media
