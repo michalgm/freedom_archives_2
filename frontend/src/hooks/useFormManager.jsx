@@ -13,7 +13,6 @@ const getChangedFields = (input, dirtyFields) => {
   if (!dirtyFields || typeof dirtyFields !== "object") {
     return input;
   }
-  logger.log(input, dirtyFields);
 
   const checkObject = (object) => {
     return (
@@ -74,6 +73,7 @@ export function useFormManager({
     },
     [service]
   );
+
   const formConfig = useMemo(
     () => ({
       reValidateMode: "onBlur",
@@ -85,18 +85,18 @@ export function useFormManager({
         return defaultValues;
       },
       resolver: async (data, context, options) => {
-        logger.log("Resolver called with:", {
-          data,
-          context,
-          options,
-          isInitialMount: initialMountRef.current,
-          // isSubmitted: formState.isSubmitted,
-          // isDirty: formState.isDirty,
-          // isValidating: formState.isValidating,
-          // touchedFields: Object.keys(formState.touchedFields),
-          // dirtyFields: Object.keys(formState.dirtyFields),
-          // eventType: options?.originalEvent?.type, // This might help identify the trigger
-        });
+        // logger.log("Resolver called with:", {
+        //   data,
+        //   context,
+        //   options,
+        //   isInitialMount: initialMountRef.current,
+        //   // isSubmitted: formState.isSubmitted,
+        //   // isDirty: formState.isDirty,
+        //   // isValidating: formState.isValidating,
+        //   // touchedFields: Object.keys(formState.touchedFields),
+        //   // dirtyFields: Object.keys(formState.dirtyFields),
+        //   // eventType: options?.originalEvent?.type, // This might help identify the trigger
+        // });
         const valdationResult = await validators[`${service}Validator`](data, context, options);
         logger.log("VALIDATION RESULT", valdationResult);
         // const errors = Object.keys(valdationResult.errors);
@@ -109,7 +109,7 @@ export function useFormManager({
       },
       ...formContextProps,
     }),
-    [formContextProps, id, inputDefaultValues, service, fetchEntity]
+    [formContextProps, id, service, inputDefaultValues, fetchEntity]
   );
 
   const context = useForm(formConfig);
@@ -124,10 +124,11 @@ export function useFormManager({
   const [retrieveTime, setRetrieveTime] = useState(null);
   const [formData, setFormData] = useState({});
   const resetPromiseRef = useRef(null);
-  const display_name = get(formData, namePath || "name");
+  const display_name = getValues(namePath) || get(formData, namePath);
   const displayError = useDisplayError();
   const addNotification = useAddNotification();
   const serviceDisplayName = service.replace(/s$/, "");
+  const hasDirtyFields = Object.keys(formState.dirtyFields).length > 0;
 
   const stats = useMemo(
     () => ({
@@ -195,7 +196,7 @@ export function useFormManager({
       }
       setLoading((l) => ({ ...l, update: false }));
     },
-    [service, addNotification, serviceDisplayName, resetForm, onUpdate]
+    [service, addNotification, serviceDisplayName, display_name, resetForm, onUpdate]
   );
 
   const createEntity = useCallback(
@@ -211,7 +212,7 @@ export function useFormManager({
       }
       setLoading((l) => ({ ...l, create: false }));
     },
-    [service, addNotification, serviceDisplayName, resetForm, onCreate, displayError]
+    [service, addNotification, serviceDisplayName, display_name, resetForm, onCreate, displayError]
   );
 
   const deleteEntity = useCallback(
@@ -228,7 +229,7 @@ export function useFormManager({
       }
       setLoading((l) => ({ ...l, delete: false }));
     },
-    [service, addNotification, serviceDisplayName, resetForm, onDelete, displayError]
+    [service, addNotification, serviceDisplayName, display_name, resetForm, onDelete, displayError]
   );
 
   useEffect(() => {
@@ -341,10 +342,10 @@ export function useFormManager({
     display_name,
     retrieveTime,
     isLoading: Object.values(loading).some((x) => x),
-    hasDirtyFields: Object.keys(formState.dirtyFields).length > 0,
+    hasDirtyFields,
     loading,
     validate: trigger,
     reset,
-    shouldBlockNavigation: formState.isDirty && !skipDirtyCheck,
+    shouldBlockNavigation: formState.isDirty && hasDirtyFields && !skipDirtyCheck,
   };
 }
