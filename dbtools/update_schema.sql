@@ -334,8 +334,8 @@ INSERT INTO
             freedom_archives_old.documents a
             LEFT JOIN users b ON LOWER(a.creator) = b.username
             LEFT JOIN users c ON LOWER(a.contributor) = c.username
-            LEFT JOIN list_items call_number_lookup ON a.call_number = call_number_lookup.item AND
-            call_number_lookup.type = 'call_number'
+            -- LEFT JOIN list_items call_number_lookup ON a.call_number = call_number_lookup.item AND
+            -- call_number_lookup.type = 'call_number'
             LEFT JOIN list_items publisher_lookup ON a.publisher = publisher_lookup.item AND
             publisher_lookup.type = 'publisher'
             LEFT JOIN list_items program_lookup ON a.program = program_lookup.item AND
@@ -670,7 +670,7 @@ INSERT INTO
     )
 SELECT
     docid AS record_id,
-    call_number,
+    trim(call_number) AS call_number,
     format_lookup.list_item_id,
     no_copies,
     quality_lookup.list_item_id,
