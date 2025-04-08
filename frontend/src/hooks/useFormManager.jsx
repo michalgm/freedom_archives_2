@@ -186,7 +186,7 @@ export function useFormManager({
       try {
         logger.log("SAVE!!!", id, data);
         const result = await services[service].patch(id, data);
-        addNotification({ message: `${startCase(serviceDisplayName)} updated` });
+        addNotification({ message: `${startCase(serviceDisplayName)} "${display_name}" updated` });
         logger.log("RESULT", result);
         const processed = await resetForm(result);
         onUpdate && (await onUpdate(processed));
@@ -203,7 +203,7 @@ export function useFormManager({
       setLoading((l) => ({ ...l, create: true }));
       try {
         const result = await services[service].create(data);
-        addNotification({ message: `${startCase(serviceDisplayName)} created` });
+        addNotification({ message: `${startCase(serviceDisplayName)} "${display_name}" created` });
         const processed = await resetForm(result);
         onCreate && (await onCreate(processed));
       } catch (error) {
@@ -219,7 +219,7 @@ export function useFormManager({
       setLoading((l) => ({ ...l, delete: true }));
       try {
         const result = await services[service].remove(id);
-        addNotification({ message: `${startCase(serviceDisplayName)} deleted` });
+        addNotification({ message: `${startCase(serviceDisplayName)} "${display_name}" deleted` });
         const processed = await resetForm(result);
         onDelete && (await onDelete(processed));
       } catch (error) {
