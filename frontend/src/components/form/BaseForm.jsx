@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useEffect } from "react";
+import React, { useEffect } from "react";
 
 import { FormContainer } from "react-hook-form-mui";
 
@@ -7,19 +7,10 @@ import { useFormManager } from "../../hooks/useFormManager";
 import { Alert } from "@mui/material";
 import { getFieldLabel } from "src/components/form/schemaUtils";
 import { flattenErrors } from "src/utils";
+import { FormManagerContext } from "./FormManagerContext";
 import { FormStateHandler } from "./FormStateHandler";
 import { parseError } from "./schemaUtils";
-
 // return { formContext: { formState: {}, getValues: () => {} } };
-const FormManagerContext = createContext(null);
-
-export const useFormManagerContext = () => {
-  const context = useContext(FormManagerContext);
-  if (!context) {
-    throw new Error("useFormManagerContext must be used within a BaseForm");
-  }
-  return context;
-};
 
 const FormErrors = ({ errors, service }) => {
   const [hideErrors, setHideErrors] = React.useState(false);

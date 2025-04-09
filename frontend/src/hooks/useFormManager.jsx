@@ -44,7 +44,7 @@ const getChangedFields = (input, dirtyFields) => {
   }, {});
 };
 
-export function useFormManager({
+function useFormManager({
   namePath = "name",
   service,
   transformInput = (input) => input,
@@ -349,3 +349,5 @@ export function useFormManager({
     shouldBlockNavigation: formState.isDirty && hasDirtyFields && !skipDirtyCheck,
   };
 }
+
+export { useFormManager };
