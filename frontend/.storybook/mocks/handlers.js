@@ -26,8 +26,6 @@ export const handlers = [
   http.get("/api/list_items", ({ request }) => {
     const url = new URL(request.url);
     const item = url.searchParams.get("item");
-    console.log(url);
-    console.log(item);
     if (item?.match("new")) {
       return HttpResponse.json({
         total: 0,
@@ -42,7 +40,7 @@ export const handlers = [
       limit: 15,
       skip: 0,
       data: [
-        { list_item_id: 157, item: "Abasi Ganda and Kamau M. Askari" },
+        { list_item_id: 157, item: "MOCK DATA" },
         { list_item_id: 159, item: "Abbe Sudvarg" },
         { list_item_id: 16600, item: "abdelbaki hermassi" },
         { list_item_id: 165, item: "Abdel-Rahim Omran" },

@@ -1,6 +1,6 @@
-const { createProxyMiddleware } = require("http-proxy-middleware");
+import { createProxyMiddleware } from "http-proxy-middleware";
 
-module.exports = function expressMiddleware(router) {
+export default function expressMiddleware(router) {
   router.use(
     "/api",
     createProxyMiddleware({
@@ -9,4 +9,4 @@ module.exports = function expressMiddleware(router) {
       changeOrigin: true,
     })
   );
-};
+}
