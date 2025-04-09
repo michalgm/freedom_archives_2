@@ -2,7 +2,7 @@ import React, { useEffect } from "react";
 
 import { FormContainer } from "react-hook-form-mui";
 
-import { useFormManager } from "../../hooks/useFormManager";
+import { useFormManager } from "src/hooks/useFormManager";
 
 import { Alert } from "@mui/material";
 import { getFieldLabel } from "src/components/form/schemaUtils";

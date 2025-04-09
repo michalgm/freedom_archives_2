@@ -1,7 +1,7 @@
 import dayjs from "dayjs";
 import { get, isEmpty, startCase } from "lodash-es";
 import { useConfirm } from "material-ui-confirm";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useForm } from "react-hook-form-mui";
 import { getDefaultValuesFromSchema } from "src/components/form/schemaUtils";
 import validators from "./validators";
@@ -298,11 +298,15 @@ function useFormManager({
           // logger.log(currentTime.format(), retrieveTime.format());
           if (currentTime > retrieveTime) {
             displayError(
-              <span>
-                Unable to save your changes. This record was updated by <b>{contributor_name}</b> on{" "}
-                <b>{currentTime?.format("LLLL")}</b> after you began editing. Please refresh the page to view the latest
-                version and manually reapply your changes.
-              </span>
+              React.createElement(
+                "span",
+                null,
+                "Unable to save your changes. This record was updated by ",
+                React.createElement("b", null, contributor_name),
+                " on ",
+                React.createElement("b", null, currentTime?.format("LLLL")),
+                " after you began editing. Please refresh the page to view the latest version and manually reapply your changes."
+              )
             );
             return false;
           }
