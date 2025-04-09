@@ -1,9 +1,10 @@
-const { KnexService } = require("@feathersjs/knex");
-const { setArchive, setArchiveData } = require("./common_hooks");
-const { keyBy } = require("lodash");
-const { hooks: schemaHooks, resolve, virtual } = require("@feathersjs/schema");
-const { feathers } = require("@feathersjs/feathers");
-
+import { feathers } from "@feathersjs/feathers";
+import { KnexService } from "@feathersjs/knex";
+import schema from "@feathersjs/schema";
+import lodash from "lodash";
+import { setArchive, setArchiveData } from "./common_hooks/index.js";
+const { keyBy } = lodash;
+const { hooks: schemaHooks, resolve, virtual } = schema;
 const settingsResultResolver = resolve({
   featured_collection: virtual(async ({ settings }, context) => {
     if (settings.featured_collection_id) {
@@ -14,7 +15,6 @@ const settingsResultResolver = resolve({
     return {};
   }),
 });
-
 class Settings extends KnexService {
   constructor(options) {
     super({
@@ -23,18 +23,14 @@ class Settings extends KnexService {
     });
   }
 }
-
-module.exports = function (app) {
+export default (function (app) {
   const options = {
     id: "archive_id",
     Model: app.get("postgresqlClient"),
   };
-
   // Initialize our service with any options it requires
   app.use("/api/settings", new Settings(options, app), { methods: ["get", "update", "patch"] });
-
   const service = app.service("api/settings");
-
   const verifyArchive = (context) => {
     const {
       id,
@@ -42,12 +38,10 @@ module.exports = function (app) {
         user: { archive_id },
       },
     } = context;
-
     if (archive_id !== parseInt(id, 10)) {
       throw new Error("You are not authorized to access this archive");
     }
   };
-
   service.hooks({
     around: {
       all: [schemaHooks.resolveResult(settingsResultResolver), setArchiveData],
@@ -60,4 +54,4 @@ module.exports = function (app) {
     },
     after: {},
   });
-};
+});

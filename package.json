@@ -31,6 +31,7 @@
     ],
     "schema": "typebox"
   },
+  "type": "module",
   "directories": {
     "lib": "backend",
     "test": "test/",
@@ -48,7 +49,6 @@
     "migrate:make": "knex migrate:make -x mjs"
   },
   "dependencies": {
-    "@ckeditor/ckeditor5-build-classic": "^44.3.0",
     "@ckeditor/ckeditor5-react": "^9.5.0",
     "@feathersjs/authentication": "^5.0.33",
     "@feathersjs/authentication-local": "^5.0.33",

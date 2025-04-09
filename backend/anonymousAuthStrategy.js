@@ -1,5 +1,5 @@
-const { AuthenticationBaseStrategy } = require("@feathersjs/authentication");
-
+import authentication from "@feathersjs/authentication";
+const { AuthenticationBaseStrategy } = authentication;
 class AnonymousStrategy extends AuthenticationBaseStrategy {
   async authenticate(authentication, params) {
     return {
@@ -7,5 +7,4 @@ class AnonymousStrategy extends AuthenticationBaseStrategy {
     };
   }
 }
-
-module.exports = AnonymousStrategy;
+export default AnonymousStrategy;

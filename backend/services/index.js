@@ -1,19 +1,18 @@
-const users = require("./users/users.service.js");
-const records = require("./records/records.service.js");
-const relationships = require("./relationships.js");
-const instances = require("./instances.js");
-const list_items = require("./list_items.js");
-const collections = require("./collections.js");
-const unified_records = require("./unified_records.js");
-const unified_collections = require("./unified_collections.js");
-const value_lookup = require("./value_lookup.js");
-const list_items_lookup = require("./list_items_lookup.js");
-const review_changes = require("./review_changes.js");
-const public_records = require("./public_records.js");
-const snapshots = require("./snapshots.js");
-const settings = require("./settings");
-
-module.exports = function (app) {
+import users from "./users/users.service.js";
+import records from "./records/records.service.js";
+import relationships from "./relationships.js";
+import instances from "./instances.js";
+import list_items from "./list_items.js";
+import collections from "./collections.js";
+import unified_records from "./unified_records.js";
+import unified_collections from "./unified_collections.js";
+import value_lookup from "./value_lookup.js";
+import list_items_lookup from "./list_items_lookup.js";
+import review_changes from "./review_changes.js";
+import public_records from "./public_records.js";
+import snapshots from "./snapshots.js";
+import settings from "./settings.js";
+export default (function (app) {
   app.configure(users);
   app.configure(records);
   app.configure(relationships);
@@ -28,4 +27,4 @@ module.exports = function (app) {
   app.configure(public_records);
   app.configure(snapshots);
   app.configure(settings);
-};
+});

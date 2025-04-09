@@ -1,7 +1,6 @@
-module.exports = () => {
+export default () => {
   return async (context, next) => {
     const { params } = context;
-
     if (params.provider && !params.authentication) {
       context.params = {
         ...params,
@@ -10,11 +9,9 @@ module.exports = () => {
         },
       };
     }
-
     if (next) {
       await next();
     }
-
     return context;
   };
 };

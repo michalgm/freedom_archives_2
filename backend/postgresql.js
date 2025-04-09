@@ -1,6 +1,5 @@
-const knex = require("knex");
-
-module.exports = function (app) {
+import knex from "knex";
+export default (function (app) {
   const config = app.get("postgresql");
   const db = knex({
     ...config,
@@ -12,6 +11,5 @@ module.exports = function (app) {
     },
     // debug: true,
   });
-
   app.set("postgresqlClient", db);
-};
+});

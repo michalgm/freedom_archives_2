@@ -5,7 +5,7 @@ const generateRandomString = (length = 15) => {
     .map(() => chars[Math.floor(Math.random() * chars.length)])
     .join("");
 };
-
-module.exports = {
-  generateRandomString,
+export { generateRandomString };
+export default {
+  generateRandomString
 };

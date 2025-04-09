@@ -1,5 +1,4 @@
-const { KnexService } = require("@feathersjs/knex");
-
+import { KnexService } from "@feathersjs/knex";
 class ReviewChanges extends KnexService {
   constructor(options) {
     super({
@@ -9,14 +8,12 @@ class ReviewChanges extends KnexService {
     // this.find = this.find.bind(this);
   }
 }
-
-module.exports = function (app) {
+export default (function (app) {
   const options = {
     id: "id",
     Model: app.get("postgresqlClient"),
     paginate: app.get("paginate"),
   };
-
-  // Initialize our service with any options it requires
+    // Initialize our service with any options it requires
   app.use("/api/review_changes", new ReviewChanges(options, app));
-};
+});

@@ -1,21 +1,22 @@
-// For more information about this file see https://dove.feathersjs.com/guides/cli/validators.html
-const { Ajv, addFormats } = require("@feathersjs/schema");
-const addErrors = require("ajv-errors");
-const {
-  recordsSchema,
-  recordsDataSchema,
-  collectionsSchema,
-  collectionsDataSchema,
-  listItemsSchema,
+import schema from "@feathersjs/schema";
+import typebox from "@feathersjs/typebox";
+import addErrors from "ajv-errors";
+import {
   archivesSchema,
-  instancesSchema,
-  usersSchema,
-  recordItemSchema,
   collectionItemSchema,
+  collectionsDataSchema,
+  collectionsSchema,
   instanceDataSchema,
-} = require("./services/schema");
-const { Type, getValidator, querySyntax } = require("@feathersjs/typebox");
-
+  instancesSchema,
+  listItemsSchema,
+  recordItemSchema,
+  recordsDataSchema,
+  recordsSchema,
+  usersSchema,
+} from "./services/schema.js";
+// For more information about this file see https://dove.feathersjs.com/guides/cli/validators.html
+const { Ajv, addFormats } = schema;
+const { Type, getValidator, querySyntax } = typebox;
 const formats = [
   "date-time",
   "time",
@@ -32,7 +33,6 @@ const formats = [
   "relative-json-pointer",
   "regex",
 ];
-
 const dataValidator = addErrors(
   addFormats(
     new Ajv({
@@ -42,7 +42,6 @@ const dataValidator = addErrors(
     formats
   )
 );
-
 const queryValidator = addErrors(
   addFormats(
     new Ajv({
@@ -53,7 +52,6 @@ const queryValidator = addErrors(
     formats
   )
 );
-
 [
   archivesSchema,
   listItemsSchema,
@@ -66,15 +64,12 @@ const queryValidator = addErrors(
   dataValidator.addSchema(schema);
   queryValidator.addSchema(schema);
 });
-
 const recordsValidator = getValidator(recordsSchema, dataValidator);
 const recordsDataValidator = getValidator(recordsDataSchema, dataValidator);
 const collectionsValidator = getValidator(collectionsSchema, dataValidator);
 const collectionsDataValidator = getValidator(collectionsDataSchema, dataValidator);
-
 queryValidator.addSchema(recordsSchema);
 queryValidator.addSchema(collectionsSchema);
-
 // querySyntax(recordsSchema, {
 //   keywords_text: {
 //     $ilike: Type.String(),
@@ -99,18 +94,25 @@ const buildQuerySyntax = (schema) => {
   }, {});
   return querySyntax(schema, props);
 };
-
 const recordsQueryValidator = getValidator(
   Type.Intersect([buildQuerySyntax(recordsSchema), Type.Object({})], { additionalProperties: false }),
   queryValidator
 );
-
 const collectionsQueryValidator = getValidator(
   Type.Intersect([buildQuerySyntax(collectionsSchema), Type.Object({})], { additionalProperties: false }),
   queryValidator
 );
-
-module.exports = {
+export {
+  collectionsDataValidator,
+  collectionsQueryValidator,
+  collectionsValidator,
+  dataValidator,
+  queryValidator,
+  recordsDataValidator,
+  recordsQueryValidator,
+  recordsValidator,
+};
+export default {
   dataValidator,
   queryValidator,
   recordsValidator,

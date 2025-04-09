@@ -1,5 +1,6 @@
-const zod = require("zod");
+import zod from "zod";
 const z = zod;
+
 // --- Basic referenced schemas ---
 const settingsSchema = z.object({
   archive_id: z.number(),
@@ -86,8 +87,13 @@ const instanceSchema = z.object({
   archive_id: z.number().nullable().optional(),
   record_id: z.number(),
   call_number: z
-    .string()
-    .regex(/^\w{1,2} \d{1,3}$/)
+    .union([
+      z.string().regex(/^\w{1,2} \d{1,3}$/, {
+        message: "Call number must be in format 'XX 123'",
+      }),
+      z.literal(""),
+      z.null(),
+    ])
     .nullable()
     .optional(),
   format: z.number().nullable().optional(),
@@ -295,7 +301,7 @@ const collectionsDataSchema = collectionsSchema
     featured_records: z.array(recordItemSchema).nullable().optional(),
   });
 
-module.exports = {
+export default {
   archivesSchema,
   listItemsSchema,
   usersSchema,

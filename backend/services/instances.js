@@ -1,4 +1,4 @@
-const { KnexService, transaction } = require("@feathersjs/knex");
+import { KnexService, transaction } from "@feathersjs/knex";
 class Instances extends KnexService {
   constructor(options) {
     super({
@@ -7,36 +7,23 @@ class Instances extends KnexService {
     });
   }
 }
-
-module.exports = function (app) {
+export default (function (app) {
   const options = {
     id: "instance_id",
     Model: app.get("postgresqlClient"),
     paginate: app.get("paginate"),
     multi: true,
   };
-
-  // Initialize our service with any options it requires
+    // Initialize our service with any options it requires
   app.use("/api/instances", new Instances(options, app));
-
   // Get our initialized service so that we can register hooks
   const service = app.service("api/instances");
-
   const updateView = async (context) => {
-    const {
-      id,
-      app,
-      data,
-      params: {
-        user,
-        transaction: { trx },
-      },
-    } = context;
+    const { id, app, data, params: { user, transaction: { trx }, }, } = context;
     if (!id) {
       await app.service("api/records").patch(data.record_id, {}, { user, transaction: { trx } });
     }
   };
-
   const cleanupMeta = (context) => {
     const { data } = context;
     ["format", "quality", "generation"].forEach((key) => {
@@ -45,13 +32,9 @@ module.exports = function (app) {
         delete data[`${key}_item`];
       }
     });
-
-    ["contributor_name", "contributor_username", "creator_name", "creator_username", "is_primary", "delete"].forEach(
-      (key) => delete data[key]
-    );
+    ["contributor_name", "contributor_username", "creator_name", "creator_username", "is_primary", "delete"].forEach((key) => delete data[key]);
     return context;
   };
-
   service.hooks({
     before: {
       all: [],
@@ -67,4 +50,4 @@ module.exports = function (app) {
       patch: [transaction.rollback()],
     },
   });
-};
+});

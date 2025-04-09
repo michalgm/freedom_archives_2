@@ -1,6 +1,6 @@
+import typebox from "@feathersjs/typebox";
 // import { resolve } from "@feathersjs/schema";
-const { StringEnum, Type } = require("@feathersjs/typebox");
-
+const { StringEnum, Type } = typebox;
 const archivesSchema = Type.Object(
   {
     archive_id: Type.Number(),
@@ -10,7 +10,6 @@ const archivesSchema = Type.Object(
     $id: "archive_id",
   }
 );
-
 const listItemsSchema = Type.Object(
   {
     list_item_id: Type.Number(),
@@ -20,7 +19,6 @@ const listItemsSchema = Type.Object(
     $id: "list_item",
   }
 );
-
 const usersSchema = Type.Object(
   {
     user_id: Type.Number(),
@@ -39,7 +37,6 @@ const usersSchema = Type.Object(
   }
 );
 const mediaTypeSchema = StringEnum(["Audio", "Webpage", "Video", "PDF"]);
-
 const instancesSchema = Type.Object(
   {
     instance_id: Type.Number(),
@@ -72,7 +69,6 @@ const instancesSchema = Type.Object(
     $id: "instance",
   }
 );
-
 const recordsSchema = Type.Recursive((record) =>
   Type.Object(
     {
@@ -144,9 +140,7 @@ const recordsSchema = Type.Recursive((record) =>
     }
   )
 );
-
 const recordItemSchema = Type.Pick(recordsSchema, ["record_id", "title"], { $id: "recordItem" });
-
 const collectionsSchema = Type.Recursive((collection) =>
   Type.Object(
     {
@@ -187,11 +181,9 @@ const collectionsSchema = Type.Recursive((collection) =>
     }
   )
 );
-
 const collectionItemSchema = Type.Pick(collectionsSchema, ["collection_id", "collection_name"], {
   $id: "collectionItem",
 });
-
 const instanceDataSchema = Type.Pick(
   instancesSchema,
   ["instance_id", "call_number", "is_primary", "generation_item", "format_item", "quality_item", "no_copies", "url"],
@@ -200,7 +192,6 @@ const instanceDataSchema = Type.Pick(
   }
 );
 // const Common = Type.Box([recordItemSchema, collectionItemSchema]);
-
 const recordsDataSchema = Type.Intersect(
   [
     Type.Pick(recordsSchema, [
@@ -233,7 +224,6 @@ const recordsDataSchema = Type.Intersect(
   ],
   { $id: "recordData" }
 );
-
 const collectionsDataSchema = Type.Pick(
   collectionsSchema,
   [
@@ -258,8 +248,21 @@ const collectionsDataSchema = Type.Pick(
   ],
   { $id: "collectionData" }
 );
-
-module.exports = {
+export {
+  archivesSchema,
+  collectionItemSchema,
+  collectionsDataSchema,
+  collectionsSchema,
+  instanceDataSchema,
+  instancesSchema,
+  listItemsSchema,
+  mediaTypeSchema,
+  recordItemSchema,
+  recordsDataSchema,
+  recordsSchema,
+  usersSchema,
+};
+export default {
   recordsSchema,
   recordsDataSchema,
   collectionsSchema,

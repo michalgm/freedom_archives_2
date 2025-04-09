@@ -2,6 +2,7 @@ import js from "@eslint/js";
 import importPlugin from 'eslint-plugin-import';
 import reactPlugin from "eslint-plugin-react";
 import reactHooks from 'eslint-plugin-react-hooks';
+import reactRefresh from "eslint-plugin-react-refresh";
 import storybook from 'eslint-plugin-storybook';
 import globals from "globals";
 // const __filename = fileURLToPath(import.meta.url);
@@ -41,7 +42,7 @@ export default [
             },
 
             ecmaVersion: 2021,
-            sourceType: "commonjs",
+            sourceType: "module",
         },
 
         rules: {
@@ -100,6 +101,7 @@ export default [
         },
 
     },
+    reactRefresh.configs.vite,
 ];
 
 // "no-unused-vars": ["warn", { "ignoreRestSiblings": true }],

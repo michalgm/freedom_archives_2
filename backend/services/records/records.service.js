@@ -1,9 +1,6 @@
-// Initializes the `records` service on path `/records`
-const { KnexService } = require("@feathersjs/knex");
-const hooks = require("./records.hooks");
-
+import { KnexService } from "@feathersjs/knex";
+import hooks from "./records.hooks.js";
 class Records extends KnexService {}
-
 const getOptions = (app) => ({
   Model: app.get("postgresqlClient"),
   paginate: app.get("paginate"),
@@ -13,13 +10,10 @@ const getOptions = (app) => ({
   operators: ["$fullText", "$contains"],
   methods: ["find", "get", "create", "patch", "remove"],
 });
-
-module.exports = function (app) {
+export default (function (app) {
   // Initialize our service with any options it requires
   app.use("/api/records", new Records(getOptions(app)));
-
   // Get our initialized service so that we can register hooks
   const service = app.service("api/records");
-
   service.hooks(hooks);
-};
+});
