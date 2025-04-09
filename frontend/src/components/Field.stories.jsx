@@ -3,8 +3,7 @@ import { Button } from "@mui/material";
 import { LocalizationProvider } from "@mui/x-date-pickers";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import dayjs from "dayjs";
-import { Form, Formik } from "formik";
-import React, { useState } from "react";
+import { useState } from "react";
 import { AutocompleteElement, FormContainer } from "react-hook-form-mui";
 import { theme } from "src/theme";
 import { StateProvider } from "../appContext";
@@ -159,12 +158,14 @@ export const ItemSelect = (args) => (
 );
 
 // Media Type Select Field
-export const MediaTypeSelectField = (args) => (
+export const ListItemSelect = (args) => (
   <Field
-    name="mediaTypeFiemediald"
-    field_type="simpleSelect"
-    selectfield_Type="media_types"
-    label="Media Type Field"
+    fetchAll
+    field_type="list_item"
+    itemType="quality"
+    label="Quality"
+    service="list_items"
+    name="ListItemSelect"
     {...args}
   />
 );
@@ -182,7 +183,7 @@ export const FieldWithError = (args) => {
       setFieldValue: () => {},
     };
 
-    return <Field required {...props} />;
+    return <Field error={true} required {...props} context={context} />;
   };
 
   return <CustomField name="textField" label="Field with Error" {...args} />;
@@ -198,7 +199,7 @@ export const FieldWithHelperText = (args) => (
   />
 );
 
-export const SwitchField = (args) => <Field name="swtchField" field_type="switch" label="Switch Field" {...args} />;
+export const SwitchField = (args) => <Field name="switchField" field_type="switch" label="Switch Field" {...args} />;
 
 // Read-only Field
 export const ReadOnlyField = (args) => <Field name="textField" label="Read-only Field" ro={true} {...args} />;
@@ -251,11 +252,11 @@ export const AllFieldTypes = (args) => (
     <DateStringField {...args} />
     {/* <SelectField {...args}/> */}
     <ItemSelect {...args} />
-    <MediaTypeSelectField {...args} />
+    <ListItemSelect {...args} />
     <RichTextField {...args} />
     <FieldWithError {...args} />
     <FieldWithHelperText {...args} />
-    <SwtchField {...args} />
+    <SwitchField {...args} />
     <ReadOnlyField {...args} />
   </div>
 );

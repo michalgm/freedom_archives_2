@@ -1,6 +1,6 @@
 import { Box, Paper, Tab, Tabs } from "@mui/material";
 
-import React, { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { list_items_lookup } from "../api";
 
 import { startCase } from "lodash-es";

@@ -1,7 +1,7 @@
-import React, { useEffect } from 'react';
-import { app, authentication } from './api';
+import { useEffect } from "react";
+import { app, authentication } from "./api";
 
-import { useStateValue } from './appContext';
+import { useStateValue } from "./appContext";
 
 function Authentication() {
   const {
@@ -14,16 +14,13 @@ function Authentication() {
     }
     app.hooks({
       error: {
-        all: context => {
-          if (context.error && context.error.name === 'NotAuthenticated') {
-            dispatch('LOGOUT');
+        all: (context) => {
+          if (context.error && context.error.name === "NotAuthenticated") {
+            dispatch("LOGOUT");
           } else {
-            console.error(
-              `Error in ${context.path} calling ${context.method} method`,
-              context.error
-            );
+            console.error(`Error in ${context.path} calling ${context.method} method`, context.error);
             if (!context.params.noDispatchError) {
-              dispatch('ERROR', { error: context.error.message });
+              dispatch("ERROR", { error: context.error.message });
             }
           }
           return context;
@@ -33,20 +30,20 @@ function Authentication() {
     authentication.hooks({
       after: {
         create: ({ result: { user } }) => {
-          dispatch('LOGIN', { user });
+          dispatch("LOGIN", { user });
         },
         remove: () => {
-          dispatch('LOGOUT');
+          dispatch("LOGOUT");
         },
       },
     });
-    dispatch('INITIALIZE_HOOKS');
+    dispatch("INITIALIZE_HOOKS");
   }, [dispatch, hooks_initialized]);
 
   useEffect(() => {
     if (isAuthenticated === null) {
       app.reAuthenticate().catch(() => {
-        dispatch('LOGOUT');
+        dispatch("LOGOUT");
       });
     }
   }, [dispatch, isAuthenticated]);

@@ -268,7 +268,13 @@ export default function Manage({
                     <Grid2 size={12}>
                       <Grid2 container spacing={1}>
                         {filter.filters.map((filter, index) => (
-                          <Filter filterTypes={filterTypes} filter={filter} key={index} index={index} remove={remove} />
+                          <Filter
+                            filterTypes={filterTypes}
+                            filter={filter}
+                            key={filter.field}
+                            index={index}
+                            remove={remove}
+                          />
                         ))}
                       </Grid2>
                     </Grid2>

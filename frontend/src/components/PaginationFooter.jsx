@@ -2,7 +2,6 @@ import { Chip, Stack } from "@mui/material";
 
 import { Pagination } from "@mui/material";
 import { startCase } from "lodash-es";
-import React from "react";
 
 function PaginationFooter({
   total,

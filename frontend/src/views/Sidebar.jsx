@@ -12,8 +12,6 @@ import {
 } from "@mui/material";
 import { Link, useLocation, useMatch, useResolvedPath } from "react-router";
 
-import React from "react";
-
 const sideBarConfig = {
   Collections: [
     { label: "Manage Collections", icon: "", href: "/collections" },

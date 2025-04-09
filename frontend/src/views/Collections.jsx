@@ -1,5 +1,5 @@
 import { Avatar, ListItemAvatar, ListItemText, Typography } from "@mui/material";
-import React, { useCallback } from "react";
+import { useCallback } from "react";
 
 import { BrokenImage } from "@mui/icons-material";
 import { merge } from "lodash-es";

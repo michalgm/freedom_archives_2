@@ -1,6 +1,5 @@
 import { Alert, AlertTitle } from "@mui/material";
 
-import React from "react";
 import { useStateValue } from "../appContext";
 
 function Errors() {

@@ -18,7 +18,7 @@ import {
 } from "@mui/material";
 import { Box } from "@mui/system";
 import { DatePicker, DateTimePicker } from "@mui/x-date-pickers";
-import { capitalize, merge } from "lodash-es";
+import { merge } from "lodash-es";
 import {
   CheckboxButtonGroup,
   CheckboxElement,
@@ -30,41 +30,18 @@ import {
 } from "react-hook-form-mui";
 import { DatePickerElement, DateTimePickerElement } from "react-hook-form-mui/date-pickers";
 
-import { renderToStaticMarkup } from "react-dom/server";
+import { formatLabel } from "src/components/form/schemaUtils";
+import { convertSvgToDataUrl } from "src/utils";
 import Autocomplete from "../Autocomplete/Autocomplete";
-
 import DateStringField from "../DateStringField";
 import { EditableItem } from "./EditableItem";
 import RichTextInput from "./RichTextInput";
-
-export const convertSvgToDataUrl = (Icon, color = "white") => {
-  return `url('data:image/svg+xml,${renderToStaticMarkup(<Icon style={{ fill: color }} />).replace(
-    "<svg ",
-    '<svg xmlns="http://www.w3.org/2000/svg" '
-  )}')`;
-};
 
 const selectOptions = {
   media_types: ["Audio", "Webpage", "Video", "PDF"].map((id) => ({
     id,
     label: id,
   })),
-};
-export const formatLabel = (label, name) => {
-  if (label?.trim() === "") {
-    return null;
-  } else if (label) {
-    return label;
-  }
-
-  const index = name.lastIndexOf(".");
-  return name
-    .slice(index + 1)
-    .replace(/_/g, " ")
-    .replace(/\w+/g, (word) => {
-      return ["and"].includes(word) ? word : capitalize(word);
-    })
-    .replace(/\b(bipoc|id\/pfn)\b/gi, (s) => s.toUpperCase());
 };
 
 const transformOptions = (options) => {
@@ -347,16 +324,19 @@ export const BaseField = ({
 
   const renderSwitch = () => {
     const Component = isRHF ? SwitchElement : Switch;
+    const { error: _e, labelProps: _lp, ...rest } = props;
     const switchInput = (
       <Component
         name={name}
         checked={value}
         onChange={onChange}
         color={color}
-        {...props}
-        labelProps={{
-          sx: {
-            userSelect: "none",
+        {...rest}
+        slotProps={{
+          label: {
+            sx: {
+              userSelect: "none",
+            },
           },
         }}
         sx={{

@@ -1,7 +1,5 @@
 import { Chip, Divider, Stack, Typography } from "@mui/material";
 
-import React from "react";
-
 export default function KVChip({ keyName, value }) {
   const label = (
     <Stack direction="row" alignItems={"center"}>
@@ -12,12 +10,5 @@ export default function KVChip({ keyName, value }) {
       </Typography>
     </Stack>
   );
-  return (
-    <Chip
-      variant="filled"
-      size="small"
-      sx={{ overflow: "hidden" }}
-      label={label}
-    />
-  );
+  return <Chip variant="filled" size="small" sx={{ overflow: "hidden" }} label={label} />;
 }

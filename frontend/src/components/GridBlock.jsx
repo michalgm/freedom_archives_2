@@ -1,7 +1,5 @@
 import { Grid2, Paper, Typography } from "@mui/material/";
 
-import React from "react";
-
 function GridBlock({ children = [], title = "", subtitle = "", width = 12, spacing, gutterBottom = false, ...props }) {
   return (
     <Grid2 size={width}>

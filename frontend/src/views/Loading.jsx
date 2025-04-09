@@ -1,7 +1,6 @@
 import { LinearProgress } from "@mui/material";
 
 import { debounce } from "lodash-es";
-import React from "react";
 import { app } from "../api";
 import { useStateValue } from "../appContext";
 

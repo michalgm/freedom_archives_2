@@ -1,6 +1,6 @@
 import { Box, Button, Grid2, Paper, Stack, Typography } from "@mui/material";
 
-import React, { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { collections, records, review_changes, snapshots } from "../api";
 
 import dayjs from "dayjs";

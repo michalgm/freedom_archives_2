@@ -13,8 +13,9 @@ import { Field as FormikField, useFormikContext } from "formik";
 
 import { DatePicker, DateTimePicker } from "@mui/x-date-pickers";
 import { Autocomplete } from "formik-mui";
-import { startCase } from "lodash-es";
+
 import React from "react";
+import { formatLabel } from "src/components/form/schemaUtils";
 import DateStringField from "./DateStringField";
 import SelectField from "./SelectField";
 import { EditableItem } from "./form/EditableItem";
@@ -38,12 +39,6 @@ const selectOptions = {
     id,
     label: id,
   })),
-};
-
-export const formatLabel = (label) => {
-  return startCase(label)
-    .replace("_value", "")
-    .replace(/\bid\b/i, "ID");
 };
 
 const FieldComponent = ({

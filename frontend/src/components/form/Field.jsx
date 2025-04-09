@@ -1,6 +1,7 @@
 import { get } from "lodash-es";
 
 import { useCallback, useMemo } from "react";
+import { useFormContext } from "react-hook-form";
 import useFormManagerContext from "src/components/form/FormManagerContext";
 import { checkRequired, getFieldLabel, parseError } from "src/components/form/schemaUtils";
 import { BaseField } from "./BaseField";
@@ -44,13 +45,16 @@ export const Field = ({
   color,
   toNumber,
   required: _required = false,
+  service,
   ...props
 }) => {
-  const managerContext = useFormManagerContext();
-  const { formContext: context, service } = managerContext;
+  const { _service } = useFormManagerContext();
+
+  service = _service || props.service || "records";
+  const context = useFormContext();
   const { setValue, getValues, control, formState } = context;
 
-  props.label = useMemo(() => props.label ?? getFieldLabel(name, service), [name, service, props.label]);
+  props.label = useMemo(() => props.label ?? getFieldLabel(name, _service), [name, _service, props.label]);
   const parseFieldError = useCallback((error) => parseError(name, props.label)(error), [name, props.label]);
   const required = useMemo(() => checkRequired(name, service) || _required, [name, service, _required]);
 

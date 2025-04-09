@@ -74,6 +74,21 @@ function useFormManager({
     [service]
   );
 
+  const processData = useCallback(
+    async (result, init = false) => {
+      logger.log("RESULT", result, init);
+      const result_data = isEmpty(result) ? result : getDefaultValuesFromSchema(service, result);
+      setEntityData(result_data);
+      const data = onFetch ? await onFetch(result_data) : result_data;
+      setFormData(data);
+      setRetrieveTime(dayjs(data?.date_updated));
+      // const transformedData = transformData(data, schema, init);
+      // logger.log({ result, init, data, transformedData });
+      return data;
+    },
+    [onFetch, service]
+  );
+
   const formConfig = useMemo(
     () => ({
       reValidateMode: "onBlur",
@@ -98,7 +113,7 @@ function useFormManager({
         //   // eventType: options?.originalEvent?.type, // This might help identify the trigger
         // });
         const valdationResult = await validators[`${service}Validator`](data, context, options);
-        logger.log("VALIDATION RESULT", valdationResult);
+        // logger.log("VALIDATION RESULT", valdationResult);
         // const errors = Object.keys(valdationResult.errors);
         // if (errors.length > 0) {
         //   const message = errors.map((key) => `${key}: ${JSON.stringify(valdationResult.errors[key])}`);
@@ -109,7 +124,7 @@ function useFormManager({
       },
       ...formContextProps,
     }),
-    [formContextProps, id, service, inputDefaultValues, fetchEntity]
+    [formContextProps, id, service, inputDefaultValues, fetchEntity, processData]
   );
 
   const context = useForm(formConfig);
@@ -136,21 +151,6 @@ function useFormManager({
       updated: formData?.date_updated && dayjs(formData.date_updated),
     }),
     [formData?.date_created, formData?.date_updated]
-  );
-
-  const processData = useCallback(
-    async (result, init = false) => {
-      logger.log("RESULT", result, init);
-      const result_data = isEmpty(result) ? result : getDefaultValuesFromSchema(service, result);
-      setEntityData(result_data);
-      const data = onFetch ? await onFetch(result_data) : result_data;
-      setFormData(data);
-      setRetrieveTime(dayjs(data?.date_updated));
-      // const transformedData = transformData(data, schema, init);
-      // logger.log({ result, init, data, transformedData });
-      return data;
-    },
-    [onFetch, service]
   );
 
   // Move all the existing form management functions here

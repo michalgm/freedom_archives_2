@@ -1,6 +1,5 @@
 import { BrokenImage } from "@mui/icons-material";
 import { Avatar } from "@mui/material";
-import React from "react";
 
 const onError = (event) => {
   event.target.src = `/static/images/nodigital.png`;

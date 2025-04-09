@@ -10,7 +10,7 @@ import {
   ListItem,
   Stack,
 } from "@mui/material";
-import React, { useState } from "react";
+import { useState } from "react";
 
 import { users } from "../api";
 import { useAddNotification } from "../appContext";

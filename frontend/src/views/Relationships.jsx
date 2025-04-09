@@ -1,7 +1,7 @@
 import "./Relationships.scss";
 
 import { Box, Button, Grid2, LinearProgress, MenuItem, Paper, TextField, Typography } from "@mui/material";
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router";
 
 import { relationships } from "../api";

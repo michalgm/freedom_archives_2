@@ -1,5 +1,4 @@
 import { Alert, AlertTitle, lighten, Paper, Stack, Typography } from "@mui/material";
-import React from "react";
 
 import { ErrorBoundary as ErrorBoundaryComponent } from "react-error-boundary";
 
