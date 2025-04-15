@@ -94,7 +94,7 @@ const DateStringMask = React.forwardRef(function DateStringMask(props, ref) {
   return (
     <IMaskInput
       {...other}
-      mask={"d/m/Y"}
+      mask={"m/d/Y"}
       blocks={blocks}
       lazy={false}
       overwrite={true}
