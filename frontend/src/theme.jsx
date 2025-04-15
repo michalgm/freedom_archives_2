@@ -1,6 +1,7 @@
 import { createTheme } from "@mui/material";
 
 export const theme = createTheme({
+  cssVariables: true,
   typography: {
     h1: { fontSize: "2.5rem" },
     h2: { fontSize: "2.2rem" },
