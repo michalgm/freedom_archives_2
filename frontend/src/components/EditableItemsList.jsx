@@ -349,7 +349,7 @@ export default function RecordItem({ record = {}, description: showDescription, 
 }
 
 export function CollectionItem({ collection = {}, description: showDescription, itemAction, ...props }) {
-  const { collection_name, collection_id, thumbnail, description, parent } = collection;
+  const { collection_name, collection_id, thumbnail, summary, parent } = collection;
   const details =
     parent && parent.collection_id
       ? [
@@ -368,7 +368,7 @@ export function CollectionItem({ collection = {}, description: showDescription, 
       id={collection_id}
       thumbnail={thumbnail}
       title={collection_name}
-      description={showDescription && description}
+      description={showDescription && summary}
       details={details}
       {...props}
       type="collection"

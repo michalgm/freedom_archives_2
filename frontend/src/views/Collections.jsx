@@ -32,7 +32,7 @@ function Collections({ embedded, itemAction, filter = {}, excludeIds = [] }) {
         needs_review: needs_review ? needs_review : undefined,
         collection_id: { $nin: excludeIds },
         $sort: { display_order: 1, collection_name: 1 },
-        $select: ["collection_id", "collection_name", "description", "thumbnail", "parent"],
+        $select: ["collection_id", "collection_name", "summary", "thumbnail", "parent"],
       };
       if (search) {
         const $ilike = `%${search.replace(/ /g, "%")}%`;
@@ -41,6 +41,7 @@ function Collections({ embedded, itemAction, filter = {}, excludeIds = [] }) {
           { keywords_text: { $ilike } },
           { collection_name: { $ilike } },
           { description: { $ilike } },
+          { summary: { $ilike } },
           { collection_id: parseInt(search, 10) || undefined },
           { call_number: { $ilike } },
         ];
