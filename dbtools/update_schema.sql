@@ -48,6 +48,7 @@ quality */
 CREATE TABLE
     list_items (
         list_item_id serial PRIMARY KEY,
+        archive_id INTEGER REFERENCES archives ON DELETE CASCADE,
         item VARCHAR(500) NOT NULL,
         TYPE VARCHAR(45) NOT NULL,
         description VARCHAR(200) DEFAULT NULL
@@ -55,7 +56,8 @@ CREATE TABLE
 
 CREATE UNIQUE INDEX list_items_type_idx ON list_items (
     TYPE,
-    item
+    item,
+    archive_id
 );
 
 CREATE TABLE
@@ -226,11 +228,13 @@ INSERT INTO
 
 INSERT INTO
     list_items (
+        archive_id,
         item,
         TYPE,
         description
     ) (
         SELECT
+        1,
             item,
         TYPE,
         description
@@ -240,10 +244,12 @@ INSERT INTO
 
 INSERT INTO
     list_items (
+        archive_id,
         item,
         TYPE
     ) (
         SELECT DISTINCT
+            1,
             publisher,
             'publisher'
         FROM
