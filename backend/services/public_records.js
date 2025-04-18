@@ -7,8 +7,11 @@ class PublicRecords extends KnexService {
     super({
       ...options,
       name: "public_search.records_view",
-      filters: {
-        $fullText: (v) => v,
+      extendedOperators: {
+        $overlap: "&&",
+        $contains: "@>",
+        $contained_by: "<@",
+        $fulltext: "@@",
       },
     });
     // this.find = this.find.bind(this);
@@ -16,12 +19,14 @@ class PublicRecords extends KnexService {
 }
 const fullTextSearch = (context) => {
   context.params.query.archive_id = archive_id;
-  if (context.params.query.$fullText !== undefined) {
-    const { $fullText, ...query } = context.params.query;
+  if (context.params.query.fulltext !== undefined) {
+    const {
+      fulltext: { $fulltext },
+      ...query
+    } = context.params.query;
     const knex = context.service.createQuery({ ...context.params, query });
-    if ($fullText) {
-      const fullTextQuery = tsquery($fullText);
-      context.fullText = fullTextQuery;
+    if ($fulltext) {
+      const fullTextQuery = tsquery($fulltext);
       knex
         .clearOrder()
         .select(context.service.Model.raw(`ts_rank_cd(fulltext, to_tsquery('english', ?)) AS score`, [fullTextQuery]))
@@ -93,54 +98,56 @@ const lookupFilters = async ({ params: { knex, provider }, result, service: { Mo
   ]);
   const query = Model.with("filtered_records", recordsQuery)
     .with("aggregated_data", aggregatedDataQuery)
-    .select(Model.raw(`
+    .select(
+      Model.raw(`
       type AS type, 
       jsonb_agg(jsonb_build_array(item, count, list_item_id) ORDER BY count DESC) AS values
-    `))
+    `)
+    )
     .from("aggregated_data")
     .groupBy("type");
-    //   const query = Model.with("filtered_records", knex.clone().clearSelect().clearOrder().select("record_id")).select(
-    //     Model.raw(`
-    //     li.type || '_ids',
-    //     jsonb_agg(jsonb_build_array(li.item, count, li.list_item_id) ORDER BY count DESC) AS values
-    // FROM
-    //       ( select li.type::text, li.item::text, li.list_item_id, count(*) as count from
-    // public_search.records_to_list_items r
-    // JOIN public_search.list_items li ON r.list_item_id = li.list_item_id
-    // AND li.type IN ('keyword', 'subject', 'author')
-    //       join filtered_records using (record_id)
-    // GROUP BY li.type, li.item, li.list_item_id
-    // union all
-    //       SELECT 'year', year::text as item ,0 ,  COUNT(*) as count
-    //       FROM public_search.records_view r
-    //         join filtered_records using (record_id)
-    //       GROUP BY year
-    //       union all
-    //     SELECT 'title', title::text, 0, COUNT(*) as count
-    //     FROM public_search.records_view r
-    //       join filtered_records using (record_id)
-    //     GROUP BY title HAVING count(*) > 1
-    //     union all
-    //       SELECT 'collection', collection_name::text, collection_id, COUNT(*) as count
-    //   FROM public_search.records_view r
-    //     join filtered_records using (record_id)
-    //       GROUP BY collection_id, collection_name
-    //       union all
-    //         SELECT 'media_type', media_type::text, 0, COUNT(*) as count
-    //   FROM public_search.records_view r
-    //     join filtered_records using (record_id)
-    //   where media_type != ''
-    //   GROUP BY media_type
-    //   union all
-    //     SELECT 'format', format::text, 0, COUNT(*) as count
-    //   FROM public_search.records_view r
-    //   join filtered_records using (record_id)
-    //   where format != ''
-    //   GROUP BY format
-    // ) li group by li.type
-    // `)
-    //   );
-    // console.log(query.toString());
+  //   const query = Model.with("filtered_records", knex.clone().clearSelect().clearOrder().select("record_id")).select(
+  //     Model.raw(`
+  //     li.type || '_ids',
+  //     jsonb_agg(jsonb_build_array(li.item, count, li.list_item_id) ORDER BY count DESC) AS values
+  // FROM
+  //       ( select li.type::text, li.item::text, li.list_item_id, count(*) as count from
+  // public_search.records_to_list_items r
+  // JOIN public_search.list_items li ON r.list_item_id = li.list_item_id
+  // AND li.type IN ('keyword', 'subject', 'author')
+  //       join filtered_records using (record_id)
+  // GROUP BY li.type, li.item, li.list_item_id
+  // union all
+  //       SELECT 'year', year::text as item ,0 ,  COUNT(*) as count
+  //       FROM public_search.records_view r
+  //         join filtered_records using (record_id)
+  //       GROUP BY year
+  //       union all
+  //     SELECT 'title', title::text, 0, COUNT(*) as count
+  //     FROM public_search.records_view r
+  //       join filtered_records using (record_id)
+  //     GROUP BY title HAVING count(*) > 1
+  //     union all
+  //       SELECT 'collection', collection_name::text, collection_id, COUNT(*) as count
+  //   FROM public_search.records_view r
+  //     join filtered_records using (record_id)
+  //       GROUP BY collection_id, collection_name
+  //       union all
+  //         SELECT 'media_type', media_type::text, 0, COUNT(*) as count
+  //   FROM public_search.records_view r
+  //     join filtered_records using (record_id)
+  //   where media_type != ''
+  //   GROUP BY media_type
+  //   union all
+  //     SELECT 'format', format::text, 0, COUNT(*) as count
+  //   FROM public_search.records_view r
+  //   join filtered_records using (record_id)
+  //   where format != ''
+  //   GROUP BY format
+  // ) li group by li.type
+  // `)
+  //   );
+  // console.log(query.toString());
   const filters = await query;
   console.timeEnd("filters");
   result.filters = filters.reduce((acc, { type, values }) => {
@@ -230,7 +237,10 @@ const lookupFilters = async ({ params: { knex, provider }, result, service: { Mo
 //     )
 //   )
 const getNonDigitizedTotal = async (context) => {
-  const { params: { query, provider, ...params }, result, } = context;
+  const {
+    params: { query, provider, ...params },
+    result,
+  } = context;
   if (provider && query.has_digital) {
     console.time("nonDigitized");
     const updatedQuery = { ...query, $select: ["record_id"], has_digital: false, $limit: 0 };
@@ -254,7 +264,7 @@ export default (function (app) {
     paginate: app.get("paginate"),
     authentication: false,
   };
-    // Initialize our service with any options it requires
+  // Initialize our service with any options it requires
   app.use("/api/public_records", new PublicRecords(options, app), {
     methods: ["find"],
   });
