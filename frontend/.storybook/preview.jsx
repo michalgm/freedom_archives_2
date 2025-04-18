@@ -13,14 +13,16 @@ import Authentication from "../src/Authentication";
 import { theme } from "../src/theme";
 import "../src/utils/logger";
 import { handlers } from "./mocks/handlers";
+
 initialize({
-  onUnhandledRequest: "bypass", // Don't show errors for unhandled requests
+  waitUntilReady: true,
+  onUnhandledRequest: "warn", // Don't show errors for unhandled requests
 });
 
 const preview = {
   parameters: {
     controls: {
-      extendsd: true,
+      extended: true,
       matchers: {
         color: /(background|color)$/i,
         date: /Date$/i,
