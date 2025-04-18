@@ -46,6 +46,7 @@
     "test": "NODE_ENV=test npm run migrate && npm run mocha",
     "bundle:client": "npm pack --pack-destination ./public",
     "migrate": "knex migrate:latest",
+    "migrate:prod": "NODE_ENV=production knex migrate:latest",
     "migrate:make": "knex migrate:make -x mjs"
   },
   "dependencies": {
