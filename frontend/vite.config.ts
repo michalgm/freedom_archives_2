@@ -3,9 +3,16 @@ import { defineConfig } from "vite";
 import commonjs from "vite-plugin-commonjs";
 import viteTsconfigPaths from "vite-tsconfig-paths";
 
-export default defineConfig({
+export default defineConfig(({ mode }) => ({
   // depending on your application, base can also be "/"
   base: "/",
+  define: {
+    // This will be replaced at build time
+    __WDYR_ENABLED__: mode === 'development',
+  },
+  build: {
+    sourcemap: true,
+  },
   plugins: [
     react(),
     {
@@ -35,4 +42,4 @@ export default defineConfig({
       "/images/": "http://localhost:3030",
     },
   }
-});
+}));
