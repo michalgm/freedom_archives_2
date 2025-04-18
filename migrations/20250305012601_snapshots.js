@@ -2,7 +2,7 @@
  * @param { import("knex").Knex } knex
  * @returns { Promise<void> }
  */
-exports.up = function (knex) {
+export const up = function (knex) {
   return knex.raw(
     `   
           -- @block create public_records table
@@ -228,7 +228,6 @@ ADD PRIMARY KEY(snapshot_id, archive_id, setting);
 CREATE TABLE
 public_search.list_items AS
 SELECT
-1 AS archive_id,
     *
     FROM
 list_items
@@ -465,7 +464,7 @@ ADD CONSTRAINT fk_snapshot FOREIGN KEY(snapshot_id) REFERENCES snapshots(snapsho
  * @param { import("knex").Knex } knex
  * @returns { Promise<void> }
  */
-exports.down = async function (knex) {
+export const down = async function (knex) {
   await knex.schema.dropSchemaIfExists("public_search", true);
 
   await knex.schema.dropTableIfExists("records_snapshots");
