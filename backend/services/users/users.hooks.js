@@ -1,22 +1,27 @@
 import { hooks } from "@feathersjs/authentication";
-import { hooks as hooks$0 } from "@feathersjs/authentication-local";
+import { hooks as localAuth } from "@feathersjs/authentication-local";
 import { generateRandomString } from "../../utils/index.js";
-const { authenticate } = { hooks }.hooks;
-const { hashPassword, protect } = { hooks: hooks$0 }.hooks;
+const { authenticate } = hooks;
+const { hashPassword, protect } = localAuth;
 const setArchive = (context) => {
-  const { data, method, params: { user: { archive_id } = {} }, } = context;
+  const {
+    data,
+    method,
+    params: { user: { archive_id } = {} },
+  } = context;
   if (archive_id && method === "create") {
     data.archive_id = archive_id;
   }
   return context;
 };
 const validateUser = (context) => {
-  const { data: { password }, } = context;
+  const {
+    data: { password },
+  } = context;
   if (password) {
     if (password.length < 8) {
       throw new Error("Password must be at least 8 characters long");
-    }
-    else if (password.match(/^[A-z0-9]+$/)) {
+    } else if (password.match(/^[A-z0-9]+$/)) {
       throw new Error("Password must contain at least one special character");
     }
   }
@@ -67,5 +72,5 @@ export const error = {
 export default {
   before,
   after,
-  error
+  error,
 };
