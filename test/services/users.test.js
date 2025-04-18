@@ -1,7 +1,7 @@
-const assert = require("assert");
-const app = require("../../backend/app");
+import assert from "assert";
+import app from "../../backend/app.js";
 
-describe("'users' service", () => {
+describe("'records' service", () => {
   it("registered the service", () => {
     const service = app.service("api/users");
 
