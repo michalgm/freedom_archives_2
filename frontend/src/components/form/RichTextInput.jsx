@@ -49,6 +49,20 @@ const RichTextInput = (props) => {
     }
   }, [label]);
 
+  const editor = rteRef.current?.editor;
+  useEffect(() => {
+    if (!editor || editor.isDestroyed) {
+      return;
+    }
+    if (!editor.isFocused || !editor.isEditable) {
+      // Use queueMicrotask per https://github.com/ueberdosis/tiptap/issues/3764#issuecomment-1546854730
+      queueMicrotask(() => {
+        const currentSelection = editor.state.selection;
+        editor.chain().setContent(content).setTextSelection(currentSelection).run();
+      });
+    }
+  }, [content, editor, editor?.isEditable, editor?.isFocused]);
+
   const extensions = [
     StarterKit,
     LinkBubbleMenuHandler,

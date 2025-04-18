@@ -1,6 +1,5 @@
 import { useMemo } from "react";
 
-import { Check } from "@mui/icons-material";
 import {
   Checkbox,
   FormControl,
@@ -30,14 +29,41 @@ import {
 } from "react-hook-form-mui";
 import { DatePickerElement, DateTimePickerElement } from "react-hook-form-mui/date-pickers";
 
+import { Check } from "@mui/icons-material";
 import { formatLabel } from "src/components/form/schemaUtils";
 import { convertSvgToDataUrl } from "src/utils";
 import Autocomplete from "../Autocomplete/Autocomplete";
+import OldAutocomplete from "../Autocomplete/AutocompleteMessy";
 import DateStringField from "../DateStringField";
 import { EditableItem } from "./EditableItem";
 import RichTextInput from "./RichTextInput";
 
 const selectOptions = {
+  day: Array.from({ length: 32 }, (v, k) => ({
+    id: k || null,
+    label: `${k || "??"}`,
+  })),
+  month: [
+    "January",
+    "February",
+    "March",
+    "April",
+    "May",
+    "June",
+    "July",
+    "August",
+    "September",
+    "October",
+    "November",
+    "December",
+  ].map((label, index) => ({ id: index + 1 || null, label })),
+  year: [
+    { id: null, label: "??" },
+    ...Array.from({ length: new Date().getFullYear() - 1900 }, (v, k) => ({
+      id: k + 1900,
+      label: k + 1900 + "",
+    })),
+  ],
   media_types: ["Audio", "Webpage", "Video", "PDF"].map((id) => ({
     id,
     label: id,
@@ -48,10 +74,54 @@ const transformOptions = (options) => {
   if (!options) return null;
   return options.map((option) => {
     if (typeof option === "string") {
-      return { value: option, label: formatLabel(option) };
+      return { id: option, value: option, label: formatLabel(option) };
     }
     return option;
   });
+};
+
+const AutocompleteWrapper = ({
+  name,
+  value,
+  onChange,
+  textFieldProps,
+  options,
+  isRHF,
+  field_type,
+  itemType,
+  label,
+  searchParams: rawSearchParams,
+  createParams: rawCreateParams,
+  service: rawService,
+  autocompleteProps = {},
+  ...restProps
+}) => {
+  const service = field_type === "list_item" ? "list_items" : rawService;
+
+  const searchParams = useMemo(() => {
+    return field_type === "list_item" ? { ...rawSearchParams, type: itemType } : rawSearchParams;
+  }, [field_type, rawSearchParams, itemType]);
+
+  const createParams = useMemo(() => {
+    return field_type === "list_item" ? { ...rawCreateParams, type: itemType } : rawCreateParams;
+  }, [field_type, rawCreateParams, itemType]);
+
+  return (
+    <Autocomplete
+      name={name}
+      options={options}
+      label={label}
+      isRHF={isRHF}
+      onChange={onChange}
+      value={value}
+      service={service}
+      textFieldProps={textFieldProps}
+      autocompleteProps={{ ...autocompleteProps }}
+      searchParams={searchParams}
+      createParams={createParams}
+      {...restProps}
+    />
+  );
 };
 
 export const BaseField = ({
@@ -71,6 +141,8 @@ export const BaseField = ({
   startAdornment,
   margin,
   textFieldProps: defaultTextFieldProps,
+  size,
+  error: _error,
   ...props
 }) => {
   // const { setValue, getValues } = useFormContext()
@@ -86,6 +158,8 @@ export const BaseField = ({
     props.value = value;
   }
 
+  const options = useMemo(() => transformOptions(defaultOptions), [defaultOptions]);
+
   const textFieldProps = useMemo(() => {
     const textFieldProps = {
       name,
@@ -93,7 +167,7 @@ export const BaseField = ({
       helperText,
       variant: props.variant || "outlined",
       fullWidth: fullWidth,
-      size: "small",
+      size: size || "small",
       color,
       tabIndex: tabIndex || undefined,
       ...defaultTextFieldProps,
@@ -110,16 +184,17 @@ export const BaseField = ({
     }
     return textFieldProps;
   }, [
-    color,
-    defaultTextFieldProps,
-    fullWidth,
-    helperText,
     name,
+    margin,
+    helperText,
+    props.variant,
+    fullWidth,
+    size,
+    color,
     tabIndex,
+    defaultTextFieldProps,
     endAdornment,
     startAdornment,
-    margin,
-    props.variant,
   ]);
 
   const renderDatePicker = () => {
@@ -148,8 +223,74 @@ export const BaseField = ({
   };
 
   const renderAutocomplete = () => {
-    const options = transformOptions(defaultOptions);
+    return (
+      <AutocompleteWrapper
+        {...{
+          name,
+          ro,
+          tabIndex,
+          value,
+          onChange,
+          isRHF,
+          endAdornment,
+          startAdornment,
+        }}
+        onChange={onChange}
+        textFieldProps={textFieldProps}
+        options={options}
+        field_type={field_type}
+        {...props}
+      />
+    );
 
+    // const { itemType, searchParams: rawSearchParams = {}, createParams: rawCreateParams, label, ...restProps } = props;
+    // const extraProps = { ...restProps };
+    // const service = field_type === "list_item" ? "list_items" : props.service;
+    // const searchParams = useMemo(() => {
+    //   if (field_type === "list_item") {
+    //     return { ...rawSearchParams, type: itemType };
+    //   }
+    //   return rawSearchParams;
+    // }, [field_type, rawSearchParams, itemType]);
+
+    // const createParams = useMemo(() => {
+    //   if (field_type === "list_item") {
+    //     return { ...rawCreateParams, type: itemType };
+    //   }
+    //   return rawCreateParams;
+    // }, [field_type, rawCreateParams, itemType]);
+    // if (field_type === "list_item") {
+    //   extraProps.service = "list_items";
+    //   extraProps.searchParams = { ...searchParams, type: itemType };
+    //   extraProps.createParams = { ...createParams, type: itemType };
+    // }
+    // // if (field_type === "list_item") {
+    // //   const { itemType } = props;
+    // //   props.service = "list_items";
+    // //   props.searchParams = {
+    // //     ...(props.searchParams || {}),
+    // //     type: itemType,
+    // //   };
+    // //   props.createParams = {
+    // //     ...(props.createParams || {}),
+    // //     type: itemType,
+    // //   };
+    // // }
+    // return (
+    //   <Autocomplete
+    //     name={name}
+    //     options={options}
+    //     label={label}
+    //     textFieldProps={textFieldProps}
+    //     isRHF={isRHF}
+    //     onChange={onChange}
+    //     value={value}
+    //     {...extraProps}
+    //   />
+    // );
+  };
+
+  const renderOldAutocomplete = () => {
     if (field_type === "list_item") {
       const { itemType } = props;
       props.service = "list_items";
@@ -163,7 +304,7 @@ export const BaseField = ({
       };
     }
     return (
-      <Autocomplete
+      <OldAutocomplete
         name={name}
         options={options}
         label={props.label}
@@ -287,9 +428,7 @@ export const BaseField = ({
           <FormLabel component="legend">{props.label}</FormLabel>
           <FormGroup>
             {defaultOptions.map((option) => (
-              <Grid2 key={option} size={6}>
-                <FormControlLabel control={<Checkbox name={`${name}_${option}`} />} label={option} />
-              </Grid2>
+              <FormControlLabel key={option} control={<Checkbox name={`${name}_${option}`} />} label={option} />
             ))}
           </FormGroup>
           <FormHelperText>{helperText}</FormHelperText>
@@ -302,13 +441,14 @@ export const BaseField = ({
     const Component = isRHF ? CheckboxElement : Checkbox;
     return (
       <Component
-        name={`${name}`}
+        name={name}
         label={props.label}
         labelProps={{ color, sx: { userSelect: "none" } }}
         onChange={onChange}
         color={color}
         helperText={helperText}
         required={props.required}
+        {...props}
       />
     );
     // return <FormGroup>
@@ -405,6 +545,7 @@ export const BaseField = ({
         // error={error}
         helperText={helperText}
         {...textFieldProps}
+        onChange={onChange}
         {...props}
       />
     );
@@ -427,9 +568,27 @@ export const BaseField = ({
     );
   };
 
-  const renderMediaType = () => {
-    const options = selectOptions["media_type"];
-    return <BaseField options={options} {...props} field_type="select" />;
+  const renderSimpleSelect = () => {
+    const { selectType, ...rest } = props;
+    const options = selectOptions[selectType];
+    if (!options) {
+      logger.error(`Unable to find options for select type ${selectType}`);
+      return null;
+    }
+    return (
+      <BaseField
+        value={value}
+        name={name}
+        options={options}
+        label={props.label}
+        // error={error}
+        helperText={helperText}
+        onChange={onChange}
+        {...textFieldProps}
+        {...rest}
+        field_type="select"
+      />
+    );
   };
 
   switch (field_type) {
@@ -453,14 +612,16 @@ export const BaseField = ({
     case "select":
     case "autocomplete":
       return renderAutocomplete();
+    case "simpleSelect":
+      return renderSimpleSelect();
+    case "autocomplete_messy":
+      return renderOldAutocomplete();
     case "togglebutton":
       return renderToggleButton();
     case "editableItem":
       return renderEditableItem();
     case "datestring":
       return renderDateString();
-    case "media_type":
-      return renderMediaType();
     case "textarea":
     default:
       return renderTextField();

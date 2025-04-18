@@ -48,6 +48,10 @@ export default {
     ),
   ],
   argTypes: {
+    size: {
+      control: "select",
+      options: ["small", "medium", "x-small", "large"],
+    },
     disabled: {
       control: "boolean",
       description: "Read-only mode",
@@ -170,6 +174,9 @@ export const ListItemSelect = (args) => (
   />
 );
 
+export const SimpleSelect = (args) => (
+  <Field name="SimpleSelect" field_type="simpleSelect" label="Day Select" selectType="day" {...args} />
+);
 // HTML Field
 export const RichTextField = (args) => (
   <Field name="richTextField" field_type="richtext" label="HTML Field" {...args} />
@@ -202,7 +209,7 @@ export const FieldWithHelperText = (args) => (
 export const SwitchField = (args) => <Field name="switchField" field_type="switch" label="Switch Field" {...args} />;
 
 // Read-only Field
-export const ReadOnlyField = (args) => <Field name="textField" label="Read-only Field" ro={true} {...args} />;
+export const ReadOnlyField = (args) => <Field name="readOnlyField" label="Read-only Field" ro={true} {...args} />;
 
 const staticOptions = [
   { id: "option1", label: "Option 1" },
@@ -258,5 +265,6 @@ export const AllFieldTypes = (args) => (
     <FieldWithHelperText {...args} />
     <SwitchField {...args} />
     <ReadOnlyField {...args} />
+    <AutocompleteTest {...args} />
   </div>
 );

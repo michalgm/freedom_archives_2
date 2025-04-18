@@ -1,4 +1,4 @@
-import { FormContainer, useFormContext } from "react-hook-form-mui";
+import { FormContainer, useForm, useFormContext } from "react-hook-form-mui";
 
 import { Field } from "../form/Field";
 
@@ -21,14 +21,14 @@ import { Field } from "../form/Field";
 //   autocomplete: { id: "option1", label: "Option 1" },
 // };
 export default {
-  title: "Components/Autocomplete",
+  title: "Components/Autocomplete/Messy",
   component: Field,
   tags: ["autodocs"],
   args: {
     returnFullObject: true,
-    field_type: "autocomplete",
+    field_type: "autocomplete_messy",
     multiple: false,
-    formDefaultValue: null,
+    formDefaultValue: "",
   },
   // argTypes: {
   //   returnFullObject: {
@@ -43,7 +43,7 @@ export default {
   // },
   decorators: [
     (Story, context) => {
-      const formDefaultValue = context.args.formDefaultValue || undefined;
+      const formDefaultValue = context.args.formDefaultValue;
       return (
         <div key={JSON.stringify(context.args)}>
           <FormContainer key={formDefaultValue} defaultValues={{ [context.args.name]: formDefaultValue }}>
@@ -64,12 +64,10 @@ const ShowValue = ({ name }) => {
 
 export const MultiListItem = {
   args: {
-    field_type: "autocomplete",
     name: "demo-autocomplete",
     label: "Authors",
     service: "list_items",
     multiple: true,
-    size: "large",
   },
 };
 
@@ -77,7 +75,6 @@ export const MultiListItemWithCreate = {
   args: {
     name: "authors",
     multiple: true,
-    field_type: "autocomplete",
     service: "list_items",
     searchParams: { type: "author" },
     create: true,
@@ -86,7 +83,6 @@ export const MultiListItemWithCreate = {
 
 export const ListItem = {
   args: {
-    field_type: "autocomplete",
     name: "demo-autocomplete",
     label: "Authors",
     service: "list_items",
@@ -94,7 +90,6 @@ export const ListItem = {
 };
 export const ListItemWithCreate = {
   args: {
-    field_type: "autocomplete",
     name: "demo-autocomplete",
     label: "Authors",
     service: "list_items",
@@ -105,7 +100,6 @@ export const ListItemWithCreate = {
 // Basic static options example
 export const WithStaticOptions = {
   args: {
-    field_type: "autocomplete",
     name: "demo-autocomplete",
     label: "Authors",
     options: [

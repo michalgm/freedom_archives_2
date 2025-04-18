@@ -8,8 +8,8 @@ import { DataGrid, GridActionsCellItem, GridToolbar, useGridApiRef } from "@mui/
 import { merge, startCase } from "lodash-es";
 import { useConfirm } from "material-ui-confirm";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useAddNotification } from "src/stores";
 import * as API from "../api";
-import { useAddNotification } from "../appContext";
 
 const AddButton = ({ itemType, addItem }) => {
   return (
@@ -95,7 +95,7 @@ export const EditableDataTable = ({
         }
         addNotification({ message: `${itemType} "${name}" ${action.toLowerCase()}d!` });
         await onUpdateRef.current();
-      } catch (err) {
+      } catch (_err) {
         newRow = oldRow;
       }
       resetEdit(newRow);

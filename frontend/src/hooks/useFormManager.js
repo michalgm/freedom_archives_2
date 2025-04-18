@@ -6,8 +6,9 @@ import { useForm } from "react-hook-form-mui";
 import { getDefaultValuesFromSchema } from "src/components/form/schemaUtils";
 import validators from "./validators";
 
+import { useAddNotification, useDisplayError } from "src/stores";
 import { services } from "../api";
-import { useAddNotification, useDisplayError } from "../appContext";
+// import { useAddNotification, useDisplayError } from "../appContext";
 
 const getChangedFields = (input, dirtyFields) => {
   if (!dirtyFields || typeof dirtyFields !== "object") {
@@ -59,7 +60,7 @@ function useFormManager({
   defaultValues: inputDefaultValues = {},
 } = {}) {
   const [entityData, setEntityData] = useState({});
-  const [loading, setLoading] = useState({ delete: false, update: false, create: false, fetch: false });
+  const [loading, setLoading] = useState({ init: true, delete: false, update: false, create: false, fetch: false });
   const confirm = useConfirm();
   const initialMountRef = useRef(true);
   logger.log("FORM MANAGER RENDER");
@@ -97,6 +98,7 @@ function useFormManager({
         const data = !id || !services[service] ? inputDefaultValues : await fetchEntity(id);
         const defaultValues = await processData(getDefaultValuesFromSchema(service, data));
         logger.log("DEFAULTS", defaultValues);
+        setLoading((l) => ({ ...l, init: false }));
         return defaultValues;
       },
       resolver: async (data, context, options) => {
@@ -139,7 +141,7 @@ function useFormManager({
   const [retrieveTime, setRetrieveTime] = useState(null);
   const [formData, setFormData] = useState({});
   const resetPromiseRef = useRef(null);
-  const display_name = getValues(namePath) || get(formData, namePath);
+  const display_name = getValues(namePath) || get(formData, namePath) || "";
   const displayError = useDisplayError();
   const addNotification = useAddNotification();
   const serviceDisplayName = service.replace(/s$/, "");
@@ -181,22 +183,36 @@ function useFormManager({
     [reset, processData, formState.isDirty]
   );
 
+  const notifyAction = useCallback(
+    (action) => {
+      const message = display_name
+        ? `${startCase(serviceDisplayName)} "${display_name}" ${action}`
+        : `${startCase(service)} ${action}`;
+      logger.log(message);
+      addNotification({
+        message,
+      });
+    },
+    [serviceDisplayName, display_name, addNotification, service]
+  );
+
   const updateEntity = useCallback(
     async (id, data) => {
       setLoading((l) => ({ ...l, update: true }));
       try {
         logger.log("SAVE!!!", id, data);
         const result = await services[service].patch(id, data);
-        addNotification({ message: `${startCase(serviceDisplayName)} "${display_name}" updated` });
+        notifyAction("updated");
         logger.log("RESULT", result);
         const processed = await resetForm(result);
         onUpdate && (await onUpdate(processed));
       } catch (error) {
-        console.error(`Error updating ${serviceDisplayName}:`, error);
+        console.error(error);
+        displayError(`Error updating ${serviceDisplayName}: ${error}`);
       }
       setLoading((l) => ({ ...l, update: false }));
     },
-    [service, addNotification, serviceDisplayName, display_name, resetForm, onUpdate]
+    [service, notifyAction, resetForm, onUpdate, displayError, serviceDisplayName]
   );
 
   const createEntity = useCallback(
@@ -204,15 +220,16 @@ function useFormManager({
       setLoading((l) => ({ ...l, create: true }));
       try {
         const result = await services[service].create(data);
-        addNotification({ message: `${startCase(serviceDisplayName)} "${display_name}" created` });
+        notifyAction("created");
         const processed = await resetForm(result);
         onCreate && (await onCreate(processed));
       } catch (error) {
+        console.error(error);
         displayError(`Error creating ${serviceDisplayName}: ${error}`);
       }
       setLoading((l) => ({ ...l, create: false }));
     },
-    [service, addNotification, serviceDisplayName, display_name, resetForm, onCreate, displayError]
+    [service, notifyAction, resetForm, onCreate, displayError, serviceDisplayName]
   );
 
   const deleteEntity = useCallback(
@@ -220,7 +237,7 @@ function useFormManager({
       setLoading((l) => ({ ...l, delete: true }));
       try {
         const result = await services[service].remove(id);
-        addNotification({ message: `${startCase(serviceDisplayName)} "${display_name}" deleted` });
+        notifyAction("deleted");
         const processed = await resetForm(result);
         onDelete && (await onDelete(processed));
       } catch (error) {
@@ -229,7 +246,7 @@ function useFormManager({
       }
       setLoading((l) => ({ ...l, delete: false }));
     },
-    [service, addNotification, serviceDisplayName, display_name, resetForm, onDelete, displayError]
+    [service, notifyAction, resetForm, onDelete, displayError, serviceDisplayName]
   );
 
   useEffect(() => {
@@ -245,7 +262,7 @@ function useFormManager({
 
       onConfirm && onConfirm();
       const confirmOptions = {
-        title: `Confirm delete of ${serviceDisplayName} "${display_name}"`,
+        title: `Confirm Delete`,
         description: `Are you sure you want to delete the ${serviceDisplayName} "${display_name}"?`,
         confirmationButtonProps: { color: "error" },
         ...customConfirmOptions,
@@ -287,7 +304,7 @@ function useFormManager({
         displayError("No changes to save");
         return;
       }
-      logger.log("CHANGED", changedFields);
+      logger.log("CHANGED", changedFields, dirtyFields);
       const transformedInput = await transformInput(changedFields, getValues());
       logger.log("TRANSFORMED", transformedInput);
       if (id) {
@@ -335,6 +352,7 @@ function useFormManager({
     return handleSubmit(onSave)();
   }, [handleSubmit, onSave]);
 
+  // console.log(formState.isDirty, formState.dirtyFields);
   return {
     service,
     formContext: context,

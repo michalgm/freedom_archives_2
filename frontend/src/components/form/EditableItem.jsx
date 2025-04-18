@@ -25,7 +25,6 @@ export function EditableItem({ service, name, link = true, label, parseError, ..
   if (!service) {
     return;
   }
-  label = label ?? name;
 
   if (edit) {
     return (

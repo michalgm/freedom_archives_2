@@ -10,9 +10,8 @@ import { flattenErrors } from "src/utils";
 import { FormManagerContext } from "./FormManagerContext";
 import { FormStateHandler } from "./FormStateHandler";
 import { parseError } from "./schemaUtils";
-// return { formContext: { formState: {}, getValues: () => {} } };
 
-const FormErrors = ({ errors, service }) => {
+export const FormErrors = ({ errors, service }) => {
   const [hideErrors, setHideErrors] = React.useState(false);
 
   useEffect(() => {
@@ -34,23 +33,14 @@ const FormErrors = ({ errors, service }) => {
   );
 };
 
-const BaseForm = ({ children, autoComplete = "off", formConfig, loadingElement, formID, ...props }) => {
+const BaseForm = ({ children, autoComplete = "off", formConfig, formID, ...props }) => {
   const formManager = useFormManager(formConfig);
   const { formContext, onSave, shouldBlockNavigation } = formManager;
-  const { isLoading, errors } = formContext.formState;
+  const { errors } = formContext.formState;
   logger.log("BASE FORM RENDER", errors, formContext.getValues());
-  // const memoizedFormManager = useMemo(() => {
-  //   return {
 
-  //   };
-  // }, [formManager.formContext, formManager.loading, formManager.service, formManager.onSave]);
-  // logger.log({ isLoading });
-  if (isLoading) {
-    logger.log("FORM LOADING...");
-    return loadingElement || null;
-  }
   const name = formID || formConfig?.service || "form";
-  // logger.log("!!!!!", memoizedFormManager);
+
   return (
     <FormManagerContext.Provider
       value={{
@@ -61,6 +51,7 @@ const BaseForm = ({ children, autoComplete = "off", formConfig, loadingElement, 
         confirmDelete: formManager.confirmDelete,
         service: formManager.service,
         submitForm: formManager.submitForm,
+        isLoading: formManager.isLoading,
       }}
     >
       <FormContainer
@@ -80,7 +71,7 @@ const BaseForm = ({ children, autoComplete = "off", formConfig, loadingElement, 
         formContext={formContext}
       >
         <FormStateHandler shouldBlockNavigation={shouldBlockNavigation} />
-        <FormErrors errors={errors} service={formConfig?.service} />
+        {/* <FormErrors errors={errors} service={formConfig?.service} /> */}
         {typeof children === "function" ? children(formManager) : children}
       </FormContainer>
     </FormManagerContext.Provider>
@@ -90,7 +81,6 @@ const BaseForm = ({ children, autoComplete = "off", formConfig, loadingElement, 
 // This is to force state refresh on id change
 const BaseFormWrapper = (props) => {
   const key = `${props.formConfig?.service}-${props.formConfig?.id || "new"}`;
-  logger.log("BASE FORM WRAPPER RENDER");
   return (
     <React.Fragment key={key}>
       <BaseForm {...props} />

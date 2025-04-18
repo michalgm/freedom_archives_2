@@ -3,11 +3,13 @@ import { Box, Breadcrumbs as Crumbs, Icon, Typography } from "@mui/material";
 import { startCase } from "lodash-es";
 import { Helmet } from "react-helmet";
 import { useLocation } from "react-router";
-import { useStateValue } from "../appContext";
+import { useAppStore } from "src/stores";
+// import { useStateValue } from "../appContext";
 import Link from "./Link";
 
 function Breadcrumbs() {
-  const { state } = useStateValue();
+  const title = useAppStore((state) => state.title);
+  // const { state } = useStateValue();
   const location = useLocation();
 
   const parts = location.pathname.split("/");
@@ -25,8 +27,8 @@ function Breadcrumbs() {
       ),
   ];
 
-  if (state.title && parts.length !== paths.length) {
-    paths.push({ link: location.pathname, title: state.title });
+  if (title && parts.length !== paths.length) {
+    paths.push({ link: location.pathname, title });
   }
 
   return (

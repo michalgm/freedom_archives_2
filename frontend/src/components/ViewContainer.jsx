@@ -1,140 +1,77 @@
-import { Box, Grid2, Icon, Paper, Stack, Typography } from "@mui/material";
+import { Alert, Box, Grid2, Paper, Stack } from "@mui/material";
 import React, { useEffect } from "react";
-import { collections, records } from "../api";
-import { useResetSearch, useStateValue } from "../appContext";
+// import { useResetSearch, useStateValue } from "../appContext";
 
-import { startCase } from "lodash-es";
-import { useLocation } from "react-router";
-import ButtonLink from "./ButtonLink";
+import { useFormState } from "react-hook-form";
+import { FormButton } from "src/components/form/ButtonsHeader";
+import useFormManagerContext from "src/components/form/FormManagerContext";
+import { getFieldLabel, parseError } from "src/components/form/schemaUtils";
+import Show from "src/components/Show";
+import { flattenErrors } from "src/utils";
 
-const renderTime = (item, type) => {
+const Section = ({ header, elements, service, ...props }) => {
+  if (!elements.length) return null;
+  const justifyContent = elements.length === 1 ? "center" : "space-between";
   return (
-    <Typography variant="caption">
-      {startCase(type)} at {item[`date_${type}`] ? new Date(item[`date_${type}`]).toLocaleString() : "???"} by{" "}
-      {item[`${type === "created" ? "creator" : "contributor"}_name`] || "Unknown"}
-    </Typography>
+    <Paper sx={{ margin: "1px" }} {...props}>
+      <Grid2 size="grow" style={{ flex: "none" }}>
+        <Grid2 container alignContent="center" alignItems="center" justifyContent={justifyContent} spacing={2}>
+          {elements.map((item) => (
+            <Grid2 key={item.key} flex="1 1 auto" style={{ textAlign: "center" }}>
+              {item}
+            </Grid2>
+          ))}
+        </Grid2>
+        {header && service && <FormErrors service={service} />}
+      </Grid2>
+    </Paper>
   );
 };
 
-function ViewContainer({ children, item, buttonRef, neighborService, embedded, ...props }) {
-  const {
-    state: {
-      search: { query, type },
-      search_index,
-    },
-    dispatch,
-  } = useStateValue();
-  const [neighbors, setNeighbors] = React.useState({ prev: null, next: null });
-  const location = useLocation();
-  const resetSearch = useResetSearch();
-  const [, rootPath, id] = location.pathname.split("/");
-  const newItem = id === "new";
+export const FormErrors = ({ service }) => {
+  const { errors } = useFormState();
+  const [hideErrors, setHideErrors] = React.useState(false);
+  useEffect(() => {
+    setHideErrors(false);
+  }, [errors]);
+  const errorsMap = flattenErrors(errors);
+  const errorMessages = Object.entries(errorsMap).reduce((acc, [field, error]) => {
+    const label = getFieldLabel(field, service);
+    const message = parseError(field, label)({ message: error });
+    acc.push(<li key={field}>{message}</li>);
+    return acc;
+  }, []);
+  if (errorMessages.length === 0 || hideErrors) return null;
+
+  return (
+    <Alert severity="error" elevation={0} sx={{ mt: 1 }} onClose={() => setHideErrors(true)}>
+      <ul>{errorMessages}</ul>
+    </Alert>
+  );
+};
+
+function ViewContainer({ children, buttons, embedded, footerElements = [], headerElements = [], service }) {
+  const { isLoading } = useFormManagerContext();
+
   logger.log("VIEW CONTAINER RENDER");
-  useEffect(() => {
-    if (rootPath !== `${type}s`) {
-      resetSearch();
-    }
-  }, [rootPath, type, resetSearch]);
 
-  useEffect(() => {
-    const updateNeighbors = async () => {
-      if (neighborService) {
-        const id = `${neighborService}_id`;
-        const neighborQuery = {
-          ...query,
-          $skip: Math.max(search_index - 1, 0),
-          $limit: 3,
-          $select: [id],
-        };
-        const { data } = await (neighborService === "record" ? records : collections).find({ query: neighborQuery });
-        const neighbors = data.map((item) => item[id]);
-        if (!search_index) {
-          neighbors.unshift(null);
-        }
-        setNeighbors({ prev: neighbors[0], next: neighbors[2] });
-      }
-    };
-    if (rootPath === `${type}s`) {
-      updateNeighbors();
-    }
-  }, [search_index, query, neighborService, rootPath, type]);
-
-  const renderNeighborLink = (type) => {
-    const offset = type === "prev" ? -1 : 1;
-    if (neighborService) {
-      return (
-        <Grid2 size="grow" component={Box} textAlign={type === "prev" ? "left" : "right"} style={{ flex: "0 0 auto" }}>
-          <ButtonLink
-            disabled={!neighbors[type]}
-            to={`/${neighborService}s/${neighbors[type]}`}
-            onClick={() => dispatch("SEARCH_INDEX", search_index + offset)}
-            startIcon={type === "prev" && <Icon>arrow_backward</Icon>}
-            endIcon={type !== "prev" && <Icon>arrow_forward</Icon>}
-          >
-            {type}
-          </ButtonLink>
-        </Grid2>
-      );
-    }
-  };
-
-  const renderSection = (type) => {
-    const sectionElements = props[`${type}Elements`] || [];
-    const sectionProps = props[`${type}Props`] || {};
-    if (sectionElements.length || (type === "footer" && item) || (type === "header" && buttonRef)) {
-      const section = (
-        <Paper {...sectionProps}>
-          <Grid2 size="grow" style={{ flex: "none" }}>
-            <Grid2
-              container
-              alignContent="center"
-              alignItems="center"
-              justifyContent={sectionElements.length === 1 ? "center" : "space-between"}
-              spacing={2}
-              // direction="column"
-            >
-              {type === "footer" && item && (
-                <>
-                  {renderNeighborLink("prev")}
-                  <Grid2 size="grow" style={{ textAlign: "center" }}>
-                    {renderTime(item, "created")}
-                  </Grid2>
-                </>
-              )}
-              {sectionElements.map((item, index) => (
-                <Grid2
-                  key={`${type}-${index}`}
-                  flex="1 1 auto"
-                  // style={{ textAlign: 'center' }}
-                >
-                  {item}
-                </Grid2>
-              ))}
-              {type === "header" && buttonRef && <Grid2 size="grow" ref={buttonRef}></Grid2>}
-              {type === "footer" && item && (
-                <>
-                  <Grid2 size="grow" style={{ textAlign: "center" }}>
-                    {renderTime(item, "modified")}
-                  </Grid2>
-                  {renderNeighborLink("next")}
-                </>
-              )}
-            </Grid2>
-            {type === "header" && <div id={`form-errors`} />}
-          </Grid2>
-        </Paper>
-      );
-      return section;
-    }
-  };
   const height = embedded ? "100%" : "100%";
+  if (buttons) {
+    headerElements.unshift(
+      <Grid2 key="buttons" container className="buttons" spacing={1} justifyContent="flex-end">
+        {buttons.map((props) => (
+          <FormButton key={props.label} {...props} />
+        ))}
+      </Grid2>
+    );
+  }
   return (
     <Stack direction="column" spacing={2} useFlexGap style={{ height, flexWrap: "nowrap" }}>
-      {renderSection("header")}
+      <Section elements={headerElements} header service={service} />
       <Box id="contents" size="grow" sx={{ overflowX: "auto", flex: "100 100 auto", padding: "1px" }}>
-        {children}
+        <Show when={!isLoading}>{children}</Show>
       </Box>
-      {!newItem && renderSection("footer")}
+      <Section type="footer" elements={footerElements} />
     </Stack>
   );
 }

@@ -1,6 +1,7 @@
 import { Alert, Snackbar } from "@mui/material";
 
-import { useStateValue } from "../appContext";
+import { useAppStore, useRemoveNotification } from "src/stores";
+// import { useStateValue } from "../appContext";
 
 function Notification({ severity = "success", index, message, onClose }) {
   return (
@@ -22,17 +23,8 @@ function Notification({ severity = "success", index, message, onClose }) {
 }
 
 function Notifications() {
-  const {
-    state: { notifications },
-    dispatch,
-  } = useStateValue();
-
-  const hideNotification = (id) => {
-    dispatch(
-      "NOTIFICATIONS",
-      notifications.filter(({ id: notification_id }) => notification_id !== id)
-    );
-  };
+  const notifications = useAppStore((state) => state.notifications);
+  const removeNotification = useRemoveNotification();
 
   return (
     <div className="notifications">
@@ -44,7 +36,7 @@ function Notifications() {
           message={message}
           onClose={(_, reason) => {
             if (!["clickaway", "escapeKeyDown"].includes(reason)) {
-              hideNotification(id, message);
+              removeNotification(id);
             }
           }}
         />

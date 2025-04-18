@@ -19,7 +19,7 @@ import {
 import { startCase } from "lodash-es";
 import React, { useState } from "react";
 import { useFieldArray, useFormContext } from "react-hook-form";
-import { Link as DOMLink, useNavigate } from "react-router";
+import { Link, useNavigate } from "react-router";
 import { Field } from "./form/Field";
 import Thumbnail from "./Thumbnail";
 
@@ -42,7 +42,7 @@ export function ItemsList({ items = [], type, emptyText, itemAction, link = true
       {items.map((item, index) => (
         <React.Fragment key={item.id || item[`${type}_id`]}>
           <ItemTag
-            itemAction={() => itemAction(index, item)}
+            itemAction={itemAction ? () => itemAction(index, item) : undefined}
             index={index}
             type={type}
             link={link}
@@ -253,7 +253,7 @@ export function Item({
 
   if ((link && id) || onClickHandler) {
     if (link && id) {
-      list_item_props.component = DOMLink;
+      list_item_props.component = Link;
       list_item_props.to = `/${type}s/${id}`;
     }
     if (onClickHandler) {

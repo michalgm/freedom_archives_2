@@ -1,9 +1,7 @@
 import { FormLabel, Grid2 } from "@mui/material";
-import { useRef } from "react";
 import { BaseForm } from "src/components/form/BaseForm";
-import ButtonsHeader from "src/components/form/ButtonsHeader";
 import { formatLabel } from "src/components/form/schemaUtils";
-import { useStateValue } from "../appContext";
+import { useAuth } from "src/stores";
 import { Field } from "../components/form/Field";
 import GridBlock from "../components/GridBlock";
 import ViewContainer from "../components/ViewContainer";
@@ -22,29 +20,21 @@ const FormRow = ({ name, ...props }) => {
 };
 
 const SiteSettings = () => {
-  const buttonRef = useRef(document.createElement("div"));
-
   const {
-    state: {
-      user: { archive_id },
-    },
-  } = useStateValue();
+    user: { archive_id },
+  } = useAuth();
 
   const buttons = [{ label: "Save", type: "submit" }];
-
   return (
     <div className="site-settings FlexContainer">
-      <ViewContainer buttonRef={buttonRef}>
-        <BaseForm
-          formConfig={{
-            service: "settings",
-            id: archive_id,
-            skipUpdatedCheck: true,
-            transformInput: ({ settings }, { featured_collection }) => {
-              return { settings: { ...settings, featured_collection_id: featured_collection?.collection_id || null } };
-            },
-          }}
-        >
+      <BaseForm
+        formConfig={{
+          service: "settings",
+          id: archive_id,
+          skipUpdatedCheck: true,
+        }}
+      >
+        <ViewContainer buttons={buttons} service="settings">
           <GridBlock
             className="foo"
             title="Site Settings"
@@ -52,12 +42,22 @@ const SiteSettings = () => {
             sx={{ height: "100%", flexGrow: 1 }}
             gutterBottom={true}
           >
-            <FormRow name="featured_collection" field_type="editableItem" link={false} service="collections" />
+            <FormRow
+              name="featured_collection"
+              field_type="editableItem"
+              link={false}
+              service="collections"
+              onChange={(value, { setValue }) => {
+                setValue("settings.featured_collection_id", value?.collection_id || null, {
+                  shouldValidate: true,
+                  shouldDirty: true,
+                });
+              }}
+            />
             <FormRow name="settings.site_intro_text" field_type="html" />
           </GridBlock>
-          <ButtonsHeader formName="settings" buttons={buttons} buttonRef={buttonRef} />
-        </BaseForm>
-      </ViewContainer>
+        </ViewContainer>
+      </BaseForm>
     </div>
   );
 };

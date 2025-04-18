@@ -21,15 +21,16 @@ import {
 import React, { useRef } from "react";
 import { useFieldArray, useFormContext } from "react-hook-form-mui";
 import { useNavigate, useParams } from "react-router";
-import { useTitle } from "../appContext";
 import { Field } from "../components/form/Field";
 
 import { EditableItemsList, RecordsList } from "src/components/EditableItemsList";
-import ButtonsHeader from "src/components/form/ButtonsHeader";
+// import ButtonsHeader from "src/components/form/ButtonsHeader";
+import { useTitle } from "src/stores";
+import EditItemView from "src/views/EditItemView";
 import FieldRow from "../components/FieldRow";
 import GridBlock from "../components/GridBlock";
 import Link from "../components/Link";
-import ViewContainer from "../components/ViewContainer";
+// import ViewContainer from "../components/ViewContainer";
 import { BaseForm } from "../components/form/BaseForm";
 
 // const defaultRecord = {
@@ -97,9 +98,10 @@ function Instance({ instance = {}, index, actions: { remove, update, move } }) {
   const edit = !instance.delete;
   return (
     <React.Fragment key={`${instance.instance_id}-${index}`}>
-      <TableRow className={`instance ${instance.delete ? "deleted" : ""}`}>
+      <TableRow className={`instance ${instance.delete ? "deleted" : ""}`} style={{ verticalAlign: "top" }}>
         <TableCell className="instance-action">
           <IconButton
+            sx={{ mt: 1, py: 1 }}
             onClick={() => {
               instance.instance_id ? update(index, { ...instance, delete: !instance.delete }) : remove(index);
             }}
@@ -109,7 +111,7 @@ function Instance({ instance = {}, index, actions: { remove, update, move } }) {
           </IconButton>
         </TableCell>
         <TableCell>
-          <IconButton onClick={() => move(index, 0)} size="large">
+          <IconButton onClick={() => move(index, 0)} size="large" sx={{ mt: 1, py: 1 }}>
             {index === 0 ? <RadioButtonCheckedOutlined /> : <RadioButtonUncheckedOutlined />}
           </IconButton>
         </TableCell>
@@ -297,7 +299,7 @@ function RecordParent() {
   );
 }
 
-function Record({ showForm, id /*  embedded = false */ }) {
+function Record({ id /*  embedded = false */ }) {
   const { id: paramId } = useParams();
   id ??= paramId;
   const navigate = useNavigate();
@@ -306,15 +308,10 @@ function Record({ showForm, id /*  embedded = false */ }) {
 
   const setTitle = useTitle();
 
-  // logger.log("Record RENDER");
+  logger.log("Record RENDER");
   if (!buttonRef.current) {
     buttonRef.current = document.createElement("div");
   }
-
-  const buttons = [
-    { label: "Save", type: "submit", color: "primary" },
-    { label: "Delete", type: "delete", color: "secondary" },
-  ];
 
   return (
     <div className="record FlexContainer">
@@ -339,11 +336,12 @@ function Record({ showForm, id /*  embedded = false */ }) {
           const { formData: record } = manager;
           return (
             <>
-              <ViewContainer
-                // item={record}
-                buttonRef={showForm && buttonRef}
+              <EditItemView
+                item={record}
+                newItem={newRecord}
                 neighborService="record"
                 className="FlexContainer"
+                service="records"
               >
                 <Grid2 container spacing={2}>
                   <GridBlock title="" spacing={2}>
@@ -444,8 +442,7 @@ function Record({ showForm, id /*  embedded = false */ }) {
                     </Accordion>
                   </Grid2>
                 </Grid2>
-                <ButtonsHeader formName="record" buttons={buttons} buttonRef={buttonRef} />
-              </ViewContainer>
+              </EditItemView>
             </>
           );
         }}

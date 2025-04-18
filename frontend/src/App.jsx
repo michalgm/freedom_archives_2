@@ -8,7 +8,6 @@ import Router from "src/Routes";
 import { theme } from "src/theme";
 import "src/utils/logger";
 import "./App.scss";
-import { StateProvider } from "./appContext";
 
 function App() {
   return (
@@ -16,13 +15,9 @@ function App() {
       <ThemeProvider theme={theme}>
         <CssBaseline>
           <LocalizationProvider dateAdapter={AdapterDayjs}>
-            <StateProvider>
-              <ConfirmProvider defaultOptions={{ confirmationButtonProps: { variant: "contained" } }}>
-                <Router>
-                  <h1>HEY!</h1>
-                </Router>
-              </ConfirmProvider>
-            </StateProvider>
+            <ConfirmProvider defaultOptions={{ confirmationButtonProps: { variant: "contained" } }}>
+              <Router />
+            </ConfirmProvider>
           </LocalizationProvider>
         </CssBaseline>
       </ThemeProvider>

@@ -241,7 +241,7 @@ function Search() {
             "vol_number",
           ],
           $limit: PAGE_SIZE,
-          $fullText: $fullText,
+          fulltext: { $fulltext: $fullText },
           $skip: offset,
         };
         if (!include_non_digitized) {

@@ -4,7 +4,8 @@ import { startCase } from "lodash-es";
 import { useConfirm } from "material-ui-confirm";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { snapshots as snapshotsService } from "../api";
-import { useAddNotification } from "../appContext";
+// import { useAddNotification } from "../appContext";
+import { useAddNotification } from "src/stores";
 import { EditableDataTable } from "../components/EditableDataTable";
 
 const PublishSite = () => {

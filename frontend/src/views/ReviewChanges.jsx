@@ -6,9 +6,9 @@ import { collections, records, review_changes, snapshots } from "../api";
 import dayjs from "dayjs";
 import { isEqual, startCase } from "lodash-es";
 import EditableDataTable from "../components/EditableDataTable";
-import Field from "../components/Field";
-import Form from "../components/Form";
 import Link from "../components/Link";
+import Field from "../components/OldField";
+import Form from "../components/OldForm";
 
 const defaultFilter = {
   needs_review: true,

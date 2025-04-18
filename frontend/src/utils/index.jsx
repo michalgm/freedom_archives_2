@@ -50,3 +50,35 @@ export const flattenErrors = (target, path = [], result = {}) => {
   }
   return result;
 };
+
+export function useLogChangedDeps(name, deps) {
+  const lastDepsRef = useRef(null);
+
+  useEffect(() => {
+    if (!lastDepsRef.current) {
+      lastDepsRef.current = deps;
+      logger.log(`[${name}] Initial dependencies:`, deps);
+      return;
+    }
+
+    deps.forEach((dep, i) => {
+      if (dep !== lastDepsRef.current[i]) {
+        logger.log(`[${name}] Dependency changed at index ${i}:`, lastDepsRef.current[i], dep);
+      }
+    });
+
+    lastDepsRef.current = [...deps];
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, deps);
+}
+
+// export function DebugProps({ name, ...props }) {
+//   const propsArray = Object.entries(props).map(([key, value]) => ({ key, value }));
+//   const propsValues = propsArray.map((p) => p.value);
+
+//   useLogChangedDeps(name || "DebugProps", propsValues);
+
+//   useEffect(() => {
+//     console.log(`[${name || "DebugProps"}] Current props:`, props);
+//   }, [name, ...propsValues]);
+// }

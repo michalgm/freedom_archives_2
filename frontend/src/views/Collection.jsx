@@ -4,11 +4,13 @@ import { useFieldArray, useFormContext } from "react-hook-form";
 import { useNavigate, useParams } from "react-router";
 import GridBlock from "src/components/GridBlock";
 import { BaseForm } from "src/components/form/BaseForm";
-import ButtonsHeader from "src/components/form/ButtonsHeader";
-import { useTitle } from "../appContext";
+// import ButtonsHeader from "src/components/form/ButtonsHeader";
+// import { useTitle } from "../appContext";
+import { useTitle } from "src/stores";
+import EditItemView from "src/views/EditItemView";
 import { EditableItemsListBase } from "../components/EditableItemsList";
 import FieldRow from "../components/FieldRow";
-import ViewContainer from "../components/ViewContainer";
+// import ViewContainer from "../components/ViewContainer";
 import { Field } from "../components/form/Field";
 import Collections from "../views/Collections";
 import Records from "./Records";
@@ -114,29 +116,36 @@ function Collection({ id, mode = "" }) {
         }}
         style={{ height: "100%" }}
       >
-        <ViewContainer
-          // item={collection}
-          buttonRef={buttonRef}
-          neighborService={isFeaturedRecords || isFeaturedCollections ? null : "collection"}
-          className="FlexContainer"
-        >
-          <GridBlock title="" spacing={2}>
-            <Stack sx={{ height: "100%" }}>
-              {!isFeaturedRecords && (
-                <Tabs sx={{ mb: 2, flex: "0 0 auto" }} value={currentTab} onChange={(_, tab) => setTab(tab)}>
-                  {!isFeaturedCollections && <Tab label="Edit Collection" value="collection"></Tab>}
-                  {!isFeaturedCollections && <Tab label="Featured Records" value="featured"></Tab>}
-                  <Tab label="Subcollections" value="subcollections"></Tab>
-                  <Tab label="Records" value="records"></Tab>
-                </Tabs>
-              )}
-              <Grid2 container spacing={2}>
-                {formContents()}
-              </Grid2>
-            </Stack>
-          </GridBlock>
-          <ButtonsHeader formName="collection" buttons={buttons} buttonRef={buttonRef} />
-        </ViewContainer>
+        {(manager) => {
+          const { formData: collection } = manager;
+          return (
+            <EditItemView
+              item={collection}
+              id={id}
+              newItem={newCollection}
+              // buttonRef={showForm && buttonRef}
+              buttons={buttons}
+              neighborService={isFeaturedRecords || isFeaturedCollections ? null : "collection"}
+              className="FlexContainer"
+            >
+              <GridBlock title="" spacing={2}>
+                <Stack sx={{ height: "100%" }}>
+                  {!isFeaturedRecords && (
+                    <Tabs sx={{ mb: 2, flex: "0 0 auto" }} value={currentTab} onChange={(_, tab) => setTab(tab)}>
+                      {!isFeaturedCollections && <Tab label="Edit Collection" value="collection"></Tab>}
+                      {!isFeaturedCollections && <Tab label="Featured Records" value="featured"></Tab>}
+                      <Tab label="Subcollections" value="subcollections"></Tab>
+                      <Tab label="Records" value="records"></Tab>
+                    </Tabs>
+                  )}
+                  <Grid2 container spacing={2}>
+                    {formContents()}
+                  </Grid2>
+                </Stack>
+              </GridBlock>
+            </EditItemView>
+          );
+        }}
       </BaseForm>
     </div>
   );

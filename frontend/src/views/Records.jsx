@@ -29,7 +29,7 @@ function Records({ embedded, itemAction, filter = {}, excludeIds = [] }) {
   const initFilter = {
     search: "",
     non_digitized: false,
-    collection: {},
+    collection: null,
     hidden: false,
     needs_review: false,
     filters: [],

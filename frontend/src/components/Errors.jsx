@@ -1,20 +1,18 @@
 import { Alert, AlertTitle } from "@mui/material";
 
-import { useStateValue } from "../appContext";
+import { useAppStore } from "src/stores";
 
 function Errors() {
-  const {
-    state: { error },
-    dispatch,
-  } = useStateValue();
+  const setError = useAppStore((state) => state.setError);
+  const error = useAppStore((state) => state.error);
 
   const clearError = () => {
-    dispatch("ERROR", { error: "" });
+    setError(null);
   };
 
   return (
     error && (
-      <Alert severity="error" onClose={() => clearError()} sx={{ mb: 1 }}>
+      <Alert severity="warning" onClose={() => clearError()} sx={{ mb: 1 }}>
         <AlertTitle>Error</AlertTitle>
         {error}
       </Alert>

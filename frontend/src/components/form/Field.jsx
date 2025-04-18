@@ -38,19 +38,19 @@ const isDirty = (dirtyField) => {
   return false;
 };
 
-export const Field = ({
+const Field = ({
   highlightDirty = true,
   name,
   onChange: _onChange,
   color,
   toNumber,
   required: _required = false,
-  service,
+  serviceName,
   ...props
 }) => {
   const { _service } = useFormManagerContext();
 
-  service = _service || props.service || "records";
+  const service = _service || serviceName;
   const context = useFormContext();
   const { setValue, getValues, control, formState } = context;
 
@@ -61,6 +61,7 @@ export const Field = ({
   const error = get(formState.errors, name);
   const fieldState = highlightDirty && isDirty(get(formState.dirtyFields, name)) && !error;
   color = fieldState ? "success" : color;
+  // console.log({ name, fieldState, error, dirty: isDirty(get(formState.dirtyFields, name)), color });
 
   if (error) {
     props.parseError = parseFieldError;
@@ -104,3 +105,7 @@ export const Field = ({
     />
   );
 };
+
+// Field.whyDidYouRender = true;
+
+export { Field };

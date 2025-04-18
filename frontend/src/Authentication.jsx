@@ -1,26 +1,48 @@
-import { useEffect } from "react";
+import React, { useEffect, useRef } from "react";
 import { app, authentication } from "./api";
 
-import { useStateValue } from "./appContext";
+import { useAuth, useDisplayError } from "src/stores";
+// import { useStateValue } from "./appContext";
 
 function Authentication() {
-  const {
-    state: { isAuthenticated, hooks_initialized },
-    dispatch,
-  } = useStateValue();
+  // const {
+  //   state: { isAuthenticated, hooks_initialized },
+  //   dispatch,
+  // } = useStateValue();
+  const { isAuthenticated, login, logout } = useAuth();
+  const displayError = useDisplayError();
+  const hooks_initialized = useRef(false);
+
+  // useEffect(() => {
+  //   console.log("checking token");
+  //   // If we already have a token in the store but Feathers doesn't know about it
+  //   if (token && isAuthenticated) {
+  //     console.log("set token on feathers");
+  //     // Set it manually in the Feathers client
+  //     app.set("authentication", { strategy: "jwt", accessToken: token });
+  //   }
+  // }, [token, isAuthenticated]);
+
   useEffect(() => {
-    if (hooks_initialized) {
+    if (hooks_initialized.current) {
       return;
     }
+
     app.hooks({
       error: {
         all: (context) => {
           if (context.error && context.error.name === "NotAuthenticated") {
-            dispatch("LOGOUT");
+            displayError(context.error.message);
+            // setError(context.error.message);
+
+            logout();
+            // dispatch("LOGOUT");
           } else {
             console.error(`Error in ${context.path} calling ${context.method} method`, context.error);
             if (!context.params.noDispatchError) {
-              dispatch("ERROR", { error: context.error.message });
+              displayError(context.error.message);
+              // setError(context.error.message);
+              // dispatch("ERROR", { error: context.error.message });
             }
           }
           return context;
@@ -29,26 +51,33 @@ function Authentication() {
     });
     authentication.hooks({
       after: {
-        create: ({ result: { user } }) => {
-          dispatch("LOGIN", { user });
+        create: ({ result: { user, accessToken } }) => {
+          login(user, accessToken);
+          // dispatch("LOGIN", { user });
         },
         remove: () => {
-          dispatch("LOGOUT");
+          logout();
+          // dispatch("LOGOUT");
         },
       },
     });
-    dispatch("INITIALIZE_HOOKS");
-  }, [dispatch, hooks_initialized]);
+    hooks_initialized.current = true;
+    // dispatch("INITIALIZE_HOOKS");
+  }, [displayError, login, logout]);
 
   useEffect(() => {
     if (isAuthenticated === null) {
-      app.reAuthenticate().catch(() => {
-        dispatch("LOGOUT");
-      });
+      app
+        .reAuthenticate()
+        .then(({ user }) => login(user))
+        .catch((_e) => {
+          logout();
+          // dispatch("LOGOUT");
+        });
     }
-  }, [dispatch, isAuthenticated]);
+  }, [logout, isAuthenticated, login]);
 
   return <></>;
 }
 
-export default Authentication;
+export default React.memo(Authentication);

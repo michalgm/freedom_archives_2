@@ -1,32 +1,36 @@
-import { Button, Grid2 } from "@mui/material";
-import { createPortal } from "react-dom";
+import { Button } from "@mui/material";
+import { useCallback, useState } from "react";
 import useFormManagerContext from "src/components/form/FormManagerContext";
 
 export const FormButton = ({ label, onClick, type, formName, deleteOptions = {}, ...props }) => {
+  const [loading, setLoading] = useState(false);
+  const context = useFormManagerContext();
   const {
     confirmDelete,
-    loading: _loading,
     formState: { isValid, isSubmitted },
     submitForm,
-  } = useFormManagerContext();
-  let loading =
-    (type == "delete" && _loading?.delete) || (type == "submit" && (_loading?.update || _loading?.create)) || false;
-  const click = (e) => {
-    logger.log("CLICK");
-    if (type === "delete") {
-      confirmDelete(deleteOptions);
-      loading = _loading?.delete;
-    } else if (type === "submit") {
-      logger.log("CLICK", "submit", onClick, formName);
+  } = context;
+
+  const click = useCallback(
+    async (e) => {
+      setLoading(true);
+      // logger.log("CLICK", "submit", onClick, formName);
       e.preventDefault();
-      loading = _loading?.update || _loading?.create;
-      submitForm();
-    }
-    if (onClick) {
-      e.preventDefault();
-      onClick();
-    }
-  };
+      try {
+        if (onClick) {
+          await onClick();
+        } else if (type === "delete") {
+          await confirmDelete(deleteOptions);
+        } else if (type === "submit") {
+          await submitForm();
+        }
+      } finally {
+        setLoading(false);
+      }
+    },
+    [confirmDelete, onClick, submitForm, type, deleteOptions, setLoading]
+  );
+
   return (
     <Button
       loading={loading}
@@ -44,19 +48,19 @@ export const FormButton = ({ label, onClick, type, formName, deleteOptions = {},
   );
 };
 
-const ButtonsHeader = ({ buttons, buttonRef, formName }) => {
-  if (!buttons.length || !buttonRef) {
-    return null;
-  }
-  return createPortal(
-    <Grid2 container className="buttons" spacing={1} justifyContent="flex-end">
-      {buttons.map(({ ...props }) => (
-        <Grid2 key={props.label}>
-          <FormButton formName={formName} {...props} />
-        </Grid2>
-      ))}
-    </Grid2>,
-    buttonRef.current
-  );
-};
-export default ButtonsHeader;
+// const ButtonsHeader = ({ buttons, buttonRef, formName }) => {
+//   if (!buttons.length || !buttonRef) {
+//     return null;
+//   }
+//   return createPortal(
+//     <Grid2 container className="buttons" spacing={1} justifyContent="flex-end">
+//       {buttons.map(({ ...props }) => (
+//         <Grid2 key={props.label}>
+//           <FormButton formName={formName} {...props} />
+//         </Grid2>
+//       ))}
+//     </Grid2>,
+//     buttonRef.current
+//   );
+// };
+// export default ButtonsHeader;
