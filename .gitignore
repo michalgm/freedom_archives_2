@@ -126,3 +126,7 @@ sharp-libvips/archive
 sharp-libvips/sharp-libvips
 
 ./public/
+
+frontend/dist/*
+
+config/production.json
