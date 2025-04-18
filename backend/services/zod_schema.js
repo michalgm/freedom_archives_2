@@ -104,7 +104,7 @@ const instanceSchema = z.object({
   thumbnail: z.string().nullable().optional(),
   media_type: z.enum(["Audio", "Webpage", "Video", "PDF"]),
   generation_item: listItemsSchema.nullable().optional().describe("Generation"),
-  format_item: z.lazy(() => listItemsSchema).describe("Format"),
+  format_item: listItemsSchema.required().describe("Format"),
   quality_item: listItemsSchema.nullable().optional().describe("Quality"),
   original_doc_id: z.number().nullable().optional(),
   is_primary: z.boolean(),
@@ -270,6 +270,7 @@ const embeddedCollectionSchema = collectionsSchema.pick({
   thumbnail: true,
   display_order: true,
   is_hidden: true,
+  summary: true,
   //   parent: collectionItemSchema.nullable().optional(),
 });
 
