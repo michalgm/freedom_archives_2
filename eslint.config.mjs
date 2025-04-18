@@ -1,4 +1,6 @@
 import js from "@eslint/js";
+import tseslint from '@typescript-eslint/eslint-plugin';
+import tsParser from '@typescript-eslint/parser';
 import importPlugin from 'eslint-plugin-import';
 import reactPlugin from "eslint-plugin-react";
 import reactHooks from 'eslint-plugin-react-hooks';
@@ -53,24 +55,33 @@ export default [
     },
     {
         name: "frontend",
-        files: ["frontend/**/*.{js,jsx}"],
+        files: ["frontend/**/*.{js,jsx,ts,tsx}"],
         languageOptions: {
             globals: {
+                ...globals.node,
                 ...globals.browser,
                 ...globals.mocha,
                 "logger": "readonly"
             },
             ecmaVersion: 2022,
             sourceType: "module",
+            parser: tsParser,
             parserOptions: {
                 ecmaFeatures: {
                     jsx: true,
                 },
                 sourceType: 'module',
+                project: './frontend/tsconfig.json', // Add this line
             },
         },
-        plugins: { "react-hooks": reactHooks, react: reactPlugin, import: importPlugin },
-        ignores: ["frontend/dist/**/*"],
+        plugins: {
+            "react-hooks": reactHooks,
+            react: reactPlugin,
+            import: importPlugin,
+            "@typescript-eslint": tseslint,
+        },
+        ignores: ["frontend/dist/**/*", "frontend/public/**/*"],
+
         rules: {
             "react-hooks/rules-of-hooks": "error",
             "react-hooks/exhaustive-deps": "warn",
@@ -87,12 +98,24 @@ export default [
             'import/default': 'error',
             'import/no-named-as-default': 'warn',
             "no-undef": "error",
+            '@typescript-eslint/no-unused-vars': ['warn',
+                {
+                    "argsIgnorePattern": "^_",
+                    "varsIgnorePattern": "^_",
+                    "caughtErrors": "none",
+                    "destructuredArrayIgnorePattern": "^_",
+
+                }
+            ],
             "no-unused-vars": ["warn", {
                 "caughtErrors": "none",
                 "varsIgnorePattern": "^_",
                 "argsIgnorePattern": "^_",
                 "destructuredArrayIgnorePattern": "^_",
             }],
+            "@typescript-eslint/no-explicit-any": "warn",
+            "@typescript-eslint/explicit-function-return-type": "off",
+            "@typescript-eslint/explicit-module-boundary-types": "off",
         },
         settings: {
             react: {
@@ -101,6 +124,25 @@ export default [
         },
 
     },
+    // {
+    //     name: "typescript",
+    //     files: ["frontend/**/*.{ts,tsx}"],
+    //     languageOptions: {
+    //         parser: tsParser,
+    //         parserOptions: {
+    //             project: './frontend/tsconfig.json',
+    //         },
+    //     },
+    //     plugins: {
+    //         "@typescript-eslint": tseslint,
+    //     },
+    //     rules: {
+    //         // TypeScript-specific rules
+    //         "@typescript-eslint/no-explicit-any": "warn",
+    //         "@typescript-eslint/explicit-function-return-type": "off",
+    //         "@typescript-eslint/explicit-module-boundary-types": "off",
+    //     },
+    // },
     reactRefresh.configs.vite,
 ];
 
