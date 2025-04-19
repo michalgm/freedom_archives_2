@@ -118,21 +118,13 @@ const eslintConfig = [
             "import/default": "error",
             "import/no-named-as-default": "warn",
             "no-undef": "error",
+            "no-unused-vars": "off",
             "@typescript-eslint/no-unused-vars": [
                 "warn",
                 {
                     argsIgnorePattern: "^_",
                     varsIgnorePattern: "^_",
                     caughtErrors: "none",
-                    destructuredArrayIgnorePattern: "^_",
-                },
-            ],
-            "no-unused-vars": [
-                "warn",
-                {
-                    caughtErrors: "none",
-                    varsIgnorePattern: "^_",
-                    argsIgnorePattern: "^_",
                     destructuredArrayIgnorePattern: "^_",
                 },
             ],
