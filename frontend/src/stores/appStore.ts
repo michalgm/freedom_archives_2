@@ -12,6 +12,7 @@ interface AppState {
     title: string;
     notifications: Notification[];
     hooks_initialized: boolean;
+    hasError: boolean;
 
     // Actions
     setLoading: (loading: boolean) => void;
@@ -27,6 +28,7 @@ const useAppStore = create<AppState>((set) => ({
     title: "",
     notifications: [],
     hooks_initialized: false,
+    hasError: false,
 
     setLoading: (loading) => set({ loading }),
     setTitle: (title) => set({ title }),
@@ -34,14 +36,16 @@ const useAppStore = create<AppState>((set) => ({
 
     addNotification: (notification) => set((state) => {
         const id = notification.id || (Math.random() + 1).toString(36).substring(7);
-        return {
-            notifications: [...state.notifications, { ...notification, id }]
-        };
+        const notifications = [...state.notifications, { ...notification, id }]
+        const hasError = notifications.some(n => n.severity === 'error');
+        return { notifications: notifications, hasError: hasError }
     }),
 
-    removeNotification: (id) => set((state) => ({
-        notifications: state.notifications.filter(notification => notification.id !== id)
-    })),
+    removeNotification: (id) => set((state) => {
+        const notifications = state.notifications.filter(notification => notification.id !== id)
+        const hasError = notifications.some(n => n.severity === 'error');
+        return { notifications: notifications, hasError: hasError }
+    }),
 }));
 
 export default useAppStore;
