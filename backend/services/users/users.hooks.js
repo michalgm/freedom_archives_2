@@ -1,6 +1,8 @@
 import { hooks } from "@feathersjs/authentication";
 import { hooks as localAuth } from "@feathersjs/authentication-local";
+
 import { generateRandomString } from "../../utils/index.js";
+
 const { authenticate } = hooks;
 const { hashPassword, protect } = localAuth;
 const setArchive = (context) => {

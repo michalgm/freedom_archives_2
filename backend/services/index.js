@@ -1,17 +1,18 @@
-import users from "./users/users.service.js";
-import records from "./records/records.service.js";
-import relationships from "./relationships.js";
+import collections from "./collections.js";
 import instances from "./instances.js";
 import list_items from "./list_items.js";
-import collections from "./collections.js";
-import unified_records from "./unified_records.js";
-import unified_collections from "./unified_collections.js";
-import value_lookup from "./value_lookup.js";
 import list_items_lookup from "./list_items_lookup.js";
-import review_changes from "./review_changes.js";
 import public_records from "./public_records.js";
-import snapshots from "./snapshots.js";
+import records from "./records/records.service.js";
+import relationships from "./relationships.js";
+import review_changes from "./review_changes.js";
 import settings from "./settings.js";
+import snapshots from "./snapshots.js";
+import unified_collections from "./unified_collections.js";
+import unified_records from "./unified_records.js";
+import users from "./users/users.service.js";
+import value_lookup from "./value_lookup.js";
+
 export default (function (app) {
   app.configure(users);
   app.configure(records);

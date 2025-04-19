@@ -1,5 +1,7 @@
 import { KnexService } from "@feathersjs/knex";
+
 import hooks from "./users.hooks.js";
+
 class Users extends KnexService {
   constructor(options) {
     super({

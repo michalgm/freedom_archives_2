@@ -1,6 +1,7 @@
 import axios from "axios";
 import fs from "fs";
 import path from "path";
+
 export default (function (app, publicPath) {
   return async function thumbnailProxy(req, res, next) {
     try {

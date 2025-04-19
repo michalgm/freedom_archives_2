@@ -1,4 +1,5 @@
 import { KnexService } from "@feathersjs/knex";
+
 class UnifiedRecords extends KnexService {
   constructor(options) {
     super({

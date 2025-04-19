@@ -1,12 +1,13 @@
 import { KnexService } from "@feathersjs/knex";
+
 import {
   fetchUnified,
   prepListItemRelations,
   refreshView,
-  setArchive,
   setUser,
   updateListItemRelations,
 } from "./common_hooks/index.js";
+
 class Collections extends KnexService {
   constructor(options) {
     super({
@@ -29,7 +30,7 @@ export default (function (app) {
     paginate: app.get("paginate"),
   };
   // Initialize our service with any options it requires
-  app.use("/api/collections", new Collections(options, app));
+  app.use("/api/collections", new Collections(options));
   // Get our initialized service so that we can register hooks
   const service = app.service("api/collections");
   const updateRelations = async (context) => {

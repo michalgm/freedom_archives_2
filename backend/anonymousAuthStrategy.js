@@ -1,7 +1,8 @@
 import authentication from "@feathersjs/authentication";
+
 const { AuthenticationBaseStrategy } = authentication;
 class AnonymousStrategy extends AuthenticationBaseStrategy {
-  async authenticate(authentication, params) {
+  async authenticate(_authentication, _params) {
     return {
       anonymous: true,
     };

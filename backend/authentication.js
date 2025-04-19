@@ -1,5 +1,6 @@
 import authentication from "@feathersjs/authentication";
 import authenticationLocal from "@feathersjs/authentication-local";
+
 const { AuthenticationBaseStrategy } = authentication;
 const { AuthenticationService, JWTStrategy } = authentication;
 const { LocalStrategy } = authenticationLocal;

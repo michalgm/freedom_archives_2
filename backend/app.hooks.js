@@ -1,6 +1,7 @@
 import { authenticate } from "@feathersjs/authentication";
 import { transaction } from "@feathersjs/knex";
-import { allowAnonymous, setArchive, validateArchive } from "./services/common_hooks/index.js";
+
+import { allowAnonymous, setArchive } from "./services/common_hooks/index.js";
 // Application hooks that run for every service
 const public_services = ["api/public_records"];
 const checkAuth = async (context) => {

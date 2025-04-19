@@ -1,4 +1,5 @@
 import { KnexService } from "@feathersjs/knex";
+
 class ReviewChanges extends KnexService {
   constructor(options) {
     super({
@@ -14,6 +15,6 @@ export default (function (app) {
     Model: app.get("postgresqlClient"),
     paginate: app.get("paginate"),
   };
-    // Initialize our service with any options it requires
-  app.use("/api/review_changes", new ReviewChanges(options, app));
+  // Initialize our service with any options it requires
+  app.use("/api/review_changes", new ReviewChanges(options));
 });

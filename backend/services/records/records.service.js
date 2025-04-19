@@ -1,5 +1,7 @@
 import { KnexService } from "@feathersjs/knex";
+
 import hooks from "./records.hooks.js";
+
 class Records extends KnexService {}
 const getOptions = (app) => ({
   Model: app.get("postgresqlClient"),

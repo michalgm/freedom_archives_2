@@ -1,4 +1,5 @@
 import { KnexService } from "@feathersjs/knex";
+
 class UnifiedCollections extends KnexService {
   constructor(options) {
     super({

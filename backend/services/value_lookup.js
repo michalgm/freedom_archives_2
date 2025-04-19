@@ -1,4 +1,5 @@
 import { KnexService } from "@feathersjs/knex";
+
 class ValueLookup extends KnexService {
   constructor(options) {
     super({

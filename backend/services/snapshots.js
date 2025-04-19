@@ -1,5 +1,7 @@
 import { KnexService, transaction } from "@feathersjs/knex";
+
 import { setArchive } from "./common_hooks/index.js";
+
 const LIVE_SNAPSHOT_TITLE = "Public Data";
 class Snapshots extends KnexService {
   constructor(options) {
@@ -26,7 +28,12 @@ const public_tables = {
   config: {},
 };
 const restoreSnapshot = async (context) => {
-  const { params: { transaction: { trx }, }, id, } = context;
+  const {
+    params: {
+      transaction: { trx },
+    },
+    id,
+  } = context;
   const { archive_id, snapshot_id, title, ...data } = await trx("snapshots").where({ snapshot_id: id }).first();
   delete data.is_live;
   for (const table of Object.keys(public_tables)) {
@@ -34,13 +41,21 @@ const restoreSnapshot = async (context) => {
       .columnInfo()
       .then((info) => Object.keys(info).filter((col) => col !== "snapshot_id"));
     await trx(`public_search.${table}`).where({ archive_id }).delete();
-    await trx(`public_search.${table}`).insert(trx(`${table}_snapshots`).select(columns).where({ snapshot_id }).select());
+    await trx(`public_search.${table}`).insert(
+      trx(`${table}_snapshots`).select(columns).where({ snapshot_id }).select()
+    );
   }
   await trx("snapshots").where({ title: LIVE_SNAPSHOT_TITLE, archive_id }).update(data);
   context.result = { snapshot_id, title, ...data };
 };
 const publishSite = async (context) => {
-  const { params: { transaction: { trx }, }, result: { snapshot_id }, data, } = context;
+  const {
+    params: {
+      transaction: { trx },
+    },
+    result: { snapshot_id },
+    data,
+  } = context;
   const { archive_id } = data;
   for (const table of Object.keys(public_tables)) {
     console.time(`copy ${table}`);
@@ -52,26 +67,35 @@ const publishSite = async (context) => {
     console.time(`delete ${table}`);
     const deleteQuery = trx(`public_search.${table}`).where({ archive_id });
     if (table == "records") {
-      deleteQuery.whereNotIn("record_id", trx("records")
-        .join("collections", { "records.collection_id": "collections.collection_id" })
-        .where({ "records.is_hidden": false, "collections.is_hidden": false, "records.needs_review": true })
-        .select("record_id"));
-    }
-    else if (table === "collections") {
-      deleteQuery.whereNotIn("collection_id", trx("collections").where({ is_hidden: false, needs_review: true }).select("collection_id"));
-    }
-    else if (table === "records_to_list_items") {
-      deleteQuery.whereNotIn("record_id", trx("records")
-        .join("collections", { "records.collection_id": "collections.collection_id" })
-        .where({ "records.is_hidden": false, "collections.is_hidden": false, "records.needs_review": true })
-        .select("record_id"));
+      deleteQuery.whereNotIn(
+        "record_id",
+        trx("records")
+          .join("collections", { "records.collection_id": "collections.collection_id" })
+          .where({ "records.is_hidden": false, "collections.is_hidden": false, "records.needs_review": true })
+          .select("record_id")
+      );
+    } else if (table === "collections") {
+      deleteQuery.whereNotIn(
+        "collection_id",
+        trx("collections").where({ is_hidden: false, needs_review: true }).select("collection_id")
+      );
+    } else if (table === "records_to_list_items") {
+      deleteQuery.whereNotIn(
+        "record_id",
+        trx("records")
+          .join("collections", { "records.collection_id": "collections.collection_id" })
+          .where({ "records.is_hidden": false, "collections.is_hidden": false, "records.needs_review": true })
+          .select("record_id")
+      );
     }
     await deleteQuery.delete();
     console.timeEnd(`delete ${table}`);
     console.time(`update ${table}`);
-    await trx(`public_search.${table}`).insert(trx(selectTarget || table)
-      .where({ archive_id })
-      .select());
+    await trx(`public_search.${table}`).insert(
+      trx(selectTarget || table)
+        .where({ archive_id })
+        .select()
+    );
     console.timeEnd(`update ${table}`);
   }
   await trx("snapshots").where({ title: "Snapshot 3", archive_id }).delete();
@@ -98,7 +122,7 @@ export default (function (app) {
     id: "snapshot_id",
     Model: app.get("postgresqlClient"),
   };
-  app.use("/api/snapshots", new Snapshots(options, app), { methods: ["create", "find", "patch"] });
+  app.use("/api/snapshots", new Snapshots(options), { methods: ["create", "find", "patch"] });
   const service = app.service("api/snapshots");
   service.hooks({
     before: {

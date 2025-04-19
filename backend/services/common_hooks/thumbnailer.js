@@ -3,6 +3,7 @@ import { promises } from "fs";
 import path, { dirname } from "path";
 import sharp from "sharp";
 import { fileURLToPath } from "url";
+
 const fs = { promises }.promises;
 const OUTPUT_DIR = "img/thumbnails/";
 const SIZES = {

@@ -1,7 +1,9 @@
 import schema from "@feathersjs/schema";
+
 import allowAnonymous from "./allowAnonymous.js";
 import { writeThumbnailsFromUrl } from "./thumbnailer.js";
-const { hooks: schemaHooks, resolve, virtual } = schema;
+
+const { hooks: schemaHooks, resolve } = schema;
 const archiveResolver = resolve({
   archive_id: (_value, _query, context) => {
     if (context.params.user) {
@@ -88,7 +90,7 @@ export const updateListItemRelations = async (context) => {
   for (const type of ["subjects", "keywords", "producers", "authors"]) {
     if (relation_data && relation_data[type] !== undefined) {
       const join_table = `${table}s_to_list_items`;
-      const res = await trx
+      await trx
         .from(join_table)
         .join("list_items", `${join_table}.list_item_id`, "list_items.list_item_id")
         .where("type", type.replace(/s$/, ""))
@@ -115,7 +117,6 @@ export const updateListItemRelations = async (context) => {
 };
 export const refreshView = async (context) => {
   const {
-    app,
     result,
     method,
     params: {
@@ -157,7 +158,6 @@ export const validateArchive = (context) => {
       query: { archive_id: query_archive_id } = {},
       data: { archive_id: data_archive_id } = {},
     },
-    method,
   } = context;
   if (!archive_id) {
     return;
@@ -168,6 +168,7 @@ export const validateArchive = (context) => {
     }
   });
 };
+
 export { allowAnonymous, writeThumbnailsFromUrl };
 export default {
   writeThumbnailsFromUrl,

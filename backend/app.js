@@ -8,6 +8,7 @@ import path, { dirname } from "path";
 import qs from "qs";
 import favicon from "serve-favicon";
 import { fileURLToPath } from "url";
+
 import appHooks from "./app.hooks.js";
 import authentication from "./authentication.js";
 import logger from "./logger.js";

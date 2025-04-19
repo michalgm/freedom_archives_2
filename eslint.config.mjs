@@ -1,11 +1,12 @@
 import js from "@eslint/js";
-import tseslint from '@typescript-eslint/eslint-plugin';
-import tsParser from '@typescript-eslint/parser';
-import importPlugin from 'eslint-plugin-import';
+import tseslint from "@typescript-eslint/eslint-plugin";
+import tsParser from "@typescript-eslint/parser";
+import { defineConfig } from "eslint/config";
+import importPlugin from "eslint-plugin-import";
 import reactPlugin from "eslint-plugin-react";
-import reactHooks from 'eslint-plugin-react-hooks';
+import reactHooks from "eslint-plugin-react-hooks";
 import reactRefresh from "eslint-plugin-react-refresh";
-import storybook from 'eslint-plugin-storybook';
+import storybook from "eslint-plugin-storybook";
 import globals from "globals";
 // const __filename = fileURLToPath(import.meta.url);
 // const __dirname = path.dirname(__filename);
@@ -14,36 +15,54 @@ import globals from "globals";
 //     recommendedConfig: js.configs.recommended,
 //     allConfig: js.configs.all
 // });
-
-export default [
-    ...storybook.configs['flat/recommended'],
+const eslintConfig = [
+    ...storybook.configs["flat/recommended"],
     {
         name: "recommended",
         ignores: ["sharp-libvips", "frontend/dist/**/*"],
         ...js.configs.recommended,
         ...importPlugin.flatConfigs.recommended,
         plugins: {
-            'import': importPlugin
+            import: importPlugin,
         },
         rules: {
-            // "import/order": ["error", {
-            //     "groups": ["builtin", "external", "internal", "parent", "sibling", "index"],
-            //     "newlines-between": "always",
-            //     "alphabetize": { "order": "asc", "caseInsensitive": true }
-            // }],
-            // "import/no-duplicates": "error"
-        }
+            "import/order": [
+                "error",
+                {
+                    groups: [["builtin", "external"], "internal", "parent", "sibling", "index"],
+                    "newlines-between": "always",
+                    alphabetize: { order: "asc", caseInsensitive: true },
+                },
+            ],
+            "import/no-duplicates": "error",
+            "import/newline-after-import": "error",
+            "no-unused-vars": [
+                "warn",
+                {
+                    caughtErrors: "none",
+                    varsIgnorePattern: "^_",
+                    argsIgnorePattern: "^_",
+                    destructuredArrayIgnorePattern: "^_",
+                },
+            ],
+
+        },
     },
     {
         name: "backend",
-        files: ["backend/**/*.js", "test/**/*.js"],
+        files: ["backend/**/*.{js,mjs,cjs}", "test/**/*.js"],
+        plugins: {
+            js,
+            import: importPlugin,
+        },
+        extends: ["js/recommended"],
         languageOptions: {
             globals: {
                 ...globals.node,
                 ...globals.mocha,
             },
 
-            ecmaVersion: 2021,
+            ecmaVersion: 2022,
             sourceType: "module",
         },
 
@@ -51,6 +70,7 @@ export default [
             indent: ["error", 2],
             "linebreak-style": ["error", "unix"],
             semi: ["error", "always"],
+            "no-undef": "warn",
         },
     },
     {
@@ -61,7 +81,7 @@ export default [
                 ...globals.node,
                 ...globals.browser,
                 ...globals.mocha,
-                "logger": "readonly"
+                logger: "readonly",
             },
             ecmaVersion: 2022,
             sourceType: "module",
@@ -70,8 +90,8 @@ export default [
                 ecmaFeatures: {
                     jsx: true,
                 },
-                sourceType: 'module',
-                project: './frontend/tsconfig.json', // Add this line
+                sourceType: "module",
+                project: "./frontend/tsconfig.json", // Add this line
             },
         },
         plugins: {
@@ -87,42 +107,44 @@ export default [
             "react-hooks/exhaustive-deps": "warn",
             "react/jsx-uses-react": "off",
             "react/jsx-uses-vars": "error",
-            "no-console": ["warn", { "allow": ["warn", "error"] }],
-            "no-unused-expressions": ["error", { "allowShortCircuit": true, "allowTernary": true }],
+            "no-console": ["warn", { allow: ["warn", "error"] }],
+            "no-unused-expressions": ["error", { allowShortCircuit: true, allowTernary: true }],
             "prefer-const": "error",
             "react/no-array-index-key": "warn",
             "react/no-danger": "warn",
             "react/jsx-key": "error",
             "import/no-unresolved": "off",
-            'import/named': 'error',
-            'import/default': 'error',
-            'import/no-named-as-default': 'warn',
+            "import/named": "error",
+            "import/default": "error",
+            "import/no-named-as-default": "warn",
             "no-undef": "error",
-            '@typescript-eslint/no-unused-vars': ['warn',
+            "@typescript-eslint/no-unused-vars": [
+                "warn",
                 {
-                    "argsIgnorePattern": "^_",
-                    "varsIgnorePattern": "^_",
-                    "caughtErrors": "none",
-                    "destructuredArrayIgnorePattern": "^_",
-
-                }
+                    argsIgnorePattern: "^_",
+                    varsIgnorePattern: "^_",
+                    caughtErrors: "none",
+                    destructuredArrayIgnorePattern: "^_",
+                },
             ],
-            "no-unused-vars": ["warn", {
-                "caughtErrors": "none",
-                "varsIgnorePattern": "^_",
-                "argsIgnorePattern": "^_",
-                "destructuredArrayIgnorePattern": "^_",
-            }],
+            "no-unused-vars": [
+                "warn",
+                {
+                    caughtErrors: "none",
+                    varsIgnorePattern: "^_",
+                    argsIgnorePattern: "^_",
+                    destructuredArrayIgnorePattern: "^_",
+                },
+            ],
             "@typescript-eslint/no-explicit-any": "warn",
             "@typescript-eslint/explicit-function-return-type": "off",
             "@typescript-eslint/explicit-module-boundary-types": "off",
         },
         settings: {
             react: {
-                version: 'detect',
+                version: "detect",
             },
         },
-
     },
     // {
     //     name: "typescript",
@@ -208,3 +230,16 @@ export default [
 //       "sourceType": "module"
 //     }
 //   },
+
+// import js from "@eslint/js";
+// import globals from "globals";
+// import json from "@eslint/json";
+// import { defineConfig } from "eslint/config";
+
+// export default defineConfig([
+//     { files: ["**/*.{js,mjs,cjs}"], plugins: { js }, extends: ["js/recommended"] },
+//     { files: ["**/*.{js,mjs,cjs}"], languageOptions: { globals: globals.browser } },
+//     { files: ["**/*.json"], plugins: { json }, language: "json/json", extends: ["json/recommended"] },
+//     { files: ["**/*.jsonc"], plugins: { json }, language: "json/jsonc", extends: ["json/recommended"] },
+// ]);
+export default defineConfig(eslintConfig);
