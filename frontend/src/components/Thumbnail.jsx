@@ -1,30 +1,35 @@
 import { BrokenImage } from "@mui/icons-material";
 import { Avatar } from "@mui/material";
+import { useCallback, useState } from "react";
 
-const onError = (event) => {
-  event.target.src = `/static/images/nodigital.png`;
-};
+const no_digital_image = "/static/images/nodigital.png";
 
 export default function Thumbnail({ src, width = 75, alt = "" }) {
+  const [brokenLink, setBrokenLink] = useState(false);
   const flex = `0 0 ${width}px`;
-  if (src) {
-    return (
-      <span style={{ width, minWidth: width, display: "flex", flex, alignItems: "start" }}>
-        <img
-          style={{
-            maxWidth: "100%",
-          }}
-          src={src}
-          onError={onError}
-          alt={alt}
-        />
-      </span>
-    );
-  } else {
+
+  const onError = useCallback(() => {
+    setBrokenLink(true);
+  }, []);
+
+  if (brokenLink) {
     return (
       <Avatar style={{ width, height: width, flex }}>
-        <BrokenImage style={{ fontSize: width * 0.6 }} />
+        <BrokenImage style={{ fontSize: width * 0.7 }} />
       </Avatar>
     );
   }
+
+  return (
+    <span style={{ width, minWidth: width, display: "flex", flex, alignItems: "start" }}>
+      <img
+        style={{
+          maxWidth: "100%",
+        }}
+        src={src || no_digital_image}
+        onError={onError}
+        alt={alt}
+      />
+    </span>
+  );
 }

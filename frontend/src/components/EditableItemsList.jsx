@@ -271,13 +271,7 @@ export function Item({
   }
 
   const thumbnail_source =
-    type === "collection"
-      ? thumbnail
-        ? `https://search.freedomarchives.org/${thumbnail}`
-        : null
-      : id
-        ? `/images/thumbnails/${id}.jpg`
-        : null; // FIXME
+    type === "collection" ? (thumbnail ? `https://search.freedomarchives.org/${thumbnail}` : null) : thumbnail;
 
   return (
     <ListItem {...props} dense={dense} disablePadding alignItems="flex-start">
@@ -339,7 +333,7 @@ export default function RecordItem({ record = {}, description: showDescription, 
   return (
     <Item
       id={record_id}
-      thumbnail={primary_instance_thumbnail}
+      thumbnail={primary_instance_thumbnail ? `/images/thumbnails/${record_id}.jpg` : null}
       details={details}
       title={title}
       description={showDescription && description}
