@@ -54,6 +54,10 @@ export const useSetSearch = () => {
     return useQueryStore(state => state.setSearch);
 };
 
+export const useSetSearchIndex = () => {
+    return useQueryStore(state => state.setSearchIndex);
+};
+
 export const useSetFilter = () => {
     return useQueryStore(state => state.setFilter);
 };

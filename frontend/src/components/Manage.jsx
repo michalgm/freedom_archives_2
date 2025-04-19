@@ -3,7 +3,7 @@ import { Box, Button, Grid2, Icon, IconButton, Paper, Stack } from "@mui/materia
 import { isEqual, startCase } from "lodash-es";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { FormContainer, useFieldArray, useForm } from "react-hook-form-mui";
-import { useResetSearch, useSetFilter, useSetSearch } from "src/stores";
+import { useResetSearch, useSetFilter, useSetSearch, useSetSearchIndex } from "src/stores";
 import useQueryStore from "src/stores/queryStore";
 import { useDebouncedCallback } from "use-debounce";
 
@@ -279,6 +279,7 @@ export default function Manage({
   const setSearch = useSetSearch();
   // const setSearchIndex = useQueryStore((state) => state.setSearchIndex);
   const setFilter = useSetFilter();
+  const setSearchIndex = useSetSearchIndex();
   // const setSearchType = useSetSearchType();
   // const resetSearch = useResetSearch();
 
@@ -367,6 +368,8 @@ export default function Manage({
   }, [offset, filter, service, lookupItems]);
 
   const link = !itemAction;
+  itemAction = itemAction || ((index) => setSearchIndex(offset + index));
+
   return (
     <ViewContainer
       embedded={embedded}
