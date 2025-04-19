@@ -1,7 +1,5 @@
 import { Alert, Box, Grid2, Paper, Stack } from "@mui/material";
 import React, { useEffect } from "react";
-// import { useResetSearch, useStateValue } from "../appContext";
-
 import { useFormState } from "react-hook-form";
 import { FormButton } from "src/components/form/ButtonsHeader";
 import useFormManagerContext from "src/components/form/FormManagerContext";
@@ -50,6 +48,16 @@ export const FormErrors = ({ service }) => {
   );
 };
 
+export function ButtonsHeader({ buttons }) {
+  return (
+    <Grid2 container className="buttons" spacing={1} justifyContent="flex-end">
+      {buttons.map((props) => (
+        <FormButton key={props.label} {...props} />
+      ))}
+    </Grid2>
+  );
+}
+
 function ViewContainer({ children, buttons, embedded, footerElements = [], headerElements = [], service }) {
   const { isLoading } = useFormManagerContext();
 
@@ -57,13 +65,7 @@ function ViewContainer({ children, buttons, embedded, footerElements = [], heade
 
   const height = embedded ? "100%" : "100%";
   if (buttons) {
-    headerElements.unshift(
-      <Grid2 key="buttons" container className="buttons" spacing={1} justifyContent="flex-end">
-        {buttons.map((props) => (
-          <FormButton key={props.label} {...props} />
-        ))}
-      </Grid2>
-    );
+    headerElements.unshift(<ButtonsHeader key="buttons" buttons={buttons} />);
   }
   return (
     <Stack direction="column" spacing={2} useFlexGap style={{ height, flexWrap: "nowrap" }}>
