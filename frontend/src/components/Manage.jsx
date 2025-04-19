@@ -1,20 +1,24 @@
+import { Close } from "@mui/icons-material";
 import { Box, Button, Grid2, Icon, IconButton, Paper, Stack } from "@mui/material";
 // import { FieldArray, Formik, useFormikContext } from "formik";
 import { isEqual, startCase } from "lodash-es";
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { collections, records } from "../api";
-
-import { Close } from "@mui/icons-material";
+import { FormContainer, useFieldArray, useForm } from "react-hook-form-mui";
+import { useResetSearch, useSetFilter, useSetSearch } from "src/stores";
 import useQueryStore from "src/stores/queryStore";
 import { useDebouncedCallback } from "use-debounce";
+
+import { collections, records } from "../api";
+
 // import { useStateValue } from "../appContext";
-import { FormContainer, useFieldArray, useForm } from "react-hook-form-mui";
+
 // import Field from "../components/Field";
 import { Field } from "../components/form/Field";
 // import ListItemField from "../components/ListItemField";
 import PaginationFooter from "../components/PaginationFooter";
+
 // import AutoSubmit from "./AutoSubmit";
-import { useResetSearch, useSetFilter, useSetSearch } from "src/stores";
+
 import { ItemsList } from "./EditableItemsList";
 import ViewContainer from "./ViewContainer";
 

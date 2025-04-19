@@ -1,5 +1,4 @@
 import { Alert, AlertTitle } from "@mui/material";
-
 import { useAppStore } from "src/stores";
 
 function Errors() {

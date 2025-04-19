@@ -6,6 +6,7 @@ import { useNavigate, useParams } from "react-router";
 
 import { relationships } from "../api";
 import ButtonLink from "../components/ButtonLink";
+
 import Relationship from "./Relationship";
 
 function LinearProgressWithLabel(props) {

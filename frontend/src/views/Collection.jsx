@@ -2,17 +2,19 @@ import { Box, Divider, Grid2, Stack, Tab, Tabs, Typography } from "@mui/material
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useFieldArray, useFormContext } from "react-hook-form";
 import { useNavigate, useParams } from "react-router";
-import GridBlock from "src/components/GridBlock";
 import { BaseForm } from "src/components/form/BaseForm";
+import GridBlock from "src/components/GridBlock";
 // import ButtonsHeader from "src/components/form/ButtonsHeader";
 // import { useTitle } from "../appContext";
 import { useTitle } from "src/stores";
 import EditItemView from "src/views/EditItemView";
+
 import { EditableItemsListBase } from "../components/EditableItemsList";
 import FieldRow from "../components/FieldRow";
 // import ViewContainer from "../components/ViewContainer";
 import { Field } from "../components/form/Field";
 import Collections from "../views/Collections";
+
 import Records from "./Records";
 
 function Collection({ id, mode = "" }) {

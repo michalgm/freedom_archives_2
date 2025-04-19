@@ -1,4 +1,3 @@
-import { useEffect, useRef, useState } from "react";
 
 import { Box, FormControl, FormHelperText, InputLabel } from "@mui/material";
 import { Link } from "@tiptap/extension-link";
@@ -25,6 +24,7 @@ import {
   RichTextEditor,
   RichTextReadOnly,
 } from "mui-tiptap";
+import { useEffect, useRef, useState } from "react";
 
 const RichTextInput = (props) => {
   const {

@@ -1,6 +1,4 @@
-import { Chip, Stack } from "@mui/material";
-
-import { Pagination } from "@mui/material";
+import { Chip, Stack , Pagination } from "@mui/material";
 import { startCase } from "lodash-es";
 
 function PaginationFooter({

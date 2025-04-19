@@ -23,17 +23,17 @@ import { useConfirm } from "material-ui-confirm";
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import { FormContainer, TextFieldElement, useFieldArray, useFormContext } from "react-hook-form-mui";
 import { useNavigate, useParams } from "react-router";
+
 import { records, relationships } from "../api";
 import { useTitle } from "../appContext";
 import { EditableItemsList, RecordsList } from "../components/EditableItemsList";
-import Field from "../components/OldField";
+import FieldRow from "../components/FieldRow";
 import { EditableItem } from "../components/form/EditableItem";
 import { Field as NewField } from "../components/form/Field";
-
-import FieldRow from "../components/FieldRow";
 import GridBlock from "../components/GridBlock";
 import Link from "../components/Link";
 import ListItemField from "../components/ListItemField";
+import Field from "../components/OldField";
 import Form from "../components/OldForm";
 import ViewContainer from "../components/ViewContainer";
 

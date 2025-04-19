@@ -1,6 +1,7 @@
-import "./wdyr"; // <--- first import
+// import "./wdyr.js";
 
 import { createRoot } from "react-dom/client";
+
 import App from "./App";
 import "./index.css";
 

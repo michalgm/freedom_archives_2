@@ -1,12 +1,13 @@
 import { Box, MenuItem, TextField } from "@mui/material";
-import RecordItem, { CollectionItem } from "./EditableItemsList";
-
 import { Field } from "formik";
 import { Autocomplete } from "formik-mui";
 import React from "react";
 import { useDebouncedCallback } from "use-debounce";
 import useDeepCompareEffect from "use-deep-compare-effect";
+
 import { services } from "../api";
+
+import RecordItem, { CollectionItem } from "./EditableItemsList";
 
 const searchTypes = {
   list_items: {

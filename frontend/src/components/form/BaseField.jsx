@@ -1,5 +1,4 @@
-import { useMemo } from "react";
-
+import { Check } from "@mui/icons-material";
 import {
   Checkbox,
   FormControl,
@@ -18,6 +17,7 @@ import {
 import { Box } from "@mui/system";
 import { DatePicker, DateTimePicker } from "@mui/x-date-pickers";
 import { merge } from "lodash-es";
+import { useMemo } from "react";
 import {
   CheckboxButtonGroup,
   CheckboxElement,
@@ -28,13 +28,13 @@ import {
   ToggleButtonGroupElement,
 } from "react-hook-form-mui";
 import { DatePickerElement, DateTimePickerElement } from "react-hook-form-mui/date-pickers";
-
-import { Check } from "@mui/icons-material";
 import { formatLabel } from "src/components/form/schemaUtils";
 import { convertSvgToDataUrl } from "src/utils";
+
 import Autocomplete from "../Autocomplete/Autocomplete";
 import OldAutocomplete from "../Autocomplete/AutocompleteMessy";
 import DateStringField from "../DateStringField";
+
 import { EditableItem } from "./EditableItem";
 import RichTextInput from "./RichTextInput";
 

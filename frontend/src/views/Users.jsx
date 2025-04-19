@@ -1,9 +1,12 @@
 import PasswordIcon from "@mui/icons-material/Password";
 import { Paper } from "@mui/material";
 import { useCallback, useEffect, useMemo, useState } from "react";
+
 import { users as usersService } from "../api";
 import EditableDataTable from "../components/EditableDataTable";
+
 import ChangePassword from "./ChangePassword";
+
 export default function Users() {
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);

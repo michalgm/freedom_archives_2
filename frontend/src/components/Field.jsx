@@ -9,16 +9,15 @@ import {
   RadioGroup,
   TextField,
 } from "@mui/material";
-import { Field as FormikField, useFormikContext } from "formik";
-
 import { DatePicker, DateTimePicker } from "@mui/x-date-pickers";
+import { Field as FormikField, useFormikContext } from "formik";
 import { Autocomplete } from "formik-mui";
-
 import React from "react";
 import { formatLabel } from "src/components/form/schemaUtils";
+
 import DateStringField from "./DateStringField";
-import SelectField from "./SelectField";
 import { EditableItem } from "./form/EditableItem";
+import SelectField from "./SelectField";
 
 const selectOptions = {
   day: Array.from({ length: 32 }, (v, k) => ({

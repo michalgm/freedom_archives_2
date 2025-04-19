@@ -1,10 +1,10 @@
 import { Box, Paper, Tab, Tabs } from "@mui/material";
-
-import { useCallback, useEffect, useState } from "react";
-import { list_items_lookup } from "../api";
-
 import { startCase } from "lodash-es";
+import { useCallback, useEffect, useState } from "react";
+
+import { list_items_lookup } from "../api";
 import EditableDataTable from "../components/EditableDataTable";
+
 const item_types = {
   call_number: { description: true, collections: true, instances: true },
   generation: { description: true, instances: true },

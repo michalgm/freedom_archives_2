@@ -3,7 +3,6 @@ import { StyledEngineProvider, ThemeProvider } from "@mui/material/styles";
 import { LocalizationProvider } from "@mui/x-date-pickers";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import { ConfirmProvider } from "material-ui-confirm";
-
 import Router from "src/Routes";
 import { theme } from "src/theme";
 import "src/utils/logger";

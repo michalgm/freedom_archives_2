@@ -1,14 +1,15 @@
 import { AppBar, Box, Button, Container, Icon, Stack, Toolbar, Typography } from "@mui/material";
+import { useEffect, useRef } from "react";
 import { Link, Outlet, useLocation } from "react-router";
 import { useAppStore, useAuth, useResetSearch } from "src/stores";
 import logger from "src/utils/logger";
+
 import { app } from "./api";
 // import { useStateValue } from "./appContext";
 import Authentication from "./Authentication";
 import Breadcrumbs from "./components/Breadcrumbs";
 import ErrorBoundary from "./components/ErrorBoundary";
 // import Errors from "./components/Errors";
-import { useEffect, useRef } from "react";
 import Notifications from "./components/Notifications";
 import Loading from "./views/Loading";
 import Sidebar from "./views/Sidebar";

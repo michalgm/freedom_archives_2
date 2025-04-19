@@ -3,16 +3,18 @@ import { FieldArray, useFormikContext } from "formik";
 import { useConfirm } from "material-ui-confirm";
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate, useParams } from "react-router";
+
 import { collections as collectionsService } from "../api";
 import { useTitle } from "../appContext";
 import { EditableItemsList } from "../components/EditableItemsList";
 import FieldRow from "../components/FieldRow";
+import { EditableItem } from "../components/form/EditableItem";
 import ListItemField from "../components/ListItemField";
 import Field from "../components/OldField";
 import Form from "../components/OldForm";
 import ViewContainer from "../components/ViewContainer";
-import { EditableItem } from "../components/form/EditableItem";
 import Collections from "../views/Collections";
+
 import Records from "./Records";
 
 const defaultCollection = {

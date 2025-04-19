@@ -1,10 +1,9 @@
 import { Box, Button, Grid2, Paper, Stack, Typography } from "@mui/material";
-
-import { useCallback, useEffect, useMemo, useState } from "react";
-import { collections, records, review_changes, snapshots } from "../api";
-
 import dayjs from "dayjs";
 import { isEqual, startCase } from "lodash-es";
+import { useCallback, useEffect, useMemo, useState } from "react";
+
+import { collections, records, review_changes, snapshots } from "../api";
 import EditableDataTable from "../components/EditableDataTable";
 import Link from "../components/Link";
 import Field from "../components/OldField";

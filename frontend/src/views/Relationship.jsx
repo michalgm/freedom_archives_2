@@ -5,6 +5,7 @@ import { relationships } from "../api";
 import Field from "../components/Field";
 import Form from "../components/Form";
 import Link from "../components/Link";
+
 import Record from "./Record";
 
 function Relationship({ id }) {

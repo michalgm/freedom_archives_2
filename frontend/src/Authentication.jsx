@@ -1,7 +1,8 @@
 import React, { useEffect, useRef } from "react";
+import { useAuth, useDisplayError } from "src/stores";
+
 import { app, authentication } from "./api";
 
-import { useAuth, useDisplayError } from "src/stores";
 // import { useStateValue } from "./appContext";
 
 function Authentication() {

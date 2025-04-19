@@ -1,10 +1,10 @@
 import "./Search.scss";
 
 import { Box, Button, Card, Divider, Grid2, Icon, Link as MULink, Paper, Stack, Typography } from "@mui/material";
-import React, { useCallback, useEffect, useRef, useState } from "react";
-
 import { useTheme } from "@mui/material/styles";
 import { startCase } from "lodash-es";
+import React, { useCallback, useEffect, useRef, useState } from "react";
+
 import { public_records as recordsService } from "../api";
 import AutoSave from "../components/AutoSave";
 import Field from "../components/Field";
