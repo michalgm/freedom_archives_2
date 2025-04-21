@@ -3,6 +3,8 @@ import { Button, DialogContentText, Paper, Stack, Typography } from "@mui/materi
 import { startCase } from "lodash-es";
 import { useConfirm } from "material-ui-confirm";
 import { useCallback, useEffect, useMemo, useState } from "react";
+import ButtonsHeader from "src/components/form/ButtonsHeader";
+import { Section } from "src/components/ViewContainer";
 import { useAddNotification } from "src/stores";
 
 import { snapshots as snapshotsService } from "../api";
@@ -27,7 +29,7 @@ const PublishSite = () => {
     );
   }, []);
 
-  const publishChanges = async () => {
+  const publishChanges = useCallback(async () => {
     await confirm({
       title: "Publish changes to live site?",
       content: (
@@ -57,7 +59,7 @@ const PublishSite = () => {
     await snapshotsService.create({});
     addNotification({ message: `Changes published to live site!` });
     fetchSnapshots();
-  };
+  }, [addNotification, confirm, fetchSnapshots]);
 
   const restoreSnapshot = useCallback(
     async ({ title, snapshot_id, date_published }) => {
@@ -73,6 +75,17 @@ const PublishSite = () => {
       fetchSnapshots();
     },
     [addNotification, confirm, fetchSnapshots]
+  );
+  const buttons = useMemo(
+    () => [
+      {
+        label: "Publish changes to live site",
+        color: "primary",
+        icon: <Publish />,
+        onClick: publishChanges,
+      },
+    ],
+    [publishChanges]
   );
 
   const columns = useMemo(
@@ -113,11 +126,7 @@ const PublishSite = () => {
 
   return (
     <Stack className="snapshots" sx={{ height: "100%" }} spacing={2}>
-      <Paper style={{ textAlign: "right" }}>
-        <Button variant="contained" startIcon={<Publish />} onClick={publishChanges}>
-          Publish changes to live site
-        </Button>
-      </Paper>
+      <Section header elements={[<ButtonsHeader key={"buttons"} buttons={buttons} />]} />
       <Paper sx={{ p: 0 }} className="FlexContainer">
         <Typography sx={{ m: "10px" }} variant="h6">
           Site Snapshots

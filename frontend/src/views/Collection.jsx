@@ -1,5 +1,6 @@
+import { Delete, Save } from "@mui/icons-material";
 import { Box, Divider, Grid2, Stack, Tab, Tabs, Typography } from "@mui/material/";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useFieldArray, useFormContext } from "react-hook-form";
 import { useNavigate, useParams } from "react-router";
 import { BaseForm } from "src/components/form/BaseForm";
@@ -26,26 +27,23 @@ function Collection({ id, mode = "" }) {
 
   const [tab, setTab] = useState(defaultTab);
 
-  const buttonRef = useRef();
   const setTitle = useTitle();
   const navigate = useNavigate();
 
   const newCollection = id === "new";
-
-  if (!buttonRef.current) {
-    buttonRef.current = document.createElement("div");
-  }
 
   useEffect(() => {
     setTab(defaultTab);
   }, [id, defaultTab]);
 
   const buttons = [
-    { label: "Save", type: "submit", color: "primary" },
+    { label: "Save", type: "submit", color: "primary", icon: <Save /> },
     {
       label: "Delete",
       type: "delete",
       color: "secondary",
+      variant: "outlined",
+      icon: <Delete />,
       deleteOptions: {
         renderContent: (collection) => {
           return (
@@ -125,7 +123,6 @@ function Collection({ id, mode = "" }) {
               item={collection}
               id={id}
               newItem={newCollection}
-              // buttonRef={showForm && buttonRef}
               buttons={buttons}
               neighborService={isFeaturedRecords || isFeaturedCollections ? null : "collection"}
               className="FlexContainer"

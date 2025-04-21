@@ -18,7 +18,7 @@ import {
   TableRow,
   Typography,
 } from "@mui/material/";
-import React, { useRef } from "react";
+import React from "react";
 import { useFieldArray, useFormContext } from "react-hook-form-mui";
 import { useNavigate, useParams } from "react-router";
 import { EditableItemsList, RecordsList } from "src/components/EditableItemsList";
@@ -304,14 +304,10 @@ function Record({ id /*  embedded = false */ }) {
   id ??= paramId;
   const navigate = useNavigate();
   const newRecord = id === "new";
-  const buttonRef = useRef();
 
   const setTitle = useTitle();
 
   logger.log("Record RENDER");
-  if (!buttonRef.current) {
-    buttonRef.current = document.createElement("div");
-  }
 
   return (
     <div className="record FlexContainer">

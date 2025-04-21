@@ -33,7 +33,7 @@ export const FormErrors = ({ errors, service }) => {
 
 const BaseForm = ({ children, autoComplete = "off", formConfig, formID, ...props }) => {
   const formManager = useFormManager(formConfig);
-  const { formContext, onSave, shouldBlockNavigation } = formManager;
+  const { formContext, submitForm, shouldBlockNavigation } = formManager;
   const { errors } = formContext.formState;
   logger.log("BASE FORM RENDER", errors, formContext.getValues());
 
@@ -45,7 +45,7 @@ const BaseForm = ({ children, autoComplete = "off", formConfig, formID, ...props
         formContext: formManager.formContext,
         formState: formManager.formState,
         loading: formManager.loading,
-        onSave: formManager.onSave,
+        onSave: formManager.submitForm,
         confirmDelete: formManager.confirmDelete,
         service: formManager.service,
         submitForm: formManager.submitForm,
@@ -53,7 +53,7 @@ const BaseForm = ({ children, autoComplete = "off", formConfig, formID, ...props
       }}
     >
       <FormContainer
-        onSuccess={onSave}
+        onSuccess={submitForm}
         FormProps={{
           style: { height: "100%" },
           autoComplete,

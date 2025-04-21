@@ -1,13 +1,13 @@
 import { Alert, Box, Grid2, Paper, Stack } from "@mui/material";
 import React, { useEffect } from "react";
 import { useFormState } from "react-hook-form";
-import { FormButton } from "src/components/form/ButtonsHeader";
+import ButtonsHeader from "src/components/form/ButtonsHeader";
 import useFormManagerContext from "src/components/form/FormManagerContext";
 import { getFieldLabel, parseError } from "src/components/form/schemaUtils";
 import Show from "src/components/Show";
 import { flattenErrors } from "src/utils";
 
-const Section = ({ header, elements, service, ...props }) => {
+export const Section = ({ header, elements, service, ...props }) => {
   if (!elements.length) return null;
   const justifyContent = elements.length === 1 ? "center" : "space-between";
   return (
@@ -47,16 +47,6 @@ export const FormErrors = ({ service }) => {
     </Alert>
   );
 };
-
-export function ButtonsHeader({ buttons }) {
-  return (
-    <Grid2 container className="buttons" spacing={1} justifyContent="flex-end">
-      {buttons.map((props) => (
-        <FormButton key={props.label} {...props} />
-      ))}
-    </Grid2>
-  );
-}
 
 function ViewContainer({ children, buttons, embedded, footerElements = [], headerElements = [], service }) {
   const { isLoading } = useFormManagerContext();

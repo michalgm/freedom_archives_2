@@ -11,12 +11,13 @@ import {
   Stack,
 } from "@mui/material";
 import { useState } from "react";
+import { FormContainer } from "react-hook-form-mui";
+import ButtonsHeader from "src/components/form/ButtonsHeader";
+import { Field } from "src/components/form/Field";
+import { FormErrors } from "src/components/ViewContainer";
 import { useAddNotification } from "src/stores";
 
 import { users } from "../api";
-// import { useAddNotification } from "../appContext";
-import Field from "../components/Field";
-import Form from "../components/Form";
 
 function ChangePassword({ open, user: { user_id, username }, handleClose }) {
   const [showPassword, setShowPassword] = useState(false);
@@ -56,33 +57,33 @@ function ChangePassword({ open, user: { user_id, username }, handleClose }) {
     const errors = {};
     if (password1 && password2) {
       if (password1 !== password2) {
-        errors.password2 = "Passwords do not match";
+        errors.password1 = { message: "Passwords do not match" };
       } else if (password1.length < 8) {
-        errors.password1 = "Password must be at least 8 characters";
+        errors.password1 = { message: "Password must be at least 8 characters" };
       } else if (password1 == username) {
-        errors.password1 = "Password cannot be the same as username";
+        errors.password1 = { message: "Password cannot be the same as username" };
       } else if (password1.match(/^[A-z0-9]+$/)) {
-        errors.password1 = "Password must contain at least one special character";
+        errors.password1 = { message: "Password must contain at least one special character" };
       }
     }
     logger.log(errors);
-    return errors;
+    return { values: { password1, password2 }, errors };
   };
 
   const buttons = [
-    { label: "Change password", type: "submit", color: "primary" },
     {
       label: "Cancel",
       onClick: handleClose,
       variant: "outlined",
     },
+    { label: "Change password", type: "submit", color: "primary", onClick: savePassword },
   ];
 
   return (
     <>
       <Dialog open={open} onClose={handleClose} maxWidth="sm">
         <DialogTitle>Change password for user &quot;{username}&quot;</DialogTitle>
-        <DialogContent sx={{ overflowY: "visible", textAlign: "center" }}>
+        <DialogContent sx={{ textAlign: "center" }}>
           <Box sx={{ textAlign: "left" }}>
             Passwords must:
             <List sx={{ listStyleType: "disc", listStylePosition: "inside" }} dense>
@@ -91,17 +92,13 @@ function ChangePassword({ open, user: { user_id, username }, handleClose }) {
               <ListItem sx={{ display: "list-item" }}>Not be the same as your username</ListItem>
             </List>
           </Box>
-          <Form
-            initialValues={{ password1: "", password2: "" }}
-            validateOnChange
-            validate={validatePasswords}
-            gridProps={{
-              justifyContent: "center",
-            }}
-            onSubmit={savePassword}
-            buttons={buttons}
-            buttonsBelow
+          <FormContainer
+            defaultValues={{ password1: "", password2: "" }}
+            mode="onChange"
+            resolver={validatePasswords}
+            onSuccess={savePassword}
           >
+            <FormErrors />
             <Stack spacing={2} direction="row" sx={{ my: 2 }}>
               <Field
                 autoFocus
@@ -109,6 +106,7 @@ function ChangePassword({ open, user: { user_id, username }, handleClose }) {
                 label="Password"
                 type={showPassword ? "text" : "password"}
                 InputProps={passwordInputProps}
+                highlightDirty={false}
                 fullWidth={false}
                 width="auto"
               />
@@ -117,11 +115,13 @@ function ChangePassword({ open, user: { user_id, username }, handleClose }) {
                 label="Verify Password"
                 type={showPassword ? "text" : "password"}
                 InputProps={passwordInputProps}
+                highlightDirty={false}
                 fullWidth={false}
                 width="auto"
               />
             </Stack>
-          </Form>
+            <ButtonsHeader buttons={buttons} useFormManager={false} />
+          </FormContainer>
         </DialogContent>
       </Dialog>
     </>

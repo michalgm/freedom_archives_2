@@ -2,6 +2,7 @@ import { Box, Button, Grid2, Paper, Stack, Typography } from "@mui/material";
 import dayjs from "dayjs";
 import { isEqual, startCase } from "lodash-es";
 import { useCallback, useEffect, useMemo, useState } from "react";
+import { Section } from "src/components/ViewContainer";
 
 import { collections, records, review_changes, snapshots } from "../api";
 import EditableDataTable from "../components/EditableDataTable";
@@ -122,8 +123,7 @@ function ReviewChangesForm({ filter, setFilter, publishDate }) {
     return;
   }
   return (
-    <Paper sx={{ flex: "0 0 auto" }}>
-      <Typography variant="h6">Filter Changes</Typography>
+    <Box>
       <Form
         initialValues={initialValues}
         enableReinitialize
@@ -168,7 +168,7 @@ function ReviewChangesForm({ filter, setFilter, publishDate }) {
           }
         })}
       </Form>
-    </Paper>
+    </Box>
   );
 }
 
@@ -296,11 +296,17 @@ function ReviewChanges() {
 
   return (
     <Stack direction="column" sx={{ height: "100%" }} spacing={2}>
-      <ReviewChangesForm
-        filter={filter}
-        setFilter={setFilter}
-        publishDate={publishDate}
-        setPublishDate={setPublishDate}
+      <Section
+        header
+        elements={[
+          <ReviewChangesForm
+            key={"form"}
+            filter={filter}
+            setFilter={setFilter}
+            publishDate={publishDate}
+            setPublishDate={setPublishDate}
+          />,
+        ]}
       />
 
       <Paper sx={{ p: 0, mb: 2 }} className="FlexContainer">

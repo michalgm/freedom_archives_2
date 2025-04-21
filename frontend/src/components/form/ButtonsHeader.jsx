@@ -1,34 +1,47 @@
-import { Button } from "@mui/material";
+import { Button, Grid2 } from "@mui/material";
 import { useCallback, useState } from "react";
+import { useFormContext } from "react-hook-form";
 import useFormManagerContext from "src/components/form/FormManagerContext";
 
-export const FormButton = ({ label, onClick, type, formName, deleteOptions = {}, ...props }) => {
+// Base FormButton component that accepts handlers from context wrappers
+
+const STATICFORMCONTEXT = { formState: {} };
+export const FormButton = ({
+  label,
+  onClick,
+  type,
+  formName,
+  deleteOptions = {},
+  icon,
+  deleteHandler,
+  saveHandler,
+  formContext = STATICFORMCONTEXT,
+  ...props
+}) => {
   const [loading, setLoading] = useState(false);
-  const context = useFormManagerContext();
-  const {
-    confirmDelete,
-    formState: { isValid, isSubmitted },
-    submitForm,
-  } = context;
+  const { handleSubmit, formState: { isValid = true, isSubmitted = false } = {} } = formContext || {};
 
   const click = useCallback(
     async (e) => {
       setLoading(true);
-      // logger.log("CLICK", "submit", onClick, formName);
-      e.preventDefault();
       try {
-        if (onClick) {
+        if (type === "submit") {
+          e.preventDefault();
+          if (saveHandler) {
+            await saveHandler();
+          } else {
+            await handleSubmit(onClick)();
+          }
+        } else if (onClick) {
           await onClick();
-        } else if (type === "delete") {
-          await confirmDelete(deleteOptions);
-        } else if (type === "submit") {
-          await submitForm();
+        } else if (type === "delete" && deleteHandler) {
+          await deleteHandler(deleteOptions);
         }
       } finally {
         setLoading(false);
       }
     },
-    [confirmDelete, onClick, submitForm, type, deleteOptions, setLoading]
+    [type, onClick, deleteHandler, saveHandler, handleSubmit, deleteOptions]
   );
 
   return (
@@ -39,8 +52,9 @@ export const FormButton = ({ label, onClick, type, formName, deleteOptions = {},
       size="medium"
       onClick={click}
       form={formName}
+      startIcon={icon}
       disabled={type === "submit" && !isValid && isSubmitted}
-      type={type === "submit" ? "submit" : "Button"}
+      type={type === "submit" ? "submit" : "button"}
       {...props}
     >
       {label}
@@ -48,19 +62,31 @@ export const FormButton = ({ label, onClick, type, formName, deleteOptions = {},
   );
 };
 
-// const ButtonsHeader = ({ buttons, buttonRef, formName }) => {
-//   if (!buttons.length || !buttonRef) {
-//     return null;
-//   }
-//   return createPortal(
-//     <Grid2 container className="buttons" spacing={1} justifyContent="flex-end">
-//       {buttons.map(({ ...props }) => (
-//         <Grid2 key={props.label}>
-//           <FormButton formName={formName} {...props} />
-//         </Grid2>
-//       ))}
-//     </Grid2>,
-//     buttonRef.current
-//   );
-// };
-// export default ButtonsHeader;
+export const FormManagerButton = (props) => {
+  const { confirmDelete, formContext, submitForm } = useFormManagerContext();
+  return <FormButton {...props} saveHandler={submitForm} deleteHandler={confirmDelete} formContext={formContext} />;
+};
+
+export const ReactHookFormButton = (props) => {
+  const formContext = useFormContext();
+  return <FormButton {...props} formContext={formContext} />;
+};
+
+export function ButtonsHeader({ buttons, useFormManager = true, ...props }) {
+  if (!buttons?.length) {
+    return null;
+  }
+
+  const ButtonComponent = useFormManager ? FormManagerButton : ReactHookFormButton;
+  return (
+    <Grid2 container className="buttons" spacing={1} justifyContent="flex-end" {...props}>
+      {buttons.map((props) => (
+        <Grid2 key={props.label || props.id}>
+          <ButtonComponent {...props} />
+        </Grid2>
+      ))}
+    </Grid2>
+  );
+}
+
+export default ButtonsHeader;

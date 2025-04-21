@@ -1,3 +1,4 @@
+import { Delete, Save } from "@mui/icons-material";
 import { Box, Grid2, Icon, Typography } from "@mui/material";
 import { startCase } from "lodash-es";
 import { useEffect, useState } from "react";
@@ -7,8 +8,8 @@ import ViewContainer from "src/components/ViewContainer";
 import useQueryStore from "src/stores/queryStore";
 
 const defaultButtons = [
-  { label: "Save", type: "submit", color: "primary" },
-  { label: "Delete", type: "delete", color: "secondary" },
+  { label: "Save", type: "submit", color: "primary", icon: <Save /> },
+  { label: "Delete", type: "delete", color: "secondary", icon: <Delete />, variant: "outlined" },
 ];
 
 const RenderTime = ({ item, type }) => {
