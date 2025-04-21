@@ -99,16 +99,10 @@ function SearchStateHandler() {
 }
 
 function NavBar() {
-  const setLoading = useAppStore((state) => state.setLoading);
-  const loading = useAppStore((state) => state.loading);
-
   return (
     <AppBar color="primary" position="fixed" elevation={0} sx={{ zIndex: (theme) => theme.zIndex.drawer + 1 }}>
       <Toolbar className="topnav">
         <Breadcrumbs />
-        <Button onClick={() => setLoading(!loading)} color="secondary" variant="contained">
-          Toggle Loading
-        </Button>
         <Logout />
       </Toolbar>
     </AppBar>
