@@ -70,7 +70,7 @@ const router = createBrowserRouter(
           </RequireAuth>
         }
       >
-        <Route exact path="/" element={<Records />} />
+        <Route exact path="/" element={<Navigate replace to="/records" />} />
         <Route exact path="/collections" element={<Collections />} />
         <Route path="/collections/featured" element={<Collection id={0} mode="featured_collections" />} />
         <Route path="/collections/:id" element={<Collection />} />
