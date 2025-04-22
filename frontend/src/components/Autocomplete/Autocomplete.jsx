@@ -117,6 +117,7 @@ const Autocomplete = ({
   clearOnSelect = false,
   returnFullObject = true,
   excludeIds = emptyArray,
+  disableClearable = false,
   ...props
 }) => {
   const typeLabel = useMemo(() => (label || "").replace(/s$/, ""), [label]);
@@ -222,6 +223,7 @@ const Autocomplete = ({
     handleHomeEndKeys: true,
     filterSelectedOptions: true,
     disableCloseOnSelect: false,
+    disableClearable,
     clearOnBlur: true,
     blurOnSelect: false,
     onChange,
