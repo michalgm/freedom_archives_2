@@ -1,4 +1,3 @@
-
 import { Box, FormControl, FormHelperText, InputLabel } from "@mui/material";
 import { Link } from "@tiptap/extension-link";
 import { TextAlign } from "@tiptap/extension-text-align";
@@ -224,5 +223,4 @@ const RichTextInput = (props) => {
     return <RichTextReadOnly content={content} extensions={extensions} />;
   }
 };
-
 export default RichTextInput;

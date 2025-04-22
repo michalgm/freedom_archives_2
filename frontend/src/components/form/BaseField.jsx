@@ -9,6 +9,7 @@ import {
   Grid2,
   InputAdornment,
   Radio,
+  Skeleton,
   Switch,
   TextField,
   ToggleButton,
@@ -17,7 +18,7 @@ import {
 import { Box } from "@mui/system";
 import { DatePicker, DateTimePicker } from "@mui/x-date-pickers";
 import { merge } from "lodash-es";
-import { useMemo } from "react";
+import React, { Suspense, useMemo } from "react";
 import {
   CheckboxButtonGroup,
   CheckboxElement,
@@ -32,11 +33,11 @@ import { formatLabel } from "src/components/form/schemaUtils";
 import { convertSvgToDataUrl } from "src/utils";
 
 import Autocomplete from "../Autocomplete/Autocomplete";
-import OldAutocomplete from "../Autocomplete/AutocompleteMessy";
 import DateStringField from "../DateStringField";
 
 import { EditableItem } from "./EditableItem";
-import RichTextInput from "./RichTextInput";
+
+const RichTextInput = React.lazy(() => import("./RichTextInput"));
 
 const selectOptions = {
   day: Array.from({ length: 32 }, (v, k) => ({
@@ -290,33 +291,6 @@ export const BaseField = ({
     // );
   };
 
-  const renderOldAutocomplete = () => {
-    if (field_type === "list_item") {
-      const { itemType } = props;
-      props.service = "list_items";
-      props.searchParams = {
-        ...(props.searchParams || {}),
-        type: itemType,
-      };
-      props.createParams = {
-        ...(props.createParams || {}),
-        type: itemType,
-      };
-    }
-    return (
-      <OldAutocomplete
-        name={name}
-        options={options}
-        label={props.label}
-        textFieldProps={textFieldProps}
-        isRHF={isRHF}
-        onChange={onChange}
-        value={value}
-        {...props}
-      />
-    );
-  };
-
   const renderRichTextField = () => {
     const textFieldOptions = {
       ...textFieldProps,
@@ -328,22 +302,24 @@ export const BaseField = ({
     };
     if (isRHF) {
       return (
-        <Controller
-          key={name}
-          name={name}
-          control={control}
-          rules={{
-            required: props.required && "This field is required",
-          }}
-          render={({ field, formState }) => (
-            <RichTextInput
-              {...textFieldOptions}
-              content={field.value}
-              onChange={field.onChange}
-              error={formState.errors[name]}
-            />
-          )}
-        />
+        <Suspense fallback={<Skeleton variant="rectangular" sx={{ height: 150 }} />}>
+          <Controller
+            key={name}
+            name={name}
+            control={control}
+            rules={{
+              required: props.required && "This field is required",
+            }}
+            render={({ field, formState }) => (
+              <RichTextInput
+                {...textFieldOptions}
+                content={field.value}
+                onChange={field.onChange}
+                error={formState.errors[name]}
+              />
+            )}
+          />
+        </Suspense>
       );
     }
     return <RichTextInput {...textFieldOptions} />;
@@ -357,7 +333,6 @@ export const BaseField = ({
   };
 
   const renderRadioGroup = () => {
-    const options = transformOptions(defaultOptions);
     return (
       <RadioButtonGroup
         name={name}
@@ -614,8 +589,6 @@ export const BaseField = ({
       return renderAutocomplete();
     case "simpleSelect":
       return renderSimpleSelect();
-    case "autocomplete_messy":
-      return renderOldAutocomplete();
     case "togglebutton":
       return renderToggleButton();
     case "editableItem":
