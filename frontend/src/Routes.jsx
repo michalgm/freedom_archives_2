@@ -11,7 +11,6 @@ const EditLists = React.lazy(() => import("./views/EditLists"));
 const Login = React.lazy(() => import("./views/Login"));
 const PublishSite = React.lazy(() => import("./views/PublishSite"));
 const Record = React.lazy(() => import("./views/Record"));
-const RecordOld = React.lazy(() => import("./views/OldRecordOld"));
 const Records = React.lazy(() => import("./views/Records"));
 const Relationships = React.lazy(() => import("./views/Relationships"));
 const ReviewChanges = React.lazy(() => import("./views/ReviewChanges"));
@@ -78,7 +77,7 @@ const router = createBrowserRouter(
         <Route exact path="/records" element={<Records />} />
         <Route path="/records/featured" element={<Collection id={0} mode="featured_records" />} />
         <Route path="/records/:id" element={<Record showForm />} />
-        <Route path="/records-old/:id" element={<RecordOld showForm />} />
+        {/* <Route path="/records-old/:id" element={<RecordOld showForm />} /> */}
         <Route path="/relationships/:skip" element={<Relationships />} />
         <Route path="/relationships/" element={<Relationships />} />
         <Route path="/login" element={<Login />} />
