@@ -271,17 +271,19 @@ const Autocomplete = ({
           },
           output: (_, value) => {
             if (!props.multiple) {
-              if (value?.[idField] === "new") {
-                setCustomValue(value.searchTerm);
+              const option = getOptionById(value) || value
+              if (option?.[idField] === "new") {
+                setCustomValue(option.searchTerm);
                 return {};
               }
               return value;
             }
             if (!Array.isArray(value)) return emptyArray;
             const lastItem = value[value.length - 1];
+            const option = getOptionById(lastItem) || lastItem
 
-            if (lastItem?.[idField] === "new") {
-              setCustomValue(lastItem.searchTerm);
+            if (option?.[idField] === "new") {
+              setCustomValue(option.searchTerm);
               return value.slice(0, -1);
             }
             return value;
@@ -292,7 +294,7 @@ const Autocomplete = ({
         handleClose={(result) => {
           setCustomValue(null);
           if (result) {
-            const updatedValue = props.multiple ? [...getValues(name), result] : result;
+            const updatedValue = props.multiple ? [...getValues(name).filter(v => v !== 'new' && v?.[idField] !== 'new'), result] : result;
             setValue(name, updatedValue, { shouldValidate: true, shouldDirty: true, shouldTouch: true });
           }
         }}
