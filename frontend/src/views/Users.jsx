@@ -1,6 +1,7 @@
 import PasswordIcon from "@mui/icons-material/Password";
 import { Paper } from "@mui/material";
 import { useCallback, useEffect, useMemo, useState } from "react";
+import { checkUnique } from "src/utils";
 
 import { users as usersService } from "../api";
 import EditableDataTable from "../components/EditableDataTable";
@@ -38,6 +39,11 @@ export default function Users() {
           field: "username",
           flex: 2,
           editable: true,
+          preProcessEditCellProps: async (params) => {
+            const hasError = await checkUnique('users', { username: params.props.value, user_id: { $ne: params.props.row.user_id } });
+            const result = { ...params.props, error: hasError ? `An user named "${params.props.value}" already exists` : null };
+            return result;
+          },
         },
         {
           field: "firstname",
@@ -106,10 +112,11 @@ export default function Users() {
         extraActions={extraActions}
         model="users"
         itemType="User"
+        nameField="username"
         getItemName={(row) => row.username}
         autosizeColumns
       />
-      <ChangePassword {...editPassword} handleClose={() => setEditPassword({ open: false, user: {} })} />
+      <ChangePassword {...editPassword} handleClose={() => { setEditPassword({ open: false, user: {} }); fetchUsers(); }} />
     </Paper>
   );
 }

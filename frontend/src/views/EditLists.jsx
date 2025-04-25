@@ -1,6 +1,7 @@
 import { Box, Paper, Tab, Tabs } from "@mui/material";
 import { startCase } from "lodash-es";
 import { useCallback, useEffect, useState } from "react";
+import { checkUnique } from "src/utils";
 
 import { list_items_lookup } from "../api";
 import EditableDataTable from "../components/EditableDataTable";
@@ -33,6 +34,15 @@ const columns = [
     field: "item",
     flex: 2,
     editable: true,
+    preProcessEditCellProps: async (params) => {
+      const { type } = params.row
+      const hasError = await checkUnique('list_items', {
+        item: params.props.value, type: type, 
+        list_item_id: { $ne: params.row.list_item_id }
+      }, params.props.value);
+      const result = { ...params.props, error: hasError ? `An item named "${params.props.value}" already exists` : null };
+      return result;
+    },
   },
   {
     field: "description",
@@ -76,29 +86,30 @@ function EditLists() {
     setPagination(initialPage);
   }, [order, filter]);
 
+  const fetchValues = useCallback(async () => {
+    setLoading(true);
+    const $ilike = `%${filter.replace(/ /g, "%")}%`;
+    const { field = "item", sort = "asc" } = order || {};
+    const $sort = { [field || "item"]: sort === "desc" ? 0 : 1 };
+    if (field !== "item") {
+      $sort.item = sort === "desc" ? 0 : 1;
+    }
+    const values = await list_items_lookup.find({
+      query: {
+        type,
+        $limit: pagination.limit,
+        $skip: pagination.skip,
+        item: { $ilike },
+        $sort,
+      },
+    });
+    setValues(values);
+    setLoading(false);
+  }, [filter, order, pagination, type]);
+
   useEffect(() => {
-    const fetchValues = async () => {
-      setLoading(true);
-      const $ilike = `%${filter.replace(/ /g, "%")}%`;
-      const { field = "item", sort = "asc" } = order || {};
-      const $sort = { [field || "item"]: sort === "desc" ? 0 : 1 };
-      if (field !== "item") {
-        $sort.item = sort === "desc" ? 0 : 1;
-      }
-      const values = await list_items_lookup.find({
-        query: {
-          type,
-          $limit: pagination.limit,
-          $skip: pagination.skip,
-          item: { $ilike },
-          $sort,
-        },
-      });
-      setValues(values);
-      setLoading(false);
-    };
     fetchValues();
-  }, [type, filter, order, pagination]);
+  }, [fetchValues]);
 
   const onFilterChange = useCallback(({ quickFilterValues: [value] }) => {
     setFilter(value || "");

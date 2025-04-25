@@ -4,7 +4,7 @@ import DeleteIcon from "@mui/icons-material/Delete";
 import EditIcon from "@mui/icons-material/Edit";
 import SaveIcon from "@mui/icons-material/Save";
 import { Box, Button, Tooltip } from "@mui/material";
-import { DataGrid, GridActionsCellItem, GridToolbar, useGridApiRef } from "@mui/x-data-grid";
+import { DataGrid, GridActionsCellItem, GridEditInputCell, GridToolbar, useGridApiRef } from "@mui/x-data-grid";
 import { merge, startCase } from "lodash-es";
 import { useConfirm } from "material-ui-confirm";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
@@ -26,13 +26,23 @@ const AddButton = ({ itemType, addItem }) => {
     </Button>
   );
 };
+
+function RenderInputCell(props) {
+  const { error } = props;
+  return (
+    <Tooltip open={!!error} title={error} arrow placement="bottom-start" slotProps={{ 'tooltip': { sx: { backgroundColor: 'error.main' } }, 'arrow': { sx: { color: 'error.main', left: '50% !important', transform: 'translateX(-50%) !important' } } }}>
+      <GridEditInputCell {...props} />
+    </Tooltip>
+  );
+}
+
 export const EditableDataTable = ({
   rows,
   columns,
   loading,
   extraActions = [],
-  onUpdate = () => {},
-  onNew = () => {},
+  onUpdate = () => { },
+  onNew = () => { },
   defaultValues = {},
   idField = "id",
   model,
@@ -90,7 +100,7 @@ export const EditableDataTable = ({
         } else if (id === -1) {
           delete prepared[idField];
           newRow = await API[model].create(prepared);
-          onNewRef.current(newRow);
+          onNewRef.current = newRow;
         } else {
           newRow = await API[model].patch(id, prepared);
         }
@@ -102,12 +112,12 @@ export const EditableDataTable = ({
       resetEdit(newRow);
       return newRow;
     },
-    [addNotification, model, itemType, getItemName, idField, confirm, prepareItem, resetEdit]
+    [getItemName, idField, resetEdit, confirm, itemType, prepareItem, addNotification, model]
   );
 
   const deleteRow = useCallback(
     (row) => {
-      processRowUpdate({ ...row, delete: true });
+      processRowUpdate({ ...row, delete: true }, row);
     },
     [processRowUpdate]
   );
@@ -151,14 +161,14 @@ export const EditableDataTable = ({
       const isInEditMode = id === editRow;
       const icons = isInEditMode
         ? [
-            ["Save", SaveIcon, () => updateRow(id, "save")],
-            ["Cancel", CancelIcon, () => updateRow(id, "cancel")],
-          ]
+          ["Save", SaveIcon, () => updateRow(id, "save")],
+          ["Cancel", CancelIcon, () => updateRow(id, "cancel")],
+        ]
         : [
-            ["Edit", EditIcon, () => updateRow(id)],
-            ["Delete", DeleteIcon, () => deleteRow(row)],
-            ...extraActions.map(([label, Icon, action]) => [label, Icon, () => action(row)]),
-          ];
+          ["Edit", EditIcon, () => updateRow(id)],
+          ["Delete", DeleteIcon, () => deleteRow(row)],
+          ...extraActions.map(([label, Icon, action]) => [label, Icon, () => action(row)]),
+        ];
 
       const actions = icons.map(([label, Icon, action]) => (
         <Tooltip key={label} title={label} arrow placement="top">
@@ -174,12 +184,18 @@ export const EditableDataTable = ({
     const updateColumns = columns.map((column) => {
       const { flex, ...rest } = column;
       rest.headerName = rest.headerName || startCase(rest.field);
+      if (column.preProcessEditCellProps) {
+        rest.renderEditCell = RenderInputCell
+      }
       if (!autosizeColumns) {
         rest.flex = flex;
         return rest;
       }
-      return { ...rest, width: columnWidths[column.field] };
+      return {
+        ...rest, width: columnWidths[column.field],
+      };
     });
+
     if (readonly) {
       return updateColumns;
     }
@@ -240,9 +256,9 @@ export const EditableDataTable = ({
           // maxWidth: "800px",
 
           "& .MuiDataGrid-footerContainer, & .MuiDataGrid-toolbarContainer, & .MuiDataGrid-topContainer .MuiDataGrid-row--borderBottom":
-            {
-              backgroundColor: "grey.100",
-            },
+          {
+            backgroundColor: "grey.100",
+          },
           "& .MuiDataGrid-columnHeaderTitle": {
             textTransform: "capitalize",
           },
@@ -253,8 +269,12 @@ export const EditableDataTable = ({
             overflow: "auto",
             // maxWidth: "800px",
           },
-          "& .MuiDataGrid-editInputCell": {
-            backgroundColor: "rgba(25, 118, 210, 0.08)",
+          "& .MuiDataGrid-cell--editing": {
+            backgroundColor: "rgba(25, 118, 210, 0.08) !important",
+            ".Mui-error": {
+              color: "error.main",
+              border: "1px solid error.main",
+            },
             ".MuiInputBase-input": {
               p: 0,
               mx: "10px",

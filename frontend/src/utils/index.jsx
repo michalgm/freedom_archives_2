@@ -1,6 +1,8 @@
 import { useEffect, useRef } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 
+import { services } from "../api";
+
 const usePrevious = (value) => {
   const ref = useRef();
   useEffect(() => {
@@ -70,6 +72,11 @@ export function useLogChangedDeps(name, deps) {
     lastDepsRef.current = [...deps];
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, deps);
+}
+
+export const checkUnique = async (service, query) => {
+  const res = await services[service].find({ query: { ...query, $limit: 1 }, noLoading: true });
+  return res.total !== 0;
 }
 
 // export function DebugProps({ name, ...props }) {
