@@ -92,7 +92,6 @@ export function EditableItemsListBase({
     if (!item) {
       return null;
     }
-    logger.log(item);
     // logger.log(getValues(`${name}[${index}]`));
     const actions = [
       <EditableItemsListAction
@@ -228,7 +227,7 @@ function RecordItemDetails({ details, dense }) {
 export function Item({
   id,
   type,
-  thumbnail,
+  item,
   details = [],
   title,
   description,
@@ -270,14 +269,11 @@ export function Item({
     props.secondaryAction = action();
   }
 
-  const thumbnail_source =
-    type === "collection" ? (thumbnail ? `https://search.freedomarchives.org/${thumbnail}` : null) : thumbnail;
-
   return (
     <ListItem {...props} dense={dense} disablePadding alignItems="flex-start">
       <Container {...list_item_props}>
         <ListItemAvatar style={{ minWidth: dense ? 35 : null }}>
-          <Thumbnail src={thumbnail_source} alt={`${title} Thumbnail`} width={dense ? 20 : 40} />
+          <Thumbnail item={item} width={dense ? 20 : 40} />
         </ListItemAvatar>
         <ListItemText
           disableTypography
@@ -314,7 +310,6 @@ export default function RecordItem({ record = {}, description: showDescription, 
   const {
     title,
     record_id,
-    primary_instance_thumbnail,
     primary_instance_format_text,
     collection: { collection_name, collection_id } = {},
     description,
@@ -332,8 +327,8 @@ export default function RecordItem({ record = {}, description: showDescription, 
   }
   return (
     <Item
+      item={record}
       id={record_id}
-      thumbnail={primary_instance_thumbnail ? `/images/thumbnails/${record_id}.jpg` : null}
       details={details}
       title={title}
       description={showDescription && description}
@@ -344,7 +339,7 @@ export default function RecordItem({ record = {}, description: showDescription, 
 }
 
 export function CollectionItem({ collection = {}, description: showDescription, itemAction, ...props }) {
-  const { collection_name, collection_id, thumbnail, summary, parent } = collection;
+  const { collection_name, collection_id, summary, parent } = collection;
   const details =
     parent && parent.collection_id
       ? [
@@ -361,7 +356,7 @@ export function CollectionItem({ collection = {}, description: showDescription, 
   return (
     <Item
       id={collection_id}
-      thumbnail={thumbnail}
+      item={collection}
       title={collection_name}
       description={showDescription && summary}
       details={details}

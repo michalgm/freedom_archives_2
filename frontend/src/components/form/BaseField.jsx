@@ -515,7 +515,7 @@ export const BaseField = ({
     return (
       <EditableItem
         name={name}
-        value={value || ""}
+        value={value}
         label={props.label}
         // error={error}
         helperText={helperText}

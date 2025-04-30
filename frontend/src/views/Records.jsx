@@ -38,12 +38,12 @@ function Records({ embedded, itemAction, filter = {}, excludeIds = [] }) {
 
   const createQuery = useCallback(
     (filter) => {
-      const { search, non_digitized, hidden, needs_review, collection = {} } = filter;
+      const { search, non_digitized, hidden, needs_review, collection } = filter;
       const query = {
         has_digital: non_digitized ? undefined : true,
         is_hidden: hidden ? undefined : false,
         needs_review: needs_review ? needs_review : undefined,
-        collection_id: collection ? collection.collection_id : undefined,
+        collection_id: collection,
         record_id: { $nin: excludeIds },
         $sort: { title: 1 },
         $select: [

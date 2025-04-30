@@ -23,6 +23,7 @@ import { useFieldArray, useFormContext } from "react-hook-form-mui";
 import { useNavigate, useParams } from "react-router";
 import { EditableItemsList, RecordsList } from "src/components/EditableItemsList";
 // import ButtonsHeader from "src/components/form/ButtonsHeader";
+import Thumbnail from "src/components/Thumbnail";
 import { useTitle } from "src/stores";
 import EditItemView from "src/views/EditItemView";
 
@@ -360,11 +361,7 @@ function Record({ id /*  embedded = false */ }) {
                         >
                           Old Admin Link
                         </Button>
-                        <p>
-                          {!newRecord && (
-                            <img style={{ maxWidth: "100%" }} alt="" src={`/images/thumbnails/${id}.jpg`} />
-                          )}
-                        </p>
+                        <p>{!newRecord && <Thumbnail item={record} width="100%" />}</p>
                       </Grid2>
                     }
                     <FieldRow>
