@@ -1,8 +1,7 @@
-import { Alert, Snackbar } from "@mui/material";
+import { Alert, Snackbar, Stack } from "@mui/material";
 import { useAppStore, useRemoveNotification } from "src/stores";
-// import { useStateValue } from "../appContext";
 
-function Notification({ severity = "success", index, message, onClose }) {
+function Notification({ severity = "success", message, onClose }) {
   return (
     <Snackbar
       open={true}
@@ -10,11 +9,9 @@ function Notification({ severity = "success", index, message, onClose }) {
       anchorOrigin={{ vertical: "top", horizontal: "center" }}
       onClose={onClose}
       disableWindowBlurListener={true}
-      sx={{
-        top: index * 70 + 84 + "px !important",
-      }}
+      sx={{ position: "relative" }}
     >
-      <Alert severity={severity} onClose={onClose}>
+      <Alert severity={severity} onClose={onClose} elevation={6} sx={{ pointerEvents: "auto" }}>
         {message}
       </Alert>
     </Snackbar>
@@ -26,7 +23,12 @@ function Notifications() {
   const removeNotification = useRemoveNotification();
 
   return (
-    <div className="notifications">
+    <Stack
+      className="notifications"
+      direction="column"
+      spacing={2}
+      sx={{ position: "absolute", top: 0, zIndex: 10000, width: "100%", pointerEvents: "none" }}
+    >
       {notifications.map(({ id, severity, message }, index) => (
         <Notification
           key={id}
@@ -40,7 +42,7 @@ function Notifications() {
           }}
         />
       ))}
-    </div>
+    </Stack>
   );
 }
 

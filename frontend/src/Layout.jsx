@@ -133,17 +133,17 @@ export function Main() {
         paddingBottom: "8px",
         overflow: "hidden",
         flex: "1 1 auto",
-
+        position: "relative",
         ...loadingStyle,
       }}
     >
+      <Notifications />
       <Authentication />
       <SearchStateHandler />
       <ErrorBoundary>
         <Outlet />
         {/* <Outlet context={{ location }} /> */}
       </ErrorBoundary>
-      <Notifications />
     </Container>
   );
 }
