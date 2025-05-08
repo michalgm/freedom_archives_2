@@ -148,16 +148,16 @@ export function useAutocompleteOptions({
         const query = {
           $select: fields,
           $sort: { [labelField]: 1 },
-          $limit: fetchAll ? 10000 : 15,
+          $limit: fetchAll ? 10000 : 115,
           ...searchParams,
         };
 
         if (!fetchAll && searchTerm) {
-          if (searchFields.length) {
-            query.$or = searchFields.map((f) => ({ [f]: { $ilike: `%${searchTerm}%` } }));
-          } else {
-            query[labelField] = { $ilike: `%${searchTerm}%` };
-          }
+          query["fullText"] = {
+            fields: searchFields.length ? searchFields : [labelField],
+            searchTerm,
+          };
+          query.$sort = { rank: -1, [labelField]: 1 };
         }
 
         const exclude = isMulti ? (value || []).map((v) => v?.[idField]).filter((v) => v !== "new") : excludeIds;

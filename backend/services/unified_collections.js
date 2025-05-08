@@ -1,5 +1,7 @@
 import { KnexService } from "@feathersjs/knex";
 
+import { rankedSearch } from "./common_hooks/index.js";
+
 class UnifiedCollections extends KnexService {
   constructor(options) {
     super({
@@ -22,5 +24,13 @@ export default (function (app) {
     paginate: app.get("paginate"),
   };
   // Initialize our service with any options it requires
-  app.use("/api/unified_collections", new UnifiedCollections(options, app));
+  app.use("/api/unified_collections", new UnifiedCollections(options));
+
+  const service = app.service("/api/unified_collections");
+  service.hooks({
+    before: {
+      all: [],
+      find: [rankedSearch],
+    },
+  });
 });

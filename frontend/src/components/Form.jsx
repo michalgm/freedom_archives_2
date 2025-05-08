@@ -1,6 +1,6 @@
 import "./Form.scss";
 
-import { Alert, AlertTitle, Button, Grid, Grid2, Portal } from "@mui/material";
+import { Alert, AlertTitle, Button, Grid2, Portal } from "@mui/material";
 import { Formik, Form as FormikForm, useFormikContext } from "formik";
 import React, { useState } from "react";
 import ReactDOM from "react-dom";
@@ -45,8 +45,8 @@ const Errors = ({ errors }) => {
     <Alert severity="error" sx={{ mt: 1 }}>
       <AlertTitle variant="subtitle1">This form has errors</AlertTitle>
       <ul>
-        {errors_list.map((error, index) => (
-          <li key={index}>{error}</li>
+        {errors_list.map((error) => (
+          <li key={error}>{error}</li>
         ))}
       </ul>
     </Alert>
@@ -77,8 +77,8 @@ const Form = ({
 
     return (
       <Grid2 container className="buttons" spacing={1} justifyContent="flex-end">
-        {buttons.map(({ ...props }, key) => (
-          <Grid2 key={key}>
+        {buttons.map(({ ...props }) => (
+          <Grid2 key={props.label}>
             <FormButton {...props} />
           </Grid2>
         ))}

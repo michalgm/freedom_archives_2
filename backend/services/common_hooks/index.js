@@ -1,6 +1,7 @@
 import schema from "@feathersjs/schema";
 
 import allowAnonymous from "./allowAnonymous.js";
+import { rankedSearch } from "./rankedSearch.js";
 import { writeThumbnailsFromUrl } from "./thumbnailer.js";
 
 const { hooks: schemaHooks, resolve } = schema;
@@ -169,7 +170,7 @@ export const validateArchive = (context) => {
   });
 };
 
-export { allowAnonymous, writeThumbnailsFromUrl };
+export { allowAnonymous, writeThumbnailsFromUrl, rankedSearch };
 export default {
   writeThumbnailsFromUrl,
   allowAnonymous,

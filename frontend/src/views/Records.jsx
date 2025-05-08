@@ -18,7 +18,7 @@ const filter_types = {
   producers: { input: "listitem", match: "listitem" },
   programs: { input: "listitem", match: "listitem_id" },
   publishers: { input: "listitem", match: "listitem_id" },
-  call_numbers: { input: "select", match: "contained", case: "upper" },
+  call_numbers_text: { label: "Call Number", input: "text", match: "fuzzy", case: "upper" },
   formats: { input: "listitem", match: "contained" },
   qualitys: { input: "listitem", match: "contained" },
   generations: { input: "listitem", match: "contained" },
@@ -43,7 +43,7 @@ function Records({ embedded, itemAction, filter = {}, excludeIds = [] }) {
         has_digital: non_digitized ? undefined : true,
         is_hidden: hidden ? undefined : false,
         needs_review: needs_review ? needs_review : undefined,
-        collection_id: collection,
+        collection_id: collection ? collection : undefined,
         record_id: { $nin: excludeIds },
         $sort: { title: 1 },
         $select: [
@@ -57,16 +57,11 @@ function Records({ embedded, itemAction, filter = {}, excludeIds = [] }) {
         ],
       };
       if (search) {
-        const $ilike = `%${search.replace(/ /g, "%")}%`;
-        // query.keywords_text = { $ilike };
-        query.$or = [
-          { keywords_text: { $ilike } },
-          { producers_text: { $ilike } },
-          { title: { $ilike } },
-          { description: { $ilike } },
-          { record_id: parseInt(search, 10) || undefined },
-          { call_numbers: { $contains: [search.toUpperCase()] } },
-        ];
+        query.fullText = {
+          fields: ["record_id", "title", "description", "keywords_text", "producers_text", "call_numbers_text"],
+          searchTerm: search,
+        };
+        query.$sort = { rank: -1, title: 1 };
       }
       return query;
     },

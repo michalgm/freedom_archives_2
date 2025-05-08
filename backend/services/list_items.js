@@ -1,6 +1,6 @@
 import { KnexService, transaction } from "@feathersjs/knex";
 
-import { refreshView } from "./common_hooks/index.js";
+import { rankedSearch, refreshView } from "./common_hooks/index.js";
 
 class ListItems extends KnexService {
   constructor(options) {
@@ -19,6 +19,7 @@ export default (function (app) {
   // Initialize our service with any options it requires
   app.use("/api/list_items", new ListItems(options));
   const service = app.service("api/list_items");
+
   const findRelations = async (context) => {
     const {
       id,
@@ -36,6 +37,7 @@ export default (function (app) {
     );
     return context;
   };
+
   const updateRecords = async (context) => {
     const {
       params: {
@@ -61,11 +63,13 @@ export default (function (app) {
       })
     );
   };
+
   service.hooks({
     before: {
       all: [],
       patch: [transaction.start(), findRelations],
       remove: [transaction.start(), findRelations],
+      find: [rankedSearch],
     },
     after: {
       patch: [updateRecords, transaction.end()],

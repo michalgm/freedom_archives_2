@@ -3,12 +3,11 @@ import { Avatar, ListItemAvatar, ListItemText, Typography } from "@mui/material"
 import { merge } from "lodash-es";
 import { useCallback } from "react";
 
-
 import Manage from "../components/Manage";
 
 const filter_types = {
   collection_name: { input: "text", match: "fuzzy" },
-  call_number: { input: "select", match: "exact", case: "upper" },
+  call_number: { input: "text", match: "fuzzy", case: "upper" },
   description: { input: "text", match: "fuzzy" },
   summary: { input: "text", match: "fuzzy" },
   notes: { input: "text", match: "fuzzy" },

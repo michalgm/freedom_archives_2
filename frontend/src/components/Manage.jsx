@@ -23,7 +23,7 @@ function Filter({ index, remove, filterTypes, filter, update }) {
     () =>
       Object.keys(filterTypes)
         .sort()
-        .map((key) => ({ label: startCase(key), id: key })),
+        .map((key) => ({ label: filterTypes[key].label || startCase(key), id: key })),
     [filterTypes]
   );
 
@@ -55,6 +55,7 @@ function Filter({ index, remove, filterTypes, filter, update }) {
   } else if (type === "simpleSelect") {
     valueFieldProps.field_type = "simpleSelect";
     valueFieldProps.selectType = field;
+    valueFieldProps.returnFullObject = false;
     valueFieldProps.autocompleteProps = {
       sx: {
         backgroundColor: "#fff",
@@ -70,7 +71,7 @@ function Filter({ index, remove, filterTypes, filter, update }) {
   return (
     <Grid2 size={"auto"} sx={{ bgColor: "grey.200" }}>
       <Paper sx={{ bgcolor: "grey.200", width: 360 }}>
-        <Stack direction="row" spacing={1} sx={{ bgColor: "grey.200" }}>
+        <Stack direction="row" spacing={1} sx={{ bgColor: "grey.200" }} alignItems={"center"}>
           <IconButton onClick={() => remove(index)} variant="outlined" size="small" sx={{ p: 0, height: 18 }}>
             <Close fontSize="inherit" />
           </IconButton>
