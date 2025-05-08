@@ -1722,4 +1722,4 @@ SELECT
 FROM
     freedom_archives_old.config;
 
-create extension if not exists pp_trgm;
+create extension if not exists pg_trgm;
