@@ -40,11 +40,17 @@ function LoginForm() {
           </Typography>
           <FormContainer onSuccess={login} initialValues={{}}>
             <Stack spacing={3}>
-              <Field name="username" placeholder="username" rules={{ required: "Username is required" }} />
+              <Field
+                name="username"
+                placeholder="username"
+                highlightDirty={false}
+                rules={{ required: "Username is required" }}
+              />
               <Field
                 name="password"
                 placeholder="password"
                 type="password"
+                highlightDirty={false}
                 rules={{ required: "Password is required" }}
               />
               <ButtonsHeader useFormManager={false} buttons={buttons} justifyContent="flex-start" />
