@@ -1,5 +1,6 @@
 import assert from "assert";
 import sinon from "sinon";
+
 import { validateArchive } from "../../backend/services/common_hooks/index.js";
 
 describe("validateArchive hook", () => {

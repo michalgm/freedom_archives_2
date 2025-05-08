@@ -1,4 +1,5 @@
 import assert from "assert";
+
 import app from "../../backend/app.js";
 
 describe("'records' service", () => {

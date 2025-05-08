@@ -1,4 +1,5 @@
 import assert from "assert";
+
 import app from "../backend/app.js";
 
 describe("authentication", () => {
@@ -8,16 +9,18 @@ describe("authentication", () => {
 
   describe("local strategy", () => {
     const userInfo = {
-      username: "someone@example.com2",
+      username: "someone@example.com",
       password: "supersecret",
       archive_id: 1,
     };
 
     before(async () => {
       try {
+        // @ts-expect-error
         await app.service("api/users").create(userInfo, { user: { archive_id: 1 } });
       } catch (error) {
         // Do nothing, it just means the user already exists and can be tested
+        // ready exists and can be tested
       }
     });
 

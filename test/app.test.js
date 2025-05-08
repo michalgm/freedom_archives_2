@@ -1,16 +1,16 @@
 // For more information about this file see https://dove.feathersjs.com/guides/cli/app.test.html
 import assert from "assert";
 import axios from "axios";
+
 import app from "../backend/app.js";
 
 const port = app.get("port");
 const appUrl = `http://${app.get("host")}:${port}`;
 
 describe("Feathers application tests", () => {
-  let server;
 
   before(async () => {
-    server = await app.listen(port);
+    await app.listen(port);
   });
 
   after(async () => {
