@@ -3,6 +3,7 @@ BEGIN;
 -- CREATE TEMP TABLE parent_lookup as select record_id, parent_record_id from records where parent_record_id is not null;
 -- select * from `parent_lookup`;
 DROP SCHEMA IF EXISTS freedom_archives CASCADE;
+
 DROP SCHEMA IF EXISTS public_search CASCADE;
 
 CREATE SCHEMA freedom_archives;
@@ -234,7 +235,7 @@ INSERT INTO
         description
     ) (
         SELECT
-        1,
+            1,
             item,
         TYPE,
         description
@@ -676,7 +677,7 @@ INSERT INTO
     )
 SELECT
     docid AS record_id,
-    trim(call_number) AS call_number,
+    TRIM(call_number) AS call_number,
     format_lookup.list_item_id,
     no_copies,
     quality_lookup.list_item_id,
@@ -1159,6 +1160,17 @@ SELECT
             instances.record_id = a.record_id AND
             call_number IS NOT NULL
     ) AS call_numbers,
+    
+        (
+            SELECT string_agg(
+                call_number, ' ')
+            FROM
+                instances
+            WHERE
+                instances.record_id = a.record_id AND
+                call_number IS NOT NULL
+                group by record_id
+        ) AS call_numbers_text,
     ARRAY (
         SELECT DISTINCT
             FORMAT
@@ -1349,7 +1361,7 @@ SELECT
             WHERE
                 a.parent_record_id = parent.record_id
         ),
-        null
+        NULL
     ) AS parent,
     COALESCE(
         ARRAY (
@@ -1451,7 +1463,6 @@ SELECT
                 records
         )
     );
-
 
 SELECT
     SETVAL(
@@ -1710,3 +1721,5 @@ SELECT
     TO_JSON(VALUE)
 FROM
     freedom_archives_old.config;
+
+create extension if not exists pp_trgm;
