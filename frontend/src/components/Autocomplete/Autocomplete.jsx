@@ -242,8 +242,9 @@ const Autocomplete = ({
     renderOption,
     onOpen: handleOpen,
     ...defaultAutocompleteProps,
-    size: "large",
+    size: textFieldProps.size,
   };
+  textFieldProps.InputProps = { ...(textFieldProps.InputProps || {}), size: textFieldProps.size };
 
   if (!staticOptions) {
     autocompleteProps.filterOptions = (x) => x;
@@ -271,7 +272,7 @@ const Autocomplete = ({
           },
           output: (_, value) => {
             if (!props.multiple) {
-              const option = getOptionById(value) || value
+              const option = getOptionById(value) || value;
               if (option?.[idField] === "new") {
                 setCustomValue(option.searchTerm);
                 return {};
@@ -280,7 +281,7 @@ const Autocomplete = ({
             }
             if (!Array.isArray(value)) return emptyArray;
             const lastItem = value[value.length - 1];
-            const option = getOptionById(lastItem) || lastItem
+            const option = getOptionById(lastItem) || lastItem;
 
             if (option?.[idField] === "new") {
               setCustomValue(option.searchTerm);
@@ -294,7 +295,9 @@ const Autocomplete = ({
         handleClose={(result) => {
           setCustomValue(null);
           if (result) {
-            const updatedValue = props.multiple ? [...getValues(name).filter(v => v !== 'new' && v?.[idField] !== 'new'), result] : result;
+            const updatedValue = props.multiple
+              ? [...getValues(name).filter((v) => v !== "new" && v?.[idField] !== "new"), result]
+              : result;
             setValue(name, updatedValue, { shouldValidate: true, shouldDirty: true, shouldTouch: true });
           }
         }}

@@ -34,8 +34,8 @@ const xSmallInputStyles = {
     fontSize: xSmallInputFontSize,
     padding: "6px 8px",
   },
-  "& .MuiInputBase-input.MuiSelect-select": {
-    padding: "5px 8px",
+  "& .MuiInputBase-input.MuiSelect-select, & .MuiInputBase-input.MuiAutocomplete-input": {
+    padding: "2.5px 4px 2.5px 8px",
   },
   "& .MuiInputBase-adornedStart": { paddingLeft: "8px" },
   "& .MuiInputBase-inputAdornedStart": { paddingLeft: 0 },
@@ -114,11 +114,37 @@ export const theme = createTheme({
         },
       ],
     },
-
+    MuiInputBase: {
+      variants: [
+        {
+          props: { size: "x-small" },
+          style: xSmallInputStyles,
+        },
+      ],
+    },
     MuiTextField: {
       defaultProps: {
         size: "small",
       },
+      variants: [
+        {
+          props: { size: "x-small" },
+          style: xSmallInputStyles,
+        },
+      ],
+    },
+    MuiAutocomplete: {
+      variants: [
+        {
+          props: { size: "x-small" },
+          style: {
+            "& .MuiAutocomplete-inputRoot": {
+              padding: "4px",
+            },
+            ...xSmallInputStyles,
+          },
+        },
+      ],
     },
     MuiPaper: {
       styleOverrides: {
