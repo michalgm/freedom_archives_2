@@ -7,7 +7,7 @@ const TRIGRAM_WEIGHT = 100;
 const FIELD_ORDER_WEIGHT = 10; // boost multiplier for earlier fields
 const FIELD_MATCH_BOOST_BASE = 10;
 const POSITION_BOOST_WEIGHT = 1;
-const SIMILARITY_THRESHOLD = 0.1;
+const SIMILARITY_THRESHOLD = 0.2;
 
 function applyBasicPrefixing(input) {
   return input
