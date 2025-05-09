@@ -222,16 +222,7 @@ export const before = {
   remove: [],
 };
 export const after = {
-  all: [
-    (context) => {
-      if (context.params.knex) {
-        context.result.query = context.params.knex.toString();
-      }
-      if (context.fullText) {
-        context.result.fullText = context.fullText;
-      }
-    },
-  ],
+  all: [],
   find: [lookupFilters],
   get: [],
   create: [updateListItemRelations, updateThumbnail, updateRelations, refreshView],

@@ -170,6 +170,14 @@ export const validateArchive = (context) => {
   });
 };
 
+export const debugQuery = (context) => {
+  const debug = context.app.get("postgresqlClient")?.client?.config?.debug;
+  if (debug && context?.result?.data && context?.params?.knex) {
+    context.result.query = context.params.knex.toString();
+  }
+  return context;
+};
+
 export { allowAnonymous, writeThumbnailsFromUrl, rankedSearch };
 export default {
   writeThumbnailsFromUrl,
