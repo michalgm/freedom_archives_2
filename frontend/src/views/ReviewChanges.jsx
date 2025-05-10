@@ -2,8 +2,9 @@ import { Box, Button, Grid2, Paper, Stack, Typography } from "@mui/material";
 import dayjs from "dayjs";
 import { startCase } from "lodash-es";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
-import { FormContainer, useForm } from "react-hook-form-mui";
+import { useForm } from "react-hook-form-mui";
 import AutoSubmit from "src/components/AutoSubmit";
+import Form from "src/components/form/Form";
 import { Section } from "src/components/ViewContainer";
 import { useDebouncedCallback } from "use-debounce";
 
@@ -157,12 +158,7 @@ const ReviewChangesForm = React.memo(function ({ setFilter, publishDate }) {
 
   return (
     <Box>
-      <FormContainer
-        formContext={formContext}
-        FormProps={{
-          autoComplete: "off",
-        }}
-      >
+      <Form formContext={formContext}>
         <AutoSubmit action={setFilter} />
         <Grid2 container spacing={2}>
           {fields.map((field) => {
@@ -197,7 +193,7 @@ const ReviewChangesForm = React.memo(function ({ setFilter, publishDate }) {
             }
           })}
         </Grid2>
-      </FormContainer>
+      </Form>
     </Box>
   );
 });

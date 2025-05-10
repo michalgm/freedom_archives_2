@@ -125,9 +125,7 @@ public/img/thumbnails/*
 sharp-libvips/archive
 sharp-libvips/sharp-libvips
 
-./public/*
-
 frontend/dist/*
 frontend/public/assets/*
-public/assets/*
+public/
 config/production.json

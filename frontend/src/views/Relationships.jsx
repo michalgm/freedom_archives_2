@@ -1,8 +1,9 @@
 import "./Relationships.scss";
 
-import { Box, Button, Grid2, LinearProgress, MenuItem, Paper, TextField, Typography } from "@mui/material";
+import { Box, Button, Grid2, LinearProgress, MenuItem, Stack, TextField, Typography } from "@mui/material";
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router";
+import { Section } from "src/components/ViewContainer";
 
 import { relationships } from "../api";
 import ButtonLink from "../components/ButtonLink";
@@ -37,11 +38,11 @@ function Relationships() {
 
   const info = {
     original: {
-      desc: "All instances of Record 2 will become instances of Record 1, and Record 2 will be deleted",
+      desc: "All media of Record 2 will become media of Record 1, and Record 2 will be deleted",
       option: "Record 1 is the original record for record 2",
     },
     instance: {
-      desc: "All instances of Record 1 will become instances of Record 2, and Record 1 will be deleted",
+      desc: "All media of Record 1 will become media of Record 2, and Record 1 will be deleted",
       option: "Record 2 is the original record for record 1",
     },
     child: {
@@ -137,11 +138,12 @@ function Relationships() {
   };
 
   return (
-    <div className="relationships">
-      <Grid2 container spacing={4} justifyContent="center" alignItems="center" direction="row">
-        <Paper>
-          <Grid2 size={12}>
-            <Grid2 container spacing={4} justifyContent="center" alignItems="center" direction="row">
+    <Stack direction={"column"} className="relationships" sx={{ height: "100%" }} spacing={2}>
+      <Section
+        header
+        elements={[
+          <Grid2 size={12} key={"header"}>
+            <Grid2 container spacing={2} justifyContent="center" alignItems="flex-start" direction="row">
               <Grid2 size={12} style={{ paddingBottom: 0 }}>
                 <LinearProgressWithLabel value={complete} />
               </Grid2>
@@ -156,14 +158,17 @@ function Relationships() {
                 <ButtonLink to={`/relationships/${nextUnreviewed}`} disabled={!nextUnreviewed}>
                   Next Unreviewed
                 </ButtonLink>
-                <div>
+                <div></div>
+              </Grid2>
+              <Grid2 size={6}>
+                <Stack spacing={1}>
                   <TextField
                     select
+                    fullWidth={true}
                     value={type}
                     size="small"
                     label="Relationship Type"
                     placeholder="Relationship Type"
-                    style={{ width: "60%" }}
                     onChange={(event) => setType(event.target.value)}
                   >
                     {Object.keys(info).map((value) => (
@@ -172,8 +177,25 @@ function Relationships() {
                       </MenuItem>
                     ))}
                   </TextField>
-                </div>
-                {info[type]?.desc}
+                  <Typography variant="caption">{info[type]?.desc}</Typography>
+                  <div>
+                    <Button
+                      variant="contained"
+                      disabled={!type}
+                      color="primary"
+                      onClick={setRelationType}
+                      fullWidth={false}
+                    >
+                      Save Relation Type
+                    </Button>
+                  </div>
+                  {relation.user && (
+                    <Typography variant="caption">
+                      Updated at <b>{new Date(relation.updated_at).toLocaleString()} </b>
+                      by <b>{relation.user}</b>
+                    </Typography>
+                  )}
+                </Stack>
               </Grid2>
               <Grid2 size={6}>
                 <TextField
@@ -186,25 +208,16 @@ function Relationships() {
                   fullWidth
                 />
               </Grid2>
-              <Grid2 size={4}>
-                <Button variant="outlined" disabled={!type} color="primary" onClick={setRelationType}>
-                  Save Relation Type
-                </Button>
-                {relation.user && (
-                  <p>
-                    Updated at <b>{new Date(relation.updated_at).toLocaleString()} </b>
-                    by <b>{relation.user}</b>
-                  </p>
-                )}
-              </Grid2>
             </Grid2>
-          </Grid2>
-        </Paper>
-        <Grid2 size={12}>
-          <Relationship id={relation.id} />
+          </Grid2>,
+        ]}
+      />
+      <div className="FlexContainer">
+        <Grid2 size={12} className="FlexContainer">
+          <Relationship id={relation.id} key={relation.id} />
         </Grid2>
-      </Grid2>
-    </div>
+      </div>
+    </Stack>
   );
 }
 

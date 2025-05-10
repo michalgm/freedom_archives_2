@@ -1,13 +1,14 @@
+import { debounce } from "lodash-es";
 import { useFormContext } from "react-hook-form";
 import useDeepCompareEffect from "use-deep-compare-effect";
 
-const AutoSubmit = ({ action }) => {
+const AutoSubmit = ({ action, timeout = 300 }) => {
   const { watch } = useFormContext();
 
   const data = watch();
 
   useDeepCompareEffect(() => {
-    action(data);
+    debounce(action, timeout)(data);
   }, [data, action]);
 
   return null;

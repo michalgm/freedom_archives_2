@@ -4,11 +4,11 @@ import { Box, Button, Card, Divider, Grid2, Icon, Link as MULink, Paper, Stack, 
 import { useTheme } from "@mui/material/styles";
 import { startCase } from "lodash-es";
 import React, { useCallback, useEffect, useRef, useState } from "react";
+import AutoSubmit from "src/components/AutoSubmit";
 
 import { public_records as recordsService } from "../api";
-import AutoSave from "../components/AutoSave";
-import Field from "../components/Field";
-import Form from "../components/Form";
+import { Field } from "../components/form/Field";
+import Form from "../components/form/Form.tsx";
 import KVChip from "../components/KVChip";
 import PaginationFooter from "../components/PaginationFooter";
 import Thumbnail from "../components/Thumbnail";
@@ -143,15 +143,17 @@ const Filter = ({ type, values = [], addFilter, search }) => {
 const SearchForm = ({ search, setSearch, filters }) => {
   const addFilter = useCallback(
     ({ type, value }) => {
-      let newFilter = [...(search[type] || [])];
-      if (newFilter.includes(value)) {
-        newFilter = newFilter.filter((v) => v !== value);
-      } else {
-        newFilter.push(value);
-      }
-      setSearch({ ...search, ...{ [type]: newFilter } });
+      setSearch((search) => {
+        let newFilter = [...(search[type] || [])];
+        if (newFilter.includes(value)) {
+          newFilter = newFilter.filter((v) => v !== value);
+        } else {
+          newFilter.push(value);
+        }
+        return { ...search, ...{ [type]: newFilter } };
+      });
     },
-    [search, setSearch]
+    [setSearch]
   );
 
   const clearFilters = useCallback(() => {
@@ -159,28 +161,37 @@ const SearchForm = ({ search, setSearch, filters }) => {
     FILTER_TYPES.forEach((type) => {
       newFilters[type] = [];
     });
-    // logger.log(search, newFilters);
-    setSearch({ ...search, ...newFilters });
-  }, [search, setSearch]);
+    setSearch((search) => ({ ...search, ...newFilters }));
+  }, [setSearch]);
+
+  const doSearch = useCallback(
+    (fields) => {
+      setSearch((search) => ({
+        ...search,
+        ...fields,
+      }));
+    },
+    [setSearch]
+  );
 
   return (
     <Paper>
-      <Form
-        initialValues={search}
-        onSubmit={(fields) => {
-          setSearch({
-            ...search,
-            ...fields,
-          });
-        }}
-      >
-        <AutoSave timeout={500} />
+      <Form defaultValues={search} onSubmit={doSearch}>
+        <AutoSubmit action={doSearch} timeout={500} />
         <Grid2 size={12}>
-          <Field name="$fullText" label="Search" placeholder="Search Records" width={12} autoFocus />
           <Field
+            highlightDirty={false}
+            name="$fullText"
+            label="Search"
+            placeholder="Search Records"
+            width={12}
+            autoFocus
+          />
+          <Field
+            highlightDirty={false}
             name="include_non_digitized"
             label="Include non-digitized documents"
-            type="checkbox"
+            field_type="checkbox"
             // autoSubmit
             width={12}
           />

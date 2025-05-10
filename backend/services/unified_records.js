@@ -24,9 +24,9 @@ export default (function (app) {
     paginate: app.get("paginate"),
   };
   // Initialize our service with any options it requires
-  app.use("/api/unified_records", new UnifiedRecords(options));
+  app.use("api/unified_records", new UnifiedRecords(options));
 
-  const service = app.service("/api/unified_records");
+  const service = app.service("api/unified_records");
   service.hooks({
     before: {
       all: [],

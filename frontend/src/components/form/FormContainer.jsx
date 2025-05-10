@@ -110,6 +110,7 @@ const FormContainer = ({
                   <FormSection key={title} title={title} sectionActions={sectionActions}>
                     <Grid2 container sx={{ alignItems: "start" }} size={12}>
                       {columns.map((fieldSet, columnIndex) => (
+                        // eslint-disable-next-line react/no-array-index-key
                         <Grid2 key={columnIndex} container size={12 / columnCount}>
                           {fieldSet.map(([key, options = {}], index) => (
                             <Grid2 key={key} size={12}>

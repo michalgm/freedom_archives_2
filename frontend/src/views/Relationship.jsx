@@ -1,9 +1,9 @@
-import { Divider, Grid2, Paper, Typography } from "@mui/material";
+import { Grid2, Paper, Stack, Typography } from "@mui/material";
 import React, { useEffect, useState } from "react";
 
 import { relationships } from "../api";
-import Field from "../components/Field";
-import Form from "../components/Form";
+import { Field } from "../components/form/Field";
+import Form from "../components/form/Form";
 import Link from "../components/Link";
 
 import Record from "./Record";
@@ -28,24 +28,43 @@ function Relationship({ id }) {
       <Grid2 container spacing={2}>
         {[1, 2].map((num) => {
           const other_num = num === 1 ? 2 : 1;
+          const defaultValues = {
+            title: relation[`title_${other_num}`],
+            description: relation[`description_${other_num}`],
+            track_number: relation[`track_number_${other_num}`],
+          };
           return (
             <Grid2 size={6} key={num}>
               <Paper>
-                <Form>
-                  <Typography variant="h4">Record {num}</Typography>
-                  <Typography variant="subtitle1">
-                    <Link to={`/record/${relation[`docid_${num}`]}`}>(ID {relation[`docid_${num}`]})</Link>
-                    <Link
-                      target="_blank"
-                      href={`https://search.freedomarchives.org/admin/#/documents/${relation[`docid_${num}`]}`}
-                    >
-                      (Live DB Link)
-                    </Link>
-                  </Typography>
-                  <Field raw label="Relation Title" value={relation[`title_${other_num}`]} />
-                  <Field raw multiline label="Relation description" value={relation[`description_${other_num}`]} />
-                  <Field raw label="Relation Track Number" value={relation[`track_number_${other_num}`]} />
-                  <Divider />
+                <Form defaultValues={defaultValues}>
+                  <Stack direction="row" spacing={2} justifyContent="space-between">
+                    <Typography variant="h4">Record {num}</Typography>
+                    <Typography variant="subtitle1">
+                      <Link to={`/records/${relation[`docid_${num}`]}`}>(ID {relation[`docid_${num}`]})</Link>
+                      <Link
+                        target="_blank"
+                        href={`https://search.freedomarchives.org/admin/#/documents/${relation[`docid_${num}`]}`}
+                      >
+                        (Live DB Link)
+                      </Link>
+                    </Typography>
+                  </Stack>
+                  <Field
+                    ro={true}
+                    multiline
+                    variant="filled"
+                    name="title"
+                    label="Relation Title"
+                    inputProps={{ style: { minHeight: "0px" } }}
+                  />
+                  <Field ro={true} multiline variant="filled" name="description" label="Relation description" />
+                  <Field
+                    ro={true}
+                    field_type="number"
+                    variant="filled"
+                    name="track_number"
+                    label="Relation Track Number"
+                  />
                 </Form>
               </Paper>
             </Grid2>
