@@ -21,7 +21,7 @@ export default function Thumbnail({ item, width = 75, alt = "" }) {
 
   if (brokenLink) {
     return (
-      <Avatar style={{ width, height: width, flex }}>
+      <Avatar style={{ width, height: width, flex, border: "1px solid rgba(0, 0, 0, 0.1)" }}>
         <BrokenImage style={{ fontSize: width * 0.7 }} />
       </Avatar>
     );
@@ -34,6 +34,7 @@ export default function Thumbnail({ item, width = 75, alt = "" }) {
       <img
         style={{
           maxWidth: "100%",
+          border: "1px solid rgba(0, 0, 0, 0.1)",
         }}
         src={src || no_digital_image}
         onError={onError}
