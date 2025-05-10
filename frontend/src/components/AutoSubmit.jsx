@@ -1,18 +1,14 @@
-import { useFormikContext } from "formik";
-import { useEffect } from "react";
+import { useFormContext } from "react-hook-form";
+import useDeepCompareEffect from "use-deep-compare-effect";
 
-const AutoSubmit = () => {
-  /*
-    This component is used to automatically submit the form when the form is valid
-    and has been changed(dirty).
-   */
-  const { isValid, values, dirty, submitForm } = useFormikContext();
+const AutoSubmit = ({ action }) => {
+  const { watch } = useFormContext();
 
-  useEffect(() => {
-    if (isValid && dirty) {
-      submitForm();
-    }
-  }, [isValid, values, dirty, submitForm]);
+  const data = watch();
+
+  useDeepCompareEffect(() => {
+    action(data);
+  }, [data, action]);
 
   return null;
 };

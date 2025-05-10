@@ -3,9 +3,9 @@ import dayjs from "dayjs";
 import { startCase } from "lodash-es";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { FormContainer, useForm } from "react-hook-form-mui";
+import AutoSubmit from "src/components/AutoSubmit";
 import { Section } from "src/components/ViewContainer";
 import { useDebouncedCallback } from "use-debounce";
-import useDeepCompareEffect from "use-deep-compare-effect";
 
 import { collections, records, review_changes, snapshots } from "../api";
 import EditableDataTable from "../components/EditableDataTable";
@@ -113,13 +113,7 @@ const ReviewChangesForm = React.memo(function ({ setFilter, publishDate }) {
     mode: "onChange",
   });
 
-  const { getValues, watch } = formContext;
-
-  const data = watch();
-
-  useDeepCompareEffect(() => {
-    setFilter(data);
-  }, [data, setFilter]);
+  const { getValues } = formContext;
 
   const customLabel = (
     <Stack direction={"row"} spacing={1} alignItems="center" justifyContent={"space-between"}>
@@ -169,6 +163,7 @@ const ReviewChangesForm = React.memo(function ({ setFilter, publishDate }) {
           autoComplete: "off",
         }}
       >
+        <AutoSubmit action={setFilter} />
         <Grid2 container spacing={2}>
           {fields.map((field) => {
             if (field.name === "date_modified") {

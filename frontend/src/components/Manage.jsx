@@ -3,6 +3,7 @@ import { Box, Button, Grid2, Icon, IconButton, Paper, Stack } from "@mui/materia
 import { isEqual, startCase } from "lodash-es";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { FormContainer, useFieldArray, useForm } from "react-hook-form-mui";
+import AutoSubmit from "src/components/AutoSubmit";
 import { useResetSearch, useSetFilter, useSetSearch, useSetSearchIndex } from "src/stores";
 import useQueryStore from "src/stores/queryStore";
 import { useDebouncedCallback } from "use-debounce";
@@ -181,14 +182,6 @@ const FilterBar = ({ service, setFilter, setSearch, filterTypes, defaultFilter }
     });
   }, [resetSearch, formContext, defaultFilter]);
 
-  const { watch } = formContext;
-
-  const data = watch();
-
-  useEffect(() => {
-    onSuccess(data);
-  }, [data, onSuccess]);
-
   return (
     <FormContainer
       formContext={formContext}
@@ -196,6 +189,7 @@ const FilterBar = ({ service, setFilter, setSearch, filterTypes, defaultFilter }
         autoComplete: "off",
       }}
     >
+      <AutoSubmit action={onSuccess} />
       <Grid2 container spacing={2}>
         <Grid2 size={3} alignContent={"flex-start"}>
           <Field
