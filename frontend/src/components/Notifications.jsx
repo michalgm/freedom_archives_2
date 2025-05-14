@@ -9,7 +9,7 @@ function Notification({ severity = "success", message, onClose }) {
       anchorOrigin={{ vertical: "top", horizontal: "center" }}
       onClose={onClose}
       disableWindowBlurListener={true}
-      sx={{ position: "relative" }}
+      sx={{ position: "relative", top: "unset !important" }}
     >
       <Alert severity={severity} onClose={onClose} elevation={6} sx={{ pointerEvents: "auto" }}>
         {message}
@@ -27,7 +27,7 @@ function Notifications() {
       className="notifications"
       direction="column"
       spacing={2}
-      sx={{ position: "absolute", top: 0, zIndex: 10000, width: "100%", pointerEvents: "none" }}
+      sx={{ position: "absolute", top: 8, zIndex: 10000, left: 24, right: 24, pointerEvents: "none" }}
     >
       {notifications.map(({ id, severity, message }, index) => (
         <Notification
