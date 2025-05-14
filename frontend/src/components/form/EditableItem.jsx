@@ -1,12 +1,13 @@
 import { FormControl, FormHelperText, Icon, IconButton, InputLabel, List } from "@mui/material";
 import { startCase } from "lodash-es";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useFormContext } from "react-hook-form";
 import RecordItem, { CollectionItem } from "src/components/EditableItemsList";
 import { Field } from "src/components/form/Field";
 
 export function EditableItem({ service, name, link = true, label, parseError, ...props }) {
   const { value } = props;
+  const inputRef = useRef(null);
   // logger.log(name, props);
   const {
     formState: { errors },
@@ -22,6 +23,14 @@ export function EditableItem({ service, name, link = true, label, parseError, ..
       itemName: "collection",
     },
   };
+
+  useEffect(() => {
+    if (edit) {
+      inputRef.current?.focus();
+      inputRef.current?.select();
+    }
+  }, [edit]);
+
   if (!service) {
     return;
   }
@@ -35,6 +44,7 @@ export function EditableItem({ service, name, link = true, label, parseError, ..
         searchType={`${service}`}
         size="small"
         label={label}
+        inputRef={inputRef}
         {...props}
       />
     );

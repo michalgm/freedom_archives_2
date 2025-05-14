@@ -37,7 +37,7 @@ export function useAutocompleteOptions({
   const config = searchTypes[service] || {};
   const labelField = config.label || "label";
   const idField = config.id || "id";
-  const searchFields = useMemo(() => config.searchFields || [], [config.searchFields]);
+  // const searchFields = useMemo(() => config.searchFields || [], [config.searchFields]);
   const fields = useMemo(() => config.fields ?? [idField, labelField], [config.fields, idField, labelField]);
 
   const labelMap = useRef(new Map());
@@ -148,15 +148,12 @@ export function useAutocompleteOptions({
         const query = {
           $select: fields,
           $sort: { [labelField]: 1 },
-          $limit: fetchAll ? 10000 : 115,
+          $limit: fetchAll ? 10000 : 25,
           ...searchParams,
         };
 
         if (!fetchAll && searchTerm) {
-          query["fullText"] = {
-            fields: searchFields.length ? searchFields : [labelField],
-            searchTerm,
-          };
+          query["$fullText"] = searchTerm;
           query.$sort = { rank: -1, [labelField]: 1 };
         }
 
@@ -184,7 +181,7 @@ export function useAutocompleteOptions({
       labelField,
       fetchAll,
       searchParams,
-      searchFields,
+      // searchFields,
       service,
       value,
       isMulti,

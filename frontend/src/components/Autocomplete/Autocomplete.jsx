@@ -118,6 +118,7 @@ const Autocomplete = ({
   returnFullObject = true,
   excludeIds = emptyArray,
   disableClearable = false,
+  inputRef,
   ...props
 }) => {
   const typeLabel = useMemo(() => (label || "").replace(/s$/, ""), [label]);
@@ -234,7 +235,7 @@ const Autocomplete = ({
       return label;
     },
     onInputChange: (e, value, reason) => {
-      if (reason === "input") {
+      if (reason === "input" && !staticOptions && !(fetchAll && options?.length)) {
         fetchOptions(value);
       }
     },
@@ -244,9 +245,9 @@ const Autocomplete = ({
     ...defaultAutocompleteProps,
     size: textFieldProps.size,
   };
-  textFieldProps.InputProps = { ...(textFieldProps.InputProps || {}), size: textFieldProps.size };
+  textFieldProps.InputProps = { ...(textFieldProps.InputProps || {}), size: textFieldProps.size, inputRef };
 
-  if (!staticOptions) {
+  if (!staticOptions && !fetchAll) {
     autocompleteProps.filterOptions = (x) => x;
   }
 
