@@ -74,6 +74,7 @@
     "pg-tsquery": "^8.4.2",
     "serve-favicon": "^2.5.0",
     "sharp": "^0.34.0",
+    "string-strip-html": "^13.4.12",
     "winston": "^3.17.0",
     "zod": "^3.24.2"
   },
