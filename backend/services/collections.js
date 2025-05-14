@@ -1,4 +1,5 @@
 import { KnexService } from "@feathersjs/knex";
+import { stripHtml } from "string-strip-html";
 
 import {
   fetchUnified,
@@ -167,6 +168,9 @@ export default (function (app) {
         delete data.parent;
       }
       context.relation_data = relation_data;
+      if ("description" in data) {
+        data.description_search = stripHtml(data.description).result.trim().toLowerCase();
+      }
     }
     prepListItemRelations(context);
     return context;

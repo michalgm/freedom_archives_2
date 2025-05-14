@@ -1,5 +1,3 @@
-import pgTsquery from "pg-tsquery";
-
 import {
   fetchUnified,
   prepListItemRelations,
@@ -10,86 +8,89 @@ import {
   writeThumbnailsFromUrl,
 } from "../common_hooks/index.js";
 
-const tsquery = pgTsquery();
-const fullTextSearch = (context) => {
-  const {
-    service: { fullName },
-  } = context;
-  if (context.params.query.$fullText !== undefined) {
-    const { $fullText, ...query } = context.params.query;
-    const knex = context.app.service(`unified_${fullName}`).createQuery({ ...context.params, query });
-    if ($fullText) {
-      const fullTextQuery = tsquery($fullText);
-      context.fullText = fullTextQuery;
-      knex.select(
-        context.service.Model.raw(`ts_rank_cd(fulltext, to_tsquery('english', ?)) AS score`, [fullTextQuery])
-      );
-      knex.whereRaw(`fulltext @@ to_tsquery('english', ?)`, [fullTextQuery]);
-      knex.orderBy("score", "desc");
-    }
-    context.params.knex = knex;
-  }
-};
-const lookupFilters = async ({
-  params: {
-    knex,
-    query: { $fullText },
-    // transaction: { trx },
-  },
-  result,
-  service: { Model },
-}) => {
-  // console.log('AFTER FIND');
-  if ($fullText !== undefined) {
-    const ids = await knex.clearSelect().clearOrder().select("record_id").toString();
-    // await trx.raw(
-    //   `create temp table search_results3  on commit drop as ${ids}`
-    // );
-    // const subquery = `select record_id from search_results3`;
-    // console.log(res);
-    const subquery = ids;
-    const filters = (
-      await Promise.all(
-        [
-          `select
-          type, array_agg(jsonb_build_array(item, count::text) order by count desc) as values
-          from (
-            select
-              item, type, count(*) as count
-            from records_to_list_items a
-            join list_items b
-            using (list_item_id)
-            where record_id in (${subquery})
-            group by item, type
-            order by type
-          ) a group by type`,
-          `select 'year' as type, array_agg(jsonb_build_array(year, count::text) order by count desc, year) as values from (
-          select year::text, count(*) as count
-          from records
-          where record_id in (${subquery})
-          group by year
-        ) a`,
-          `select 'collection' as type, array_agg(jsonb_build_array(collection_name, count::text, collection_id) order by count desc, collection_name) as values from (
-          select collection_id, max(collection_name) as collection_name, count(*) as count
-          from records
-          join collections using (collection_id)
-          where record_id in (${subquery})
-          group by collection_id
-        ) a`,
-          `select 'title' as type, array_agg(jsonb_build_array(title, count::text) order by count desc, title) as values from (
-          select title, count(*) as count
-          from records
-          where record_id in (${subquery})
-          group by title
-        ) a`,
-        ].flatMap(async (query) => (await Model.raw(query)).rows.flat())
-      )
-    ).flat();
-    // await trx.raw(`drop table search_results3 `);
-    // console.log(filters);
-    result.filters = filters;
-  }
-};
+// const tsquery = pgTsquery();
+
+// const fullTextSearch = (context) => {
+//   const {
+//     service: { fullName },
+//   } = context;
+//   if (context.params.query.$fullText !== undefined) {
+//     const { $fullText, ...query } = context.params.query;
+//     const knex = context.app.service(`unified_${fullName}`).createQuery({ ...context.params, query });
+//     if ($fullText) {
+//       const fullTextQuery = tsquery($fullText);
+//       context.fullText = fullTextQuery;
+//       knex.select(
+//         context.service.Model.raw(`ts_rank_cd(fulltext, to_tsquery('english', ?)) AS score`, [fullTextQuery])
+//       );
+//       knex.whereRaw(`fulltext @@ to_tsquery('english', ?)`, [fullTextQuery]);
+//       knex.orderBy("score", "desc");
+//     }
+//     context.params.knex = knex;
+//   }
+// };
+
+// const lookupFilters = async ({
+//   params: {
+//     knex,
+//     query: { $fullText },
+//     // transaction: { trx },
+//   },
+//   result,
+//   service: { Model },
+// }) => {
+//   // console.log('AFTER FIND');
+//   if ($fullText !== undefined) {
+//     const ids = await knex.clearSelect().clearOrder().select("record_id").toString();
+//     // await trx.raw(
+//     //   `create temp table search_results3  on commit drop as ${ids}`
+//     // );
+//     // const subquery = `select record_id from search_results3`;
+//     // console.log(res);
+//     const subquery = ids;
+//     const filters = (
+//       await Promise.all(
+//         [
+//           `select
+//           type, array_agg(jsonb_build_array(item, count::text) order by count desc) as values
+//           from (
+//             select
+//               item, type, count(*) as count
+//             from records_to_list_items a
+//             join list_items b
+//             using (list_item_id)
+//             where record_id in (${subquery})
+//             group by item, type
+//             order by type
+//           ) a group by type`,
+//           `select 'year' as type, array_agg(jsonb_build_array(year, count::text) order by count desc, year) as values from (
+//           select year::text, count(*) as count
+//           from records
+//           where record_id in (${subquery})
+//           group by year
+//         ) a`,
+//           `select 'collection' as type, array_agg(jsonb_build_array(collection_name, count::text, collection_id) order by count desc, collection_name) as values from (
+//           select collection_id, max(collection_name) as collection_name, count(*) as count
+//           from records
+//           join collections using (collection_id)
+//           where record_id in (${subquery})
+//           group by collection_id
+//         ) a`,
+//           `select 'title' as type, array_agg(jsonb_build_array(title, count::text) order by count desc, title) as values from (
+//           select title, count(*) as count
+//           from records
+//           where record_id in (${subquery})
+//           group by title
+//         ) a`,
+//         ].flatMap(async (query) => (await Model.raw(query)).rows.flat())
+//       )
+//     ).flat();
+//     // await trx.raw(`drop table search_results3 `);
+//     // console.log(filters);
+//     result.filters = filters;
+//   }
+// };
+
 const prepData = (context) => {
   const { data } = context;
   if (data && Object.keys(data).length) {
@@ -215,7 +216,7 @@ const updateThumbnail = async (context) => {
 };
 export const before = {
   all: [prepData],
-  find: [fullTextSearch, fetchUnified],
+  find: [fetchUnified],
   get: [fetchUnified],
   create: [setUser, setArchive],
   patch: [setUser, updateListItemRelations, updateThumbnail, updateRelations],
@@ -223,7 +224,7 @@ export const before = {
 };
 export const after = {
   all: [],
-  find: [lookupFilters],
+  find: [],
   get: [],
   create: [updateListItemRelations, updateThumbnail, updateRelations, refreshView],
   patch: [refreshView],

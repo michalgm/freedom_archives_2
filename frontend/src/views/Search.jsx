@@ -2,9 +2,10 @@ import "./Search.scss";
 
 import { Box, Button, Card, Divider, Grid2, Icon, Link as MULink, Paper, Stack, Typography } from "@mui/material";
 import { useTheme } from "@mui/material/styles";
-import { startCase } from "lodash-es";
+import { merge, startCase } from "lodash-es";
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import AutoSubmit from "src/components/AutoSubmit";
+import { useImmer } from "use-immer";
 
 import { public_records as recordsService } from "../api";
 import { Field } from "../components/form/Field";
@@ -150,7 +151,7 @@ const SearchForm = ({ search, setSearch, filters }) => {
         } else {
           newFilter.push(value);
         }
-        return { ...search, ...{ [type]: newFilter } };
+        search[type] = newFilter;
       });
     },
     [setSearch]
@@ -166,10 +167,9 @@ const SearchForm = ({ search, setSearch, filters }) => {
 
   const doSearch = useCallback(
     (fields) => {
-      setSearch((search) => ({
-        ...search,
-        ...fields,
-      }));
+      setSearch((search) => {
+        merge(search, fields);
+      });
     },
     [setSearch]
   );
@@ -181,7 +181,7 @@ const SearchForm = ({ search, setSearch, filters }) => {
         <Grid2 size={12}>
           <Field
             highlightDirty={false}
-            name="$fullText"
+            name="fullText"
             label="Search"
             placeholder="Search Records"
             width={12}
@@ -216,28 +216,21 @@ function Search() {
   const [offset, setOffset] = useState(0);
   const [time, setTime] = useState(0);
 
-  const [search, setSearch] = useState({
-    $fullText: "",
+  const [search, setSearch] = useImmer({
+    fullText: "",
     include_non_digitized: false,
   });
   const [filters, setFilters] = useState([]);
 
-  // const searchRef = useRef(search);
-  // // logger.log(searchRef.current, search, records, filters, total, offset, time)
-  // if (!isEqual(search, searchRef.current)) {
-  //   searchRef.current = search;
-  // }
-
   useEffect(() => {
     setOffset(0);
-    // }, [searchRef.current]);
   }, [search]);
 
   useEffect(() => {
     const fetchRecords = async () => {
       const time = new Date();
       try {
-        const { $fullText, include_non_digitized } = search;
+        const { fullText, include_non_digitized } = search;
         const query = {
           $select: [
             "record_id",
@@ -252,9 +245,13 @@ function Search() {
             "vol_number",
           ],
           $limit: PAGE_SIZE,
-          fulltext: { $fulltext: $fullText },
           $skip: offset,
+          $sort: { title: 1 },
         };
+        if (fullText) {
+          query.$fullText = fullText;
+          query.$sort = { rank: -1, title: 1 };
+        }
         if (!include_non_digitized) {
           query.has_digital = true;
         }

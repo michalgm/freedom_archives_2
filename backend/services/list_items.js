@@ -14,7 +14,7 @@ export default (function (app) {
   const options = {
     id: "list_item_id",
     Model: app.get("postgresqlClient"),
-    paginate: app.get("paginate"),
+    paginate: { ...app.get("paginate"), max: false },
   };
   // Initialize our service with any options it requires
   app.use("/api/list_items", new ListItems(options));

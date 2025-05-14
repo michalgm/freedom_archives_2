@@ -1,5 +1,25 @@
 BEGIN;
 
+-- (needs to be done as root user)
+-- CREATE EXTENSION IF NOT EXISTS plpython3u;
+-- CREATE OR REPLACE FUNCTION clean_html(input TEXT)
+-- RETURNS TEXT
+-- LANGUAGE plpython3u
+-- AS $$
+-- from bs4 import BeautifulSoup
+-- return null if input is null;
+-- ALLOWED_TAGS = {'p', 'em', 'strong', 'b', 'i', 'ul', 'ol', 'li', 'br', 'blockquote', 'span', 'a', 'strong', 'div', 'font', 'img', 'title'}
+
+-- soup = BeautifulSoup(input, "html.parser")
+
+-- # Remove tags not in ALLOWED_TAGS
+-- for tag in soup.find_all():
+--     if tag.name not in ALLOWED_TAGS:
+--         tag.unwrap()
+
+-- return str(soup)
+-- $$;
+
 -- CREATE TEMP TABLE parent_lookup as select record_id, parent_record_id from records where parent_record_id is not null;
 -- select * from `parent_lookup`;
 DROP SCHEMA IF EXISTS freedom_archives CASCADE;
@@ -11,6 +31,8 @@ CREATE SCHEMA freedom_archives;
 -- select * from `parent_lookup`;
 SET
     search_path TO freedom_archives;
+
+CREATE EXTENSION IF NOT EXISTS pg_trgm;
 
 -- select * from parent_lookup;
 CREATE TABLE
@@ -51,6 +73,8 @@ CREATE TABLE
         list_item_id serial PRIMARY KEY,
         archive_id INTEGER REFERENCES archives ON DELETE CASCADE,
         item VARCHAR(500) NOT NULL,
+        fulltext tsvector GENERATED ALWAYS as ( TO_TSVECTOR('english', COALESCE(item::TEXT, ''))) STORED,
+        search_text text GENERATED ALWAYS AS (lower(coalesce(item::text, ''))) STORED,
         TYPE VARCHAR(45) NOT NULL,
         description VARCHAR(200) DEFAULT NULL
     );
@@ -61,6 +85,10 @@ CREATE UNIQUE INDEX list_items_type_idx ON list_items (
     archive_id
 );
 
+CREATE INDEX list_items_fulltext_idx ON list_items USING GIN (fulltext);
+
+CREATE INDEX list_items_search_text_idx ON list_items (search_text);
+
 CREATE TABLE
     collections (
         collection_id serial PRIMARY KEY,
@@ -68,6 +96,7 @@ CREATE TABLE
         parent_collection_id INTEGER DEFAULT NULL REFERENCES collections,
         collection_name VARCHAR(255) DEFAULT NULL,
         description TEXT,
+        description_search TEXT,
         summary VARCHAR(255) DEFAULT NULL,
         call_number TEXT,
         publisher_id INTEGER REFERENCES list_items,
@@ -283,7 +312,8 @@ INSERT INTO
             1,
             parent_id,
             collection_name,
-            a.description,
+            public.clean_html((a.description)),
+            public.strip_tags(public.clean_html(a.description)),
             summary,
             call_number,
             publisher_lookup.list_item_id,
@@ -967,6 +997,7 @@ SELECT
     COALESCE(keywords.items, '[]') AS keywords,
     subjects.items_text AS subjects_text,
     keywords.items_text AS keywords_text,
+    publisher_lookup.item AS publisher_text,
     subjects.items_search AS subjects_search,
     keywords.items_search AS keywords_search,
     ARRAY_TO_JSON(
@@ -1034,7 +1065,36 @@ SELECT
                 f.record_order,
                 b.title
         )
-    ) AS featured_records
+    ) AS featured_records,
+     SETWEIGHT(
+        TO_TSVECTOR('english', COALESCE(a.collection_id::TEXT, '')),
+        'A'
+    ) || SETWEIGHT(
+        TO_TSVECTOR('english', COALESCE(a.collection_name, '')),
+        'A'
+    ) || SETWEIGHT(
+        TO_TSVECTOR('english', COALESCE(a.call_number, '')),
+        'A'    
+    ) || SETWEIGHT(
+        TO_TSVECTOR('english', COALESCE(a.summary, '')),
+        'B'
+    ) || SETWEIGHT(
+        TO_TSVECTOR('english', COALESCE(a.description_search, '')),
+        'B'
+    ) || SETWEIGHT(
+        TO_TSVECTOR('english', COALESCE(keywords.items_text, '')),
+        'C'
+    ) || SETWEIGHT(
+        TO_TSVECTOR('english', COALESCE(subjects.items_text, '')),
+        'C'
+    ) AS fulltext,
+    lower(a.collection_id::text 
+    || COALESCE(a.collection_name, '')
+    || COALESCE(a.call_number, '')
+    || COALESCE(a.summary, '')
+    || COALESCE(a.description_search, '')
+    || COALESCE(keywords.items_text, '')
+    || COALESCE(subjects.items_text, '')) as search_text
 FROM
     collections a
     LEFT JOIN list_items publisher_lookup ON a.publisher_id = publisher_lookup.list_item_id
@@ -1054,7 +1114,17 @@ SELECT
 FROM
     collections_view;
 
--- CREATE INDEX collections_fulltext_index on unified_collections using GIN (fulltext);
+CREATE INDEX collections_fulltext_index on _unified_collections using GIN (fulltext);
+CREATE INDEX collections_search_text_index on _unified_collections using GIN (search_text gin_trgm_ops);
+CREATE INDEX collections_publisher_index on _unified_collections (publisher_text);
+CREATE INDEX collections_subjects_index on _unified_collections using GIN (subjects_search);
+CREATE INDEX collections_keywords_index on _unified_collections using GIN (keywords_search);
+CREATE INDEX collections_summary_index on _unified_collections (summary);
+CREATE INDEX collections_description_index on _unified_collections USING GIN (description_search gin_trgm_ops);
+CREATE INDEX collections_collection_name_index on _unified_collections (collection_name);
+CREATE INDEX collections_call_number_index on _unified_collections (call_number);
+
+
 ALTER TABLE _unified_collections
 ADD PRIMARY KEY (collection_id);
 
@@ -1117,6 +1187,30 @@ FROM
     list_items.type = 'format';
 
 /* FIXME collection */
+
+DROP VIEW IF EXISTS record_instances_view;
+
+CREATE VIEW record_instances_view AS
+        SELECT
+            record_id,
+            BOOL_OR(url != '') AS has_digital,
+            COUNT(*) AS instance_count,
+            ARRAY_TO_JSON(
+                ARRAY_AGG(
+                    ROW_TO_JSON(a)
+                    ORDER BY
+                        a.is_primary DESC,
+                        a.instance_id
+                )
+            ) AS instances,
+    array_remove(array_agg( DISTINCT call_number ), NULL) AS call_numbers,
+    string_agg(DISTINCT call_number, ' ') as call_numbers_text,
+    array_remove(array_agg( DISTINCT "format" ), NULL) AS formats,
+    array_remove(array_agg( DISTINCT quality ), NULL) AS qualitys,
+    array_remove(array_agg( DISTINCT generation ), NULL) AS generations,
+    array_remove(array_agg( DISTINCT media_type ), NULL) AS media_types
+FROM instances_view a  GROUP BY record_id;
+
 DROP VIEW IF EXISTS records_view;
 
 CREATE VIEW
@@ -1151,63 +1245,12 @@ SELECT
     contributor.username AS contributor_username,
     creator.firstname || ' ' || creator.lastname AS creator_name,
     creator.username AS creator_username,
-    ARRAY (
-        SELECT DISTINCT
-            call_number
-        FROM
-            instances
-        WHERE
-            instances.record_id = a.record_id AND
-            call_number IS NOT NULL
-    ) AS call_numbers,
-    
-        (
-            SELECT string_agg(
-                call_number, ' ')
-            FROM
-                instances
-            WHERE
-                instances.record_id = a.record_id AND
-                call_number IS NOT NULL
-                group by record_id
-        ) AS call_numbers_text,
-    ARRAY (
-        SELECT DISTINCT
-            FORMAT
-        FROM
-            instances
-        WHERE
-            instances.record_id = a.record_id AND
-            FORMAT IS NOT NULL
-    ) AS formats,
-    ARRAY (
-        SELECT DISTINCT
-            quality
-        FROM
-            instances
-        WHERE
-            instances.record_id = a.record_id AND
-            quality IS NOT NULL
-    ) AS qualitys,
-    ARRAY (
-        SELECT DISTINCT
-            generation
-        FROM
-            instances
-        WHERE
-            instances.record_id = a.record_id AND
-            generation IS NOT NULL
-    ) AS generations,
-    ARRAY (
-        SELECT DISTINCT
-            media_type
-        FROM
-            instances
-        WHERE
-            instances.record_id = a.record_id AND
-            media_type IS NOT NULL AND
-            media_type != ''
-    ) AS media_types,
+    instances.call_numbers,
+    instances.call_numbers_text,
+    instances.formats,
+    instances.qualitys,
+    instances.generations,
+    instances.media_types,
     COALESCE(authors.items, '[]') AS authors,
     COALESCE(subjects.items, '[]') AS subjects,
     COALESCE(keywords.items, '[]') AS keywords,
@@ -1221,7 +1264,13 @@ SELECT
     keywords.items_search AS keywords_search,
     producers.items_search AS producers_search,
     SETWEIGHT(
+        TO_TSVECTOR('english', COALESCE(a.record_id::TEXT, '')),
+        'A'
+    ) || SETWEIGHT(
         TO_TSVECTOR('english', COALESCE(a.title, '')),
+        'A'
+    ) || SETWEIGHT(
+        TO_TSVECTOR('english', COALESCE(instances.call_numbers_text)),
         'A'
     ) || SETWEIGHT(
         TO_TSVECTOR('english', COALESCE(a.description, '')),
@@ -1235,37 +1284,21 @@ SELECT
     ) || SETWEIGHT(
         TO_TSVECTOR('english', COALESCE(keywords.items_text, '')),
         'C'
-    ) AS fulltext -- array(select distinct call_number from instances where instances.record_id = a.record_id and call_number is not null) as call_numbers,
-    -- array(select distinct format from instances where instances.record_id = a.record_id and format is not null) as formats,
-    -- array(select distinct quality from instances where instances.record_id = a.record_id and quality is not null) as qualitys,
-    -- array(select distinct generation from instances where instances.record_id = a.record_id and generation is not null) as generations,
-    -- array(select distinct media_type from instances where instances.record_id = a.record_id and media_type is not null) as media_types
-    -- array(select row_to_json(record_summaries) from record_summaries where record_summaries.parent_record_id = a.record_id) as children,
-    -- array(select row_to_json(record_summaries) from record_summaries where record_summaries.parent_record_id = a.parent_record_id and record_summaries.record_id != a.record_id) as siblings,
-    -- (select row_to_json(parent) from record_summaries parent where a.parent_record_id = parent.record_id) as parent
+    ) AS fulltext,
+    lower(a.record_id::text 
+    || ' ' || COALESCE(a.title, '')
+    || ' ' || COALESCE(instances.call_numbers_text, '')
+    || ' ' || COALESCE(a.description, '')
+    || ' ' || COALESCE(instances.call_numbers_text, '')
+    || ' ' || COALESCE(authors.items_text, '')
+    || ' ' || COALESCE(subjects.items_text, '')
+    || ' ' || COALESCE(keywords.items_text, '')) as search_text
 FROM
     records a -- left join record_summaries b using (record_id)
     -- left join record_summaries parent on a.parent_record_id = parent.record_id
     LEFT JOIN list_items publisher_lookup ON a.publisher_id = publisher_lookup.list_item_id
     LEFT JOIN list_items program_lookup ON a.program_id = program_lookup.list_item_id
-    LEFT JOIN (
-        SELECT
-            record_id,
-            BOOL_OR(url != '') AS has_digital,
-            COUNT(*) AS instance_count,
-            ARRAY_TO_JSON(
-                ARRAY_AGG(
-                    ROW_TO_JSON(b)
-                    ORDER BY
-                        b.is_primary DESC,
-                        b.instance_id
-                )
-            ) AS instances
-        FROM
-            instances_view b
-        GROUP BY
-            record_id
-    ) instances USING (record_id)
+    LEFT JOIN record_instances_view instances USING (record_id)
     LEFT JOIN instances primary_instance ON a.primary_instance_id = primary_instance.instance_id
     LEFT JOIN users contributor ON a.contributor_user_id = contributor.user_id
     LEFT JOIN users creator ON a.creator_user_id = creator.user_id -- left join (select parent_record_id, array_to_json(array_agg(row_to_json(b))) as children from (select parent_record_id, record_id, title from records) b group by parent_record_id) children on children.parent_record_id = a.record_id
@@ -1285,7 +1318,8 @@ FROM
     LEFT JOIN records_list_items_view keywords ON keywords.type = 'keyword' AND
     keywords.record_id = a.record_id
     LEFT JOIN records_list_items_view producers ON producers.type = 'producer' AND
-    producers.record_id = a.record_id -- left join records parent on a.parent_record_id = parent.record_id
+    producers.record_id = a.record_id 
+    -- left join records parent on a.parent_record_id = parent.record_id
 ;
 
 DROP TABLE IF EXISTS _unified_records CASCADE;
@@ -1298,6 +1332,8 @@ FROM
     records_view;
 
 CREATE INDEX records_fulltext_index ON _unified_records USING GIN (fulltext);
+
+CREATE INDEX records_search_text_index ON _unified_records using GIN (search_text gin_trgm_ops);
 
 CREATE INDEX records_year ON _unified_records (YEAR);
 
@@ -1482,6 +1518,8 @@ CREATE OR REPLACE VIEW
 SELECT
     li.list_item_id,
     li.item,
+    li.fulltext,
+    li.search_text,
     li.type,
     li.description,
     COUNT(DISTINCT r.record_id) AS records_count,
@@ -1499,6 +1537,8 @@ UNION ALL
 SELECT
     li.list_item_id,
     li.item,
+    li.fulltext,
+    li.search_text,
     li.type,
     li.description,
     COUNT(DISTINCT r.record_id) AS records_count,
@@ -1517,6 +1557,8 @@ UNION ALL
 SELECT
     li.list_item_id,
     li.item,
+    li.fulltext,
+    li.search_text,
     li.type,
     li.description,
     COUNT(DISTINCT r.record_id) AS records_count,
@@ -1534,6 +1576,8 @@ UNION ALL
 SELECT
     li.list_item_id,
     li.item,
+    li.fulltext,
+    li.search_text,
     li.type,
     li.description,
     COUNT(DISTINCT r.record_id) AS records_count,
@@ -1552,6 +1596,8 @@ UNION ALL
 SELECT
     li.list_item_id,
     li.item,
+    li.fulltext,
+    li.search_text,
     li.type,
     li.description,
     COUNT(DISTINCT r.record_id) AS records_count,
@@ -1569,6 +1615,8 @@ UNION ALL
 SELECT
     li.list_item_id,
     li.item,
+    li.fulltext,
+    li.search_text,
     li.type,
     li.description,
     COUNT(DISTINCT r.record_id) AS records_count,
@@ -1587,6 +1635,8 @@ UNION ALL
 SELECT
     li.list_item_id,
     li.item,
+    li.fulltext,
+    li.search_text,
     li.type,
     li.description,
     0 AS records_count,
@@ -1604,6 +1654,8 @@ UNION ALL
 SELECT
     li.list_item_id,
     li.item,
+    li.fulltext,
+    li.search_text,
     li.type,
     li.description,
     0 AS records_count,
@@ -1621,6 +1673,8 @@ UNION ALL
 SELECT
     li.list_item_id,
     li.item,
+    li.fulltext,
+    li.search_text,
     li.type,
     li.description,
     0 AS records_count,
@@ -1638,6 +1692,8 @@ UNION ALL
 SELECT
     li.list_item_id,
     li.item,
+    li.fulltext,
+    li.search_text,
     li.type,
     li.description,
     0 AS records_count,
@@ -1721,5 +1777,3 @@ SELECT
     TO_JSON(VALUE)
 FROM
     freedom_archives_old.config;
-
-create extension if not exists pg_trgm;

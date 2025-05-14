@@ -13,21 +13,11 @@ const searchTypes = {
   collections: {
     id: "collection_id",
     label: "collection_name",
-    fields: ["collection_id", "collection_name", "thumbnail", "parent"],
     renderOption: (item) => <CollectionItem collection={item} component="div" dense />,
   },
   records: {
     id: "record_id",
     label: "title",
-    fields: [
-      "record_id",
-      "title",
-      "parent_record_id",
-      "primary_instance_thumbnail",
-      "primary_instance_format_text",
-      "primary_instance_media_type",
-      "collection",
-    ],
     renderOption: (item) => <RecordItem record={item} component="div" dense />,
   },
   value_lookup: {

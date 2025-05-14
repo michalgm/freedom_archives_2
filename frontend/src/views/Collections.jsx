@@ -35,19 +35,7 @@ function Collections({ embedded, itemAction, filter = {}, excludeIds = [] }) {
         $select: ["collection_id", "collection_name", "summary", "thumbnail", "parent"],
       };
       if (search) {
-        // const $ilike = `%${search.replace(/ /g, "%")}%`;
-        query.fullText = {
-          fields: [
-            "collection_id",
-            "collection_name",
-            "call_number",
-            "summary",
-            "description",
-            "keywords_text",
-            "subjects_text",
-          ],
-          searchTerm: search,
-        };
+        query.$fullText = search;
         query.$sort = { rank: -1, collection_name: 1 };
       }
       return query;

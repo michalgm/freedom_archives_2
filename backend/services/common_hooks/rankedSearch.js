@@ -2,11 +2,10 @@ import tsquery from "pg-tsquery";
 
 const parser = tsquery();
 
-const FULLTEXT_WEIGHT = 10000;
+const FULLTEXT_WEIGHT = 1000;
 const TRIGRAM_WEIGHT = 100;
-const FIELD_ORDER_WEIGHT = 10; // boost multiplier for earlier fields
-const FIELD_MATCH_BOOST_BASE = 10;
-const POSITION_BOOST_WEIGHT = 1;
+const EXACT_MATCH_BOOST = 10000;
+const POSITION_BOOST_WEIGHT = 5;
 const SIMILARITY_THRESHOLD = 0.2;
 
 function applyBasicPrefixing(input) {
@@ -28,72 +27,55 @@ function applyBasicPrefixing(input) {
 
 export const rankedSearch = async (context) => {
   const { query = {} } = context.params;
-  const { fields, searchTerm, language = 'english' } = query.fullText || {};
-  if (!searchTerm || !fields) return context;
+  const language = 'english';
 
-  delete query.fullText;
+  const searchTerm = query?.$fullText?.toLowerCase() || context?.params?._rankedSearch || '';
+  delete query.$fullText;
+
+  if (!searchTerm) return context;
+  context.params._rankedSearch = searchTerm;
 
   const knex = context.app.get('postgresqlClient');
-
+  const params = await context.service.sanitizeQuery(context.params);
   const baseQuery = context.service
-    .createQuery({ ...context.params, query });
+    .createQuery({ ...params, query: params });
 
   // Always apply prefix matching by default on all terms
   const tsqueryString = parser(applyBasicPrefixing(searchTerm));
 
-  const tsvectorExpr = fields.map((f) => `coalesce(${f}::text, '')`).join(` || ' ' || `);
+  const exactBoostCases = knex.raw(`WHEN search_text = ? THEN ${EXACT_MATCH_BOOST}`, [searchTerm]).toString();
+  console.log(context.service.fullName);
 
-  const exactBoostCases = fields
-    .map((f, i) => `WHEN ${f}::text ILIKE ? THEN ${(FIELD_MATCH_BOOST_BASE * FIELD_ORDER_WEIGHT) / (i + 1)}`)
-    .join(' ');
-  const exactBoostBindings = fields.map(() => searchTerm);
+  const positionScoreExpr = knex.raw(
+    `CASE WHEN position(? in search_text) > 0 THEN ${(POSITION_BOOST_WEIGHT)}::float / position(? in search_text) ELSE 0 END`,
+    [searchTerm, searchTerm]
+  ).toString();
 
-  const positionScoreFragments = fields
-    .map(
-      (f, i) =>
-        `CASE WHEN position(lower(?) in lower(${f}::text)) > 0 THEN ${(POSITION_BOOST_WEIGHT * FIELD_ORDER_WEIGHT) / (i + 1)} / position(lower(?) in lower(${f}::text)) ELSE 0 END`
-    );
-  const positionScoreBindings = fields.flatMap(() => [searchTerm, searchTerm]);
-
-  const positionScoreExpr = positionScoreFragments.join(' + ');
-
-  const trigramWeighted = fields
-    .map((f, i) => knex.raw(`? * word_similarity(??::text, ?)`, [(FIELD_ORDER_WEIGHT / (i + 1)), f, searchTerm]))
-    .map((r) => r.toString())
-    .join(' + ');
-
+  const trigram = knex.raw(`word_similarity(search_text, ?)`, [searchTerm]).toString();
   context.params.knex = baseQuery
     .clone()
+    .with('ts_query', knex.raw(`select to_tsquery(?, ?) as query`, [language, tsqueryString]))
     .where(function () {
-      this.whereRaw(`to_tsvector(?, ${tsvectorExpr}) @@ to_tsquery(?, ?)`, [
-        language,
-        language,
-        tsqueryString,
-      ]).orWhere(function () {
-        fields.forEach((f) => {
-          this.orWhereRaw(`word_similarity(??::text, ?) > ${SIMILARITY_THRESHOLD}`, [f, searchTerm]);
-        });
-      })
-        .whereRaw(
-          `${trigramWeighted} IS NOT NULL`,
-        );
+      this.whereRaw(`fulltext @@ (select query from ts_query)`)
+        .orWhereRaw(`${trigram} > ${SIMILARITY_THRESHOLD}`);
     })
     .select(
       knex.raw(
         `(
           CASE
-            WHEN to_tsvector(?, ${tsvectorExpr}) @@ to_tsquery(?, ?) THEN 
-                 ${FULLTEXT_WEIGHT} * ts_rank(to_tsvector(?, ${tsvectorExpr}), to_tsquery(?, ?))
+            WHEN fulltext @@ (select query from ts_query) THEN 
+                 ${FULLTEXT_WEIGHT} * ts_rank(fulltext, (select query from ts_query))
             ELSE 
-              ${TRIGRAM_WEIGHT} * ${trigramWeighted}
+              ${TRIGRAM_WEIGHT} * ${trigram}
             END
             + CASE ${exactBoostCases} ELSE 0 END
             + (${positionScoreExpr} ) 
-        ) AS rank`,
-        [language, language, tsqueryString, language, language, tsqueryString, ...exactBoostBindings, ...positionScoreBindings]
+        ) AS rank`
       )
     );
   ;
-
+  // context.result = [];
+  // return context;
+  // console.log(context.params.knex.toString());
   return context;
 };

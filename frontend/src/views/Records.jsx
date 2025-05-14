@@ -57,10 +57,7 @@ function Records({ embedded, itemAction, filter = {}, excludeIds = [] }) {
         ],
       };
       if (search) {
-        query.fullText = {
-          fields: ["record_id", "title", "description", "keywords_text", "producers_text", "call_numbers_text"],
-          searchTerm: search,
-        };
+        query.$fullText = search;
         query.$sort = { rank: -1, title: 1 };
       }
       return query;
