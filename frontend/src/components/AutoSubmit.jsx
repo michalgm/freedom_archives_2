@@ -1,15 +1,24 @@
-import { debounce } from "lodash-es";
+import { useEffect } from "react";
 import { useFormContext } from "react-hook-form";
-import useDeepCompareEffect from "use-deep-compare-effect";
+import { useDebouncedCallback } from "use-debounce";
 
 const AutoSubmit = ({ action, timeout = 300 }) => {
   const { watch } = useFormContext();
 
   const data = watch();
 
-  useDeepCompareEffect(() => {
-    debounce(action, timeout)(data);
-  }, [data, action]);
+  const debouncedAction = useDebouncedCallback(action, timeout);
+
+  useEffect(() => {
+    debouncedAction(data);
+  }, [data, debouncedAction]);
+
+  useEffect(
+    () => () => {
+      debouncedAction.flush();
+    },
+    [debouncedAction]
+  );
 
   return null;
 };
