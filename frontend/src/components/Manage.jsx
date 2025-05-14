@@ -6,7 +6,6 @@ import { FormContainer, useFieldArray, useForm } from "react-hook-form-mui";
 import AutoSubmit from "src/components/AutoSubmit";
 import { useResetSearch, useSetFilter, useSetSearch, useSetSearchIndex } from "src/stores";
 import useQueryStore from "src/stores/queryStore";
-import { useDebouncedCallback } from "use-debounce";
 
 import { collections, records } from "../api";
 import { Field } from "../components/form/Field";
@@ -286,76 +285,73 @@ export default function Manage({
   // }, [defaultFilter, formContext, searchType, service, setSearchType]);
 
   // const { dispatch } = useStateValue();
-  const lookupItems = useDebouncedCallback(
-    useCallback(
-      async ({ filter, offset, page_size, service }) => {
-        const { filters } = filter;
-        const query = createQuery(filter);
-        query.$skip = offset;
-        query.$limit = page_size;
-        const noLoading = Boolean(embedded);
-        if (filters.length) {
-          filters.forEach((filterValue) => {
-            const { field } = filterValue;
-            let { value } = filterValue;
-            if (!field || !value) return;
-            const filter = filterTypes[field];
+  const lookupItems = useCallback(
+    async ({ filter, offset, page_size, service }) => {
+      const { filters } = filter;
+      const query = createQuery(filter);
+      query.$skip = offset;
+      query.$limit = page_size;
+      const noLoading = Boolean(embedded);
+      if (filters.length) {
+        filters.forEach((filterValue) => {
+          const { field } = filterValue;
+          let { value } = filterValue;
+          if (!field || !value) return;
+          const filter = filterTypes[field];
 
-            if (filter && (value !== null || (value !== undefined && filter.allowNull))) {
-              if (filter.case === "upper" && typeof value === "string") {
-                value = value.toUpperCase();
-              }
-              switch (filter.match) {
-                case "contained":
-                  query[field] = {
-                    $contains: [value.list_item_id || value.value || value],
-                  };
-                  break;
-                case "fuzzy":
-                  query[field] = { $ilike: `%${value.replace(/ /g, "%")}%` };
-                  break;
-                case "listitem":
-                  query[`${field}_search`] = { $contains: [value.item] };
-                  break;
-                case "listitem_id":
-                  query[`${field.replace(/s$/, "")}_id`] = value.list_item_id;
-                  break;
-                default:
-                  query[field] = value;
-              }
+          if (filter && (value !== null || (value !== undefined && filter.allowNull))) {
+            if (filter.case === "upper" && typeof value === "string") {
+              value = value.toUpperCase();
             }
-          });
-        }
-        const [{ data, total }, { total: digitizedTotal = 0 }] = await Promise.all([
-          (service === "record" ? records : collections).find({ noLoading, query }),
-          service === "record"
-            ? records.find({
-                noLoading,
-                query: {
-                  ...query,
-                  has_digital: true,
-                  $select: [`record_id`],
-                  $limit: 1,
-                },
-              })
-            : {},
-        ]);
-        setItems(data);
-        setSearch({ total });
-        setDigitizedTotal(digitizedTotal);
-        if (!embedded) {
-          setSearch({
-            type: service,
-            query,
-            total,
-            offset,
-            page_size,
-          });
-        }
-      },
-      [createQuery, embedded, filterTypes, setSearch]
-    ),
-    250
+            switch (filter.match) {
+              case "contained":
+                query[field] = {
+                  $contains: [value.list_item_id || value.value || value],
+                };
+                break;
+              case "fuzzy":
+                query[field] = { $ilike: `%${value.replace(/ /g, "%")}%` };
+                break;
+              case "listitem":
+                query[`${field}_search`] = { $contains: [value.item] };
+                break;
+              case "listitem_id":
+                query[`${field.replace(/s$/, "")}_id`] = value.list_item_id;
+                break;
+              default:
+                query[field] = value;
+            }
+          }
+        });
+      }
+      const [{ data, total }, { total: digitizedTotal = 0 }] = await Promise.all([
+        (service === "record" ? records : collections).find({ noLoading, query }),
+        service === "record"
+          ? records.find({
+              noLoading,
+              query: {
+                ...query,
+                has_digital: true,
+                $select: [`record_id`],
+                $limit: 1,
+              },
+            })
+          : {},
+      ]);
+      setItems(data);
+      setSearch({ total });
+      setDigitizedTotal(digitizedTotal);
+      if (!embedded) {
+        setSearch({
+          type: service,
+          query,
+          total,
+          offset,
+          page_size,
+        });
+      }
+    },
+    [createQuery, embedded, filterTypes, setSearch]
   );
 
   useEffect(() => {
