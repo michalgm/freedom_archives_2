@@ -34,6 +34,7 @@ function Filter({ index, remove, filterTypes, filter, update }) {
     highlightDirty: false,
     disabled: !field,
     margin: "none",
+    expandOptions: true,
   };
 
   if (type === "listitem" || type === "listitem_id") {

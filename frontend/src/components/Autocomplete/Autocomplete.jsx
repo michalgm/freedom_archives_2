@@ -99,6 +99,7 @@ const Autocomplete = ({
   textFieldProps,
   options: staticOptions,
   autocompleteProps: _autocompleteProps,
+  expandOptions = false,
   // autocompleteProps: {
   //   helperText: _helperText,
   //   inputProps: _inputProps,
@@ -239,7 +240,18 @@ const Autocomplete = ({
         fetchOptions(value);
       }
     },
-    slotProps: { paper: { style: { width: "fit-content" } } },
+    slotProps: {
+      paper: {
+        style: {
+          width: expandOptions ? "fit-content" : null,
+        },
+        sx: {
+          "& .MuiAutocomplete-option": {
+            whiteSpace: expandOptions ? "nowrap" : "wrap",
+          },
+        },
+      },
+    },
     renderOption,
     onOpen: handleOpen,
     ...defaultAutocompleteProps,
