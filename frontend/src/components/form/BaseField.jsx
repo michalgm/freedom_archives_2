@@ -423,6 +423,7 @@ export const BaseField = ({
         color={color}
         helperText={helperText}
         required={props.required}
+        size={size}
         {...props}
       />
     );
