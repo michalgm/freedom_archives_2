@@ -5,14 +5,11 @@ import { useFieldArray, useFormContext } from "react-hook-form";
 import { useNavigate, useParams } from "react-router";
 import { BaseForm } from "src/components/form/BaseForm";
 import GridBlock from "src/components/GridBlock";
-// import ButtonsHeader from "src/components/form/ButtonsHeader";
-// import { useTitle } from "../appContext";
 import { useTitle } from "src/stores";
 import EditItemView from "src/views/EditItemView";
 
 import { EditableItemsListBase } from "../components/EditableItemsList";
 import FieldRow from "../components/FieldRow";
-// import ViewContainer from "../components/ViewContainer";
 import { Field } from "../components/form/Field";
 import Collections from "../views/Collections";
 
@@ -211,7 +208,7 @@ function EditList({ property = "child_records", type = "record", filter, reorder
         useFlexGap
         divider={<Divider orientation="vertical" flexItem />}
       >
-        <Box sx={{ flex: "1 1 0" }}>
+        <Box sx={{ width: "calc(50% - 16.5px)" }}>
           <Stack direction="column" sx={{ height: "100%" }}>
             <Box sx={{ flex: "0 0 auto" }}>
               <Typography variant="subtitle1">
@@ -231,7 +228,7 @@ function EditList({ property = "child_records", type = "record", filter, reorder
             </Box>
           </Stack>
         </Box>
-        <Box sx={{ flex: "1 1 0" }}>
+        <Box sx={{ width: "calc(50% - 16.5px)" }}>
           <ItemsList
             embedded
             itemAction={(_, item) => setTimeout(prepend(item), 0)}

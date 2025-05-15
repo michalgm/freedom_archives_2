@@ -73,6 +73,7 @@ function Records({ embedded, itemAction, filter = {}, excludeIds = [] }) {
       service="record"
       embedded={embedded}
       itemAction={itemAction}
+      searchHelperText="Search title, description, keywords, producers, and call number"
     />
   );
 }

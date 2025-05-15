@@ -1,4 +1,4 @@
-import { Chip, Stack , Pagination } from "@mui/material";
+import { Chip, Stack, Pagination } from "@mui/material";
 import { startCase } from "lodash-es";
 
 function PaginationFooter({
@@ -31,7 +31,7 @@ function PaginationFooter({
         onChange={(_, page) => setOffset((page - 1) * page_size)}
         showFirstButton
         showLastButton
-        size="large"
+        size={embedded ? "small" : "large"}
         color="primary"
         variant="outlined"
         sx={{ "& .MuiPagination-ul": { flexWrap: "nowrap" } }}

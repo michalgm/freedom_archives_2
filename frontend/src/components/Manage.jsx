@@ -1,9 +1,10 @@
-import { Close } from "@mui/icons-material";
-import { Box, Button, Grid2, Icon, IconButton, Paper, Stack } from "@mui/material";
+import { Close, Search } from "@mui/icons-material";
+import { Box, Button, Grid2, Icon, IconButton, InputAdornment, Paper, Stack, Tooltip } from "@mui/material";
 import { isEqual, startCase } from "lodash-es";
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { FormContainer, useFieldArray, useForm } from "react-hook-form-mui";
+import { FormProvider, useFieldArray, useForm } from "react-hook-form-mui";
 import AutoSubmit from "src/components/AutoSubmit";
+import Show from "src/components/Show";
 import { useResetSearch, useSetFilter, useSetSearch, useSetSearchIndex } from "src/stores";
 import useQueryStore from "src/stores/queryStore";
 
@@ -34,12 +35,12 @@ function Filter({ index, remove, filterTypes, filter, update }) {
     highlightDirty: false,
     disabled: !field,
     margin: "none",
-    expandOptions: true,
   };
 
   if (type === "listitem" || type === "listitem_id") {
     valueFieldProps.field_type = "list_item";
     valueFieldProps.itemType = field.replace(/s$/, "");
+    valueFieldProps.expandOptions = true;
     valueFieldProps.autocompleteProps = {
       sx: {
         backgroundColor: "#fff",
@@ -48,6 +49,7 @@ function Filter({ index, remove, filterTypes, filter, update }) {
   } else if (type === "select") {
     valueFieldProps.field_type = "select";
     valueFieldProps.selectType = "value_lookup";
+    valueFieldProps.expandOptions = true;
     valueFieldProps.autocompleteProps = {
       sx: {
         backgroundColor: "#fff",
@@ -56,6 +58,7 @@ function Filter({ index, remove, filterTypes, filter, update }) {
   } else if (type === "simpleSelect") {
     valueFieldProps.field_type = "simpleSelect";
     valueFieldProps.selectType = field;
+    valueFieldProps.expandOptions = true;
     valueFieldProps.returnFullObject = false;
     valueFieldProps.autocompleteProps = {
       sx: {
@@ -70,9 +73,9 @@ function Filter({ index, remove, filterTypes, filter, update }) {
   }
 
   return (
-    <Grid2 size={"auto"} sx={{ bgColor: "grey.200" }}>
-      <Paper sx={{ bgcolor: "grey.200", width: 360 }}>
-        <Stack direction="row" spacing={1} sx={{ bgColor: "grey.200" }} alignItems={"center"}>
+    <Grid2 size={"auto"}>
+      <Paper sx={{ bgcolor: "grey.200", width: 360, p: 1 }}>
+        <Stack direction="row" spacing={1} alignItems={"center"}>
           <IconButton onClick={() => remove(index)} variant="outlined" size="small" sx={{ p: 0, height: 18 }}>
             <Close fontSize="inherit" />
           </IconButton>
@@ -104,54 +107,7 @@ function Filter({ index, remove, filterTypes, filter, update }) {
   );
 }
 
-const Filters = ({ filterTypes, resetSearch }) => {
-  const { fields, append, remove, update } = useFieldArray({ name: "filters" });
-
-  return (
-    <>
-      <Grid2 size={2} spacing={2} container alignContent={"flex-start"}>
-        <Button
-          variant="outlined"
-          startIcon={<Icon>add</Icon>}
-          onClick={() => {
-            append({ field: null, value: null });
-          }}
-          size="small"
-          fullWidth
-        >
-          Add Filter
-        </Button>
-        <Button
-          variant="outlined"
-          startIcon={<Icon>search_off</Icon>}
-          onClick={() => resetSearch()}
-          size="small"
-          fullWidth
-        >
-          Clear Filters
-        </Button>
-      </Grid2>
-      <Grid2 size={12}>
-        <Grid2 container spacing={1}>
-          {fields.map((filter, index) => (
-            <Filter
-              key={filter.id}
-              {...{
-                filterTypes,
-                filter,
-                index,
-                remove,
-                update,
-              }}
-            />
-          ))}
-        </Grid2>
-      </Grid2>
-    </>
-  );
-};
-
-const FilterBar = ({ service, setFilter, setSearch, filterTypes, defaultFilter }) => {
+const FilterBar = ({ service, setFilter, setSearch, filterTypes, defaultFilter, searchHelperText, embedded }) => {
   const filter = useQueryStore((state) => state.search.filter);
   const resetSearch = useResetSearch();
 
@@ -159,6 +115,8 @@ const FilterBar = ({ service, setFilter, setSearch, filterTypes, defaultFilter }
     defaultValues: filter,
     mode: "onChange",
   });
+
+  const { fields, remove, update, append } = useFieldArray({ name: "filters", control: formContext.control });
 
   // useEffect(() => {
   //   console.log("filter changed", filter);
@@ -181,74 +139,145 @@ const FilterBar = ({ service, setFilter, setSearch, filterTypes, defaultFilter }
       formContext.reset(defaultFilter);
     });
   }, [resetSearch, formContext, defaultFilter]);
+  const size = embedded ? "x-small" : "small";
 
   return (
-    <FormContainer
-      formContext={formContext}
-      FormProps={{
-        autoComplete: "off",
-      }}
-    >
+    <FormProvider {...formContext}>
       <AutoSubmit action={onSuccess} />
-      <Grid2 container spacing={2}>
-        <Grid2 size={3} alignContent={"flex-start"}>
-          <Field
-            highlightDirty={false}
-            size="small"
-            name="search"
-            type="search"
-            label="Quick Search"
-            margin="none"
-            helperText="Search title, description. keywords, producers, and call number"
-          />
-        </Grid2>
-        <Grid2 size={4}>
-          {service === "record" && (
-            <Field
-              name="collection"
-              highlightDirty={false}
-              field_type="select"
-              service="collections"
-              size="small"
-              margin="none"
-              returnFullObject={false}
-            />
-          )}
-        </Grid2>
-        <Grid2 size={3} justifyContent={"flex-start"} direction={"column"} container spacing={0}>
-          {service === "record" && (
+      <Grid2
+        container
+        spacing={2}
+        flexWrap={"nowrap"}
+        alignContent={"flex-start"}
+        alignItems={"flex-start"}
+        // justifyContent={"space-between"}
+      >
+        <Grid2 container flex="1 1 fit-content" spacing={2}>
+          <Grid2 container flex="0 1 fit-content" rowSpacing={1}>
+            <Grid2 flex="1 0 45%" sx={{ minWidth: 150 }}>
+              <Field
+                highlightDirty={false}
+                size={size}
+                name="search"
+                type="search"
+                label="Quick Search"
+                margin="none"
+                slotProps={{
+                  input: {
+                    startAdornment: (
+                      <InputAdornment position="start">
+                        <Tooltip title={searchHelperText}>
+                          <Search />
+                        </Tooltip>
+                      </InputAdornment>
+                    ),
+                  },
+                }}
+              />
+            </Grid2>
+            <Show when={service === "record"}>
+              <Grid2 flex="1 0 45%" sx={{ minWidth: 150 }}>
+                <Field
+                  name="collection"
+                  highlightDirty={false}
+                  field_type="select"
+                  service="collections"
+                  size={size}
+                  margin="none"
+                  returnFullObject={false}
+                  expandOptions
+                />
+              </Grid2>
+            </Show>
+          </Grid2>
+          <Grid2 flex="1 1 min-content" container spacing={0} flexWrap={"wrap"}>
+            <Show when={service === "record"}>
+              <Field
+                field_type="checkbox"
+                highlightDirty={false}
+                name="non_digitized"
+                label="Include Non-Digitized"
+                margin="none"
+                size="small"
+                sx={{ py: 0.5 }}
+                labelProps={{ sx: { whiteSpace: "nowrap" } }}
+              />
+            </Show>
             <Field
               field_type="checkbox"
               highlightDirty={false}
-              name="non_digitized"
-              label="Include Non-Digitized"
+              name="hidden"
+              label="Include Hidden"
               margin="none"
               size="small"
               sx={{ py: 0.5 }}
+              labelProps={{ sx: { whiteSpace: "nowrap" } }}
             />
-          )}
-          <Field
-            field_type="checkbox"
-            highlightDirty={false}
-            name="hidden"
-            label="Include Hidden"
-            margin="none"
-            size="small"
-            sx={{ py: 0.5 }}
-          />
-          <Field
-            field_type="checkbox"
-            highlightDirty={false}
-            name="needs_review"
-            label="Needs Review"
-            margin="none"
-            size="small"
-            sx={{ py: 0.5 }}
-          />
+            <Field
+              field_type="checkbox"
+              highlightDirty={false}
+              name="needs_review"
+              label="Needs Review"
+              margin="none"
+              size="small"
+              sx={{ py: 0.5 }}
+              labelProps={{ sx: { whiteSpace: "nowrap" } }}
+            />
+          </Grid2>
         </Grid2>
-        <Filters filterTypes={filterTypes} resetSearch={reset} />
+        <Grid2
+          container
+          justifyContent={"flex-end"}
+          flex="0 0 fit-content"
+          flexWrap={"wrap"}
+          direction={"column"}
+          spacing={1}
+        >
+          {/* <Stack direction={"column"} spacing={1} width={"max-content"}> */}
+          <Button
+            // sx={{ flex: "1 1 0" }}
+            variant="outlined"
+            width="fit-content"
+            startIcon={!embedded && <Icon>add</Icon>}
+            onClick={() => {
+              append({ field: null, value: null });
+            }}
+            size={embedded ? "x-small" : "small"}
+            fullWidth
+          >
+            Add Filter
+          </Button>
+          <Button
+            // sx={{ flex: "1 1 0" }}
+            variant="outlined"
+            startIcon={!embedded && <Icon>search_off</Icon>}
+            onClick={() => reset()}
+            size={embedded ? "x-small" : "small"}
+            // fullWidth
+            sx={{ whiteSpace: "nowrap", width: "max-content" }}
+          >
+            Clear Filters
+          </Button>
+          {/* </Stack> */}
+        </Grid2>
+
+        {/* <Filters filterTypes={filterTypes} arrayMethods={arrayMethods} /> */}
       </Grid2>
-    </FormContainer>
+      <Grid2 size={12} container spacing={1}>
+        {fields.map((filter, index) => (
+          <Filter
+            key={filter.id}
+            {...{
+              filterTypes,
+              filter,
+              index,
+              remove,
+              update,
+            }}
+          />
+        ))}
+      </Grid2>
+    </FormProvider>
   );
 };
 
@@ -256,6 +285,7 @@ export default function Manage({
   defaultFilter = {},
   filterTypes,
   createQuery,
+  searchHelperText = "",
   // type,
   service,
   embedded,
@@ -381,12 +411,13 @@ export default function Manage({
         <FilterBar
           key="filter"
           service={service}
-          lookupItems={lookupItems}
           filter={filter}
           setFilter={setFilter}
           setSearch={setSearch}
           filterTypes={filterTypes}
           defaultFilter={defaultFilter}
+          searchHelperText={searchHelperText}
+          embedded={embedded}
         />,
       ]}
     >

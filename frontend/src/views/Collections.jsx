@@ -92,6 +92,7 @@ function Collections({ embedded, itemAction, filter = {}, excludeIds = [] }) {
       service="collection"
       embedded={embedded}
       itemAction={itemAction}
+      searchHelperText={"Search name, description, summary, keywords, subjects, and call number"}
     />
   );
 }
