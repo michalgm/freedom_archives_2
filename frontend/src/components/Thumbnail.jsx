@@ -8,10 +8,11 @@ export default function Thumbnail({ item, width = 75, alt = "" }) {
   const [brokenLink, setBrokenLink] = useState(false);
   const type = item?.record_id ? "record" : "collection";
   let src = "";
+  const cache_buster = item.date_modified ? `?cache_buster=${item.date_modified}` : "";
   if (type === "collection") {
-    src = `https://search.freedomarchives.org/${item?.thumbnail}`;
+    src = `https://search.freedomarchives.org/${item?.thumbnail}${cache_buster}`;
   } else {
-    src = item.primary_instance_thumbnail ? `/images/thumbnails/${item?.record_id}.jpg` : "";
+    src = item.primary_instance_thumbnail ? `/images/thumbnails/${item?.record_id}.jpg${cache_buster}` : "";
   }
   const flex = `0 0 ${width}px`;
 
