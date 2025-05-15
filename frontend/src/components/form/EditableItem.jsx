@@ -55,7 +55,7 @@ export function EditableItem({ service, name, link = true, label, parseError, ..
     const missingText = name === "parent" ? `Parent ${startCase(itemName)}` : "Collection";
 
     return (
-      <FormControl variant="outlined" fullWidth size="small" margin="none" error={props.error}>
+      <FormControl variant="outlined" fullWidth size="small" margin="dense" error={props.error}>
         <InputLabel sx={{ backgroundColor: "#fff" }} shrink>
           {startCase(label)}
         </InputLabel>
