@@ -23,6 +23,7 @@ import { useFieldArray, useFormContext } from "react-hook-form-mui";
 import { useNavigate, useParams } from "react-router";
 import { EditableItemsList, RecordsList } from "src/components/EditableItemsList";
 // import ButtonsHeader from "src/components/form/ButtonsHeader";
+import Show from "src/components/Show";
 import Thumbnail from "src/components/Thumbnail";
 import { useTitle } from "src/stores";
 import EditItemView from "src/views/EditItemView";
@@ -353,7 +354,14 @@ function Record({ id /*  embedded = false */ }) {
                       </Grid2>
                     </Grid2>
                     {
-                      <Grid2 size={2} className="record-thumbnail">
+                      <Grid2
+                        container
+                        size={2}
+                        className="record-thumbnail"
+                        spacing={2}
+                        direction={"column"}
+                        alignItems={"center"}
+                      >
                         <Button
                           variant="outlined"
                           href={`https://search.freedomarchives.org/admin/#/documents/${id}`}
@@ -361,7 +369,9 @@ function Record({ id /*  embedded = false */ }) {
                         >
                           Old Admin Link
                         </Button>
-                        <p>{!newRecord && <Thumbnail item={record} width="100%" />}</p>
+                        <Show unless={newRecord}>
+                          <Thumbnail item={record} />
+                        </Show>
                       </Grid2>
                     }
                     <FieldRow>
