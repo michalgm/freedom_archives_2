@@ -4,38 +4,42 @@ import { useCallback, useState } from "react";
 
 const no_digital_image = "/static/images/nodigital.png";
 
-export default function Thumbnail({ item, width = 75, alt = "" }) {
+export default function Thumbnail({ item, src: _src, width = 75, alt = "", type: _type }) {
   const [brokenLink, setBrokenLink] = useState(false);
-  const type = item?.record_id ? "record" : "collection";
+  const type = _type || item?.record_id ? "record" : "collection";
   let src = "";
-  const cache_buster = item.date_modified ? `?cache_buster=${item.date_modified}` : "";
-  if (type === "collection") {
-    src = `https://search.freedomarchives.org/${item?.thumbnail}${cache_buster}`;
-  } else {
-    src = item.primary_instance_thumbnail ? `/images/thumbnails/${item?.record_id}.jpg${cache_buster}` : "";
-  }
-  const flex = `0 0 ${width}px`;
 
-  const onError = useCallback(() => {
+  const cache_buster = item.date_modified ? `?${item.date_modified}` : "";
+  if (!_src) {
+    if (type === "collection") {
+      src = `/${item?.thumbnail}${cache_buster}`;
+    } else {
+      src = item.primary_instance_thumbnail ? `/images/thumbnails/${item?.record_id}.jpg${cache_buster}` : "";
+    }
+  } else {
+    src = _src;
+  }
+
+  const onError = useCallback((_e) => {
     setBrokenLink(true);
   }, []);
 
   if (brokenLink) {
     return (
-      <Avatar style={{ width, height: width, flex, border: "1px solid rgba(0, 0, 0, 0.1)" }}>
+      <Avatar style={{ width, height: width, border: "1px solid rgba(0, 0, 0, 0.1)" }}>
         <BrokenImage style={{ fontSize: width * 0.7 }} />
       </Avatar>
     );
   }
 
-  if (!item.record_id && !item.collection_id) return null;
-
   return (
-    <span style={{ width, minWidth: width, display: "flex", flex, alignItems: "start" }}>
+    <span style={{ width, minWidth: width, display: "inline-block" }}>
       <img
         style={{
-          maxWidth: "100%",
+          objectFit: "cover",
           border: "1px solid rgba(0, 0, 0, 0.1)",
+          width: "100%",
+          height: "100%",
         }}
         src={src || no_digital_image}
         onError={onError}

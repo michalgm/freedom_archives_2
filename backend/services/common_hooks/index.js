@@ -2,7 +2,7 @@ import schema from "@feathersjs/schema";
 
 import allowAnonymous from "./allowAnonymous.js";
 import { rankedSearch } from "./rankedSearch.js";
-import { writeThumbnailsFromUrl } from "./thumbnailer.js";
+import { updateThumbnail } from "./thumbnailer.js";
 
 const { hooks: schemaHooks, resolve } = schema;
 const archiveResolver = resolve({
@@ -178,17 +178,5 @@ export const debugQuery = (context) => {
   return context;
 };
 
-export { allowAnonymous, writeThumbnailsFromUrl, rankedSearch };
-export default {
-  writeThumbnailsFromUrl,
-  allowAnonymous,
-  setArchiveQuery,
-  setArchiveData,
-  setUser,
-  setArchive,
-  fetchUnified,
-  prepListItemRelations,
-  updateListItemRelations,
-  refreshView,
-  validateArchive,
-};
+export { allowAnonymous, updateThumbnail, rankedSearch };
+

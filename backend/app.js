@@ -35,7 +35,7 @@ app.use(
 );
 app.use(cors());
 app.use(compress());
-app.use(json());
+app.use(json({ limit: "13mb" }));
 app.configure(rest());
 app.use(urlencoded({ extended: true }));
 app.use(favicon(path.join(publicPath, "favicon.ico")));
@@ -51,7 +51,7 @@ app.configure(authentication);
 app.configure(services);
 
 app.hooks(appHooks);
-app.get("*", function (request, response) {
+app.get("*", function (_request, response) {
   response.sendFile(path.join(publicPath, "index.html"));
 });
 // Configure a middleware for 404s and the error handler

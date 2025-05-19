@@ -7,6 +7,7 @@ import {
   refreshView,
   setUser,
   updateListItemRelations,
+  updateThumbnail,
 } from "./common_hooks/index.js";
 
 class Collections extends KnexService {
@@ -149,7 +150,7 @@ export default (function (app) {
           delete data[key];
         }
       });
-      ["child_records", "children", "featured_records"].forEach((key) => {
+      ["child_records", "children", "featured_records", "thumbnail"].forEach((key) => {
         if (data[key]) {
           relation_data[key] = data[key];
           delete data[key];
@@ -175,20 +176,21 @@ export default (function (app) {
     prepListItemRelations(context);
     return context;
   };
+
   service.hooks({
     before: {
       all: [prepData],
       get: [fetchUnified],
       find: [fetchUnified],
-      create: [setUser],
+      create: [setUser,],
       patch: [setUser, updateListItemRelations, updateRelations],
       remove: [setUser, updateChildren],
     },
     after: {
       all: [],
-      create: [updateListItemRelations, updateRelations, refreshView],
+      create: [updateListItemRelations, updateThumbnail, updateRelations, refreshView],
       update: [refreshView],
-      patch: [refreshView],
+      patch: [updateThumbnail, refreshView],
       remove: [refreshView],
     },
     error: {

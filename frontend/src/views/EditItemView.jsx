@@ -1,4 +1,4 @@
-import { Delete, Save } from "@mui/icons-material";
+import { Delete, Link, Save } from "@mui/icons-material";
 import { Box, Grid2, Icon, Typography } from "@mui/material";
 import { startCase } from "lodash-es";
 import { useEffect, useState } from "react";
@@ -6,11 +6,6 @@ import { services } from "src/api";
 import ButtonLink from "src/components/ButtonLink";
 import ViewContainer from "src/components/ViewContainer";
 import useQueryStore from "src/stores/queryStore";
-
-const defaultButtons = [
-  { label: "Save", type: "submit", color: "primary", icon: <Save /> },
-  { label: "Delete", type: "delete", color: "secondary", icon: <Delete />, variant: "outlined" },
-];
 
 const RenderTime = ({ item, type }) => {
   return (
@@ -40,7 +35,7 @@ const NeighborLink = ({ type, neighborService, neighbors, setSearchIndex, search
   }
 };
 
-const EditItemView = ({ newItem, item, neighborService, buttons = defaultButtons, className, children, ...props }) => {
+const EditItemView = ({ newItem, item, neighborService, deleteOptions, className, children, ...props }) => {
   const [neighbors, setNeighbors] = useState({ prev: null, next: null });
   const setSearchIndex = useQueryStore((state) => state.setSearchIndex);
   const {
@@ -72,6 +67,22 @@ const EditItemView = ({ newItem, item, neighborService, buttons = defaultButtons
       updateNeighbors();
     }
   }, [search_index, query, neighborService, rootPath, type]);
+
+  const buttons = [
+    { label: "Save", type: "submit", color: "primary", icon: <Save /> },
+    { label: "Delete", type: "delete", color: "secondary", icon: <Delete />, variant: "outlined", deleteOptions },
+  ];
+
+  if (!newItem)
+    buttons.unshift({
+      label: "Old Admin Link",
+      type: "link",
+      variant: "outlined",
+      icon: <Link />,
+      to: `https://search.freedomarchives.org/admin/#/${type === "record" ? "document" : type}s/${item[`${type}_id`]}`,
+      sx: { mr: "auto" },
+      target: "_blank",
+    });
 
   const footerElements = newItem
     ? []

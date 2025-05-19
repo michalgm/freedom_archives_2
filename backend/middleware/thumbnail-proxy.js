@@ -7,7 +7,7 @@ export default (function (app, publicPath) {
     try {
       const imageName = req.path.split("/").pop();
       // Path to the local thumbnail
-      const localThumbnailPath = path.join(publicPath, "img/thumbnails", imageName);
+      const localThumbnailPath = path.join(publicPath, "img/thumbnails", req.path);
       if (fs.existsSync(localThumbnailPath)) {
         return res.sendFile(localThumbnailPath);
       } else {

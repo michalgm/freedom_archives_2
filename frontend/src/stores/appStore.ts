@@ -2,7 +2,7 @@ import { create } from 'zustand';
 
 interface Notification {
     id: string;
-    severity: 'success' | 'info' | 'warning' | 'error';
+    severity?: 'success' | 'info' | 'warning' | 'error';
     message: string;
     timeout?: number;
 }
@@ -34,9 +34,9 @@ const useAppStore = create<AppState>((set) => ({
     setTitle: (title) => set({ title }),
     initializeHooks: () => set({ hooks_initialized: true }),
 
-    addNotification: (notification) => set((state) => {
+    addNotification: (notification: Notification) => set((state) => {
         const id = notification.id || (Math.random() + 1).toString(36).substring(7);
-        const notifications = [...state.notifications, { ...notification, id }]
+        const notifications = [...state.notifications, { 'severity': 'success', ...notification, id } as Notification]
         const hasError = notifications.some(n => n.severity === 'error');
         return { notifications: notifications, hasError: hasError }
     }),

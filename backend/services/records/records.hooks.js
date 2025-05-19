@@ -5,7 +5,7 @@ import {
   setArchive,
   setUser,
   updateListItemRelations,
-  writeThumbnailsFromUrl,
+  updateThumbnail,
 } from "../common_hooks/index.js";
 
 // const tsquery = pgTsquery();
@@ -202,24 +202,13 @@ const updateRelations = async (context) => {
   }
   return context;
 };
-const updateThumbnail = async (context) => {
-  const { relation_data } = context;
-  const instance = relation_data?.instances?.[0];
-  if (instance && instance.url) {
-    await writeThumbnailsFromUrl({
-      url: instance.url,
-      filename: context.id || context.result.record_id,
-      basedir: context.app.get("public"),
-    });
-  }
-  return context;
-};
+
 export const before = {
   all: [prepData],
   find: [fetchUnified],
   get: [fetchUnified],
   create: [setUser, setArchive],
-  patch: [setUser, updateListItemRelations, updateThumbnail, updateRelations],
+  patch: [setUser, updateListItemRelations, updateRelations],
   remove: [],
 };
 export const after = {
@@ -227,7 +216,7 @@ export const after = {
   find: [],
   get: [],
   create: [updateListItemRelations, updateThumbnail, updateRelations, refreshView],
-  patch: [refreshView],
+  patch: [updateThumbnail, refreshView],
   remove: [refreshView],
 };
 export const error = {

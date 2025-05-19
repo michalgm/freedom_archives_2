@@ -1,4 +1,3 @@
-import { Delete, Save } from "@mui/icons-material";
 import { Box, Divider, Grid2, Stack, Tab, Tabs, Typography } from "@mui/material/";
 import { useEffect, useMemo, useState } from "react";
 import { useFieldArray, useFormContext } from "react-hook-form";
@@ -33,32 +32,6 @@ function Collection({ id, mode = "" }) {
     setTab(defaultTab);
   }, [id, defaultTab]);
 
-  const buttons = [
-    { label: "Save", type: "submit", color: "primary", icon: <Save /> },
-    {
-      label: "Delete",
-      type: "delete",
-      color: "secondary",
-      variant: "outlined",
-      icon: <Delete />,
-      deleteOptions: {
-        renderContent: (collection) => {
-          return (
-            <>
-              <Typography component="span" sx={{ display: "block" }} gutterBottom>
-                Are you sure you want to delete collection &quot;
-                <b>{collection.collection_name}</b>&quot;?
-              </Typography>
-              <Typography component="span" sx={{ display: "block" }} variant="body2">
-                All child records will be moved to the &quot;Uncategorized&quot; collection
-              </Typography>
-            </>
-          );
-        },
-      },
-    },
-  ];
-
   const formContents = () => {
     const featured_records = (
       <EditList
@@ -87,7 +60,7 @@ function Collection({ id, mode = "" }) {
     }
     return (
       <>
-        {tab === "collection" && <CollectionFields />}
+        {tab === "collection" && <CollectionFields id={id} newCollection={newCollection} />}
         {tab === "featured" && featured_records}
         {tab === "subcollections" && <EditList property="children" type="collection" reorder />}
         {tab === "records" && <EditList property="child_records" type="record" />}
@@ -96,6 +69,22 @@ function Collection({ id, mode = "" }) {
   };
 
   const currentTab = isFeaturedCollections && ["collection", "featured"].includes(tab) ? defaultTab : tab;
+
+  const deleteOptions = {
+    renderContent: (collection) => {
+      return (
+        <>
+          <Typography component="span" sx={{ display: "block" }} gutterBottom>
+            Are you sure you want to delete collection &quot;
+            <b>{collection.collection_name}</b>&quot;?
+          </Typography>
+          <Typography component="span" sx={{ display: "block" }} variant="body2">
+            All child records will be moved to the &quot;Uncategorized&quot; collection
+          </Typography>
+        </>
+      );
+    },
+  };
 
   return (
     <div className="collection FlexContainer">
@@ -120,9 +109,10 @@ function Collection({ id, mode = "" }) {
               item={collection}
               id={id}
               newItem={newCollection}
-              buttons={buttons}
+              // buttons={buttons}
               neighborService={isFeaturedRecords || isFeaturedCollections ? null : "collection"}
               className="FlexContainer"
+              deleteOptions={deleteOptions}
             >
               <GridBlock title="" spacing={2}>
                 <Stack sx={{ height: "100%" }}>
@@ -150,8 +140,36 @@ function Collection({ id, mode = "" }) {
 function CollectionFields() {
   return (
     <>
+      <Stack direction={"row"} spacing={2}>
+        <Grid2 container spacing={2}>
+          <Grid2 size={12}>
+            <Field name="collection_name" />
+          </Grid2>
+          <Grid2 size={12}>
+            <Field name="description" field_type="html" />
+          </Grid2>
+        </Grid2>
+        {
+          <Grid2
+            container
+            size="auto"
+            className="record-thumbnail"
+            spacing={2}
+            direction={"column"}
+            alignItems={"center"}
+          >
+            <Field
+              field_type="upload"
+              name="thumbnail"
+              label="Thumbnail"
+              width={100}
+              accept={["image/gif", "image/jpeg", "image/png", "image/webp", "image/tiff", "application/pdf"]}
+            />
+          </Grid2>
+        }
+      </Stack>
       <FieldRow>
-        <Field name="collection_name" />
+        <Field name="call_number" field_type="call_number" />
         <Field field_type="editableItem" service="collections" name="parent" />
       </FieldRow>
       <FieldRow>
@@ -159,13 +177,10 @@ function CollectionFields() {
         <Field name="needs_review" field_type="checkbox" />
       </FieldRow>
       <FieldRow>
-        <Field name="call_number" field_type="call_number" />
         <Field field_type="list_item" itemType="publisher" name="publisher" />
-      </FieldRow>
-      <FieldRow>
         <Field name="date_range" />
-        <Field name="thumbnail" />
       </FieldRow>
+      <FieldRow></FieldRow>
       <FieldRow>
         <Field name="keywords" multiple field_type="list_item" itemType="keyword" create />
         <Field name="subjects" multiple field_type="list_item" itemType="subject" create />

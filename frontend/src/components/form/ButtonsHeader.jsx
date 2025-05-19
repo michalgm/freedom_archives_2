@@ -1,6 +1,7 @@
 import { Button, Grid2 } from "@mui/material";
 import { useCallback, useState } from "react";
 import { useFormContext } from "react-hook-form";
+import ButtonLink from "src/components/ButtonLink";
 import useFormManagerContext from "src/components/form/FormManagerContext";
 
 // Base FormButton component that accepts handlers from context wrappers
@@ -44,6 +45,10 @@ export const FormButton = ({
     [type, onClick, deleteHandler, saveHandler, handleSubmit, deleteOptions]
   );
 
+  if (type === "link") {
+    return <ButtonLink {...props}>{label}</ButtonLink>;
+  }
+
   return (
     <Button
       loading={loading}
@@ -81,9 +86,7 @@ export function ButtonsHeader({ buttons, useFormManager = true, ...props }) {
   return (
     <Grid2 container className="buttons" spacing={1} justifyContent="flex-end" {...props}>
       {buttons.map((props) => (
-        <Grid2 key={props.label || props.id}>
-          <ButtonComponent {...props} />
-        </Grid2>
+        <ButtonComponent key={props.label || props.id} {...props} />
       ))}
     </Grid2>
   );

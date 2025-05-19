@@ -29,6 +29,7 @@ import {
   ToggleButtonGroupElement,
 } from "react-hook-form-mui";
 import { DatePickerElement, DateTimePickerElement } from "react-hook-form-mui/date-pickers";
+import FileUpload from "src/components/form/FileUpload";
 import { formatLabel } from "src/components/form/schemaUtils";
 import { convertSvgToDataUrl } from "src/utils";
 
@@ -567,6 +568,10 @@ export const BaseField = ({
     );
   };
 
+  const renderFileUpload = () => {
+    return <FileUpload name={name} control={control} label={props.label} textFieldProps={textFieldProps} {...props} />;
+  };
+
   switch (field_type) {
     case "checkbox":
       return renderCheckbox();
@@ -596,6 +601,8 @@ export const BaseField = ({
       return renderEditableItem();
     case "datestring":
       return renderDateString();
+    case "upload":
+      return renderFileUpload();
     case "textarea":
     default:
       return renderTextField();

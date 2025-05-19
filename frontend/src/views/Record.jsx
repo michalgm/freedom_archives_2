@@ -356,21 +356,15 @@ function Record({ id /*  embedded = false */ }) {
                     {
                       <Grid2
                         container
-                        size={2}
+                        size={"grow"}
                         className="record-thumbnail"
                         spacing={2}
                         direction={"column"}
                         alignItems={"center"}
+                        sx={{ textAlign: "center" }}
                       >
-                        <Button
-                          variant="outlined"
-                          href={`https://search.freedomarchives.org/admin/#/documents/${id}`}
-                          target="_blank"
-                        >
-                          Old Admin Link
-                        </Button>
                         <Show unless={newRecord}>
-                          <Thumbnail item={record} />
+                          <Thumbnail item={record} width={100} />
                         </Show>
                       </Grid2>
                     }
