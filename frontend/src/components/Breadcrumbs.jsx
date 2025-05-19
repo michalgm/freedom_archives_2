@@ -1,6 +1,5 @@
 import { Box, Breadcrumbs as Crumbs, Icon, Typography } from "@mui/material";
 import { startCase } from "lodash-es";
-import { Helmet } from "react-helmet";
 import { useLocation } from "react-router";
 import { useAppStore } from "src/stores";
 
@@ -60,9 +59,7 @@ function Breadcrumbs() {
         },
       }}
     >
-      <Helmet>
-        <title>{paths.map(({ title }) => title).join(" – ")}</title>
-      </Helmet>
+      <title>{paths.map(({ title }) => title).join(" – ")}</title>
       <Crumbs separator={<Icon>navigate_next</Icon>}>
         {paths.map(({ link, title }) => {
           return (
