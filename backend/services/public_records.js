@@ -113,24 +113,18 @@ const lookupFilters = async (context) => {
 
 const getNonDigitizedTotal = async (context) => {
   const { query, provider } = await sanitizeParams(context);
+  const params = { ...context.params, query };
 
   if (provider && query.has_digital) {
     console.time("nonDigitized");
-    const updatedQuery = (context.params.knex || context.service.createQuery(context.params)).clone();
-    updatedQuery._statements = updatedQuery._statements.filter(stmt => {
-      return !(
-        stmt.grouping === 'where' &&    // regular WHERE
-        stmt.type === 'whereBasic' &&   // basic “col op val” clause
-        stmt.column === 'has_digital' // your column
-      );
-    });
+    params.query.has_digital = false;
+    const updatedQuery = (context.params.knex || context.service.createQuery(params)).clone();
 
     updatedQuery
       .clearSelect()
       .clearOrder()
       .clear('limit')
-      .count("record_id")
-      .where({ has_digital: false });
+      .count("record_id");
 
     const res = await updatedQuery.first();
     console.timeEnd("nonDigitized");
