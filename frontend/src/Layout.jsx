@@ -31,6 +31,7 @@ export default function Layout() {
   return (
     <Box className="App" sx={{ backgroundColor: "#efefef", height: "100vh", display: "flex", flexDirection: "column" }}>
       <NavBar />
+      <NavigationListener />
       <Stack direction="row" sx={{ overflow: "hidden", height: "100%" }}>
         {isAuthenticated && (
           <Sidebar
@@ -61,6 +62,19 @@ export default function Layout() {
     </Box>
   );
 }
+
+function NavigationListener() {
+  const location = useLocation();
+  const removeNotificationsOnNavigate = useAppStore((state) => state.removeNotificationsOnNavigate);
+
+  useEffect(() => {
+    // Clear navigation notifications when location changes
+    removeNotificationsOnNavigate();
+  }, [location, removeNotificationsOnNavigate]);
+
+  return null;
+}
+
 export function Logout() {
   // const {
   //   state: { isAuthenticated, user },

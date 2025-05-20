@@ -5,6 +5,7 @@ interface Notification {
     severity?: 'success' | 'info' | 'warning' | 'error';
     message: string;
     timeout?: number;
+    keepOnNavigate?: boolean;
 }
 
 interface AppState {
@@ -20,6 +21,7 @@ interface AppState {
     initializeHooks: () => void;
     addNotification: (notification: Omit<Notification, 'id'> & { id?: string }) => void;
     removeNotification: (id: string) => void;
+    removeNotificationsOnNavigate: () => void;
 }
 
 // Store for UI state (not persisted)
@@ -46,6 +48,10 @@ const useAppStore = create<AppState>((set) => ({
         const hasError = notifications.some(n => n.severity === 'error');
         return { notifications: notifications, hasError: hasError }
     }),
+    removeNotificationsOnNavigate: () => set((state) => {
+        const notifications = state.notifications.filter(notification => notification.keepOnNavigate);
+        return { notifications: notifications }
+    })
 }));
 
 export default useAppStore;
