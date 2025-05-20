@@ -337,7 +337,7 @@ function Record({ id /*  embedded = false */ }) {
               <EditItemView
                 item={record}
                 newItem={newRecord}
-                neighborService="record"
+                service="record"
                 className="FlexContainer"
                 service="records"
               >

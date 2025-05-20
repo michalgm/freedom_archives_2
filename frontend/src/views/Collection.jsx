@@ -110,7 +110,7 @@ function Collection({ id, mode = "" }) {
               id={id}
               newItem={newCollection}
               // buttons={buttons}
-              neighborService={isFeaturedRecords || isFeaturedCollections ? null : "collection"}
+              service={isFeaturedRecords || isFeaturedCollections ? null : "collection"}
               className="FlexContainer"
               deleteOptions={deleteOptions}
             >
