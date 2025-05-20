@@ -36,10 +36,9 @@ export default function Thumbnail({ item, src: _src, width = 75, alt = "", type:
     <span style={{ width, minWidth: width, display: "inline-block" }}>
       <img
         style={{
-          objectFit: "cover",
+          objectFit: "contain",
           border: "1px solid rgba(0, 0, 0, 0.1)",
           width: "100%",
-          height: "100%",
         }}
         src={src || no_digital_image}
         onError={onError}
