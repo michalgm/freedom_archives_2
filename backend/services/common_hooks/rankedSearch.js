@@ -56,15 +56,16 @@ export const rankedSearch = async (context) => {
     .clone()
     .with('ts_query', knex.raw(`select to_tsquery(?, ?) as query`, [language, tsqueryString]))
     .where(function () {
-      this.whereRaw(`fulltext @@ (select query from ts_query)`)
-        .orWhereRaw(`${trigram} > ${SIMILARITY_THRESHOLD}`);
+      this.whereRaw(`fulltext @@ ts_query.query`)
+        .orWhereRaw(`search_text %> ?`, [searchTerm]);
     })
+    .crossJoin('ts_query')
     .select(
       knex.raw(
         `(
           CASE
-            WHEN fulltext @@ (select query from ts_query) THEN 
-                 ${FULLTEXT_WEIGHT} * ts_rank(fulltext, (select query from ts_query))
+            WHEN fulltext @@ ts_query.query THEN 
+                 ${FULLTEXT_WEIGHT} * ts_rank(fulltext, ts_query.query)
             ELSE 
               ${TRIGRAM_WEIGHT} * ${trigram}
             END

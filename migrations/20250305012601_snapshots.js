@@ -3,8 +3,8 @@
  * @returns { Promise<void> }
  */
 export const up = function (knex) {
-  return knex.raw(
-    `   
+    return knex.raw(
+        `   
           -- @block create public_records table
 
 CREATE VIEW
@@ -49,7 +49,8 @@ JSONB_ARRAY_ELEMENTS(r.producers) AS VALUE
     (r.publisher ->> 'list_item_id')::INTEGER AS publisher_id,
         (r.program ->> 'list_item_id')::INTEGER AS program_id,
             r.collection_id,
-            r.fulltext
+            r.fulltext,
+            r.search_text
 FROM
             unified_records r
             JOIN collections c USING(collection_id)
@@ -71,6 +72,8 @@ CREATE VIEW
     c.thumbnail,
     c.date_modified,
     c.parent_collection_id,
+    c.search_text,
+    c.fulltext,
     (
         SELECT
                     ARRAY_AGG(DISTINCT(VALUE ->> 'collection_id'):: INTEGER)
@@ -143,6 +146,7 @@ CREATE INDEX records_format_idx ON public_search.records(archive_id, "format");
 
 CREATE INDEX records_media_type_idx ON public_search.records(archive_id, media_type);
 
+create index records_search_text_idx on public_search.records using GIN (search_text gin_trgm_ops);
 
 CREATE TABLE
     records_snapshots AS
@@ -457,7 +461,7 @@ ADD CONSTRAINT fk_snapshot FOREIGN KEY(snapshot_id) REFERENCES snapshots(snapsho
 
         
         `
-  );
+    );
 };
 
 /**
@@ -465,29 +469,29 @@ ADD CONSTRAINT fk_snapshot FOREIGN KEY(snapshot_id) REFERENCES snapshots(snapsho
  * @returns { Promise<void> }
  */
 export const down = async function (knex) {
-  await knex.schema.dropSchemaIfExists("public_search", true);
+    await knex.schema.dropSchemaIfExists("public_search", true);
 
-  await knex.schema.dropTableIfExists("records_snapshots");
+    await knex.schema.dropTableIfExists("records_snapshots");
 
-  await knex.schema.dropTableIfExists("collections_snapshots");
+    await knex.schema.dropTableIfExists("collections_snapshots");
 
-  await knex.schema.dropTableIfExists("featured_records_snapshots");
+    await knex.schema.dropTableIfExists("featured_records_snapshots");
 
-  await knex.schema.dropTableIfExists("config_snapshots");
+    await knex.schema.dropTableIfExists("config_snapshots");
 
-  await knex.schema.dropTableIfExists("public_search.list_items");
+    await knex.schema.dropTableIfExists("public_search.list_items");
 
-  await knex.schema.dropTableIfExists("list_items_snapshots");
+    await knex.schema.dropTableIfExists("list_items_snapshots");
 
-  await knex.schema.dropTableIfExists("records_to_list_items_snapshots");
+    await knex.schema.dropTableIfExists("records_to_list_items_snapshots");
 
-  await knex.schema.dropViewIfExists("public_search.records_view");
+    await knex.schema.dropViewIfExists("public_search.records_view");
 
-  await knex.schema.dropTableIfExists("snapshots", true);
+    await knex.schema.dropTableIfExists("snapshots", true);
 
-  await knex.schema.dropViewIfExists("collections_snapshot_view", true);
+    await knex.schema.dropViewIfExists("collections_snapshot_view", true);
 
-  await knex.schema.dropViewIfExists("list_items_snapshot_view", true);
-  await knex.schema.dropViewIfExists("records_to_list_items_snapshot_view", true);
-  await knex.schema.dropViewIfExists("records_snapshot_view", true);
+    await knex.schema.dropViewIfExists("list_items_snapshot_view", true);
+    await knex.schema.dropViewIfExists("records_to_list_items_snapshot_view", true);
+    await knex.schema.dropViewIfExists("records_snapshot_view", true);
 };

@@ -151,6 +151,8 @@ CREATE INDEX records_format_idx ON public_search.records(archive_id, "format");
 
 CREATE INDEX records_media_type_idx ON public_search.records(archive_id, media_type);
 
+create index records_search_text_idx on public_search.records using GIN (search_text gin_trgm_ops);
+
 DROP TABLE IF EXISTS records_snapshots CASCADE;
 
 CREATE TABLE
@@ -398,8 +400,8 @@ DROP VIEW IF EXISTS list_items_snapshot_view CASCADE;
 CREATE VIEW
     list_items_snapshot_view AS(
     SELECT DISTINCT
-            r.archive_id,
     li.list_item_id,
+    r.archive_id,
     li.item,
     li.fulltext,
     li.search_text,
