@@ -42,7 +42,7 @@
     "dev": "LD_PRELOAD=$LD_PRELOAD:/usr/lib/x86_64-linux-gnu/libjemalloc.so nodemon -d 1 -w config/ -w backend/ -w package.json backend/index.js",
     "start": "concurrently -k \"npm run dev\" \"cd ./frontend; npm run start\"",
     "start:prod": "node backend/",
-    "mocha": "NODE_ENV=test mocha test/ --recursive --exit",
+    "mocha": "NODE_ENV=test mocha test/ --ignore '**/helpers/**' --recursive --parallel --exit",
     "test": "NODE_ENV=test npm run migrate && npm run mocha",
     "bundle:client": "npm pack --pack-destination ./public",
     "migrate": "knex migrate:latest",
@@ -92,6 +92,7 @@
     "eslint": "^9.25.0",
     "globals": "^16.0.0",
     "mocha": "^11.1.0",
+    "mock-knex": "^0.4.13",
     "nodemon": "^3.1.9",
     "sinon": "^19.0.2",
     "typescript-eslint": "^8.30.1"
