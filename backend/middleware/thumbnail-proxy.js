@@ -5,7 +5,7 @@ import path from "path";
 export default (function (app, publicPath) {
   return async function thumbnailProxy(req, res, next) {
     try {
-      const imageName = req.path.split("/").pop();
+      const imageName = req.path;
       // Path to the local thumbnail
       const localThumbnailPath = path.join(publicPath, "img/thumbnails", req.path);
       if (fs.existsSync(localThumbnailPath)) {

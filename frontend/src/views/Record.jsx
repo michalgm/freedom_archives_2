@@ -335,13 +335,7 @@ function Record({ id /*  embedded = false */ }) {
           const { formData: record } = manager;
           return (
             <>
-              <EditItemView
-                item={record}
-                newItem={newRecord}
-                service="record"
-                className="FlexContainer"
-                service="records"
-              >
+              <EditItemView item={record} newItem={newRecord} service="record" className="FlexContainer">
                 <Grid2 container spacing={2}>
                   <GridBlock title="" spacing={2}>
                     <Grid2 size={12}>
