@@ -1,6 +1,6 @@
 import { expect } from 'chai';
 
-import app from '../../app.js';
+import app from '../../backend/app.js';
 
 
 describe('Ranked Search Integration Tests', () => {
@@ -11,15 +11,16 @@ describe('Ranked Search Integration Tests', () => {
     service = app.service('api/records');
   });
 
+  after(async () => {
+    await app.get('postgresqlClient').destroy();
+  });
+
   it('should return results with exact matches ranked higher', async () => {
     // Test exact match ranking
     const exactMatchTerm = 'freedom';
     const result = await service.find({
       query: {
-        fullText: {
-          searchTerm: exactMatchTerm,
-          fields: ['title', 'description', 'authors_text', 'subjects_text', 'keywords_text']
-        },
+        $fullText: exactMatchTerm,
         $sort: { rank: -1 },
         $limit: 10
       }
@@ -45,10 +46,7 @@ describe('Ranked Search Integration Tests', () => {
     // Test prefix matching (e.g., "free" should match "freedom")
     const result = await service.find({
       query: {
-        fullText: {
-          searchTerm: 'free',
-          fields: ['title', 'description', 'authors_text']
-        },
+        $fullText: 'free',
         $limit: 10
       }
     });
@@ -69,10 +67,7 @@ describe('Ranked Search Integration Tests', () => {
     // Test multiple term search
     const result = await service.find({
       query: {
-        fullText: {
-          searchTerm: 'freedom movement',
-          fields: ['title', 'description', 'subjects_text']
-        },
+        $fullText: 'freedom movement',
         $limit: 10
       }
     });
@@ -97,10 +92,7 @@ describe('Ranked Search Integration Tests', () => {
     // Test with a misspelled word that should use trigram similarity
     const result = await service.find({
       query: {
-        fullText: {
-          searchTerm: 'freedum', // Misspelled "freedom"
-          fields: ['title', 'description']
-        },
+        $fullText: 'freedum', // Misspelled "freedom"
         $limit: 10
       }
     });
@@ -122,10 +114,7 @@ describe('Ranked Search Integration Tests', () => {
     const searchTerm = 'revolution';
     const result = await service.find({
       query: {
-        fullText: {
-          searchTerm,
-          fields: ['title', 'description']
-        },
+        $fullText: searchTerm,
         $limit: 20
       }
     });
@@ -152,11 +141,7 @@ describe('Ranked Search Integration Tests', () => {
     // Test with a non-English language parameter
     const result = await service.find({
       query: {
-        fullText: {
-          searchTerm: 'libertad', // Spanish for "freedom"
-          fields: ['title', 'description'],
-          language: 'spanish'
-        },
+        $fullText: 'libertad', // Spanish for "freedom"
         $limit: 10
       }
     });

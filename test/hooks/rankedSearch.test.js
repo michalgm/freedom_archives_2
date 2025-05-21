@@ -1,75 +1,85 @@
 import { expect } from 'chai';
+import knex from 'knex';
+import mockKnex from 'mock-knex';
 import sinon from 'sinon';
 
 import { rankedSearch } from '../../backend/services/common_hooks/rankedSearch.js';
 
 describe('rankedSearch hook', () => {
   let context;
-  let mockKnex;
-  let mockQuery;
+  let db;
+  let tracker;
   let sandbox;
 
   beforeEach(() => {
     sandbox = sinon.createSandbox();
 
-    // Create mock knex and query builder
-    mockQuery = {
-      clone: sinon.stub().returnsThis(),
-      whereRaw: sinon.stub().returnsThis(),
-      clearOrder: sinon.stub().returnsThis(),
-      limit: sinon.stub(),
-      select: sinon.stub().returnsThis(),
-      where: sinon.stub().returnsThis()
-    };
-
-    // Default to returning results for FTS query
-    mockQuery.limit.returns([{ exists: true }]);
-
-    // Setup where function to handle callback
-    mockQuery.where.callsFake(function (cb) {
-      if (typeof cb === 'function') {
-        cb.call({
-          orWhereRaw: sinon.stub().returnsThis()
-        });
+    // Create a real knex instance with mock-knex tracker
+    db = knex({
+      client: 'pg',
+      connection: {},
+      debug: false,
+      extendedOperators: {
+        $overlap: "&&",
+        $contains: "@>",
+        $contained_by: "<@",
+        $fulltext: "@@",
       }
-      return this;
     });
 
-    mockKnex = {
-      raw: sinon.stub().callsFake((query) => ({ toString: () => query }))
-    };
+    // Install mock-knex tracker
+    mockKnex.mock(db);
+    tracker = mockKnex.getTracker();
+    tracker.install();
+
+    // Set up tracker to respond to queries
+    tracker.on('query', (query) => {
+      query.response([]);
+    });
+
+    // Create a real query builder from knex
+    const baseQuery = db.queryBuilder();
 
     // Setup context
     context = {
       app: {
-        get: sinon.stub().withArgs('postgresqlClient').returns(mockKnex)
+        get: sinon.stub().withArgs('postgresqlClient').returns(db)
       },
       service: {
-        createQuery: sinon.stub().returns(mockQuery)
+        fullName: 'records',
+        createQuery: sinon.stub().returns(baseQuery),
+        sanitizeQuery: sinon.stub().resolvesArg(0)
       },
       params: {
         query: {
-          fullText: {
-            fields: ['title', 'description'],
-            searchTerm: 'test query',
-            language: 'english'
-          },
+          $fullText: 'test query',
           otherParam: 'value'
         }
       }
     };
 
-    // Stub console methods
+    // Stub console.log to prevent noise in test output
     sandbox.stub(console, 'log');
-    sandbox.stub(console, 'warn');
   });
 
   afterEach(() => {
     sandbox.restore();
+    tracker.uninstall();
+    mockKnex.unmock(db);
+  });
+
+  after(() => {
+    // Make sure mock-knex is completely uninstalled
+    try {
+      tracker.uninstall();
+      mockKnex.unmock(db);
+    } catch (e) {
+      // Ignore errors if tracker is already uninstalled
+    }
   });
 
   it('should return unmodified context when searchTerm is missing', async () => {
-    context.params.query.fullText.searchTerm = '';
+    context.params.query.$fullText = '';
     const result = await rankedSearch(context);
 
     expect(result).to.equal(context);
@@ -77,90 +87,70 @@ describe('rankedSearch hook', () => {
   });
 
   it('should return unmodified context when fields are missing', async () => {
-    context.params.query.fullText.fields = null;
+    context.params.query.$fullText = null;
     const result = await rankedSearch(context);
 
     expect(result).to.equal(context);
     expect(context.params.knex).to.be.undefined;
   });
 
-  // it('should handle invalid tsquery input', async () => {
-  //   // Use a search term that would cause the real parser to throw an error
-  //   // For example, unbalanced quotes or parentheses
-  //   context.params.query.fullText.searchTerm = '"unbalanced quote';
-
-  //   const result = await rankedSearch(context);
-  //   console.error(result);
-  //   // expect(console.warn.calledWith('Invalid tsquery input:', sinon.match.string)).to.be.true;
-  //   expect(result).to.equal(context);
-  //   expect(context.params.knex).to.be.undefined;
-  // });
-
-  it('should use full-text search when results exist', async () => {
-    const result = await rankedSearch(context);
-
-    expect(mockQuery.whereRaw.calledWith(
-      sinon.match(/to_tsvector/),
-      sinon.match.array
-    )).to.be.true;
-    expect(mockQuery.select.called).to.be.true;
-    expect(context.params.knex).to.exist;
-    expect(result).to.equal(context);
-  });
-
-  it('should fall back to trigram similarity when no FTS results', async () => {
-    // Simulate no FTS results
-    mockQuery.limit.returns([]);
+  it('should use full-text search and set knex in params', async () => {
+    // Set up tracker to capture queries
+    let capturedQueries = [];
+    tracker.on('query', (query) => {
+      capturedQueries.push(query.sql);
+      query.response([]);
+    });
 
     const result = await rankedSearch(context);
 
-    expect(mockQuery.where.called).to.be.true;
     expect(context.params.knex).to.exist;
     expect(result).to.equal(context);
+
+    // Verify that the query includes the expected components
+    const queryString = context.params.knex.toString();
+    expect(queryString).to.include('with');
+    expect(queryString).to.include('ts_query');
+    expect(queryString).to.include('to_tsquery');
   });
 
   it('should apply prefix matching to search terms', async () => {
-    context.params.query.fullText.searchTerm = 'simple test';
+    context.params.query.$fullText = 'simple test';
 
     await rankedSearch(context);
 
-    // The tsquery string should have :* appended to each term
-    // We can't check the exact string since we're using the real parser,
-    // but we can check that whereRaw was called with the right parameters
-    expect(mockQuery.whereRaw.calledWith(
-      sinon.match(/to_tsvector/),
-      sinon.match.array
-    )).to.be.true;
+    // Verify that the query includes prefixed terms
+    const queryString = context.params.knex.toString();
+    expect(queryString).to.include('simple:*');
+    expect(queryString).to.include('test:*');
   });
 
   it('should not modify already quoted or prefixed terms', async () => {
     // Set up a search term with quoted phrases, prefixed terms, and operators
-    context.params.query.fullText.searchTerm = '"exact phrase" partial:* operator&term';
+    context.params.query.$fullText = '"exact phrase" partial:* operator&term';
 
     await rankedSearch(context);
 
-    // Instead of checking console.log calls, verify the actual behavior:
-    // The search term should be properly processed and passed to the query
-    expect(mockQuery.whereRaw.called).to.be.true;
-
-    // We can check that the whereRaw was called with parameters that include
-    // our search terms in the expected format (preserving quotes and operators)
-    expect(mockQuery.whereRaw.calledWith(
-      sinon.match.string,
-      sinon.match(arr => {
-        // The third parameter should be the processed search term
-        const tsqueryString = arr[2];
-        // Check that it contains our terms in some form
-        return tsqueryString.includes('"exact<->phrase"') &&
-          tsqueryString.includes('partial:*') &&
-          tsqueryString.includes('operator&term');
-      })
-    )).to.be.true;
+    // Verify the query string contains the properly formatted terms
+    const queryString = context.params.knex.toString();
+    expect(queryString).to.include('"exact phrase"');
+    expect(queryString).to.include('partial:*');
+    expect(queryString).to.include('operator&term');
   });
 
-  it('should remove fullText from query params', async () => {
+  it('should remove $fullText from query params', async () => {
     await rankedSearch(context);
 
-    expect(context.params.query.fullText).to.be.undefined;
+    expect(context.params.query.$fullText).to.be.undefined;
+    expect(context.params._rankedSearch).to.equal('test query');
+  });
+
+  it('should include rank calculation in the query', async () => {
+    await rankedSearch(context);
+
+    const queryString = context.params.knex.toString();
+    expect(queryString).to.include('AS rank');
+    expect(queryString).to.include('ts_rank');
+    expect(queryString).to.include('word_similarity');
   });
 });

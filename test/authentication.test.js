@@ -1,8 +1,20 @@
 import assert from "assert";
+import sinon from 'sinon';
 
 import app from "../backend/app.js";
 
+let sandbox;
+
 describe("authentication", () => {
+  before(async () => {
+    sandbox = sinon.createSandbox();
+    sandbox.stub(console, 'error');
+  });
+
+  after(() => {
+    sandbox.restore();
+  });
+
   it("registered the authentication service", () => {
     assert.ok(app.service("api/authentication"));
   });

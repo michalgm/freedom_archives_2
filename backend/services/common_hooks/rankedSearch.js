@@ -6,7 +6,6 @@ const FULLTEXT_WEIGHT = 1000;
 const TRIGRAM_WEIGHT = 100;
 const EXACT_MATCH_BOOST = 10000;
 const POSITION_BOOST_WEIGHT = 5;
-const SIMILARITY_THRESHOLD = 0.2;
 
 function applyBasicPrefixing(input) {
   return input
@@ -44,7 +43,6 @@ export const rankedSearch = async (context) => {
   const tsqueryString = parser(applyBasicPrefixing(searchTerm));
 
   const exactBoostCases = knex.raw(`WHEN search_text = ? THEN ${EXACT_MATCH_BOOST}`, [searchTerm]).toString();
-  console.log(context.service.fullName);
 
   const positionScoreExpr = knex.raw(
     `CASE WHEN position(? in search_text) > 0 THEN ${(POSITION_BOOST_WEIGHT)}::float / position(? in search_text) ELSE 0 END`,
