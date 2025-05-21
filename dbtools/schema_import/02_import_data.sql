@@ -587,7 +587,7 @@ INSERT INTO
     )
 SELECT
     x.docid_1 AS record_id,
-    a.call_number AS call_number,
+    TRIM(a.call_number) AS call_number,
     format_lookup.list_item_id,
     no_copies,
     quality_lookup.list_item_id,
@@ -626,6 +626,19 @@ FROM
     AND quality_lookup.type='quality'
     LEFT JOIN list_items generation_lookup ON a.generation=generation_lookup.item
     AND generation_lookup.type='generation';
+
+UPDATE instances
+SET
+    call_number=NULL
+WHERE
+    call_number=''
+    OR call_number='null';
+
+UPDATE instances
+SET
+    call_number=REPLACE(call_number, 'JG/', 'JG/LS')
+WHERE
+    call_number LIKE 'JG/ %';
 
 INSERT INTO
     config

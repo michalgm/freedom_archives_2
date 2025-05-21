@@ -15,6 +15,18 @@ const __dirname = dirname(__filename);
 
 const OUTPUT_FORMAT = "jpg";
 
+const thumbnailApis = {
+  'vimeo.com:': (url) => `https://vimeo.com/api/oembed.json?url=${url}`,
+  '(?:(?!www.))archive.org': (url) => {
+    const id = url.split('/').pop();
+    return (`https://archive.org/services/img/${id}`);
+  },
+  'youtube.com': (url) => {
+    const id = url.split('=').pop();
+    return (`https://i.ytimg.com/vi/${id}/mqdefault.jpg`);
+  },
+};
+
 const fetchExternalImage = async (url) => {
   const { data } = await axios({ url, responseType: "arraybuffer" });
   return data;
@@ -34,7 +46,14 @@ const processDataUrl = (dataUrl) => {
   return matches[2];
 };
 
-const writeThumbnailsFromUrl = async ({ url, filename, basedir }) => {
+const writeThumbnailsFromUrl = async ({ url: _url, filename, basedir }) => {
+  let url = _url;
+  for (const [key, value] of Object.entries(thumbnailApis)) {
+    if (url.match(key)) {
+      url = value(url);
+      break;
+    }
+  }
   const data = await fetchExternalImage(url);
   return writeThumbnails({ data, filename, basedir });
 };

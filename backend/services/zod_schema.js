@@ -89,7 +89,7 @@ const instanceSchema = z.object({
   record_id: z.number(),
   call_number: z
     .union([
-      z.string().regex(/^\w{1,2} \d{1,3}$/, {
+      z.string().regex(/^([A-Z/]{1,5}|Vin) [\d.]{1,5}( ?[A-Z]| +R[123]| \d{3})?$/, {
         message: "Call number must be in format 'XX 123'",
       }),
       z.literal(""),
