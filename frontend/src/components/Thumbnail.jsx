@@ -14,7 +14,7 @@ export default function Thumbnail({ item, src: _src, width = 75, alt = "", type:
     if (type === "collection") {
       src = `/${item?.thumbnail}${cache_buster}`;
     } else {
-      src = item.primary_instance_thumbnail ? `/images/thumbnails/${item?.record_id}.jpg${cache_buster}` : "";
+      src = item.primary_instance_thumbnail ? `/images/thumbnails/records/${item?.record_id}.jpg${cache_buster}` : "";
     }
   } else {
     src = _src;
