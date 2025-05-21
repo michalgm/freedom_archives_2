@@ -11,6 +11,7 @@ import {
   Grid2,
   Icon,
   IconButton,
+  Stack,
   Table,
   TableBody,
   TableCell,
@@ -343,31 +344,32 @@ function Record({ id /*  embedded = false */ }) {
               >
                 <Grid2 container spacing={2}>
                   <GridBlock title="" spacing={2}>
-                    <Grid2 size={10}>
-                      <Grid2 container spacing={2}>
-                        <Grid2 size={12}>
-                          <Field name="title" />
+                    <Grid2 size={12}>
+                      <Stack direction={"row"} spacing={2}>
+                        <Grid2 container spacing={2} size="grow">
+                          <Grid2 size={12}>
+                            <Field name="title" />
+                          </Grid2>
+                          <Grid2 size={12}>
+                            <Field name="description" multiline rows={4} />
+                          </Grid2>
                         </Grid2>
-                        <Grid2 size={12}>
-                          <Field name="description" multiline rows={4} />
-                        </Grid2>
-                      </Grid2>
+                        {
+                          <Grid2
+                            container
+                            size={"auto"}
+                            className="record-thumbnail"
+                            spacing={2}
+                            direction={"column"}
+                            alignItems={"center"}
+                          >
+                            <Show unless={newRecord}>
+                              <Thumbnail item={record} width={100} />
+                            </Show>
+                          </Grid2>
+                        }
+                      </Stack>
                     </Grid2>
-                    {
-                      <Grid2
-                        container
-                        size={"grow"}
-                        className="record-thumbnail"
-                        spacing={2}
-                        direction={"column"}
-                        alignItems={"center"}
-                        sx={{ textAlign: "center" }}
-                      >
-                        <Show unless={newRecord}>
-                          <Thumbnail item={record} width={100} />
-                        </Show>
-                      </Grid2>
-                    }
                     <FieldRow>
                       <Field field_type="checkbox" name="is_hidden" />
                       <Field field_type="checkbox" name="needs_review" />

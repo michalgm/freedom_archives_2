@@ -186,9 +186,6 @@ function CollectionFields() {
         <Field name="subjects" multiple field_type="list_item" itemType="subject" create />
       </FieldRow>
       <FieldRow>
-        <Field name="description" field_type="html" />
-      </FieldRow>
-      <FieldRow>
         <Field field_type="textarea" name="summary" />
       </FieldRow>
       <FieldRow>
