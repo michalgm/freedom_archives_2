@@ -1,15 +1,13 @@
 import { AppBar, Box, Button, Container, Icon, Stack, Toolbar, Typography } from "@mui/material";
-import { useEffect, useRef } from "react";
+import { useEffect } from "react";
 import { Link, Outlet, useLocation } from "react-router";
-import { useAppStore, useAuth, useResetSearch } from "src/stores";
+import { useAppStore, useAuth } from "src/stores";
 import logger from "src/utils/logger";
 
 import { app } from "./api";
-// import { useStateValue } from "./appContext";
 import Authentication from "./Authentication";
 import Breadcrumbs from "./components/Breadcrumbs";
 import ErrorBoundary from "./components/ErrorBoundary";
-// import Errors from "./components/Errors";
 import Notifications from "./components/Notifications";
 import Loading from "./views/Loading";
 import Sidebar from "./views/Sidebar";
@@ -17,9 +15,6 @@ import Sidebar from "./views/Sidebar";
 const DRAWERWIDTH = 256;
 
 export default function Layout() {
-  // const {
-  //   state: { isAuthenticated },
-  // } = useStateValue();
   const { isAuthenticated } = useAuth();
   const style = isAuthenticated
     ? {}
@@ -53,7 +48,6 @@ export default function Layout() {
           style={style}
         >
           <Toolbar />
-          {/* <Loading>{({ loading }) => <Main loading={loading} />}</Loading> */}
           <Loading>
             <Main />
           </Loading>
@@ -76,9 +70,6 @@ function NavigationListener() {
 }
 
 export function Logout() {
-  // const {
-  //   state: { isAuthenticated, user },
-  // } = useStateValue();
   const { isAuthenticated, user } = useAuth();
   return isAuthenticated ? (
     <div className="logout">
@@ -95,23 +86,6 @@ export function Logout() {
   );
 }
 
-function SearchStateHandler() {
-  const { pathname } = useLocation();
-  const resetSearch = useResetSearch();
-  const prevPathRef = useRef(pathname);
-
-  useEffect(() => {
-    const [, prevPath] = prevPathRef.current.split("/");
-    const [, path] = pathname.split("/");
-
-    if (["records", "collections"].includes(prevPath) && prevPath !== path) {
-      resetSearch();
-    }
-    prevPathRef.current = pathname;
-  }, [pathname, resetSearch]);
-  return null;
-}
-
 function NavBar() {
   return (
     <AppBar color="primary" position="fixed" elevation={0} sx={{ zIndex: (theme) => theme.zIndex.drawer + 1 }}>
@@ -126,17 +100,13 @@ function NavBar() {
 export function Main() {
   const loading = useAppStore((state) => state.loading);
 
-  // const {
-  //   state: { isAuthenticated },
-  // } = useStateValue();
-  // const location = useLocation();
   const loadingStyle = loading
     ? {
         opacity: 0.6,
         // marginTop: "-2px",
       }
     : {};
-  // logger.log("Main RENDER", location);
+  logger.log("Main RENDER", location);
 
   return (
     <Container
@@ -153,13 +123,11 @@ export function Main() {
     >
       <Notifications />
       <Authentication />
-      <SearchStateHandler />
       <ErrorBoundary>
         <Outlet />
-        {/* <Outlet context={{ location }} /> */}
       </ErrorBoundary>
     </Container>
   );
 }
 
-Main.whyDidYouRender = true;
+// Main.whyDidYouRender = true;
