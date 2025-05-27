@@ -1,4 +1,3 @@
-import { merge } from "lodash-es";
 import { useCallback } from "react";
 
 import Manage from "../components/Manage";
@@ -25,25 +24,12 @@ const filter_types = {
   media_types: { input: "simpleSelect", match: "contained" },
 };
 
-function Records({ embedded, itemAction, filter = {}, excludeIds = [] }) {
-  const initFilter = {
-    search: "",
-    non_digitized: false,
-    collection: null,
-    hidden: false,
-    needs_review: false,
-    filters: [],
-  };
-  const defaultFilter = merge(initFilter, filter);
-
+function Records({ embedded, itemAction, filter = {}, excludeIds = [], useStore }) {
   const createQuery = useCallback(
     (filter) => {
-      const { search, non_digitized, hidden, needs_review, collection } = filter;
+      const { search, non_digitized, hidden, needs_review, collection_id } = filter;
+
       const query = {
-        has_digital: non_digitized ? undefined : true,
-        is_hidden: hidden ? undefined : false,
-        needs_review: needs_review ? needs_review : undefined,
-        collection_id: collection ? collection : undefined,
         record_id: { $nin: excludeIds },
         $sort: { title: 1 },
         $select: [
@@ -56,6 +42,18 @@ function Records({ embedded, itemAction, filter = {}, excludeIds = [] }) {
           "primary_instance_format_text",
         ],
       };
+      if (!non_digitized) {
+        query.has_digital = true;
+      }
+      if (!hidden) {
+        query.is_hidden = false;
+      }
+      if (needs_review) {
+        query.needs_review = true;
+      }
+      if (collection_id) {
+        query.collection_id = collection_id;
+      }
       if (search) {
         query.$fullText = search;
         query.$sort = { rank: -1, title: 1 };
@@ -67,13 +65,14 @@ function Records({ embedded, itemAction, filter = {}, excludeIds = [] }) {
 
   return (
     <Manage
-      defaultFilter={defaultFilter}
+      defaultFilter={filter}
       createQuery={createQuery}
       filterTypes={filter_types}
       service="record"
       embedded={embedded}
       itemAction={itemAction}
       searchHelperText="Search title, description, keywords, producers, and call number"
+      useStore={useStore}
     />
   );
 }

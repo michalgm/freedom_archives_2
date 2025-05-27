@@ -35,12 +35,20 @@ const columns = [
     flex: 2,
     editable: true,
     preProcessEditCellProps: async (params) => {
-      const { type } = params.row
-      const hasError = await checkUnique('list_items', {
-        item: params.props.value, type: type, 
-        list_item_id: { $ne: params.row.list_item_id }
-      }, params.props.value);
-      const result = { ...params.props, error: hasError ? `An item named "${params.props.value}" already exists` : null };
+      const { type } = params.row;
+      const hasError = await checkUnique(
+        "list_items",
+        {
+          item: params.props.value,
+          type: type,
+          list_item_id: { $ne: params.row.list_item_id },
+        },
+        params.props.value
+      );
+      const result = {
+        ...params.props,
+        error: hasError ? `An item named "${params.props.value}" already exists` : null,
+      };
       return result;
     },
   },

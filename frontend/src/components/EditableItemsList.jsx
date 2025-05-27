@@ -38,7 +38,7 @@ export function ItemsList({ items = [], type, emptyText, itemAction, link = true
   // logger.log(items);
   return (
     <List>
-      {items.length === 0 && <Typography>{emptyText}</Typography>}
+      {items.length === 0 && <Typography sx={{ p: 2, textAlign: "center" }}>{emptyText}</Typography>}
       {items.map((item, index) => (
         <React.Fragment key={item.id || item[`${type}_id`]}>
           <ItemTag

@@ -11,7 +11,7 @@ export const Section = ({ header, elements, service, ...props }) => {
   if (!elements.length) return null;
   const justifyContent = elements.length === 1 ? "center" : "space-between";
   return (
-    <Paper sx={{ margin: "1px" }} {...props}>
+    <Paper {...props} elevation={1}>
       <Grid2 size="grow" style={{ flex: "none" }}>
         <Grid2 container alignContent="center" alignItems="center" justifyContent={justifyContent} spacing={2}>
           {elements.map((item) => (
@@ -48,21 +48,30 @@ export const FormErrors = ({ service }) => {
   );
 };
 
-function ViewContainer({ children, buttons, embedded, footerElements = [], headerElements = [], service }) {
+function ViewContainer({
+  children,
+  buttons,
+  // embedded,
+  noPaper = false,
+  footerElements = [],
+  headerElements = [],
+  service,
+  containerProps = {},
+}) {
   const { isLoading } = useFormManagerContext();
 
   logger.log("VIEW CONTAINER RENDER");
 
-  const height = embedded ? "100%" : "100%";
   if (buttons) {
     headerElements.unshift(<ButtonsHeader key="buttons" buttons={buttons} />);
   }
+  const Container = noPaper ? Box : Paper;
   return (
-    <Stack direction="column" spacing={2} useFlexGap style={{ height, flexWrap: "nowrap" }}>
+    <Stack direction="column" spacing={2} useFlexGap className="ScrollContainer">
       <Section elements={headerElements} header service={service} />
-      <Box id="contents" size="grow" sx={{ overflowX: "auto", flex: "100 100 auto", padding: "1px" }}>
+      <Container id="contents" className="FlexContainer" {...containerProps}>
         <Show when={!isLoading}>{children}</Show>
-      </Box>
+      </Container>
       <Section type="footer" elements={footerElements} />
     </Stack>
   );

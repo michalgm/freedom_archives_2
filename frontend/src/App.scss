@@ -20,6 +20,10 @@ body,
     height: 100%;
     overflow-x: hidden;
   }
+  .ScrollContainer {
+    height: 100%;
+    overflow: visible;
+  }
   .FlexScroller {
     overflow-x: auto;
     height: 100%;

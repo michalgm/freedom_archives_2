@@ -313,7 +313,7 @@ function Record({ id /*  embedded = false */ }) {
   logger.log("Record RENDER");
 
   return (
-    <div className="record FlexContainer">
+    <Box className="record ScrollContainer">
       <BaseForm
         formConfig={{
           service: "records",
@@ -329,13 +329,12 @@ function Record({ id /*  embedded = false */ }) {
             instances: [{ no_copies: 1 }],
           },
         }}
-        style={{ height: "100%" }}
       >
         {(manager) => {
           const { formData: record } = manager;
           return (
             <>
-              <EditItemView item={record} newItem={newRecord} service="record" className="FlexContainer">
+              <EditItemView item={record} newItem={newRecord} service="record" noPaper>
                 <Grid2 container spacing={2}>
                   <GridBlock title="" spacing={2}>
                     <Grid2 size={12}>
@@ -440,7 +439,7 @@ function Record({ id /*  embedded = false */ }) {
           );
         }}
       </BaseForm>
-    </div>
+    </Box>
   );
 }
 

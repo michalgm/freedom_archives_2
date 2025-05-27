@@ -1,11 +1,11 @@
-import { Box, Button, Grid2, Paper, Stack, Typography } from "@mui/material";
+import { Box, Button, Grid2, Stack, Typography } from "@mui/material";
 import dayjs from "dayjs";
 import { startCase } from "lodash-es";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { useForm } from "react-hook-form-mui";
 import AutoSubmit from "src/components/AutoSubmit";
 import Form from "src/components/form/Form";
-import { Section } from "src/components/ViewContainer";
+import ViewContainer from "src/components/ViewContainer";
 import { useDebouncedCallback } from "use-debounce";
 
 import { collections, records, review_changes, snapshots } from "../api";
@@ -324,52 +324,48 @@ function ReviewChanges() {
   };
 
   return (
-    <Stack direction="column" sx={{ height: "100%" }} spacing={2}>
-      <Section
-        header
-        elements={[
-          <ReviewChangesForm
-            key={"form"}
-            // filter={filter}
-            setFilter={setFilter}
-            // fetchValues={fetchValues}
-            publishDate={publishDate}
-            // setPublishDate={setPublishDate}
-          />,
-        ]}
+    <ViewContainer
+      headerElements={[
+        <ReviewChangesForm
+          key={"form"}
+          // filter={filter}
+          setFilter={setFilter}
+          // fetchValues={fetchValues}
+          publishDate={publishDate}
+          // setPublishDa]}
+        />,
+      ]}
+      noPaper
+    >
+      <EditableDataTable
+        rows={values.data}
+        columns={columns}
+        idField="id"
+        model="list_items"
+        sortingMode="server"
+        paginationMode="server"
+        loading={loading}
+        initialState={{
+          sorting: {
+            sortModel: [initialOrder],
+          },
+        }}
+        // autosizeColumns
+        paginationModel={{ page: pagination.skip / pagination.limit, pageSize: pagination.limit }}
+        onPaginationModelChange={handlePaginationModelChange}
+        pageSizeOptions={[pagination.limit]}
+        rowCount={values.total}
+        sortModel={[order]}
+        sortingOrder={["desc", "asc"]}
+        onSortModelChange={handleSortModelChange}
+        readonly
+        slotProps={{
+          toolbar: {
+            showQuickFilter: false,
+          },
+        }}
       />
-
-      <Paper sx={{ p: 0, mb: 2 }} className="FlexContainer">
-        <EditableDataTable
-          rows={values.data}
-          columns={columns}
-          idField="id"
-          model="list_items"
-          sortingMode="server"
-          paginationMode="server"
-          loading={loading}
-          initialState={{
-            sorting: {
-              sortModel: [initialOrder],
-            },
-          }}
-          // autosizeColumns
-          paginationModel={{ page: pagination.skip / pagination.limit, pageSize: pagination.limit }}
-          onPaginationModelChange={handlePaginationModelChange}
-          pageSizeOptions={[pagination.limit]}
-          rowCount={values.total}
-          sortModel={[order]}
-          sortingOrder={["desc", "asc"]}
-          onSortModelChange={handleSortModelChange}
-          readonly
-          slotProps={{
-            toolbar: {
-              showQuickFilter: false,
-            },
-          }}
-        />
-      </Paper>
-    </Stack>
+    </ViewContainer>
   );
 }
 export default ReviewChanges;

@@ -40,8 +40,14 @@ export default function Users() {
           flex: 2,
           editable: true,
           preProcessEditCellProps: async (params) => {
-            const hasError = await checkUnique('users', { username: params.props.value, user_id: { $ne: params.props.row.user_id } });
-            const result = { ...params.props, error: hasError ? `An user named "${params.props.value}" already exists` : null };
+            const hasError = await checkUnique("users", {
+              username: params.props.value,
+              user_id: { $ne: params.props.row.user_id },
+            });
+            const result = {
+              ...params.props,
+              error: hasError ? `An user named "${params.props.value}" already exists` : null,
+            };
             return result;
           },
         },
@@ -65,7 +71,7 @@ export default function Users() {
           flex: 1,
           editable: true,
           type: "singleSelect",
-          valueOptions: ["intern", "administrator"],
+          valueOptions: ["intern", "staff", "administrator"],
         },
         {
           field: "active",
@@ -116,7 +122,13 @@ export default function Users() {
         getItemName={(row) => row.username}
         autosizeColumns
       />
-      <ChangePassword {...editPassword} handleClose={() => { setEditPassword({ open: false, user: {} }); fetchUsers(); }} />
+      <ChangePassword
+        {...editPassword}
+        handleClose={() => {
+          setEditPassword({ open: false, user: {} });
+          fetchUsers();
+        }}
+      />
     </Paper>
   );
 }
