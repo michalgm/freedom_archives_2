@@ -2,7 +2,7 @@
 // import useQueryStore from "src/stores/queryStore";
 import { useCallback, useMemo } from "react";
 import useAppStore from "src/stores/appStore";
-import useQueryStore from "src/stores/queryStore";
+import { queryStores, createLocalQueryStore } from "src/stores/queryStore";
 import useSessionStore from "src/stores/sessionStore";
 
 const errorMessages = {
@@ -11,8 +11,9 @@ const errorMessages = {
 
 export {
     useAppStore,
-    // useQueryStore,
-    useSessionStore
+    useSessionStore,
+    queryStores,
+    createLocalQueryStore
 };
 
 const parseError = (error: string | Error) => {
@@ -46,25 +47,21 @@ export const useTitle = () => {
     }, [setTitle]);
 };
 
-export const useResetSearch = () => {
-    return useQueryStore(state => state.resetSearch);
-};
+// export const useResetSearch = (type: SearchType) => {
+//     return useQueryStore(type)(state => state.resetSearch);
+// };
 
-export const useSetSearch = () => {
-    return useQueryStore(state => state.setSearch);
-};
+// export const useSetSearch = (type: SearchType) => {
+//     return useQueryStore(type)(state => state.setSearch);
+// };
 
-export const useSetSearchIndex = () => {
-    return useQueryStore(state => state.setSearchIndex);
-};
+// export const useSetSearchIndex = (type: SearchType) => {
+//     return useQueryStore(type)(state => state.setSearchIndex);
+// };
 
-export const useSetFilter = () => {
-    return useQueryStore(state => state.setFilter);
-};
-
-export const useSetSearchType = () => {
-    return useQueryStore(state => state.setSearchType);
-};
+// export const useSetFilter = (type: SearchType) => {
+//     return useQueryStore(type)(state => state.setFilter);
+// };
 
 export const useRemoveNotification = () => {
     return useAppStore(state => state.removeNotification);

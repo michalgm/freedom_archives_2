@@ -5,8 +5,7 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { FormProvider, useFieldArray, useForm } from "react-hook-form-mui";
 import AutoSubmit from "src/components/AutoSubmit";
 import Show from "src/components/Show";
-import { useResetSearch, useSetFilter, useSetSearch, useSetSearchIndex } from "src/stores";
-import useQueryStore from "src/stores/queryStore";
+import { queryStores } from "src/stores";
 
 import { collections, records } from "../api";
 import { Field } from "../components/form/Field";
@@ -107,21 +106,23 @@ function Filter({ index, remove, filterTypes, filter, update }) {
   );
 }
 
-const FilterBar = ({ service, setFilter, setSearch, filterTypes, defaultFilter, searchHelperText, embedded }) => {
-  const filter = useQueryStore((state) => state.search.filter);
-  const resetSearch = useResetSearch();
-
+const FilterBar = ({
+  service,
+  setFilter,
+  setSearch,
+  filterTypes,
+  defaultFilter,
+  searchHelperText,
+  embedded,
+  filter,
+  resetSearch,
+}) => {
   const formContext = useForm({
     defaultValues: filter,
     mode: "onChange",
   });
 
   const { fields, remove, update, append } = useFieldArray({ name: "filters", control: formContext.control });
-
-  // useEffect(() => {
-  //   console.log("filter changed", filter);
-  //   formContext.reset(filter);
-  // }, [filter, formContext]);
 
   const onSuccess = useCallback(
     (values) => {
@@ -178,7 +179,7 @@ const FilterBar = ({ service, setFilter, setSearch, filterTypes, defaultFilter, 
             <Show when={service === "record"}>
               <Grid2 flex="1 0 45%" sx={{ minWidth: 150 }}>
                 <Field
-                  name="collection"
+                  name="collection_id"
                   highlightDirty={false}
                   field_type="select"
                   service="collections"
@@ -233,7 +234,6 @@ const FilterBar = ({ service, setFilter, setSearch, filterTypes, defaultFilter, 
           direction={"column"}
           spacing={1}
         >
-          {/* <Stack direction={"column"} spacing={1} width={"max-content"}> */}
           <Button
             // sx={{ flex: "1 1 0" }}
             variant="outlined"
@@ -258,10 +258,7 @@ const FilterBar = ({ service, setFilter, setSearch, filterTypes, defaultFilter, 
           >
             Clear Filters
           </Button>
-          {/* </Stack> */}
         </Grid2>
-
-        {/* <Filters filterTypes={filterTypes} arrayMethods={arrayMethods} /> */}
       </Grid2>
       <Grid2 size={12} container spacing={1}>
         {fields.map((filter, index) => (
@@ -281,43 +278,43 @@ const FilterBar = ({ service, setFilter, setSearch, filterTypes, defaultFilter, 
   );
 };
 
-export default function Manage({
+export default function Manage({ embedded, ...props }) {
+  const ManageState = embedded ? EmbeddedManage : StatefulManage;
+  return <ManageState {...props} />;
+}
+
+const EmbeddedManage = ({ ...props }) => {
+  return <ManageBase {...{ embedded: true, ...props }} />;
+};
+
+const StatefulManage = ({ useStore: _useStore, ...props }) => {
+  const stateService = props.service;
+  const useQueryStore = queryStores[stateService];
+  return <ManageBase {...{ useStore: useQueryStore, ...props }} />;
+};
+
+const ManageBase = ({
   defaultFilter = {},
   filterTypes,
   createQuery,
   searchHelperText = "",
-  // type,
   service,
   embedded,
   itemAction,
-}) {
+  useStore,
+}) => {
   const [items, setItems] = useState([]);
-  // const [total, setTotal] = useState(0);
   const [digitizedTotal, setDigitizedTotal] = useState(0);
-  // const [offset, setOffset] = useState(0);
-  // const [filter, setFilter] = useState(defaultFilter);
-  const { offset, filter, total } = useQueryStore((state) => state.search);
+  const [loading, setLoading] = useState(false);
+  const { offset, total, filter } = useStore((s) => s.search);
+  const setSearch = useStore((s) => s.setSearch);
+  const setFilter = useStore((s) => s.setFilter);
+  const setSearchIndex = useStore((s) => s.setSearchIndex);
+  const resetSearch = useStore((s) => s.resetSearch);
 
-  // const searchType = useQueryStore((state) => state.searchType);
-
-  // console.log("SEARCH", { offset, ...filter, total }, filter.filters[0]);
-  const setSearch = useSetSearch();
-  // const setSearchIndex = useQueryStore((state) => state.setSearchIndex);
-  const setFilter = useSetFilter();
-  const setSearchIndex = useSetSearchIndex();
-  // const setSearchType = useSetSearchType();
-  // const resetSearch = useResetSearch();
-
-  // useEffect(() => {
-  //   if (searchType !== service) {
-  //     formContext.reset(defaultFilter);
-  //     setSearchType(service);
-  //   }
-  // }, [defaultFilter, formContext, searchType, service, setSearchType]);
-
-  // const { dispatch } = useStateValue();
   const lookupItems = useCallback(
     async ({ filter, offset, page_size, service }) => {
+      setLoading(true);
       const { filters } = filter;
       const query = createQuery(filter);
       query.$skip = offset;
@@ -370,17 +367,18 @@ export default function Manage({
           : {},
       ]);
       setItems(data);
-      setSearch({ total });
       setDigitizedTotal(digitizedTotal);
       if (!embedded) {
         setSearch({
-          type: service,
           query,
           total,
           offset,
           page_size,
         });
+      } else {
+        setSearch({ total });
       }
+      setLoading(false);
     },
     [createQuery, embedded, filterTypes, setSearch]
   );
@@ -391,7 +389,6 @@ export default function Manage({
 
   const link = !itemAction;
   itemAction = itemAction || ((index) => setSearchIndex(offset + index));
-
   return (
     <ViewContainer
       embedded={embedded}
@@ -414,6 +411,7 @@ export default function Manage({
           filter={filter}
           setFilter={setFilter}
           setSearch={setSearch}
+          resetSearch={resetSearch}
           filterTypes={filterTypes}
           defaultFilter={defaultFilter}
           searchHelperText={searchHelperText}
@@ -421,10 +419,14 @@ export default function Manage({
         />,
       ]}
     >
-      <Paper>
-        <ItemsList description items={items} itemAction={itemAction} type={service} link={link} />
-      </Paper>
+      <>
+        {loading ? (
+          "Loading..."
+        ) : (
+          <ItemsList description items={items} itemAction={itemAction} type={service} link={link} />
+        )}
+      </>
     </ViewContainer>
   );
-}
+};
 // Manage.whyDidYouRender = true;

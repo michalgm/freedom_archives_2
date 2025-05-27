@@ -1,6 +1,5 @@
 import { BrokenImage } from "@mui/icons-material";
 import { Avatar, ListItemAvatar, ListItemText, Typography } from "@mui/material";
-import { merge } from "lodash-es";
 import { useCallback } from "react";
 
 import Manage from "../components/Manage";
@@ -16,24 +15,21 @@ const filter_types = {
   subjects: { input: "listitem", match: "listitem" },
 };
 
-function Collections({ embedded, itemAction, filter = {}, excludeIds = [] }) {
-  const initFilter = {
-    hidden: false,
-    filters: [],
-    needs_review: "",
-    search: "",
-  };
-  const defaultFilter = merge(initFilter, filter);
+function Collections({ embedded, itemAction, filter = {}, excludeIds = [], useStore }) {
   const createQuery = useCallback(
     (filter) => {
       const { search, hidden, needs_review } = filter;
       const query = {
-        is_hidden: hidden ? undefined : false,
-        needs_review: needs_review ? needs_review : undefined,
         collection_id: { $nin: excludeIds },
         $sort: { display_order: 1, collection_name: 1 },
         $select: ["collection_id", "collection_name", "summary", "thumbnail", "parent"],
       };
+      if (!hidden) {
+        query.is_hidden = false;
+      }
+      if (needs_review) {
+        query.needs_review = true;
+      }
       if (search) {
         query.$fullText = search;
         query.$sort = { rank: -1, collection_name: 1 };
@@ -86,13 +82,14 @@ function Collections({ embedded, itemAction, filter = {}, excludeIds = [] }) {
   return (
     <Manage
       renderItem={renderItem}
-      defaultFilter={defaultFilter}
+      defaultFilter={filter}
       createQuery={createQuery}
       filterTypes={filter_types}
       service="collection"
       embedded={embedded}
       itemAction={itemAction}
       searchHelperText={"Search name, description, summary, keywords, subjects, and call number"}
+      useStore={useStore}
     />
   );
 }

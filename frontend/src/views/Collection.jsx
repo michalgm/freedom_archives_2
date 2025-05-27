@@ -1,10 +1,12 @@
 import { Box, Divider, Grid2, Stack, Tab, Tabs, Typography } from "@mui/material/";
+import { startCase } from "lodash-es";
 import { useEffect, useMemo, useState } from "react";
 import { useFieldArray, useFormContext } from "react-hook-form";
 import { useNavigate, useParams } from "react-router";
 import { BaseForm } from "src/components/form/BaseForm";
-import GridBlock from "src/components/GridBlock";
+import ViewContainer from "src/components/ViewContainer";
 import { useTitle } from "src/stores";
+import { createLocalQueryStore } from "src/stores/queryStore";
 import EditItemView from "src/views/EditItemView";
 
 import { EditableItemsListBase } from "../components/EditableItemsList";
@@ -26,11 +28,21 @@ function Collection({ id, mode = "" }) {
   const setTitle = useTitle();
   const navigate = useNavigate();
 
-  const newCollection = id === "new";
+  const [useFeaturedRecordsStore] = useState(() => createLocalQueryStore("record"));
+  const [useSubcollectionsStore] = useState(() => createLocalQueryStore("collection"));
+  const [useRecordsStore] = useState(() => createLocalQueryStore("record"));
 
   useEffect(() => {
-    setTab(defaultTab);
-  }, [id, defaultTab]);
+    return () => {
+      [useRecordsStore, useSubcollectionsStore, useFeaturedRecordsStore].forEach((store) => store.destroy?.());
+    };
+  }, [useRecordsStore, useSubcollectionsStore, useFeaturedRecordsStore]);
+
+  const newCollection = id === "new";
+
+  // useEffect(() => {
+  //   setTab(defaultTab);
+  // }, [id, defaultTab]);
 
   const formContents = () => {
     const featured_records = (
@@ -45,6 +57,7 @@ function Collection({ id, mode = "" }) {
                 collection: { collection_id: id },
               }
         }
+        useStore={useFeaturedRecordsStore}
       />
     );
     if (isFeaturedRecords) {
@@ -53,8 +66,10 @@ function Collection({ id, mode = "" }) {
     if (isFeaturedCollections) {
       return (
         <>
-          {tab === "subcollections" && <EditList property="children" type="collection" reorder />}
-          {tab === "records" && <EditList property="child_records" type="record" />}
+          {tab === "subcollections" && (
+            <EditList property="children" type="collection" useStore={useSubcollectionsStore} reorder />
+          )}
+          {tab === "records" && <EditList property="child_records" type="record" useStore={useRecordsStore} />}
         </>
       );
     }
@@ -62,8 +77,16 @@ function Collection({ id, mode = "" }) {
       <>
         {tab === "collection" && <CollectionFields id={id} newCollection={newCollection} />}
         {tab === "featured" && featured_records}
-        {tab === "subcollections" && <EditList property="children" type="collection" reorder />}
-        {tab === "records" && <EditList property="child_records" type="record" />}
+        {tab === "subcollections" && (
+          <EditList
+            property="children"
+            label="subcollections"
+            type="collection"
+            useStore={useSubcollectionsStore}
+            reorder
+          />
+        )}
+        {tab === "records" && <EditList property="child_records" type="record" useStore={useRecordsStore} />}
       </>
     );
   };
@@ -87,7 +110,7 @@ function Collection({ id, mode = "" }) {
   };
 
   return (
-    <div className="collection FlexContainer">
+    <Box className="collection ScrollContainer">
       <BaseForm
         formConfig={{
           service: "collections",
@@ -100,7 +123,7 @@ function Collection({ id, mode = "" }) {
           },
           onDelete: () => navigate(`/collections`),
         }}
-        style={{ height: "100%" }}
+        // style={{ height: "100%" }}
       >
         {(manager) => {
           const { formData: collection } = manager;
@@ -114,33 +137,33 @@ function Collection({ id, mode = "" }) {
               className="FlexContainer"
               deleteOptions={deleteOptions}
             >
-              <GridBlock title="" spacing={2}>
-                <Stack sx={{ height: "100%" }}>
-                  {!isFeaturedRecords && (
-                    <Tabs sx={{ mb: 2, flex: "0 0 auto" }} value={currentTab} onChange={(_, tab) => setTab(tab)}>
-                      {!isFeaturedCollections && <Tab label="Edit Collection" value="collection"></Tab>}
-                      {!isFeaturedCollections && <Tab label="Featured Records" value="featured"></Tab>}
-                      <Tab label="Subcollections" value="subcollections"></Tab>
-                      <Tab label="Records" value="records"></Tab>
-                    </Tabs>
-                  )}
-                  <Grid2 container spacing={2}>
-                    {formContents()}
-                  </Grid2>
-                </Stack>
-              </GridBlock>
+              {/* <GridBlock title="" spacing={2} className="FlexContainer"> */}
+              <Stack sx={{ height: "100%" }} className="FlexContainer">
+                {!isFeaturedRecords && (
+                  <Tabs sx={{ flex: "0 0 auto" }} value={currentTab} onChange={(_, tab) => setTab(tab)}>
+                    {!isFeaturedCollections && <Tab label="Edit Collection" value="collection"></Tab>}
+                    {!isFeaturedCollections && <Tab label="Featured Records" value="featured"></Tab>}
+                    <Tab label="Subcollections" value="subcollections"></Tab>
+                    <Tab label="Records" value="records"></Tab>
+                  </Tabs>
+                )}
+                <Grid2 container spacing={2} sx={{ height: "100%", overflowY: "auto" }}>
+                  {formContents()}
+                </Grid2>
+              </Stack>
+              {/* </GridBlock> */}
             </EditItemView>
           );
         }}
       </BaseForm>
-    </div>
+    </Box>
   );
 }
 
 function CollectionFields() {
   return (
     <>
-      <Stack direction={"row"} spacing={2}>
+      <Stack direction={"row"} spacing={2} sx={{ mt: 2 }}>
         <Grid2 container spacing={2}>
           <Grid2 size={12}>
             <Field name="collection_name" />
@@ -195,7 +218,7 @@ function CollectionFields() {
   );
 }
 
-function EditList({ property = "child_records", type = "record", filter, reorder }) {
+function EditList({ property = "child_records", type = "record", label: _label, filter, reorder, useStore }) {
   const { control } = useFormContext();
 
   const { fields, append, move, prepend, update } = useFieldArray({
@@ -207,12 +230,14 @@ function EditList({ property = "child_records", type = "record", filter, reorder
     return fields.map((item) => item[`${type}_id`]);
   }, [type, fields]);
 
-  useEffect(() => {
-    logger.log(fields);
-  }, [fields]);
+  const count = fields.filter((f) => !f.delete).length;
+  let label = startCase(_label || property);
+  if (count === 1) {
+    label = label.slice(0, -1);
+  }
 
   return (
-    <Grid2 size={{ height: "100%" }}>
+    <Grid2 className="FlexContainer" sx={{ backgroundColor: "grey.100", p: 1 }}>
       <Stack
         direction={"row"}
         sx={{ height: "100%" }}
@@ -221,13 +246,16 @@ function EditList({ property = "child_records", type = "record", filter, reorder
         divider={<Divider orientation="vertical" flexItem />}
       >
         <Box sx={{ width: "calc(50% - 16.5px)" }}>
-          <Stack direction="column" sx={{ height: "100%" }}>
-            <Box sx={{ flex: "0 0 auto" }}>
-              <Typography variant="subtitle1">
-                {`${fields.length} ${type} in Collection`} {/* FIXME */}
-              </Typography>
-            </Box>
-            <Box sx={{ flex: "1 1 auto", overflow: "auto" }}>
+          <ViewContainer
+            embedded
+            footerElements={[
+              <Typography key="count" variant="caption">
+                {`${count} ${label} in Collection`}
+              </Typography>,
+            ]}
+            containerProps={{ sx: { p: 0 } }}
+          >
+            <Box sx={{ backgroundColor: "white" }}>
               <EditableItemsListBase
                 type={type}
                 name={property}
@@ -236,9 +264,10 @@ function EditList({ property = "child_records", type = "record", filter, reorder
                 append={append}
                 move={move}
                 update={update}
+                sx={{ overflow: "auto" }}
               />
             </Box>
-          </Stack>
+          </ViewContainer>
         </Box>
         <Box sx={{ width: "calc(50% - 16.5px)" }}>
           <ItemsList
@@ -246,6 +275,7 @@ function EditList({ property = "child_records", type = "record", filter, reorder
             itemAction={(_, item) => setTimeout(prepend(item), 0)}
             excludeIds={excludeIds}
             filter={filter}
+            useStore={useStore}
           />
         </Box>
       </Stack>

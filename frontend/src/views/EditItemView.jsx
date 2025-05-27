@@ -1,13 +1,14 @@
 import { Delete, Link, Save } from "@mui/icons-material";
 import { Box, Grid2, Icon, Typography } from "@mui/material";
-import { startCase } from "lodash-es";
+import { isEmpty, startCase } from "lodash-es";
 import { useEffect, useState } from "react";
 import { services } from "src/api";
 import ButtonLink from "src/components/ButtonLink";
 import ViewContainer from "src/components/ViewContainer";
-import useQueryStore from "src/stores/queryStore";
+import { queryStores } from "src/stores/";
 
 const RenderTime = ({ item, type }) => {
+  if (isEmpty(item)) return null;
   return (
     <Typography variant="caption">
       {startCase(type)} at {item[`date_${type}`] ? new Date(item[`date_${type}`]).toLocaleString() : "???"} by{" "}
@@ -35,20 +36,19 @@ const NeighborLink = ({ type, service, neighbors, setSearchIndex, search_index }
   }
 };
 
-const EditItemView = ({ newItem, item, service, deleteOptions, className, children, ...props }) => {
+const EditItemFooter = ({ service, item }) => {
   const [neighbors, setNeighbors] = useState({ prev: null, next: null });
-  const setSearchIndex = useQueryStore((state) => state.setSearchIndex);
-  const {
-    search: { query, type },
-    search_index,
-  } = useQueryStore((state) => state);
 
-  const [, rootPath] = location.pathname.split("/");
+  const useStore = queryStores[service];
+  const setSearchIndex = useStore((s) => s.setSearchIndex);
+  const search_index = useStore((s) => s.search_index);
+  const { query, type } = useStore((s) => s.search);
+
+  const id = `${service}_id`;
 
   useEffect(() => {
     const updateNeighbors = async () => {
       if (service) {
-        const id = `${service}_id`;
         const neighborQuery = {
           ...query,
           $skip: Math.max(search_index - 1, 0),
@@ -63,17 +63,29 @@ const EditItemView = ({ newItem, item, service, deleteOptions, className, childr
         setNeighbors({ prev: neighbors[0], next: neighbors[2] });
       }
     };
-    if (rootPath === `${type}s`) {
-      updateNeighbors();
-    }
-  }, [search_index, query, service, rootPath, type]);
+    updateNeighbors();
+  }, [search_index, query, service, id, type]);
 
+  return [
+    <NeighborLink key="prev" type="prev" {...{ service, neighbors, setSearchIndex, search_index }} />,
+    <Grid2 key="created" size="grow" style={{ textAlign: "center" }}>
+      <RenderTime item={item} type="created" />
+    </Grid2>,
+    <Grid2 key="modified" size="grow" style={{ textAlign: "center" }}>
+      <RenderTime item={item} type="modified" />
+    </Grid2>,
+    <NeighborLink key="next" type="next" {...{ service, neighbors, setSearchIndex, search_index }} />,
+  ];
+};
+
+const EditItemView = ({ newItem, item, service, deleteOptions, className, children, ...props }) => {
   const buttons = [
     { label: "Save", type: "submit", color: "primary", icon: <Save /> },
     { label: "Delete", type: "delete", color: "secondary", icon: <Delete />, variant: "outlined", deleteOptions },
   ];
 
-  if (!newItem && service)
+  let footerElements = [];
+  if (!newItem && service) {
     buttons.unshift({
       label: "Old Admin Link",
       type: "link",
@@ -83,19 +95,8 @@ const EditItemView = ({ newItem, item, service, deleteOptions, className, childr
       sx: { mr: "auto" },
       target: "_blank",
     });
-
-  const footerElements = newItem
-    ? []
-    : [
-        <NeighborLink key="prev" type="prev" {...{ service, neighbors, setSearchIndex, search_index }} />,
-        <Grid2 key="created" size="grow" style={{ textAlign: "center" }}>
-          <RenderTime item={item} type="created" />
-        </Grid2>,
-        <Grid2 key="modified" size="grow" style={{ textAlign: "center" }}>
-          <RenderTime item={item} type="modified" />
-        </Grid2>,
-        <NeighborLink key="next" type="next" {...{ service, neighbors, setSearchIndex, search_index }} />,
-      ];
+    footerElements = EditItemFooter({ service, item });
+  }
 
   return (
     <ViewContainer

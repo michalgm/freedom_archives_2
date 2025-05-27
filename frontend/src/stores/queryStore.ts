@@ -1,5 +1,5 @@
 
-import { cloneDeep, merge } from "lodash-es";
+import { Query } from "@feathersjs/feathers";
 import { create } from "zustand";
 import { createJSONStorage, persist } from "zustand/middleware";
 import { immer } from 'zustand/middleware/immer';
@@ -37,8 +37,16 @@ interface FilterItem {
 
 // Define types for search state
 interface SearchFilter {
+  search: string;
+  hidden: boolean;
+  needs_review: boolean;
   [key: string]: string | number | boolean | undefined | FilterItem[];
   filters?: FilterItem[];
+}
+
+interface RecordSearchFilter extends SearchFilter {
+  non_digitized: boolean;
+  collection_id: number | null;
 }
 
 interface SearchData {
@@ -48,37 +56,60 @@ interface SearchData {
   index: number;
   ids: string[];
   offset: number;
-}
-enum SearchTypes {
-  'records',
-  'collections'
+  query: Query
 }
 
-interface SearchState {
-  search: SearchData;
+interface RecordSearchData extends SearchData {
+  filter: RecordSearchFilter;
+}
+
+interface SearchState<T extends SearchData> {
+  search: T;
   search_index: number;
-  searchType: SearchTypes | null
 }
 
-interface Actions {
+export type SearchType = "record" | "collection";
+
+interface Actions<T extends SearchData> {
   // Actions
-  setSearch: (searchData: SearchData) => void;
+  setSearch: (searchData: Partial<T>) => void;
   setFilter: (filter: SearchFilter) => void;
-  setSearchType: (type: SearchTypes | null) => void;
   setSearchIndex: (index: number) => void;
   resetSearch: () => void;
 }
 
-const initialSearch: SearchData = {
+const initialSearchData: SearchData = {
   type: "",
   filter: {
+    hidden: false,
+    needs_review: false,
+    search: "",
     filters: []
   },
   total: 0,
   index: 0,
   ids: [],
   offset: 0,
+  query: {}
 };
+
+export const initialSearch = {
+  record: {
+    search: {
+      ...initialSearchData,
+      filter: {
+        ...initialSearchData.filter,
+        non_digitized: false,
+        collection_id: null
+      }
+    },
+    search_index: 0,
+  } as SearchState<RecordSearchData>,
+  collection: {
+    search: initialSearchData,
+    search_index: 0,
+  } as SearchState<SearchData>,
+}
 
 // const getUrlSearch = () => {
 //   return window.location.search.slice(1)
@@ -117,38 +148,67 @@ const initialSearch: SearchData = {
 
 
 
-const storageOptions = {
-  name: 'queryStore',
-  // storage: createJSONStorage<SearchState>(() => persistentStorage),
-  storage: createJSONStorage<SearchState>(() => localStorage),
+const getStateManager = (initialData) => (set) => ({
+  search: initialData,
+  search_index: 0,
+  setSearch: (searchData) => set((state) => {
+    state.search = { ...state.search, ...searchData };
+  }),
+
+  setFilter: (filterData) => set((state) => {
+    state.search.filter = filterData;
+  }),
+
+  setSearchIndex: (index) => set((state) => {
+    state.search_index = index;
+  }),
+
+  resetSearch: () => set(() => ({
+    search: initialData,
+    search_index: 0,
+  }), true),
+})
+
+
+export const createLocalQueryStore = <T extends SearchData>(service) => {
+  const initialData = initialSearch[service].search
+  return create<SearchState<T> & Actions<T>>()(
+    immer((getStateManager(initialData)))
+  );
+};
+
+export const createQueryStore = <T extends SearchData>(type: SearchType, initialData: T) => {
+  const baseStore = immer<SearchState<T> & Actions<T>>(getStateManager(initialData))
+  const storeFactory =
+    persist(
+      baseStore,
+      {
+        name: `queryStore-${type}`,
+        storage: createJSONStorage(() => localStorage),
+      }
+    )
+
+  return create<SearchState<T> & Actions<T>>()(storeFactory)
+
 }
 
-const useQueryStore = create<SearchState & Actions>()(
-  persist(
-    immer((set) => ({
-      search: initialSearch,
-      searchType: null,
-      search_index: 0,
+const useRecordsQueryStore = createQueryStore('record', initialSearch.record.search);
+const useCollectionsQueryStore = createQueryStore('collection', initialSearch.collection.search);
 
-      setSearchType: (type) => set({ searchType: type }),
+export const queryStores = {
+  record: useRecordsQueryStore,
+  collection: useCollectionsQueryStore
+}
 
-      setSearch: (searchData) => set((state) => {
-        // With Immer, you can use merge directly on state
-        merge(state.search, searchData);
-      }),
-
-      setFilter: (filterData) => set((state) => {
-        state.search.filter = cloneDeep(filterData);
-      }),
-
-      setSearchIndex: (index) => set(state => { state.search_index = index }),
-      resetSearch: () => set((state) => {
-        state.search = cloneDeep(initialSearch);
-        state.search_index = 0;
-      }, true),
-    })),
-    storageOptions,
-  ),
-)
+const useQueryStore = (type: SearchType) => {
+  switch (type) {
+    case 'record':
+      return useRecordsQueryStore;
+    case 'collection':
+      return useCollectionsQueryStore;
+    default:
+      throw new Error(`Unknown search type: ${type}`);
+  }
+};
 
 export default useQueryStore
