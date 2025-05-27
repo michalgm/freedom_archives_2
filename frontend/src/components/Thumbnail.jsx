@@ -12,7 +12,7 @@ export default function Thumbnail({ item, src: _src, width = 75, alt = "", type:
   const cache_buster = item.date_modified ? `?${item.date_modified}` : "";
   if (!_src) {
     if (type === "collection") {
-      src = `/${item?.thumbnail}${cache_buster}`;
+      src = item?.thumbnail ? `/${item?.thumbnail}${cache_buster}` : "";
     } else {
       src = item.primary_instance_thumbnail ? `/images/thumbnails/records/${item?.record_id}.jpg${cache_buster}` : "";
     }
