@@ -96,7 +96,7 @@ function useFormManager({
       reValidateMode: "onBlur",
       mode: "onSubmit",
       defaultValues: async () => {
-        const data = !id || !services[service] ? inputDefaultValues : await fetchEntity(id);
+        const data = id == null || !services[service] ? inputDefaultValues : await fetchEntity(id);
         const defaultValues = await processData(getDefaultValuesFromSchema(service, data));
         // logger.log("DEFAULTS", defaultValues);
         setLoading((l) => ({ ...l, init: false }));
@@ -299,11 +299,11 @@ function useFormManager({
       logger.log("SAVE!", input);
       // logger.log({ dirtyFields });
 
-      if (!id && Object.keys(input).length === 0) {
+      if (id == null && Object.keys(input).length === 0) {
         displayError("No data to save");
         return;
       }
-      const changedFields = id ? getChangedFields(input, dirtyFields) : input;
+      const changedFields = id != null ? getChangedFields(input, dirtyFields) : input;
       if (Object.keys(dirtyFields).length === 0) {
         displayError("No changes to save");
         return;
@@ -311,7 +311,7 @@ function useFormManager({
       logger.log("CHANGED", changedFields, dirtyFields);
       const transformedInput = await transformInput(changedFields, getValues());
       logger.log("TRANSFORMED", transformedInput);
-      if (id) {
+      if (id != null) {
         if (!skipUpdatedCheck) {
           const { date_modified, contributor_name } = await fetchEntity(id);
           logger.log("CURRENT", { date_modified, contributor_name });

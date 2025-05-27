@@ -57,14 +57,14 @@ export function useAutocompleteOptions({
   });
 
   const [loading, setLoading] = useState(false);
-  const hasHydrated = useRef(returnFullObject || !value);
+  const hasHydrated = useRef(returnFullObject || value == null);
 
   const ensureCurrentValuesPresent = useCallback(() => {
     const ids = Array.isArray(value) ? value : [value];
 
     ids.forEach((entry) => {
       const id = typeof entry === "object" ? entry?.[idField] : entry;
-      if (!id) return;
+      if (id == null) return;
       if (!labelMap.current.has(id)) {
         labelMap.current.set(
           id,
@@ -94,7 +94,7 @@ export function useAutocompleteOptions({
   );
 
   const hydrateInitialValue = useCallback(async () => {
-    if (returnFullObject || !value || staticOptions || hasHydrated.current) return;
+    if (returnFullObject || value == null || staticOptions || hasHydrated.current) return;
     hasHydrated.current = true;
 
     const ids = isMulti

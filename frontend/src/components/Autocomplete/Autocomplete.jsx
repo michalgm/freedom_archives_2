@@ -150,7 +150,7 @@ const Autocomplete = ({
 
   const renderOption = useCallback(
     (props, val) => {
-      if (!val) return null;
+      if (val == null) return null;
       const option = getOptionById(val);
       if (!option) {
         return null;
@@ -187,7 +187,7 @@ const Autocomplete = ({
   const onChange = useCallback(
     async (e, _value) => {
       let value = _value;
-      if (value) {
+      if (value != null) {
         if (returnFullObject) {
           if (props.multiple) {
             value = value.map((item) => getOptionById(item) || item);
@@ -276,7 +276,7 @@ const Autocomplete = ({
         {...props}
         transform={{
           input: (value) => {
-            let returnValue = value || null;
+            let returnValue = value ?? null;
             if (props.multiple) {
               returnValue = Array.isArray(value) ? value : emptyArray;
             }
@@ -285,7 +285,7 @@ const Autocomplete = ({
           },
           output: (_, value) => {
             if (!props.multiple) {
-              const option = getOptionById(value) || value;
+              const option = getOptionById(value) ?? value;
               if (option?.[idField] === "new") {
                 setCustomValue(option.searchTerm);
                 return {};
@@ -294,7 +294,7 @@ const Autocomplete = ({
             }
             if (!Array.isArray(value)) return emptyArray;
             const lastItem = value[value.length - 1];
-            const option = getOptionById(lastItem) || lastItem;
+            const option = getOptionById(lastItem) ?? lastItem;
 
             if (option?.[idField] === "new") {
               setCustomValue(option.searchTerm);

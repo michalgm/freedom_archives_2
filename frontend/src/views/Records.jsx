@@ -51,7 +51,7 @@ function Records({ embedded, itemAction, filter = {}, excludeIds = [], useStore 
       if (needs_review) {
         query.needs_review = true;
       }
-      if (collection_id) {
+      if (collection_id != null) {
         query.collection_id = collection_id;
       }
       if (search) {
