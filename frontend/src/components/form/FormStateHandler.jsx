@@ -9,15 +9,13 @@ export const FormStateHandler = ({ shouldBlockNavigation }) => {
 
   useEffect(() => {
     const handleNav = async () => {
-      try {
-        await confirm({
-          title: "You have unsaved changes. ",
-          description: "Are you sure you want to leave this page? Changes you made will be lost if you navigate away.",
-        });
-        blocker.proceed();
-      } catch (e) {
-        blocker.reset();
-      }
+      const { confirmed } = await confirm({
+        title: "You have unsaved changes. ",
+        description: "Are you sure you want to leave this page? Changes you made will be lost if you navigate away.",
+      });
+
+      if (confirmed) blocker.proceed();
+      else blocker.reset();
     };
     if (blocker.state === "blocked") {
       handleNav();

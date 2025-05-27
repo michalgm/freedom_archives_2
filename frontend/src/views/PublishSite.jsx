@@ -30,7 +30,7 @@ const PublishSite = () => {
   }, []);
 
   const publishChanges = useCallback(async () => {
-    await confirm({
+    const { confirmed } = await confirm({
       title: "Publish changes to live site?",
       content: (
         <DialogContentText component="div">
@@ -56,6 +56,7 @@ const PublishSite = () => {
       ),
       confirmationButtonProps: { variant: "contained" },
     });
+    if (!confirmed) return;
     await snapshotsService.create({});
     addNotification({ message: `Changes published to live site!` });
     fetchSnapshots();

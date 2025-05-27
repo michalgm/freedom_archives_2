@@ -30,7 +30,16 @@ const AddButton = ({ itemType, addItem }) => {
 function RenderInputCell(props) {
   const { error } = props;
   return (
-    <Tooltip open={!!error} title={error} arrow placement="bottom-start" slotProps={{ 'tooltip': { sx: { backgroundColor: 'error.main' } }, 'arrow': { sx: { color: 'error.main', left: '50% !important', transform: 'translateX(-50%) !important' } } }}>
+    <Tooltip
+      open={!!error}
+      title={error}
+      arrow
+      placement="bottom-start"
+      slotProps={{
+        tooltip: { sx: { backgroundColor: "error.main" } },
+        arrow: { sx: { color: "error.main", left: "50% !important", transform: "translateX(-50%) !important" } },
+      }}
+    >
       <GridEditInputCell {...props} />
     </Tooltip>
   );
@@ -41,8 +50,8 @@ export const EditableDataTable = ({
   columns,
   loading,
   extraActions = [],
-  onUpdate = () => { },
-  onNew = () => { },
+  onUpdate = () => {},
+  onNew = () => {},
   defaultValues = {},
   idField = "id",
   model,
@@ -87,25 +96,29 @@ export const EditableDataTable = ({
       const id = newRow[idField];
       const action = newRow.delete ? "Delete" : id === -1 ? "Create" : "Update";
       try {
-        await confirm({
+        const { confirmed } = await confirm({
           title: `${action} ${itemType.toLowerCase()}?`,
           description: `Are you sure you want to ${action.toLowerCase()} the ${itemType.toLowerCase()} "${name}"?`,
           confirmationButtonProps: {
             variant: "contained",
           },
         });
-        const prepared = prepareItem ? prepareItem(newRow) : newRow;
-        if (newRow.delete) {
-          await API[model].remove(id);
-        } else if (id === -1) {
-          delete prepared[idField];
-          newRow = await API[model].create(prepared);
-          onNewRef.current = newRow;
+        if (confirmed) {
+          const prepared = prepareItem ? prepareItem(newRow) : newRow;
+          if (newRow.delete) {
+            await API[model].remove(id);
+          } else if (id === -1) {
+            delete prepared[idField];
+            newRow = await API[model].create(prepared);
+            onNewRef.current = newRow;
+          } else {
+            newRow = await API[model].patch(id, prepared);
+          }
+          addNotification({ message: `${itemType} "${name}" ${action.toLowerCase()}d!` });
+          await onUpdateRef.current();
         } else {
-          newRow = await API[model].patch(id, prepared);
+          newRow = oldRow;
         }
-        addNotification({ message: `${itemType} "${name}" ${action.toLowerCase()}d!` });
-        await onUpdateRef.current();
       } catch (_err) {
         newRow = oldRow;
       }
@@ -161,14 +174,14 @@ export const EditableDataTable = ({
       const isInEditMode = id === editRow;
       const icons = isInEditMode
         ? [
-          ["Save", SaveIcon, () => updateRow(id, "save")],
-          ["Cancel", CancelIcon, () => updateRow(id, "cancel")],
-        ]
+            ["Save", SaveIcon, () => updateRow(id, "save")],
+            ["Cancel", CancelIcon, () => updateRow(id, "cancel")],
+          ]
         : [
-          ["Edit", EditIcon, () => updateRow(id)],
-          ["Delete", DeleteIcon, () => deleteRow(row)],
-          ...extraActions.map(([label, Icon, action]) => [label, Icon, () => action(row)]),
-        ];
+            ["Edit", EditIcon, () => updateRow(id)],
+            ["Delete", DeleteIcon, () => deleteRow(row)],
+            ...extraActions.map(([label, Icon, action]) => [label, Icon, () => action(row)]),
+          ];
 
       const actions = icons.map(([label, Icon, action]) => (
         <Tooltip key={label} title={label} arrow placement="top">
@@ -185,14 +198,15 @@ export const EditableDataTable = ({
       const { flex, ...rest } = column;
       rest.headerName = rest.headerName || startCase(rest.field);
       if (column.preProcessEditCellProps) {
-        rest.renderEditCell = RenderInputCell
+        rest.renderEditCell = RenderInputCell;
       }
       if (!autosizeColumns) {
         rest.flex = flex;
         return rest;
       }
       return {
-        ...rest, width: columnWidths[column.field],
+        ...rest,
+        width: columnWidths[column.field],
       };
     });
 
@@ -256,9 +270,9 @@ export const EditableDataTable = ({
           // maxWidth: "800px",
 
           "& .MuiDataGrid-footerContainer, & .MuiDataGrid-toolbarContainer, & .MuiDataGrid-topContainer .MuiDataGrid-row--borderBottom":
-          {
-            backgroundColor: "grey.100",
-          },
+            {
+              backgroundColor: "grey.100",
+            },
           "& .MuiDataGrid-columnHeaderTitle": {
             textTransform: "capitalize",
           },

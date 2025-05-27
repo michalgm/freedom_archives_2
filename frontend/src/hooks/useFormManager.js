@@ -98,7 +98,7 @@ function useFormManager({
       defaultValues: async () => {
         const data = !id || !services[service] ? inputDefaultValues : await fetchEntity(id);
         const defaultValues = await processData(getDefaultValuesFromSchema(service, data));
-        logger.log("DEFAULTS", defaultValues);
+        // logger.log("DEFAULTS", defaultValues);
         setLoading((l) => ({ ...l, init: false }));
         return defaultValues;
       },
@@ -274,12 +274,15 @@ function useFormManager({
       }
       await new Promise((resolve) => setTimeout(resolve, 0));
       try {
-        await confirm(confirmOptions);
+        const { confirmed } = await confirm(confirmOptions);
+        if (!confirmed) {
+          throw new Error("User cancelled the deletion");
+        }
         const params = getDeleteParams?.() || {};
         logger.log("DELETE", id, params);
         await deleteEntity(id);
       } catch (error) {
-        if (error?.isCancellation) {
+        if (error?.message?.includes("User cancelled the deletion")) {
           logger.log("User cancelled the deletion");
         } else {
           console.error("Error confirming delete:", error);
