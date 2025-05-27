@@ -1,8 +1,9 @@
 import configuration from "@feathersjs/configuration";
-import express, { errorHandler, json, notFound, rest, urlencoded } from "@feathersjs/express";
+import feathersExpress, { errorHandler, json, notFound, rest, urlencoded } from "@feathersjs/express";
 import { feathers } from "@feathersjs/feathers";
 import compress from "compression";
 import cors from "cors";
+import express from 'express';
 import helmet from "helmet";
 import path, { dirname } from "path";
 import qs from "qs";
@@ -19,13 +20,15 @@ import services from "./services/index.js";
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
-const app = express(feathers());
+const expressApp = express();
+expressApp.set("query parser", function (str) {
+  return qs.parse(str, { strictNullHandling: true, arrayLimit: Infinity });
+});
+
+const app = feathersExpress(feathers(), expressApp);
 app.configure(configuration());
 // Set up Plugins and providers
 const publicPath = path.resolve(__dirname, app.get("public")); // Adjust relative path as necessary
-app.set("query parser", function (str) {
-  return qs.parse(str, { strictNullHandling: true, arrayLimit: Infinity });
-});
 // Load app configuration
 // Enable security, CORS, compression, favicon and body parsing
 app.use(
@@ -51,9 +54,9 @@ app.configure(authentication);
 app.configure(services);
 
 app.hooks(appHooks);
-app.get("*", function (_request, response) {
-  response.sendFile(path.join(publicPath, "index.html"));
-});
+// app.get("*", function (_request, response) {
+//   response.sendFile(path.join(publicPath, "index.html"));
+// });
 // Configure a middleware for 404s and the error handler
 app.use(notFound());
 app.use(
