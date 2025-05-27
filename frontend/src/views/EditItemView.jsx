@@ -42,7 +42,7 @@ const EditItemFooter = ({ service, item }) => {
   const useStore = queryStores[service];
   const setSearchIndex = useStore((s) => s.setSearchIndex);
   const search_index = useStore((s) => s.search_index);
-  const { query, type } = useStore((s) => s.search);
+  const query = useStore((s) => s.search.query);
 
   const id = `${service}_id`;
 
@@ -64,7 +64,7 @@ const EditItemFooter = ({ service, item }) => {
       }
     };
     updateNeighbors();
-  }, [search_index, query, service, id, type]);
+  }, [search_index, query, service, id]);
 
   return [
     <NeighborLink key="prev" type="prev" {...{ service, neighbors, setSearchIndex, search_index }} />,

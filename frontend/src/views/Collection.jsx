@@ -6,7 +6,7 @@ import { useNavigate, useParams } from "react-router";
 import { BaseForm } from "src/components/form/BaseForm";
 import ViewContainer from "src/components/ViewContainer";
 import { useTitle } from "src/stores";
-import { createLocalQueryStore } from "src/stores/queryStore";
+import { createQueryStore } from "src/stores/index";
 import EditItemView from "src/views/EditItemView";
 
 import { EditableItemsListBase } from "../components/EditableItemsList";
@@ -16,21 +16,31 @@ import Collections from "../views/Collections";
 
 import Records from "./Records";
 
+const getDefaultTab = (mode, tab = "") => {
+  if (mode === "featured_records") {
+    return "featured";
+  } else if (mode === "featured_collections" && !["subcollections", "records"].includes(tab)) {
+    return "subcollections";
+  } else if (tab) {
+    return tab;
+  }
+  return "collection";
+};
+
 function Collection({ id, mode = "" }) {
   const { id: paramId } = useParams();
   id ??= paramId;
   const isFeaturedCollections = id == 0 && mode == "featured_collections";
   const isFeaturedRecords = id == 0 && mode == "featured_records";
-  const defaultTab = isFeaturedCollections ? "subcollections" : "collection";
 
-  const [tab, setTab] = useState(defaultTab);
+  const [tab, setTab] = useState(getDefaultTab(mode));
 
   const setTitle = useTitle();
   const navigate = useNavigate();
 
-  const [useFeaturedRecordsStore] = useState(() => createLocalQueryStore("record"));
-  const [useSubcollectionsStore] = useState(() => createLocalQueryStore("collection"));
-  const [useRecordsStore] = useState(() => createLocalQueryStore("record"));
+  const [useFeaturedRecordsStore] = useState(() => createQueryStore("record"));
+  const [useSubcollectionsStore] = useState(() => createQueryStore("collection"));
+  const [useRecordsStore] = useState(() => createQueryStore("record"));
 
   useEffect(() => {
     return () => {
@@ -40,43 +50,32 @@ function Collection({ id, mode = "" }) {
 
   const newCollection = id === "new";
 
-  // useEffect(() => {
-  //   setTab(defaultTab);
-  // }, [id, defaultTab]);
+  useEffect(() => {
+    const defaultTab = getDefaultTab(mode, tab);
+    if (tab !== defaultTab) {
+      setTab(defaultTab);
+    }
+  }, [mode, tab]);
 
   const formContents = () => {
-    const featured_records = (
-      <EditList
-        property="featured_records"
-        type="record"
-        reorder
-        filter={
-          id === "new"
-            ? null
-            : {
-                collection: { collection_id: id },
-              }
-        }
-        useStore={useFeaturedRecordsStore}
-      />
-    );
-    if (isFeaturedRecords) {
-      return featured_records;
-    }
-    if (isFeaturedCollections) {
-      return (
-        <>
-          {tab === "subcollections" && (
-            <EditList property="children" type="collection" useStore={useSubcollectionsStore} reorder />
-          )}
-          {tab === "records" && <EditList property="child_records" type="record" useStore={useRecordsStore} />}
-        </>
-      );
-    }
     return (
       <>
         {tab === "collection" && <CollectionFields id={id} newCollection={newCollection} />}
-        {tab === "featured" && featured_records}
+        {tab === "featured" && (
+          <EditList
+            property="featured_records"
+            type="record"
+            filter={
+              newCollection
+                ? null
+                : {
+                    collection_id: parseInt(id, 10),
+                  }
+            }
+            useStore={useFeaturedRecordsStore}
+            reorder
+          />
+        )}
         {tab === "subcollections" && (
           <EditList
             property="children"
@@ -86,12 +85,19 @@ function Collection({ id, mode = "" }) {
             reorder
           />
         )}
-        {tab === "records" && <EditList property="child_records" type="record" useStore={useRecordsStore} />}
+        {tab === "records" && (
+          <EditList
+            property="child_records"
+            type="record"
+            filter={{ collection_id: 1000 }}
+            useStore={useRecordsStore}
+          />
+        )}
       </>
     );
   };
 
-  const currentTab = isFeaturedCollections && ["collection", "featured"].includes(tab) ? defaultTab : tab;
+  // const currentTab = isFeaturedCollections && ["collection", "featured"].includes(tab) ? defaultTab : tab;
 
   const deleteOptions = {
     renderContent: (collection) => {
@@ -132,7 +138,6 @@ function Collection({ id, mode = "" }) {
               item={collection}
               id={id}
               newItem={newCollection}
-              // buttons={buttons}
               service={isFeaturedRecords || isFeaturedCollections ? null : "collection"}
               className="FlexContainer"
               deleteOptions={deleteOptions}
@@ -140,7 +145,7 @@ function Collection({ id, mode = "" }) {
               {/* <GridBlock title="" spacing={2} className="FlexContainer"> */}
               <Stack sx={{ height: "100%" }} className="FlexContainer">
                 {!isFeaturedRecords && (
-                  <Tabs sx={{ flex: "0 0 auto" }} value={currentTab} onChange={(_, tab) => setTab(tab)}>
+                  <Tabs sx={{ flex: "0 0 auto" }} value={tab} onChange={(_, tab) => setTab(tab)}>
                     {!isFeaturedCollections && <Tab label="Edit Collection" value="collection"></Tab>}
                     {!isFeaturedCollections && <Tab label="Featured Records" value="featured"></Tab>}
                     <Tab label="Subcollections" value="subcollections"></Tab>
@@ -220,7 +225,6 @@ function CollectionFields() {
 
 function EditList({ property = "child_records", type = "record", label: _label, filter, reorder, useStore }) {
   const { control } = useFormContext();
-
   const { fields, append, move, prepend, update } = useFieldArray({
     name: property, // unique name for your Field Array
     control,

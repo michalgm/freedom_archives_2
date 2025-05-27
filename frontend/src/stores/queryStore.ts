@@ -53,8 +53,6 @@ interface SearchData {
   type: string;
   filter: SearchFilter;
   total: number;
-  index: number;
-  ids: string[];
   offset: number;
   query: Query
 }
@@ -87,8 +85,6 @@ const initialSearchData: SearchData = {
     filters: []
   },
   total: 0,
-  index: 0,
-  ids: [],
   offset: 0,
   query: {}
 };
@@ -146,8 +142,6 @@ export const initialSearch = {
 //   },
 // }
 
-
-
 const getStateManager = (initialData) => (set) => ({
   search: initialData,
   search_index: 0,
@@ -156,59 +150,37 @@ const getStateManager = (initialData) => (set) => ({
   }),
 
   setFilter: (filterData) => set((state) => {
-    state.search.filter = filterData;
+    state.search.filter = structuredClone(filterData);
   }),
 
   setSearchIndex: (index) => set((state) => {
     state.search_index = index;
   }),
 
-  resetSearch: () => set(() => ({
-    search: initialData,
-    search_index: 0,
-  }), true),
+  resetSearch: () => set((state) => {
+    state.search = initialData;
+    state.search_index = 0;
+  }),
 })
 
-
-export const createLocalQueryStore = <T extends SearchData>(service) => {
-  const initialData = initialSearch[service].search
-  return create<SearchState<T> & Actions<T>>()(
-    immer((getStateManager(initialData)))
-  );
-};
-
-export const createQueryStore = <T extends SearchData>(type: SearchType, initialData: T) => {
+export const createQueryStore = <T extends SearchData>(type: SearchType, persistStore: boolean = false) => {
+  const initialData = initialSearch[type].search
   const baseStore = immer<SearchState<T> & Actions<T>>(getStateManager(initialData))
-  const storeFactory =
-    persist(
-      baseStore,
-      {
-        name: `queryStore-${type}`,
-        storage: createJSONStorage(() => localStorage),
-      }
-    )
 
-  return create<SearchState<T> & Actions<T>>()(storeFactory)
+  if (persistStore) {
+    return create<SearchState<T> & Actions<T>>()(persist(baseStore, {
+      name: `queryStore-${type}`,
+      storage: createJSONStorage(() => localStorage),
+    }))
+  }
 
+  return create<SearchState<T> & Actions<T>>()(baseStore)
 }
 
-const useRecordsQueryStore = createQueryStore('record', initialSearch.record.search);
-const useCollectionsQueryStore = createQueryStore('collection', initialSearch.collection.search);
+const useRecordsQueryStore = createQueryStore('record', true);
+const useCollectionsQueryStore = createQueryStore('collection', true);
 
 export const queryStores = {
   record: useRecordsQueryStore,
   collection: useCollectionsQueryStore
 }
-
-const useQueryStore = (type: SearchType) => {
-  switch (type) {
-    case 'record':
-      return useRecordsQueryStore;
-    case 'collection':
-      return useCollectionsQueryStore;
-    default:
-      throw new Error(`Unknown search type: ${type}`);
-  }
-};
-
-export default useQueryStore

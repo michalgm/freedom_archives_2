@@ -1,11 +1,12 @@
 import { Close, Search } from "@mui/icons-material";
 import { Box, Button, Grid2, Icon, IconButton, InputAdornment, Paper, Stack, Tooltip } from "@mui/material";
-import { isEqual, startCase } from "lodash-es";
+import { isEqual, merge, startCase } from "lodash-es";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { FormProvider, useFieldArray, useForm } from "react-hook-form-mui";
 import AutoSubmit from "src/components/AutoSubmit";
 import Show from "src/components/Show";
 import { queryStores } from "src/stores";
+import { initialSearch } from "src/stores/queryStore";
 
 import { collections, records } from "../api";
 import { Field } from "../components/form/Field";
@@ -115,10 +116,9 @@ const FilterBar = ({
   searchHelperText,
   embedded,
   filter,
-  resetSearch,
 }) => {
   const formContext = useForm({
-    defaultValues: filter,
+    defaultValues: merge(structuredClone(filter), defaultFilter),
     mode: "onChange",
   });
 
@@ -126,8 +126,12 @@ const FilterBar = ({
 
   const onSuccess = useCallback(
     (values) => {
-      if (!isEqual(values, filter)) {
-        setFilter(values);
+      const search = {
+        ...values,
+        filters: values.filters.filter((f) => f.field != null && f.value != null),
+      };
+      if (!isEqual(search, filter)) {
+        setFilter(search);
         setSearch({ offset: 0 });
       }
     },
@@ -135,11 +139,10 @@ const FilterBar = ({
   );
 
   const reset = useCallback(() => {
-    resetSearch();
-    setTimeout(() => {
-      formContext.reset(defaultFilter);
-    });
-  }, [resetSearch, formContext, defaultFilter]);
+    const values = initialSearch[service];
+    formContext.reset(values.search.filter);
+  }, [formContext, service]);
+
   const size = embedded ? "x-small" : "small";
 
   return (
@@ -180,6 +183,7 @@ const FilterBar = ({
               <Grid2 flex="1 0 45%" sx={{ minWidth: 150 }}>
                 <Field
                   name="collection_id"
+                  label="Collection"
                   highlightDirty={false}
                   field_type="select"
                   service="collections"
@@ -306,11 +310,12 @@ const ManageBase = ({
   const [items, setItems] = useState([]);
   const [digitizedTotal, setDigitizedTotal] = useState(0);
   const [loading, setLoading] = useState(false);
-  const { offset, total, filter } = useStore((s) => s.search);
+  const offset = useStore((s) => s.search.offset);
+  const total = useStore((s) => s.search.total);
+  const filter = useStore((s) => s.search.filter);
   const setSearch = useStore((s) => s.setSearch);
   const setFilter = useStore((s) => s.setFilter);
   const setSearchIndex = useStore((s) => s.setSearchIndex);
-  const resetSearch = useStore((s) => s.resetSearch);
 
   const lookupItems = useCallback(
     async ({ filter, offset, page_size, service }) => {
@@ -324,7 +329,7 @@ const ManageBase = ({
         filters.forEach((filterValue) => {
           const { field } = filterValue;
           let { value } = filterValue;
-          if (!field || !value) return;
+          if (!field) return;
           const filter = filterTypes[field];
 
           if (filter && (value !== null || (value !== undefined && filter.allowNull))) {
@@ -411,7 +416,6 @@ const ManageBase = ({
           filter={filter}
           setFilter={setFilter}
           setSearch={setSearch}
-          resetSearch={resetSearch}
           filterTypes={filterTypes}
           defaultFilter={defaultFilter}
           searchHelperText={searchHelperText}

@@ -2,7 +2,7 @@
 // import useQueryStore from "src/stores/queryStore";
 import { useCallback, useMemo } from "react";
 import useAppStore from "src/stores/appStore";
-import { queryStores, createLocalQueryStore } from "src/stores/queryStore";
+import { queryStores, createQueryStore } from "src/stores/queryStore";
 import useSessionStore from "src/stores/sessionStore";
 
 const errorMessages = {
@@ -13,7 +13,7 @@ export {
     useAppStore,
     useSessionStore,
     queryStores,
-    createLocalQueryStore
+    createQueryStore
 };
 
 const parseError = (error: string | Error) => {
