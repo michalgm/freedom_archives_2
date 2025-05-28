@@ -131,6 +131,13 @@ INSERT INTO
             LEFT JOIN users c ON LOWER(a.contributor)=c.username
     );
 
+UPDATE collections
+SET
+    call_number=NULL
+WHERE
+    TRIM(call_number)=''
+    OR call_number='null';
+
 /* FIXME: Call number relation */
 /* FIXME: list_items missing stuff */
 /* FIXME: year/month/day -> date field */
@@ -639,6 +646,32 @@ SET
     call_number=REPLACE(call_number, 'JG/', 'JG/LS')
 WHERE
     call_number LIKE 'JG/ %';
+
+UPDATE instances
+SET
+    call_number=REGEXP_REPLACE(call_number, '  +', ' ')
+WHERE
+    call_number~'  +';
+
+UPDATE instances
+SET
+    call_number=REGEXP_REPLACE(call_number, ' +(A|B|C)$', '\1')
+WHERE
+    call_number~' +(A|B|C)$';
+
+UPDATE instances
+SET
+    call_number=REGEXP_REPLACE(call_number, '^Vin (.+)', 'VIN \1')
+WHERE
+    call_number~'^Vin ';
+
+UPDATE list_items
+SET
+    item='VIN'
+WHERE
+    item='Vin'
+    AND
+TYPE='call_number';
 
 INSERT INTO
     config
