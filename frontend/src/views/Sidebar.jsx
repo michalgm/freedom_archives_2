@@ -10,7 +10,11 @@ import {
   Toolbar,
   Typography,
 } from "@mui/material";
+import { useMemo } from "react";
 import { Link, useLocation, useMatch, useResolvedPath } from "react-router";
+import { useAuth } from "src/stores";
+
+const ROLE_HIERARCHY = ["intern", "staff", "administrator"];
 
 const sideBarConfig = {
   Collections: [
@@ -20,51 +24,69 @@ const sideBarConfig = {
       label: "Manage Featured Collections",
       icon: "",
       href: "/collections/featured",
+      authRole: "staff",
     },
   ],
   Records: [
     { label: "Search Records", icon: "", href: "/search" },
     { label: "Manage Records", icon: "", href: "/records" },
     { label: "New Record", icon: "", href: "/records/new" },
-    { label: "Manage Featured Records", icon: "", href: "/records/featured" },
+    { label: "Manage Featured Records", icon: "", href: "/records/featured", authRole: "staff" },
   ],
   "Site Management": [
-    { label: "Site Settings", icon: "", href: "/site/settings" },
-    { label: "Edit List Values", icon: "", href: "/site/edit-list-values" },
-    { label: "Export Collections", icon: "" },
-    { label: "Find Duplicate Records", icon: "" },
-    { label: "Review Changes", icon: "", href: "/site/review-changes" },
+    { label: "Site Settings", icon: "", href: "/site/settings", authRole: "staff" },
+    { label: "Edit List Values", icon: "", href: "/site/edit-list-values", authRole: "staff" },
+    { label: "Export Collections", icon: "", authRole: "staff" },
+    { label: "Find Duplicate Records", icon: "", authRole: "staff" },
+    { label: "Review Changes", icon: "", href: "/site/review-changes", authRole: "administrator" },
   ],
   Admin: [
-    { label: "Update Unknown Relationships", icon: "", href: "/relationships" },
+    { label: "Update Unknown Relationships", icon: "", href: "/relationships", authRole: "administrator" },
     // { label: "Update Thumbnails", icon: "",  },
     // { label: "Update Keywords", icon: "",  },
-    { label: "Manage Users", href: "/admin/users" },
-    { label: "Publish/Restore Live Site", href: "/admin/publish-site" },
+    { label: "Manage Users", href: "/admin/users", authRole: "staff" },
+    { label: "Publish/Restore Live Site", href: "/admin/publish-site", authRole: "administrator" },
   ],
 };
 
 function Sidebar({ ...props }) {
+  const {
+    user: { role },
+  } = useAuth();
+  const roleLevel = ROLE_HIERARCHY.indexOf(role);
+
+  const sidebarLinks = useMemo(() => {
+    return Object.keys(sideBarConfig).map((title) => {
+      const links = sideBarConfig[title].reduce((acc, { label, href, icon, authRole }) => {
+        {
+          if (roleLevel >= ROLE_HIERARCHY.indexOf(authRole)) {
+            acc.push(<SidebarItem key={label} label={label} href={href} icon={icon} />);
+          }
+          return acc;
+        }
+      }, []);
+      if (links.length === 0) return null;
+
+      return (
+        <div key={title}>
+          <Divider />
+          <List dense>
+            <ListItem>
+              <Typography variant="h6">{title}</Typography>
+            </ListItem>
+            {links}
+          </List>
+        </div>
+      );
+    });
+  }, [roleLevel]);
+
   return (
     <Drawer {...props}>
       <Stack className="FlexContainer">
         <Toolbar />
         <Box sx={{ overflow: "auto" }} className="FlexContainer">
-          {Object.keys(sideBarConfig).map((title) => {
-            return (
-              <div key={title}>
-                <Divider />
-                <List dense>
-                  <ListItem>
-                    <Typography variant="h6">{title}</Typography>
-                  </ListItem>
-                  {sideBarConfig[title].map(({ label, href, icon }) => (
-                    <SidebarItem key={label} label={label} href={href} icon={icon} />
-                  ))}
-                </List>
-              </div>
-            );
-          })}
+          {sidebarLinks}
         </Box>
       </Stack>
     </Drawer>

@@ -1,6 +1,7 @@
 import schema from "@feathersjs/schema";
 
 import allowAnonymous from "./allowAnonymous.js";
+import authRoles from "./authRoles.js";
 import { rankedSearch } from "./rankedSearch.js";
 import { updateThumbnail } from "./thumbnailer.js";
 
@@ -178,5 +179,5 @@ export const debugQuery = (context) => {
   return context;
 };
 
-export { allowAnonymous, updateThumbnail, rankedSearch };
+export { allowAnonymous, updateThumbnail, rankedSearch, authRoles };
 

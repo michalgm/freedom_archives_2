@@ -15,7 +15,7 @@ SET
 CREATE TABLE
     archives (archive_id serial PRIMARY KEY, title TEXT);
 
-CREATE TYPE user_role AS ENUM('user', 'intern', 'administrator');
+CREATE TYPE user_role AS ENUM('intern', 'staff', 'administrator');
 
 CREATE TABLE
     users (
@@ -27,7 +27,7 @@ CREATE TABLE
         ROLE user_role DEFAULT NULL,
         PASSWORD TEXT DEFAULT NULL,
         active BOOLEAN DEFAULT FALSE,
-        email TEXT DEFAULT NULL UNIQUE,
+        email TEXT DEFAULT NULL,
         full_name TEXT GENERATED ALWAYS AS (TRIM(firstname||' '||lastname)) STORED,
         user_search TEXT GENERATED ALWAYS AS (
             TRIM(
