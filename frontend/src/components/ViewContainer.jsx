@@ -51,7 +51,7 @@ export const FormErrors = ({ service }) => {
 function ViewContainer({
   children,
   buttons,
-  // embedded,
+  embedded,
   noPaper = false,
   footerElements = [],
   headerElements = [],
@@ -67,7 +67,7 @@ function ViewContainer({
   }
   const Container = noPaper ? Box : Paper;
   return (
-    <Stack direction="column" spacing={2} useFlexGap className="ScrollContainer">
+    <Stack direction="column" spacing={embedded ? 1 : 2} useFlexGap className="ScrollContainer">
       <Section elements={headerElements} header service={service} />
       <Container id="contents" className="FlexContainer" {...containerProps}>
         <Show when={!isLoading}>{children}</Show>
