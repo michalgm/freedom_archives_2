@@ -19,7 +19,9 @@ const item_types = {
   quality: { description: true, instances: true },
 };
 
-const types = Object.keys(item_types).map((t) => [t, startCase(t)]);
+const types = Object.keys(item_types)
+  .map((t) => [t, startCase(t)])
+  .sort();
 
 const prepareItem = (item) => {
   const prepared = { ...item };
@@ -105,6 +107,15 @@ function EditLists() {
     const values = await list_items_lookup.find({
       query: {
         type,
+        $select: [
+          "list_item_id",
+          "item",
+          "type",
+          "description",
+          "instances_count",
+          "records_count",
+          "collections_count",
+        ],
         $limit: pagination.limit,
         $skip: pagination.skip,
         item: { $ilike },
