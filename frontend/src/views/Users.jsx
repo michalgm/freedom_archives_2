@@ -1,6 +1,19 @@
+import { Help } from "@mui/icons-material";
 import PasswordIcon from "@mui/icons-material/Password";
-import { Paper } from "@mui/material";
+import {
+  Box,
+  Checkbox,
+  FormControl,
+  FormControlLabel,
+  FormGroup,
+  Paper,
+  Stack,
+  Tooltip,
+  Typography,
+} from "@mui/material";
+import { startCase } from "lodash-es";
 import { useCallback, useEffect, useMemo, useState } from "react";
+import { useAuth } from "src/stores";
 import { checkUnique } from "src/utils";
 
 import { users as usersService } from "../api";
@@ -11,6 +24,8 @@ import ChangePassword from "./ChangePassword";
 export default function Users() {
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [showInactive, setShowInactive] = useState(false);
+  const { user } = useAuth();
 
   const [editPassword, setEditPassword] = useState({
     open: false,
@@ -21,16 +36,17 @@ export default function Users() {
     setLoading(true);
     const query = {
       $sort: { username: 1 },
+      active: showInactive ? undefined : true,
       $limit: 1000,
     };
     const { data: users } = await usersService.find({ query });
     setUsers(users);
     setLoading(false);
-  }, []);
+  }, [showInactive]);
 
   useEffect(() => {
-    fetchUsers();
-  }, [fetchUsers]);
+    fetchUsers(showInactive);
+  }, [fetchUsers, showInactive]);
 
   const columns = useMemo(
     () =>
@@ -42,7 +58,7 @@ export default function Users() {
           preProcessEditCellProps: async (params) => {
             const hasError = await checkUnique("users", {
               username: params.props.value,
-              user_id: { $ne: params.props.row.user_id },
+              user_id: { $ne: params.props?.row?.user_id },
             });
             const result = {
               ...params.props,
@@ -72,6 +88,33 @@ export default function Users() {
           editable: true,
           type: "singleSelect",
           valueOptions: ["intern", "staff", "administrator"],
+          valueFormatter: (value) => startCase(value),
+          getOptionLabel: (value) => startCase(value),
+          headerName: (
+            <Stack direction="row" alignItems="baseline" spacing={1} useFlexGap>
+              <span>Roles</span>
+              <Tooltip
+                arrow
+                title={
+                  <Box>
+                    <Typography variant="caption" component="ul" sx={{ p: 1, pl: 2 }}>
+                      <li>
+                        <b>Intern</b>: Can modify collections and records
+                      </li>
+                      <li>
+                        <b>Staff</b>: Can modify site settings, featured records and collections, list items, and users
+                      </li>
+                      <li>
+                        <b>Administrator</b>: Can publish site and review changes
+                      </li>
+                    </Typography>
+                  </Box>
+                }
+              >
+                <Help fontSize="inherit" />
+              </Tooltip>
+            </Stack>
+          ),
         },
         {
           field: "active",
@@ -100,6 +143,17 @@ export default function Users() {
     active: true,
   };
 
+  const headerControls = [
+    <FormControl key="active_toggle" onChange={() => setShowInactive((prev) => !prev)}>
+      <FormGroup>
+        <FormControlLabel
+          control={<Checkbox name="active" size="x-small" checked={showInactive} sx={{ py: 0 }} />}
+          label={"Show Inactive"}
+        />
+      </FormGroup>
+    </FormControl>,
+  ];
+
   return (
     <Paper className="users FlexContainer" sx={{ p: 0 }}>
       <EditableDataTable
@@ -113,14 +167,18 @@ export default function Users() {
           onNew: (row) => {
             setEditPassword({ open: true, user: row });
           },
-          isCellEditable: (params) => params.field !== "username" || params.row.user_id === -1,
+          isCellEditable: (params) =>
+            (params.field !== "username" || params.row.user_id === -1) &&
+            (params.row.user_id !== user.user_id || !["role", "active"].includes(params.field)),
         }}
         extraActions={extraActions}
+        disableDelete
         model="users"
         itemType="User"
         nameField="username"
         getItemName={(row) => row.username}
         autosizeColumns
+        headerControls={headerControls}
       />
       <ChangePassword
         {...editPassword}

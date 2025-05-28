@@ -3,25 +3,18 @@ import CancelIcon from "@mui/icons-material/Cancel";
 import DeleteIcon from "@mui/icons-material/Delete";
 import EditIcon from "@mui/icons-material/Edit";
 import SaveIcon from "@mui/icons-material/Save";
-import { Box, Button, Tooltip } from "@mui/material";
+import { Box, Button, Stack, Tooltip } from "@mui/material";
 import { DataGrid, GridActionsCellItem, GridEditInputCell, GridToolbar, useGridApiRef } from "@mui/x-data-grid";
 import { merge, startCase } from "lodash-es";
 import { useConfirm } from "material-ui-confirm";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { useAddNotification } from "src/stores";
 
 import * as API from "../api";
 
 const AddButton = ({ itemType, addItem }) => {
   return (
-    <Button
-      color="primary"
-      size="small"
-      variant="contained"
-      startIcon={<Add />}
-      onClick={addItem}
-      sx={{ position: "absolute", top: "8px", left: "8px", zIndex: 100 }}
-    >
+    <Button color="primary" size="small" variant="contained" startIcon={<Add />} onClick={addItem}>
       Add {itemType}
     </Button>
   );
@@ -60,6 +53,8 @@ export const EditableDataTable = ({
   prepareItem,
   autosizeColumns = false,
   readonly = false,
+  headerControls = [],
+  disableDelete = false,
   sx = {},
   ...props
 }) => {
@@ -68,11 +63,10 @@ export const EditableDataTable = ({
   const [columnWidths, setColumnWidths] = useState({});
   const confirm = useConfirm();
 
-  const onNewRef = useRef(onNew);
-  const onUpdateRef = useRef(onUpdate);
   const apiRef = useGridApiRef();
   const addNotification = useAddNotification();
   const fieldToFocus = columns?.[0].field;
+
   useEffect(() => {
     setLocalRows(rows);
   }, [rows]);
@@ -110,12 +104,12 @@ export const EditableDataTable = ({
           } else if (id === -1) {
             delete prepared[idField];
             newRow = await API[model].create(prepared);
-            onNewRef.current = newRow;
+            onNew(newRow);
           } else {
             newRow = await API[model].patch(id, prepared);
           }
           addNotification({ message: `${itemType} "${name}" ${action.toLowerCase()}d!` });
-          await onUpdateRef.current();
+          await onUpdate(newRow);
         } else {
           newRow = oldRow;
         }
@@ -125,7 +119,7 @@ export const EditableDataTable = ({
       resetEdit(newRow);
       return newRow;
     },
-    [getItemName, idField, resetEdit, confirm, itemType, prepareItem, addNotification, model]
+    [getItemName, idField, resetEdit, confirm, itemType, prepareItem, addNotification, onUpdate, model, onNew]
   );
 
   const deleteRow = useCallback(
@@ -179,19 +173,21 @@ export const EditableDataTable = ({
           ]
         : [
             ["Edit", EditIcon, () => updateRow(id)],
-            ["Delete", DeleteIcon, () => deleteRow(row)],
+            disableDelete ? null : ["Delete", DeleteIcon, () => deleteRow(row)],
             ...extraActions.map(([label, Icon, action]) => [label, Icon, () => action(row)]),
           ];
 
-      const actions = icons.map(([label, Icon, action]) => (
-        <Tooltip key={label} title={label} arrow placement="top">
-          <GridActionsCellItem
-            icon={<Icon color={label === "Save" ? "primary" : "default"} />}
-            label={label}
-            onClick={action}
-          />
-        </Tooltip>
-      ));
+      const actions = icons
+        .filter((i) => i)
+        .map(([label, Icon, action]) => (
+          <Tooltip key={label} title={label} arrow placement="top">
+            <GridActionsCellItem
+              icon={<Icon color={label === "Save" ? "primary" : "default"} />}
+              label={label}
+              onClick={action}
+            />
+          </Tooltip>
+        ));
       return actions;
     };
     const updateColumns = columns.map((column) => {
@@ -223,7 +219,7 @@ export const EditableDataTable = ({
         width: columnWidths["actions"] || (2 + extraActions.length) * 40,
       },
     ];
-  }, [editRow, columns, deleteRow, extraActions, updateRow, columnWidths, autosizeColumns, readonly]);
+  }, [editRow, columns, deleteRow, extraActions, updateRow, columnWidths, autosizeColumns, readonly, disableDelete]);
 
   useEffect(() => {
     if (autosizeColumns && !loading && localRows.length > 0 && apiRef.current) {
@@ -305,7 +301,30 @@ export const EditableDataTable = ({
 
   return (
     <Box className="FlexContainer" sx={{ position: "relative" }}>
-      {!readonly && <AddButton addItem={addItem} itemType={itemType} />}
+      {
+        <Stack
+          direction="row"
+          spacing={3}
+          alignItems={"center"}
+          sx={{
+            position: "absolute",
+            top: "0px",
+            left: "0px",
+            zIndex: 100,
+            width: "calc(100% - 280px)",
+            height: "auto",
+            pl: 1,
+            pt: 1,
+          }}
+        >
+          {!readonly && (
+            <Box>
+              <AddButton addItem={addItem} itemType={itemType} />
+            </Box>
+          )}
+          {...headerControls}
+        </Stack>
+      }
       <DataGrid
         slots={{ toolbar: GridToolbar }}
         processRowUpdate={processRowUpdate}
