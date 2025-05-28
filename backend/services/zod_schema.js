@@ -7,7 +7,7 @@ const settingsSchema = z.object({
   archive_id: z.number(),
   settings: z.object({
     site_intro_text: z.string().default(""),
-    featured_collection_id: z.number().nullable().optional(),
+    featured_collection_id: z.string().nullable().optional(),
   }),
 });
 
