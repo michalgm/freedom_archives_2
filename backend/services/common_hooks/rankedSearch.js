@@ -23,6 +23,25 @@ function applyBasicPrefixing(input) {
     .join(' ');
 }
 
+const isNumeric = /^\d+$/;
+
+const applyWhere = (qb, { idField, idValue, searchTerm }) => {
+  qb.where(function () {
+    // exact-ID branch
+    this.where(function () {
+      this.whereRaw("id_check.exists = true");
+      this.where(`${idField}`, idValue);
+    })
+      // fallback branch
+      .orWhere(function () {
+        this.whereRaw("id_check.exists = false");
+        this.whereRaw("fulltext @@ ts_query.query");
+        if (idValue == null) {
+          this.orWhereRaw("search_text %> ?", [searchTerm]);
+        }
+      });
+  });
+};
 
 export const rankedSearch = async (context) => {
   const { query = {} } = context.params;
@@ -31,15 +50,18 @@ export const rankedSearch = async (context) => {
   const searchTerm = query?.$fullText?.toLowerCase() || context?.params?._rankedSearch || '';
   delete query.$fullText;
 
+  const params = await context.service.sanitizeQuery(context.params);
   if (!searchTerm) return context;
   context.params._rankedSearch = searchTerm;
 
   const knex = context.app.get('postgresqlClient');
-  const params = await context.service.sanitizeQuery(context.params);
   const baseQuery = context.service
     .createQuery({ ...params, query: params });
 
-  // Always apply prefix matching by default on all terms
+  const { id: idField, name: tableName } = context.service.getOptions({});
+
+  const idValue = isNumeric.test(searchTerm) ? parseInt(searchTerm, 10) : null;
+
   const tsqueryString = parser(applyBasicPrefixing(searchTerm));
 
   const exactBoostCases = knex.raw(`WHEN search_text = ? THEN ${EXACT_MATCH_BOOST}`, [searchTerm]).toString();
@@ -50,31 +72,44 @@ export const rankedSearch = async (context) => {
   ).toString();
 
   const trigram = knex.raw(`word_similarity(search_text, ?)`, [searchTerm]).toString();
-  context.params.knex = baseQuery
+
+  const idTest = idValue ? knex.raw(`"${idField}" = ?`, [idValue]).toString() : 'false';
+
+  const rankedQuery = baseQuery
     .clone()
     .with('ts_query', knex.raw(`select to_tsquery(?, ?) as query`, [language, tsqueryString]))
-    .where(function () {
-      this.whereRaw(`fulltext @@ ts_query.query`)
-        .orWhereRaw(`search_text %> ?`, [searchTerm]);
-    })
+    .with(
+      "id_check",
+      idValue !== null ? knex.raw(
+        `SELECT EXISTS(
+            SELECT 1 FROM "${tableName}" 
+            WHERE "${idField}" = ?
+          ) AS exists`,
+        [idValue]
+      ) : knex.raw(`SELECT false AS exists`)
+    )
     .crossJoin('ts_query')
+    .crossJoin('id_check')
+    .modify(q => applyWhere(q, { idField, idValue, searchTerm }))
     .select(
       knex.raw(
         `(
+          CASE WHEN ${idTest} THEN 1
+              ELSE
           CASE
             WHEN fulltext @@ ts_query.query THEN 
-                 ${FULLTEXT_WEIGHT} * ts_rank(fulltext, ts_query.query)
+              ${FULLTEXT_WEIGHT} * ts_rank(fulltext, ts_query.query)
             ELSE 
-              ${TRIGRAM_WEIGHT} * ${trigram}
+              ${idValue !== null ? '0' : `${TRIGRAM_WEIGHT} * ${trigram}`}
             END
             + CASE ${exactBoostCases} ELSE 0 END
             + (${positionScoreExpr} ) 
-        ) AS rank`
+            END ) as rank
+        `,
       )
     );
-  ;
-  // context.result = [];
-  // return context;
-  // console.log(context.params.knex.toString());
+
+  context.params.knex = rankedQuery;
+
   return context;
 };
