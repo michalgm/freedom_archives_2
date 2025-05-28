@@ -1,23 +1,104 @@
-Todos:
-    ☐ add record count + digitized
-    ✔ link to collection in search results @done(21-06-14 23:32)
+Priorities:
+    ✔ auth roles: @done(25-05-28 02:30)
+        ✔ if not admin, can't change own role @done(25-05-28 02:30)
+        ✔ intern: set needs_review = true on records @done(25-05-28 02:30)
+        ✔ staff role : edit list values, manage users @done(25-05-28 02:30)
+        ✔ admin role : publish, review @done(25-05-28 02:30)
     ☐ Thumbnail uploads/resizing/management
-    ✔ record display: title, collection, format, thumbnail @done(21-06-13 16:23)
-    ☐ collectionItem component
-    ☐ clear search when switching between record + collection @high 
+        ✔ collection thumbnails @done(25-05-20 12:30)
+        ✔ vimeo thumbnails @done(25-05-22 15:13)
+        ☐ force update thumbnail
+        ☐ update "no digital" thumbnail
+    ☐ export collections
+        ☐ Export collections - intern can't export all
+    ☐ Backups
+        ☐ automated server-side backups solution 
+    ✔ Vin -> VIN @done(25-05-28 02:35)
+    ☐ Publisher -> multivalue
+    ✔ why record id search not match: 39067 @done(25-05-28 02:35)
+    ✔ Data cleanup to review / Send Nathaniel data cleanup lists @done(25-05-28 02:35)
+    ☐ Validate call numbers on save
+    
+
+Todos:
+    ✔ "loading" on empty dropdown interface (subjects, etc) @done(25-05-15 13:26)
+    ✔ confirmation on deletes @done(24-02-13 21:25)
+    ☐ duplicate records UI
+    ✔ merge/review changes UI @done(25-05-15 13:27)
+    ✔ embedded filter styling on Manage component @done(25-05-15 13:27)
+    ☐ identity/merge duplicate list items
+    ✔ search: run search + filters lookup in parallel @done(25-05-14 12:17)
+    ✔ backup/restore database @done(25-05-15 13:28)
+    ☐ universal search in nav
+    ✔ drop footer on site settings? or add update/mod times to settings? @done(25-05-15 14:00)
+    ✔ retain focus on multi-value fields @done(25-05-14 12:17)
+    ✔ handle long entries in dropdowns @done(25-05-15 13:30)
+    ✔ thumbnail update issue on live site @done(25-05-15 13:57)
+    ✔ editablelistitem - focus input on edit @done(25-05-14 12:25)
+    ✔ datestring starts as dirty? @done(25-05-14 12:25)
+    ☐ on records tab in collection, set default filter to uncategorized category
+    ☐ manage uncategorized category per-archive
+    ☐ check fuzzy-dupes on list item add
+    ☐ clear canceled list-item add ("create new author 'xxx'")
+    ☐ sort option in manage interface
+    ✔ state management for manage interface (separate record/collection, and non-persistent) @done(25-05-28 02:40)
+    ☐ limit select fields on collection/record views
+    ☐ clean up call numbers
+    ☐ clean up list item capitalization duplicates
+    
+
+    API:
+        ☐ access controls
+        ☐ intern auto-set "needs review"
+
+    Settings:
+        ✔ Site header text @done(25-05-08 15:00)
     Record:
-        ✔ Link to collection @done(21-06-29 01:49)
+        ✔ vimeo thumbnails @done(25-05-21 10:20)
         Continuations:
             ☐ continuation needs order/index field
     Collection:
-        ☐ Manage Child records
-        ☐ Notes should be textarea
-        ☐ Featured Records interface
-        ☐ Subcollections
+        ✔ Manage Child records @done(25-05-15 14:02)
+        ✔ Featured Records interface @done(25-05-15 14:02)
+        ✔ Subcollections @done(25-05-15 14:02)
+        ✔ thumbnails @done(25-05-21 10:20)
+        ✔ check if collection has records before delete @done(25-05-21 10:20)
+        ✔ add validation @done(25-05-14 16:34)
+
+    Users:
+        ✔ confirm on user delete @done(25-03-14 18:24)
+
+Future Steps:
+    ☐ Upload PDFs through admin tool? - maybe
+    ☐ Better auth/password management
+    ☐ Language property on Record?
+    ☐ OCR data in db?
+
+Questions:
+    ☐ Date range - how to normalize?
+    ☐ Publisher - should it be multi-value? Example: Americans for Middle East Understanding; Council of the Advancement of Arab-British Understanding; UC Nuclear Weapons Labs Conversion Project; Fund to Restore an Educated Electorate; American-Arab Anti-Discrimination Committee; Los Angeles World Affairs Council; The American Committee of Justice in the Middle East; 
+    ✔ Are featured records always direct members of collection - no also subcollections, but never outside @done(25-05-15 13:53)
+    ✔ Filter by call number - just category, or full call number? - full call number as it is now works @done(25-05-15 13:53)
+    ✔ Update record thumbnails indepedently of primary instance URL? - no @done(25-03-20 13:29)
+    ✔ Collections thumbnail sources - pull from child record? - no @done(25-03-20 13:29)
+    ✔ Non-edit display of record/collection? - no @done(25-03-20 13:29)
+
+
+
 
 Archive:
+  ✔ Notes should be textarea @done(22-04-28 14:18) @project(Todos.Collection)
+  ✔ add record count + digitized @done(22-04-28 14:04) @project(Todos)
+  ✔ link to collection in search results @done(21-06-14 23:32) @project(Todos)
+  ✔ record display: title, collection, format, thumbnail @done(21-06-13 16:23) @project(Todos)
+  ✔ collectionItem component @done(22-04-28 14:04) @project(Todos)
+  ✔ clear search when switching between record + collection @high @done(22-04-28 14:04) @project(Todos)
+  ✔ record filters resetting if selected within timeout @done(22-04-28 14:03) @project(Todos)
+  ✔ into icons for non-digitized @done(22-04-28 14:04) @project(Todos)
+  ✔ Link to collection @done(21-06-29 01:49) @project(Todos.Record)
   ✔ move call number to media level @done(21-06-13 16:10) @project(Todos)
   ✔ breadcrumbs @done(21-06-13 16:10) @project(Todos)
   ✔ add filters to search @done(21-06-13 16:10) @project(Todos)
   ✔ loses focus when it searches @done(21-06-13 16:10) @project(Todos)
   ✔ add organizer/publisher @done(21-06-13 16:10) @project(Todos)
+ 
