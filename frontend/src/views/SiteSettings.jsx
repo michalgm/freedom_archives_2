@@ -44,7 +44,7 @@ const SiteSettings = () => {
                 link={false}
                 service="collections"
                 onChange={(value, { setValue }) => {
-                  setValue("settings.featured_collection_id", value?.collection_id || null, {
+                  setValue("settings.featured_collection_id", value?.collection_id ? `${value.collection_id}` : null, {
                     shouldValidate: true,
                     shouldDirty: true,
                   });
