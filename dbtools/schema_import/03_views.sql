@@ -252,9 +252,6 @@ SELECT
         )
     ) AS featured_records,
     SETWEIGHT(
-        TO_TSVECTOR('english', COALESCE(a.collection_id::TEXT, '')),
-        'A'
-    )||SETWEIGHT(
         TO_TSVECTOR('english', COALESCE(a.collection_name, '')),
         'A'
     )||SETWEIGHT(
@@ -274,7 +271,7 @@ SELECT
         'C'
     ) AS fulltext,
     LOWER(
-        a.collection_id::TEXT||COALESCE(a.collection_name, '')||COALESCE(a.call_number, '')||COALESCE(a.summary, '')||COALESCE(a.description_search, '')||COALESCE(keywords.items_text, '')||COALESCE(subjects.items_text, '')
+        COALESCE(a.collection_name, '')||COALESCE(a.call_number, '')||COALESCE(a.summary, '')||COALESCE(a.description_search, '')||COALESCE(keywords.items_text, '')||COALESCE(subjects.items_text, '')
     ) AS search_text
 FROM
     collections a
@@ -455,9 +452,6 @@ SELECT
     keywords.items_search AS keywords_search,
     producers.items_search AS producers_search,
     SETWEIGHT(
-        TO_TSVECTOR('english', COALESCE(a.record_id::TEXT, '')),
-        'A'
-    )||SETWEIGHT(
         TO_TSVECTOR('english', COALESCE(a.title, '')),
         'A'
     )||SETWEIGHT(
@@ -477,7 +471,7 @@ SELECT
         'C'
     ) AS fulltext,
     LOWER(
-        a.record_id::TEXT||' '||COALESCE(a.title, '')||' '||COALESCE(instances.call_numbers_text, '')||' '||COALESCE(a.description, '')||' '||COALESCE(instances.call_numbers_text, '')||' '||COALESCE(authors.items_text, '')||' '||COALESCE(subjects.items_text, '')||' '||COALESCE(keywords.items_text, '')
+        COALESCE(a.title, '')||' '||COALESCE(instances.call_numbers_text, '')||' '||COALESCE(a.description, '')||' '||COALESCE(instances.call_numbers_text, '')||' '||COALESCE(authors.items_text, '')||' '||COALESCE(subjects.items_text, '')||' '||COALESCE(keywords.items_text, '')
     ) AS search_text
 FROM
     records a -- left join record_summaries b using (record_id)
