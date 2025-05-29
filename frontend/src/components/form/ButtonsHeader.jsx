@@ -58,7 +58,7 @@ export const FormButton = ({
       onClick={click}
       form={formName}
       startIcon={icon}
-      disabled={type === "submit" && !isValid && isSubmitted}
+      // disabled={type === "submit" && !isValid && isSubmitted}
       type={type === "submit" ? "submit" : "button"}
       {...props}
     >
