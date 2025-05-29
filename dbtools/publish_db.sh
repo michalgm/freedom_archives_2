@@ -79,11 +79,14 @@ sync_schema() {
   PGPASSWORD=$REMOTE_PASSWORD psql -h $REMOTE_HOST -p $REMOTE_PORT -U $REMOTE_USER -d $REMOTE_DB < schema_dump.sql
 
   log "Copying data to remote database $REMOTE_DB"
-PGPASSWORD=$REMOTE_PASSWORD psql -h $REMOTE_HOST -p $REMOTE_PORT -U $REMOTE_USER -d $REMOTE_DB < data_dump.sql
+  PGPASSWORD=$REMOTE_PASSWORD psql -h $REMOTE_HOST -p $REMOTE_PORT -U $REMOTE_USER -d $REMOTE_DB < data_dump.sql
 }
 
 sync_schema "freedom_archives" "freedom_archives"
 sync_schema "public_search" "public_search"
+
+log "Running VACUUM ANALYZE on remote database $REMOTE_DB"
+PGPASSWORD=$REMOTE_PASSWORD psql -h $REMOTE_HOST -p $REMOTE_PORT -U $REMOTE_USER -d $REMOTE_DB -c "VACUUM ANALYZE;"
 
 # Clean up SSH tunnel if used
 if [ "$SSH_TUNNEL" = true ]; then
