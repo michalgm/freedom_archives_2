@@ -231,6 +231,7 @@ const Autocomplete = ({
     onChange,
     disabled: props.disabled,
     autoHighlight: true,
+    autoSelect: true,
     getOptionLabel: (option) => {
       const label = (getOptionById(option) || option)?.[labelField] || "NO LABEL";
       return label;
