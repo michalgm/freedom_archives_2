@@ -77,7 +77,21 @@ export function useLogChangedDeps(name, deps) {
 export const checkUnique = async (service, query) => {
   const res = await services[service].find({ query: { ...query, $limit: 1 }, noLoading: true });
   return res.total !== 0;
-}
+};
+
+export const getOrdinal = (n) => {
+  let ord = "th";
+
+  if (n % 10 == 1 && n % 100 != 11) {
+    ord = "st";
+  } else if (n % 10 == 2 && n % 100 != 12) {
+    ord = "nd";
+  } else if (n % 10 == 3 && n % 100 != 13) {
+    ord = "rd";
+  }
+
+  return `${n}${ord}`;
+};
 
 // export function DebugProps({ name, ...props }) {
 //   const propsArray = Object.entries(props).map(([key, value]) => ({ key, value }));

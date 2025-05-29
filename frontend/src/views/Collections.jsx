@@ -85,7 +85,7 @@ function Collections({ embedded, itemAction, filter = {}, excludeIds = [], useSt
       defaultFilter={filter}
       createQuery={createQuery}
       filterTypes={filter_types}
-      service="collection"
+      service="collections"
       embedded={embedded}
       itemAction={itemAction}
       searchHelperText={"Search name, description, summary, keywords, subjects, and call number"}

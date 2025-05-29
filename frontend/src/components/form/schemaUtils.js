@@ -1,4 +1,5 @@
 import { capitalize, fromPairs, isArray, isEmpty, isObject, map, mapValues, merge, omitBy, reject } from "lodash-es";
+import { getOrdinal } from "src/utils";
 
 import schemas from "../../../../backend/services/zod_schema";
 
@@ -14,8 +15,9 @@ export const parseError = (name, _label) => (error) => {
   if (error.message === "Invalid") {
     return `${label} is not valid`;
   }
-  return error.message;
+  return `${label}: ${error.message}`;
 };
+
 export function isEmptyValue(value) {
   return (
     value === undefined || // Null
@@ -25,6 +27,7 @@ export function isEmptyValue(value) {
     (isObject(value) && isEmpty(value)) // Empty object after recursion
   );
 }
+
 function removeNulls(value) {
   let cleanedValue = value;
   if (isArray(value)) {
@@ -94,15 +97,17 @@ const mapSchema = (schema, callback, parentKey = "") => {
   return Object.keys(shape).reduce((acc, key) => {
     const field = shape[key];
     const fullPath = parentKey ? `${parentKey}.${key}` : key;
+
+    const value = callback(field, fullPath, acc);
+    if (value) {
+      acc.push(value);
+    }
+
     // If it's an object, recurse
     if (field._def?.typeName === "ZodObject") {
       return acc.concat(mapSchema(field, callback, fullPath));
     } else if (field._def?.typeName === "ZodArray" && field._def.type?._def?.typeName === "ZodObject") {
       return acc.concat(mapSchema(field._def.type, callback, `${fullPath}[]`));
-    }
-    const value = callback(field, fullPath, acc);
-    if (value) {
-      acc.push(value);
     }
     // if (!field.isOptional?.() && !field._def?.innerType?.isOptional?.()) {
     //   acc.push(callback(field, fullPath, acc));
@@ -110,6 +115,7 @@ const mapSchema = (schema, callback, parentKey = "") => {
     return acc;
   }, []);
 };
+
 export const formatLabel = (label, name) => {
   if (label?.trim() === "") {
     return null;
@@ -149,11 +155,34 @@ export const fieldLabels = Object.keys(schemas).reduce((acc, key) => {
   );
   return acc;
 }, {});
+
 export const checkRequired = (field, schemaName) => {
   const schema = `${schemaName}DataSchema`;
   return requiredFields?.[schema]?.includes(field.replace(/\d/g, ""));
 };
 
-export const getFieldLabel = (field, schemaName) => {
-  return fieldLabels?.[`${schemaName}DataSchema`]?.[field.replace(/\d/g, "")];
+export const getFieldLabel = (field, schemaName, fullPath) => {
+  if (!fullPath) {
+    return fieldLabels?.[`${schemaName}DataSchema`]?.[field.replace(/\[\d\]/g, '')];
+  }
+  const paths = field.split('.')
+  const [, labels] = paths.reduce(([paths, labels], path) => {
+    let count = path.match(/\[(\d)\]/)?.[1]
+    if (count) {
+      path = path.replace(/\d/, '')
+      count = parseInt(count) + 1
+    }
+    paths.push(path)
+    const fullPath = paths.join('.')
+    let label = fieldLabels?.[`${schemaName}DataSchema`]?.[fullPath.replace(/\[\]$/, '')];
+    if (count) {
+      label = ` ${getOrdinal(count)} ${label}`
+    }
+    // console.log({ count, path, fullPath, labels, label })
+    labels.push(label)
+
+    return [paths, labels];
+  }, [[], []]);
+
+  return labels.reverse().join(' of the ');
 };

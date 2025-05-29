@@ -1,5 +1,5 @@
 import dayjs from "dayjs";
-import { get, isEmpty, startCase } from "lodash-es";
+import { isEmpty, startCase } from "lodash-es";
 import { useConfirm } from "material-ui-confirm";
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useForm } from "react-hook-form-mui";
@@ -116,7 +116,9 @@ function useFormManager({
         //   // eventType: options?.originalEvent?.type, // This might help identify the trigger
         // });
         const valdationResult = await validators[`${service}Validator`](data, context, options);
-        // logger.log("VALIDATION RESULT", valdationResult);
+        if (!isEmpty(valdationResult.errors)) {
+          logger.log("VALIDATION RESULT", valdationResult, data);
+        }
         // const errors = Object.keys(valdationResult.errors);
         // if (errors.length > 0) {
         //   const message = errors.map((key) => `${key}: ${JSON.stringify(valdationResult.errors[key])}`);
@@ -142,11 +144,14 @@ function useFormManager({
   const [retrieveTime, setRetrieveTime] = useState(null);
   const [formData, setFormData] = useState({});
   const resetPromiseRef = useRef(null);
-  const display_name = getValues(namePath) || get(formData, namePath) || "";
   const displayError = useDisplayError();
   const addNotification = useAddNotification();
   const serviceDisplayName = service.replace(/s$/, "");
   const hasDirtyFields = Object.keys(formState.dirtyFields).length > 0;
+
+  const getDisplayName = useCallback(() => {
+    return getValues(namePath) || "";
+  }, [getValues, namePath]);
 
   const stats = useMemo(
     () => ({
@@ -186,6 +191,7 @@ function useFormManager({
 
   const notifyAction = useCallback(
     (action) => {
+      const display_name = getDisplayName();
       const message = display_name
         ? `${startCase(serviceDisplayName)} "${display_name}" ${action}`
         : `${startCase(service)} ${action}`;
@@ -194,7 +200,7 @@ function useFormManager({
         message,
       });
     },
-    [serviceDisplayName, display_name, addNotification, service]
+    [serviceDisplayName, getDisplayName, addNotification, service]
   );
 
   const updateEntity = useCallback(
@@ -259,6 +265,7 @@ function useFormManager({
 
   const confirmDelete = useCallback(
     async (deleteOptions = {}) => {
+      const display_name = getDisplayName();
       const { renderContent, getDeleteParams, onConfirm, ...customConfirmOptions } = deleteOptions;
 
       onConfirm && onConfirm();
@@ -290,7 +297,7 @@ function useFormManager({
         return false;
       }
     },
-    [confirm, deleteEntity, display_name, entityData, id, serviceDisplayName]
+    [confirm, deleteEntity, getDisplayName, entityData, id, serviceDisplayName]
   );
 
   const onSave = useCallback(
@@ -365,7 +372,7 @@ function useFormManager({
     stats,
     submitForm,
     confirmDelete,
-    display_name,
+    // display_name: getDisplayName(),
     retrieveTime,
     isLoading: Object.values(loading).some((x) => x),
     hasDirtyFields,

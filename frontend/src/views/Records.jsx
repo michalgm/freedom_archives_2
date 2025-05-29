@@ -37,7 +37,7 @@ function Records({ embedded, itemAction, filter = {}, forcedFilter = {}, useStor
           "collection",
           "has_digital",
           "description",
-          "primary_instance_thumbnail",
+          "primary_instance_media_type",
           "primary_instance_format_text",
         ],
         ...forcedFilter,
@@ -68,7 +68,7 @@ function Records({ embedded, itemAction, filter = {}, forcedFilter = {}, useStor
       defaultFilter={filter}
       createQuery={createQuery}
       filterTypes={filter_types}
-      service="record"
+      service="records"
       embedded={embedded}
       itemAction={itemAction}
       searchHelperText="Search title, description, keywords, producers, and call number"

@@ -66,7 +66,7 @@ interface SearchState<T extends SearchData> {
   search_index: number;
 }
 
-export type SearchType = "record" | "collection";
+export type SearchType = "records" | "collections";
 
 interface Actions<T extends SearchData> {
   // Actions
@@ -90,7 +90,7 @@ const initialSearchData: SearchData = {
 };
 
 export const initialSearch = {
-  record: {
+  records: {
     search: {
       ...initialSearchData,
       filter: {
@@ -101,7 +101,7 @@ export const initialSearch = {
     },
     search_index: 0,
   } as SearchState<RecordSearchData>,
-  collection: {
+  collections: {
     search: initialSearchData,
     search_index: 0,
   } as SearchState<SearchData>,
@@ -177,10 +177,10 @@ export const createQueryStore = <T extends SearchData>(type: SearchType, persist
   return create<SearchState<T> & Actions<T>>()(baseStore)
 }
 
-const useRecordsQueryStore = createQueryStore('record', true);
-const useCollectionsQueryStore = createQueryStore('collection', true);
+const useRecordsQueryStore = createQueryStore('records', true);
+const useCollectionsQueryStore = createQueryStore('collections', true);
 
 export const queryStores = {
-  record: useRecordsQueryStore,
-  collection: useCollectionsQueryStore
+  records: useRecordsQueryStore,
+  collections: useCollectionsQueryStore
 }

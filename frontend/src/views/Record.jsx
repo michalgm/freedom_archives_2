@@ -334,7 +334,7 @@ function Record({ id /*  embedded = false */ }) {
           const { formData: record } = manager;
           return (
             <>
-              <EditItemView item={record} newItem={newRecord} service="record" noPaper>
+              <EditItemView item={record} newItem={newRecord} service="records" noPaper>
                 <Grid2 container spacing={2}>
                   <GridBlock title="" spacing={2}>
                     <Grid2 size={12}>

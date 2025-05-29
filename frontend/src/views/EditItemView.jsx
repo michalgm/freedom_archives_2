@@ -2,7 +2,7 @@ import { Delete, Link, Save } from "@mui/icons-material";
 import { Box, Grid2, Icon, Typography } from "@mui/material";
 import { isEmpty, startCase } from "lodash-es";
 import { useEffect, useState } from "react";
-import { services } from "src/api";
+import { getServiceID, services } from "src/api";
 import ButtonLink from "src/components/ButtonLink";
 import ViewContainer from "src/components/ViewContainer";
 import { queryStores } from "src/stores/";
@@ -24,7 +24,7 @@ const NeighborLink = ({ type, service, neighbors, setSearchIndex, search_index }
       <Grid2 size="grow" component={Box} textAlign={type === "prev" ? "left" : "right"} style={{ flex: "0 0 auto" }}>
         <ButtonLink
           disabled={!neighbors[type]}
-          to={`/${service}s/${neighbors[type]}`}
+          to={`/${service}/${neighbors[type]}`}
           onClick={() => setSearchIndex(search_index + offset)}
           startIcon={type === "prev" && <Icon>arrow_backward</Icon>}
           endIcon={type !== "prev" && <Icon>arrow_forward</Icon>}
@@ -38,13 +38,12 @@ const NeighborLink = ({ type, service, neighbors, setSearchIndex, search_index }
 
 const EditItemFooter = ({ service, item }) => {
   const [neighbors, setNeighbors] = useState({ prev: null, next: null });
-
   const useStore = queryStores[service];
   const setSearchIndex = useStore((s) => s.setSearchIndex);
   const search_index = useStore((s) => s.search_index);
   const query = useStore((s) => s.search.query);
 
-  const id = `${service}_id`;
+  const id = getServiceID(service);
 
   useEffect(() => {
     const updateNeighbors = async () => {
@@ -55,7 +54,7 @@ const EditItemFooter = ({ service, item }) => {
           $limit: 3,
           $select: [id],
         };
-        const { data } = await services[`${service}s`].find({ query: neighborQuery });
+        const { data } = await services[`${service}`].find({ query: neighborQuery });
         const neighbors = data.map((item) => item[id]);
         if (!search_index) {
           neighbors.unshift(null);
@@ -86,12 +85,13 @@ const EditItemView = ({ newItem, item, service, deleteOptions, className, childr
 
   let footerElements = [];
   if (!newItem && service) {
+    const id = item[getServiceID(service)];
     buttons.unshift({
       label: "Old Admin Link",
       type: "link",
       variant: "outlined",
       icon: <Link />,
-      to: `https://search.freedomarchives.org/admin/#/${service === "record" ? "document" : service}s/${item[`${service}_id`]}`,
+      to: `https://search.freedomarchives.org/admin/#/${service === "records" ? "documents" : service}/${id}`,
       sx: { mr: "auto" },
       target: "_blank",
     });
@@ -101,6 +101,7 @@ const EditItemView = ({ newItem, item, service, deleteOptions, className, childr
   return (
     <ViewContainer
       {...{
+        service,
         buttons,
         footerElements,
         className,

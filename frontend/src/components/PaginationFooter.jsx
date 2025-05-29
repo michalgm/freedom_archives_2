@@ -5,14 +5,14 @@ function PaginationFooter({
   total,
   offset,
   page_size,
-  type = "record",
+  type = "records",
   setOffset,
   digitizedTotal,
   embedded,
   ...props
 }) {
-  const label = `${total} ${startCase(type)}s ${
-    type === "record" && digitizedTotal !== undefined ? `(${digitizedTotal} digitized)` : ""
+  const label = `${total} ${startCase(type)} ${
+    type === "records" && digitizedTotal !== undefined ? `(${digitizedTotal} digitized)` : ""
   }`;
 
   const count = Math.ceil(total / page_size);

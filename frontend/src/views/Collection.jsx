@@ -3,6 +3,7 @@ import { startCase } from "lodash-es";
 import { useEffect, useMemo, useState } from "react";
 import { useFieldArray, useFormContext } from "react-hook-form";
 import { useNavigate, useParams } from "react-router";
+import { getServiceID } from "src/api";
 import { BaseForm } from "src/components/form/BaseForm";
 import ViewContainer from "src/components/ViewContainer";
 import { useTitle } from "src/stores";
@@ -38,9 +39,9 @@ function Collection({ id, mode = "" }) {
   const setTitle = useTitle();
   const navigate = useNavigate();
 
-  const [useFeaturedRecordsStore] = useState(() => createQueryStore("record"));
-  const [useSubcollectionsStore] = useState(() => createQueryStore("collection"));
-  const [useRecordsStore] = useState(() => createQueryStore("record"));
+  const [useFeaturedRecordsStore] = useState(() => createQueryStore("records"));
+  const [useSubcollectionsStore] = useState(() => createQueryStore("collections"));
+  const [useRecordsStore] = useState(() => createQueryStore("records"));
 
   useEffect(() => {
     return () => {
@@ -64,7 +65,7 @@ function Collection({ id, mode = "" }) {
         {tab === "featured" && (
           <EditList
             property="featured_records"
-            type="record"
+            type="records"
             filter={{
               non_digitized: true,
             }}
@@ -83,7 +84,7 @@ function Collection({ id, mode = "" }) {
           <EditList
             property="children"
             label="subcollections"
-            type="collection"
+            type="collections"
             useStore={useSubcollectionsStore}
             reorder
           />
@@ -91,7 +92,7 @@ function Collection({ id, mode = "" }) {
         {tab === "records" && (
           <EditList
             property="child_records"
-            type="record"
+            type="records"
             filter={{ collection_id: 1000, non_digitized: true }}
             useStore={useRecordsStore}
           />
@@ -141,7 +142,7 @@ function Collection({ id, mode = "" }) {
               item={collection}
               id={id}
               newItem={newCollection}
-              service={isFeaturedRecords || isFeaturedCollections ? null : "collection"}
+              service={isFeaturedRecords || isFeaturedCollections ? null : "collections"}
               className="FlexContainer"
               deleteOptions={deleteOptions}
             >
@@ -228,7 +229,7 @@ function CollectionFields() {
 
 function EditList({
   property = "child_records",
-  type = "record",
+  type = "records",
   label: _label,
   filter,
   reorder,
@@ -240,8 +241,9 @@ function EditList({
     name: property, // unique name for your Field Array
     control,
   });
-  const ItemsList = type === "record" ? Records : Collections;
-  const idField = `${type}_id`;
+  const ItemsList = type === "records" ? Records : Collections;
+  const idField = getServiceID(type);
+
   const excludeIds = useMemo(() => {
     return fields.map((item) => item[idField]);
   }, [fields, idField]);
@@ -273,7 +275,7 @@ function EditList({
           >
             <Box sx={{ backgroundColor: "white" }}>
               <EditableItemsListBase
-                type={type}
+                type={type.replace(/s$/, "")}
                 name={property}
                 reorder={reorder}
                 fields={fields}

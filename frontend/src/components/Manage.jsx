@@ -179,7 +179,7 @@ const FilterBar = ({
                 }}
               />
             </Grid2>
-            <Show when={service === "record"}>
+            <Show when={service === "records"}>
               <Grid2 flex="1 0 45%" sx={{ minWidth: 150 }}>
                 <Field
                   name="collection_id"
@@ -196,7 +196,7 @@ const FilterBar = ({
             </Show>
           </Grid2>
           <Grid2 flex="1 1 min-content" container spacing={0} flexWrap={"wrap"}>
-            <Show when={service === "record"}>
+            <Show when={service === "records"}>
               <Field
                 field_type="checkbox"
                 highlightDirty={false}
@@ -358,8 +358,8 @@ const ManageBase = ({
         });
       }
       const [{ data, total }, { total: digitizedTotal = 0 }] = await Promise.all([
-        (service === "record" ? records : collections).find({ noLoading, query }),
-        service === "record"
+        (service === "records" ? records : collections).find({ noLoading, query }),
+        service === "records"
           ? records.find({
               noLoading,
               query: {
@@ -427,7 +427,7 @@ const ManageBase = ({
         {loading ? (
           "Loading..."
         ) : (
-          <ItemsList description items={items} itemAction={itemAction} type={service} link={link} />
+          <ItemsList description items={items} itemAction={itemAction} type={service.replace(/s$/, "")} link={link} />
         )}
       </>
     </ViewContainer>

@@ -1,32 +1,39 @@
-import { Alert } from "@mui/material";
+import { Alert, AlertTitle } from "@mui/material";
 import React, { useEffect } from "react";
 import { FormContainer } from "react-hook-form-mui";
 import { getFieldLabel } from "src/components/form/schemaUtils";
 import { useFormManager } from "src/hooks/useFormManager";
 import { flattenErrors } from "src/utils";
 
-import { FormManagerContext } from "./FormManagerContext";
+import useFormManagerContext, { FormManagerContext } from "./FormManagerContext";
 import { FormStateHandler } from "./FormStateHandler";
 import { parseError } from "./schemaUtils";
 
-export const FormErrors = ({ errors, service }) => {
+export const FormErrors = ({ service, embedded = false }) => {
+  const {
+    formState: { errors },
+  } = useFormManagerContext();
   const [hideErrors, setHideErrors] = React.useState(false);
 
   useEffect(() => {
     setHideErrors(false);
   }, [errors]);
   const errorsMap = flattenErrors(errors);
+  const errorCount = Object.entries(errorsMap).length;
   const errorMessages = Object.entries(errorsMap).reduce((acc, [field, error]) => {
-    const label = getFieldLabel(field, service);
+    const label = getFieldLabel(field, service, true);
     const message = parseError(field, label)({ message: error });
     acc.push(<li key={field}>{message}</li>);
     return acc;
   }, []);
   if (errorMessages.length === 0 || hideErrors) return null;
-
+  const props = embedded ? { elevation: 0, sx: { marginTop: 1 } } : { elevation: 2, sx: { marginBottom: 2 } };
   return (
-    <Alert severity="error" elevation={2} sx={{ marginBottom: 2 }} onClose={() => setHideErrors(true)}>
-      <ul>{errorMessages}</ul>
+    <Alert severity="error" {...props} onClose={() => setHideErrors(true)}>
+      <AlertTitle>
+        {errorCount} error{errorCount > 1 ? "s" : ""} prohibited this {service.replace(/s$/, "")} from being saved
+      </AlertTitle>
+      <ul style={{ margin: 0 }}>{errorMessages}</ul>
     </Alert>
   );
 };
@@ -69,7 +76,6 @@ const BaseForm = ({ children, autoComplete = "off", formConfig, formID, ...props
         formContext={formContext}
       >
         <FormStateHandler shouldBlockNavigation={shouldBlockNavigation} />
-        {/* <FormErrors errors={errors} service={formConfig?.service} /> */}
         {typeof children === "function" ? children(formManager) : children}
       </FormContainer>
     </FormManagerContext.Provider>

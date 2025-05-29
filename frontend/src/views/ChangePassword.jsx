@@ -12,9 +12,9 @@ import {
 } from "@mui/material";
 import { useState } from "react";
 import { FormContainer } from "react-hook-form-mui";
+import { FormErrors } from "src/components/form/BaseForm";
 import ButtonsHeader from "src/components/form/ButtonsHeader";
 import { Field } from "src/components/form/Field";
-import { FormErrors } from "src/components/ViewContainer";
 import { useAddNotification } from "src/stores";
 
 import { users } from "../api";
