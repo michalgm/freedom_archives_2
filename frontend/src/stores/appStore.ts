@@ -49,7 +49,7 @@ const useAppStore = create<AppState>((set) => ({
         return { notifications: notifications, hasError: hasError }
     }),
     removeNotificationsOnNavigate: () => set((state) => {
-        const notifications = state.notifications.filter(notification => notification.keepOnNavigate);
+        const notifications = state.notifications.filter(notification => notification.keepOnNavigate || notification.severity === 'success');
         return { notifications: notifications }
     })
 }));
