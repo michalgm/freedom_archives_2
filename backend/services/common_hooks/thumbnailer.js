@@ -1,3 +1,4 @@
+import { BadRequest } from "@feathersjs/errors";
 import axios from "axios";
 import { promises } from "fs";
 import path, { dirname } from "path";
@@ -14,6 +15,18 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
 const OUTPUT_FORMAT = "jpg";
+
+const MEDIA_TYPES = {
+  'mp3': 'Audio',
+  'mp4': 'Video',
+  'wav': 'Audio',
+  'jpg': 'Image',
+  'png': 'Image',
+  'jpeg': 'Image',
+  'tiff': 'Image',
+  'bmp': 'Image',
+  'pdf': 'PDF',
+};
 
 const thumbnailApis = {
   'vimeo.com:': (url) => `https://vimeo.com/api/oembed.json?url=${url}`,
@@ -46,15 +59,13 @@ const processDataUrl = (dataUrl) => {
   return matches[2];
 };
 
-const writeThumbnailsFromUrl = async ({ url: _url, filename, basedir }) => {
-  let url = _url;
-  for (const [key, value] of Object.entries(thumbnailApis)) {
-    if (url.match(key)) {
-      url = value(url);
-      break;
-    }
+const writeThumbnailsFromUrl = async ({ url, filename, basedir }) => {
+  let data;
+  try {
+    data = await fetchExternalImage(url);
+  } catch (error) {
+    throw new BadRequest(`Error fetching media url "${url}": ${error}`);
   }
-  const data = await fetchExternalImage(url);
   return writeThumbnails({ data, filename, basedir });
 };
 
@@ -105,13 +116,34 @@ const updateThumbnail = async (context) => {
       filename,
       basedir,
     };
-    const paths = await (type === 'records' ? writeThumbnailsFromUrl : writeThumbnailsFromDataUrl)(args);
-    const params = { user, transaction: { trx } };
+    // console.log(args);
 
-    for (const path of paths) {
-      if (path.endsWith(`${filename}.jpg`) && type === 'collections') {
-        await context.service._patch(id, { thumbnail: path }, params);
+    const params = { user, transaction: { trx } };
+    if (type === 'collections') {
+      const paths = await writeThumbnailsFromDataUrl(args);
+      for (const path of paths) {
+        if (path.endsWith(`${filename}.jpg`)) {
+          await context.service._patch(id, { thumbnail: path }, params);
+        }
       }
+    }
+    if (type === 'records') {
+      let media_type = '';
+      for (const [key, value] of Object.entries(thumbnailApis)) {
+        if (url.match(key)) {
+          args.url = value(url);
+          media_type = 'Video';
+          break;
+        }
+      }
+      if (!media_type) {
+        const ext = url.split('.').pop().replace(/\?.*/g, '').toLowerCase();
+        media_type = MEDIA_TYPES[ext] || 'Webpage';
+      }
+      if (['Video', 'Image', 'PDF'].includes(media_type)) {
+        await writeThumbnailsFromUrl(args);
+      }
+      await context.app.service('api/instances').patch(relation_data.instances[0].instance_id, { media_type }, params);
     }
   }
   return context;

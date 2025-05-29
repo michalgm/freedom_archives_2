@@ -12,7 +12,7 @@ export default (function (app, publicPath) {
         return res.sendFile(localThumbnailPath);
       } else {
         // If not, try to fetch it from the remote server
-        const remoteUrl = `https://search.freedomarchives.org/images/thumbnails/${imageName.replace('records/', '')}`;
+        const remoteUrl = `https://search.freedomarchives.org/images/thumbnails${imageName.replace('records/', '')}`;
         try {
           const response = await axios({
             method: "get",
