@@ -27,6 +27,7 @@ const public_tables = {
   featured_records: {},
   config: {},
 };
+
 const restoreSnapshot = async (context) => {
   const {
     params: {
@@ -48,6 +49,7 @@ const restoreSnapshot = async (context) => {
   await trx("snapshots").where({ title: LIVE_SNAPSHOT_TITLE, archive_id }).update(data);
   context.result = { snapshot_id, title, ...data };
 };
+
 const publishSite = async (context) => {
   const {
     params: {
@@ -117,6 +119,11 @@ const publishSite = async (context) => {
   await trx("snapshots").where({ snapshot_id }).update(metadata);
   return context;
 };
+
+const analyzeSnapshot = async ({ service }) => {
+  await service.getModel().raw("VACUUM ANALYZE");
+};
+
 export default (function (app) {
   const options = {
     id: "snapshot_id",
@@ -143,8 +150,8 @@ export default (function (app) {
       patch: [transaction.start(), restoreSnapshot],
     },
     after: {
-      create: [publishSite, transaction.end()],
-      patch: [transaction.end()],
+      create: [publishSite, transaction.end(), analyzeSnapshot],
+      patch: [transaction.end(), analyzeSnapshot],
     },
     error: {
       create: [transaction.rollback()],
