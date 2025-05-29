@@ -684,7 +684,7 @@ FROM
 
 UPDATE collections
 SET
-    parent_collection_id=NULL,
+    parent_collection_id=NULL
 WHERE
     collection_id=1000;
 
