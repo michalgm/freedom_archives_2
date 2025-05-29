@@ -66,7 +66,7 @@ const selectOptions = {
       label: k + 1900 + "",
     })),
   ],
-  media_types: ["Audio", "Webpage", "Video", "PDF"].map((id) => ({
+  media_types: ["Audio", "Webpage", "Image", "Video", "PDF"].map((id) => ({
     id,
     label: id,
   })),
