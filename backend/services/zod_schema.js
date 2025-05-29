@@ -101,9 +101,10 @@ const instanceSchema = z.object({
   no_copies: z.number().min(1).nullable().optional().describe("Copies Count"),
   quality: z.string().nullable().optional(),
   generation: z.string().nullable().optional(),
-  url: z.string().url().nullable().optional(),
+  url: z.union([z.string().url({ message: "Must be a valid URL" }), z.literal(""), z.null()]).nullable(),
+  // url: z.string().url().nullable(),
   thumbnail: z.string().nullable().optional(),
-  media_type: z.enum(["Audio", "Webpage", "Video", "PDF"]),
+  media_type: z.enum(["Audio", "Webpage", "Image", "Video", "PDF"]),
   generation_item: listItemsSchema.nullable().optional().describe("Generation"),
   format_item: listItemsSchema.required().describe("Format"),
   quality_item: listItemsSchema.nullable().optional().describe("Quality"),
@@ -134,13 +135,51 @@ const recordsSchema = z.object({
   date_string: z
     .string()
     .regex(/\d{2}\/\d{2}\/\d{4}/)
-    .describe("Date")
     .nullable()
-    .optional(),
-  // .default("00/00/0000"),
+    .optional()
+    .superRefine((val, ctx) => {
+      if (!val || val === "") return; // Allow empty/null
+
+      const parts = val.split('/');
+      if (parts.length !== 3) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: "Date must be in MM/DD/YYYY format"
+        });
+        return;
+      }
+
+      const [month, day, year] = parts.map(Number);
+
+      // Validate month
+      if (month !== 0 && (month < 1 || month > 12)) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: "Month must be 00 (unknown) or 01-12"
+        });
+      }
+
+      // Validate day
+      if (day !== 0 && (day < 1 || day > 31)) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: "Day must be 00 (unknown) or 01-31"
+        });
+      }
+
+      // Validate year
+      if (year != 0 && (year < 1920 || year > 2100)) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: "Year must be between 1920 and 2100"
+        });
+      }
+    })
+    .describe("Date"),
+
   publisher: listItemsSchema.nullable().optional(),
   program: listItemsSchema.nullable().optional(),
-  instances: z.array(instanceSchema).min(1).default([]),
+  instances: z.array(instanceSchema).describe('Media').min(1).default([]),
   has_digital: z.boolean().default(false),
   authors: z.array(listItemsSchema).nullable().optional(),
   subjects: z.array(listItemsSchema).nullable().optional(),
@@ -216,14 +255,15 @@ const recordsDataSchema = recordsSchema
     primary_instance_id: true,
   })
   .extend({
-    parent: recordItemSchema.nullable().optional(),
+    parent: recordItemSchema.nullable().optional().describe('Parent Record'),
     children: z
       .array(recordItemSchema.extend({ delete: z.boolean().optional() }))
+      .describe('Child Records')
       .nullable()
       .optional(),
     continuations: z.array(recordItemSchema).nullable().optional(),
     collection: z.lazy(() => collectionItemSchema),
-    instances: z.array(instanceDataSchema).min(1, { message: "At least one media item is required" }),
+    instances: z.array(instanceDataSchema).describe('Media').min(1, { message: "At least one media item is required" }),
   });
 
 const embeddedRecordSchema = recordsSchema
@@ -244,7 +284,7 @@ const collectionsSchema = z.object({
   collection_id: z.number().nullable().optional(),
   archive_id: z.number().nullable().optional(),
   parent_collection_id: z.number().nullable().optional(),
-  collection_name: z.string(),
+  collection_name: z.string().min(1),
   description: z.string().nullable().optional(),
   summary: z.string().nullable().optional(),
   call_number: z.string().nullable().optional(),
@@ -298,8 +338,8 @@ const collectionsDataSchema = collectionsSchema
   })
   .extend({
     child_records: z.array(recordItemSchema).nullable().optional(),
-    parent: collectionItemSchema.nullable().optional(),
-    children: z.array(collectionItemSchema).nullable().optional(),
+    parent: collectionItemSchema.nullable().optional().describe('Parent Collection'),
+    children: z.array(collectionItemSchema).nullable().optional().describe('Child Collections'),
     featured_records: z.array(recordItemSchema).nullable().optional(),
   });
 
