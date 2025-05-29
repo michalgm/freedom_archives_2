@@ -243,6 +243,7 @@ function Search() {
             "program",
             "call_number",
             "vol_number",
+            "media_type",
           ],
           $limit: PAGE_SIZE,
           $skip: offset,
@@ -314,11 +315,11 @@ function Search() {
       <Grid2 size={12} key={record.record_id}>
         <Card>
           <Stack spacing={2} direction="row">
-            <Thumbnail item={record} width={75} />
             <Box>
-              <Typography variant="h5">
-                {record.title} ({record.score})
-              </Typography>
+              <Thumbnail item={record} width={75} />
+            </Box>
+            <Box>
+              <Typography variant="h5">{record.title}</Typography>
               <Grid2 container spacing={1} style={{ marginBottom: 3, marginTop: 3 }}>
                 {(record.details || []).map(([key, value]) => (
                   <Grid2 key={key}>

@@ -18,8 +18,9 @@ export default function Thumbnail({ item, src: _src, width = 75, alt = "", type:
   const [brokenLink, setBrokenLink] = useState(false);
   const type = item?.record_id ? "record" : "collection";
   let src = "";
+  const media_type = item?.primary_instance_media_type || item.media_type;
 
-  let Icon = brokenLink ? BrokenImage : MEDIA_TYPE_ICONS[item.primary_instance_media_type];
+  let Icon = brokenLink ? BrokenImage : MEDIA_TYPE_ICONS[media_type];
 
   if (!Icon) {
     const cache_buster = item?.date_modified ? `?${item.date_modified}` : "";
@@ -31,9 +32,7 @@ export default function Thumbnail({ item, src: _src, width = 75, alt = "", type:
           Icon = BrokenImage;
         }
       } else {
-        src = item.primary_instance_media_type
-          ? `/images/thumbnails/records/${item?.record_id}.jpg${cache_buster}`
-          : "";
+        src = item.media_type ? `/images/thumbnails/records/${item?.record_id}.jpg${cache_buster}` : "";
       }
     } else {
       src = _src;
@@ -56,7 +55,7 @@ export default function Thumbnail({ item, src: _src, width = 75, alt = "", type:
       </Avatar>
     );
   }
-  const Badge = MEDIA_TYPE_BADGES[item.primary_instance_media_type];
+  const Badge = MEDIA_TYPE_BADGES[media_type];
 
   return (
     <span style={{ width, minWidth: width, display: "inline-flex", position: "relative" }}>
