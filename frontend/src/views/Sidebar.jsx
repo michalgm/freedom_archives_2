@@ -11,7 +11,7 @@ import {
   Typography,
 } from "@mui/material";
 import { useMemo } from "react";
-import { Link, useLocation, useMatch, useResolvedPath } from "react-router";
+import { Link, useLocation } from "react-router";
 import { useAuth } from "src/stores";
 
 const ROLE_HIERARCHY = ["intern", "staff", "administrator"];
@@ -94,15 +94,13 @@ function Sidebar({ ...props }) {
 }
 
 function SidebarItem({ label, /* icon, */ href }) {
-  const { pathname = null } = useResolvedPath(href);
   const location = useLocation();
   // logger.log(location)?
-  // logger.log(useMatch({path: pathname || ''}))
+  const pattern = new RegExp(`^${href}(?:/\\d+)?/?$`);
   const current =
-    Boolean(useMatch({ path: pathname || "" }) !== null || (location.pathname === "/" && href === "/records")) && href;
-  // const home = Boolean(useMatch({path: href==='records' ? '/' : 'notalink'}))
+    Boolean(pattern.test(location.pathname) && href) || (location.pathname === "/" && href === "/records");
 
-  // logger.log({href, pathname, current, home})
+  // logger.log({ label, href, pathname, current });
   return (
     <ListItemLink selected={Boolean(current)} href={href}>
       <ListItemText>{label}</ListItemText>
