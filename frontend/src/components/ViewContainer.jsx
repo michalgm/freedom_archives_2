@@ -4,11 +4,11 @@ import ButtonsHeader from "src/components/form/ButtonsHeader";
 import useFormManagerContext from "src/components/form/FormManagerContext";
 import Show from "src/components/Show";
 
-export const Section = ({ header, elements, service, ...props }) => {
+export const Section = ({ header, elements, service, embedded, ...props }) => {
   if (!elements.length) return null;
   const justifyContent = elements.length === 1 ? "center" : "space-between";
   return (
-    <Paper {...props} elevation={1}>
+    <Paper {...props} elevation={embedded ? 0 : 1}>
       <Grid2 size="grow" style={{ flex: "none" }}>
         <Grid2 container alignContent="center" alignItems="center" justifyContent={justifyContent} spacing={2}>
           {elements.map((item) => (
@@ -43,11 +43,11 @@ function ViewContainer({
   const Container = noPaper ? Box : Paper;
   return (
     <Stack direction="column" spacing={embedded ? 1 : 2} useFlexGap className="ScrollContainer">
-      <Section elements={headerElements} header service={service} />
-      <Container id="contents" className="FlexContainer" {...containerProps}>
+      <Section elements={headerElements} header service={service} embedded={embedded} />
+      <Container id="contents" className="FlexContainer" {...containerProps} elevation={embedded ? 0 : 1}>
         <Show when={!isLoading}>{children}</Show>
       </Container>
-      <Section type="footer" elements={footerElements} />
+      <Section type="footer" elements={footerElements} embedded={embedded} />
     </Stack>
   );
 }

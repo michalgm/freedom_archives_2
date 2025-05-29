@@ -71,11 +71,17 @@ const router = createBrowserRouter(
       >
         <Route exact path="/" element={<Navigate replace to="/records" />} />
         <Route exact path="/collections" element={<Collections />} />
-        <Route path="/collections/featured" element={<Collection id={0} mode="featured_collections" />} />
+        <Route
+          path="/collections/featured"
+          element={<Collection key="featured_collections" id={0} mode="featured_collections" />}
+        />
         <Route path="/collections/:id" element={<Collection />} />
         <Route exact path="/search" element={<Search />} />
         <Route exact path="/records" element={<Records />} />
-        <Route path="/records/featured" element={<Collection id={0} mode="featured_records" />} />
+        <Route
+          path="/records/featured"
+          element={<Collection key="featured_records" id={0} mode="featured_records" />}
+        />
         <Route path="/records/:id" element={<Record showForm />} />
         {/* <Route path="/records-old/:id" element={<RecordOld showForm />} /> */}
         <Route path="/relationships/:skip" element={<Relationships />} />

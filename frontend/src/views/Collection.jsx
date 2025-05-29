@@ -70,7 +70,7 @@ function Collection({ id, mode = "" }) {
               non_digitized: true,
             }}
             forcedFilter={
-              newCollection
+              newCollection || isFeaturedRecords
                 ? null
                 : {
                     collection_id: { $in: [...(collection.descendant_collection_ids || []), collection.collection_id] },
@@ -255,15 +255,15 @@ function EditList({
   }
 
   return (
-    <Grid2 className="FlexContainer" sx={{ backgroundColor: "grey.100", p: 1 }}>
+    <Grid2 className="FlexContainer" sx={{ backgroundColor: "grey.200", p: 1 }}>
       <Stack
         direction={"row"}
         sx={{ height: "100%" }}
-        spacing={2}
+        spacing={1}
         useFlexGap
         divider={<Divider orientation="vertical" flexItem />}
       >
-        <Box sx={{ width: "calc(50% - 16.5px)" }}>
+        <Box sx={{ width: "calc(50% - 0.5px)" }}>
           <ViewContainer
             embedded
             footerElements={[
