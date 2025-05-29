@@ -21,9 +21,11 @@ export const setUser = (context) => {
     method,
     service: { Model },
     params: {
-      user: { user_id },
+      user
     },
   } = context;
+  if (!user) return context;
+  const { user_id } = user;
   if (method === "create") {
     data.creator_user_id = user_id;
     data.date_created = Model.raw("now()");
@@ -125,12 +127,20 @@ export const refreshView = async (context) => {
       transaction: { trx },
     },
     service: { fullName },
+    app
   } = context;
   const table = fullName.slice(0, -1);
   const id = context.id || result[`${table}_id`];
+  const additional_views = context.additional_views || [];
+
+  await Promise.all(additional_views.map(async ([table, id]) => {
+    await app.service(`api/${table}`).patch(id, {}, { transaction: { trx } });
+  }));
+
   if (["update", "patch", "remove", "create"].includes(method)) {
     await trx(`_unified_${table}s`).where(`${table}_id`, id).delete();
   }
+
   if (["update", "patch", "create"].includes(method)) {
     const [current_data = {}] = await trx(`${table}s_view`).where(`${table}_id`, id).select();
     const encoded = {};
@@ -153,6 +163,7 @@ export const refreshView = async (context) => {
     return context;
   }
 };
+
 export const validateArchive = (context) => {
   const {
     params: {

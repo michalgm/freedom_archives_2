@@ -91,8 +91,8 @@ import {
 //   }
 // };
 
-const prepData = (context) => {
-  const { data } = context;
+const prepData = async (context) => {
+  const { data, method } = context;
   if (data && Object.keys(data).length) {
     const relation_data = {};
     // remove calculated fields
@@ -141,6 +141,10 @@ const prepData = (context) => {
     context.relation_data = relation_data;
   }
   prepListItemRelations(context);
+  if (method === "remove") {
+    const { collection_id } = await context.app.service("api/records")._get(context.id, context.params);
+    context.additional_views = [['collections', collection_id]];
+  }
   return context;
 };
 const updateRelations = async (context) => {

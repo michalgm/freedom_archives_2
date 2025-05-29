@@ -47,7 +47,7 @@ export default (function (app) {
     } = context;
     const id = context.id || context.result.collection_id;
     if (!Object.keys(data).length) {
-      context.result = await trx("collections").where("collections_id", id).select();
+      context.result = await trx("collections").where("collection_id", id).select();
     }
     if (relation_data.children !== undefined) {
       let index = 0;
@@ -135,7 +135,7 @@ export default (function (app) {
       childCollections.map(({ collection_id }) => {
         return app
           .service("api/collections")
-          .patch(collection_id, { parent_collection_id: null }, { user, transaction });
+          .patch(collection_id, { parent_collection_id: 0 }, { user, transaction });
       })
     );
     return context;
