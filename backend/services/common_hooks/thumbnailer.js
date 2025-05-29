@@ -95,10 +95,11 @@ const writeThumbnail = async ({ image, filename, size, basedir }) => {
 };
 
 const updateThumbnail = async (context) => {
-  const { relation_data, service: { fullName }, params: {
+  const { relation_data, method, service: { fullName }, params: {
     user,
     transaction: { trx },
   } } = context;
+
   const type = fullName.replace('api/', '');
   let url = '';
   if (type === 'records') {
@@ -143,7 +144,12 @@ const updateThumbnail = async (context) => {
       if (['Video', 'Image', 'PDF'].includes(media_type)) {
         await writeThumbnailsFromUrl(args);
       }
-      await context.app.service('api/instances').patch(relation_data.instances[0].instance_id, { media_type }, params);
+
+      if (method === 'create') {
+        relation_data.instances[0].media_type = media_type;
+      } else {
+        await context.app.service('api/instances').patch(relation_data.instances[0].instance_id, { media_type }, params);
+      }
     }
   }
   return context;

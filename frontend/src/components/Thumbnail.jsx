@@ -32,7 +32,7 @@ export default function Thumbnail({ item, src: _src, width = 75, alt = "", type:
           Icon = BrokenImage;
         }
       } else {
-        src = item.media_type ? `/images/thumbnails/records/${item?.record_id}.jpg${cache_buster}` : "";
+        src = media_type ? `/images/thumbnails/records/${item?.record_id}.jpg${cache_buster}` : "";
       }
     } else {
       src = _src;

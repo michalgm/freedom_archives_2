@@ -168,6 +168,9 @@ const updateRelations = async (context) => {
         if (instance.delete) {
           return app.service("api/instances").remove(instance.instance_id, params);
         } else if (instance.instance_id) {
+          if (instance.url === '') {
+            instance.media_type = '';
+          }
           return app.service("api/instances").patch(instance.instance_id, instance, params);
         }
         delete instance.instance_id;

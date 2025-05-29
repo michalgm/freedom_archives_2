@@ -101,7 +101,7 @@ const instanceSchema = z.object({
   no_copies: z.number().min(1).nullable().optional().describe("Copies Count"),
   quality: z.string().nullable().optional(),
   generation: z.string().nullable().optional(),
-  url: z.union([z.string().url({ message: "Must be a valid URL" }), z.literal(""), z.null()]).nullable(),
+  url: z.union([z.string().url({ message: "Must be a valid URL" }), z.literal(""), z.null()]).nullable().optional(),
   // url: z.string().url().nullable(),
   thumbnail: z.string().nullable().optional(),
   media_type: z.enum(["Audio", "Webpage", "Image", "Video", "PDF"]),
