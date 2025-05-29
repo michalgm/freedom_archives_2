@@ -337,10 +337,39 @@ SELECT
             collection_summaries.parent_collection_id=a.collection_id
         ORDER BY
             collection_summaries.display_order
-    ) AS children
+    ) AS children,
+    d.descendant_ids AS descendant_collection_ids
 FROM
     _unified_collections a
-    LEFT JOIN collection_summaries b USING (collection_id);
+    LEFT JOIN collection_summaries b USING (collection_id)
+    LEFT JOIN LATERAL (
+        WITH RECURSIVE
+            d AS (
+                SELECT
+                    collection_id
+                FROM
+                    collections
+                WHERE
+                    collection_id=a.collection_id
+                UNION ALL
+                SELECT
+                    c.collection_id
+                FROM
+                    collections c
+                    JOIN d ON c.parent_collection_id=d.collection_id
+            )
+        SELECT
+            ARRAY_AGG(
+                d.collection_id
+                ORDER BY
+                    d.collection_id
+            ) FILTER (
+                WHERE
+                    d.collection_id<>a.collection_id
+            ) AS descendant_ids
+        FROM
+            d
+    ) AS d ON TRUE;
 
 DROP VIEW IF EXISTS record_summaries;
 

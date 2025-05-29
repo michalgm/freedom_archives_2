@@ -57,7 +57,7 @@ function Collection({ id, mode = "" }) {
     }
   }, [mode, tab]);
 
-  const formContents = () => {
+  const formContents = (collection) => {
     return (
       <>
         {tab === "collection" && <CollectionFields id={id} newCollection={newCollection} />}
@@ -65,11 +65,14 @@ function Collection({ id, mode = "" }) {
           <EditList
             property="featured_records"
             type="record"
-            filter={
+            filter={{
+              non_digitized: true,
+            }}
+            forcedFilter={
               newCollection
                 ? null
                 : {
-                    collection_id: parseInt(id, 10),
+                    collection_id: { $in: [...(collection.descendant_collection_ids || []), collection.collection_id] },
                   }
             }
             useStore={useFeaturedRecordsStore}
@@ -89,7 +92,7 @@ function Collection({ id, mode = "" }) {
           <EditList
             property="child_records"
             type="record"
-            filter={{ collection_id: 1000 }}
+            filter={{ collection_id: 1000, non_digitized: true }}
             useStore={useRecordsStore}
           />
         )}
@@ -153,7 +156,7 @@ function Collection({ id, mode = "" }) {
                   </Tabs>
                 )}
                 <Grid2 container spacing={2} sx={{ height: "100%", overflowY: "auto" }}>
-                  {formContents()}
+                  {formContents(collection)}
                 </Grid2>
               </Stack>
               {/* </GridBlock> */}
@@ -223,16 +226,25 @@ function CollectionFields() {
   );
 }
 
-function EditList({ property = "child_records", type = "record", label: _label, filter, reorder, useStore }) {
+function EditList({
+  property = "child_records",
+  type = "record",
+  label: _label,
+  filter,
+  reorder,
+  useStore,
+  forcedFilter = {},
+}) {
   const { control } = useFormContext();
   const { fields, append, move, prepend, update } = useFieldArray({
     name: property, // unique name for your Field Array
     control,
   });
   const ItemsList = type === "record" ? Records : Collections;
+  const idField = `${type}_id`;
   const excludeIds = useMemo(() => {
-    return fields.map((item) => item[`${type}_id`]);
-  }, [type, fields]);
+    return fields.map((item) => item[idField]);
+  }, [fields, idField]);
 
   const count = fields.filter((f) => !f.delete).length;
   let label = startCase(_label || property);
@@ -276,8 +288,11 @@ function EditList({ property = "child_records", type = "record", label: _label, 
         <Box sx={{ width: "calc(50% - 16.5px)" }}>
           <ItemsList
             embedded
+            forcedFilter={{
+              ...forcedFilter,
+              [idField]: { $nin: excludeIds },
+            }}
             itemAction={(_, item) => setTimeout(prepend(item), 0)}
-            excludeIds={excludeIds}
             filter={filter}
             useStore={useStore}
           />

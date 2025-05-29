@@ -681,3 +681,15 @@ SELECT
     TO_JSON(VALUE)
 FROM
     freedom_archives_old.config;
+
+UPDATE collections
+SET
+    parent_collection_id=NULL,
+WHERE
+    collection_id=1000;
+
+UPDATE collections
+SET
+    collection_name='Featured'
+WHERE
+    collection_id=0;

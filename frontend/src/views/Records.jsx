@@ -24,13 +24,12 @@ const filter_types = {
   media_types: { input: "simpleSelect", match: "contained" },
 };
 
-function Records({ embedded, itemAction, filter = {}, excludeIds = [], useStore }) {
+function Records({ embedded, itemAction, filter = {}, forcedFilter = {}, useStore }) {
   const createQuery = useCallback(
-    (filter) => {
-      const { search, non_digitized, hidden, needs_review, collection_id } = filter;
+    (formFilter) => {
+      const { search, non_digitized, hidden, needs_review, collection_id } = formFilter;
 
       const query = {
-        record_id: { $nin: excludeIds },
         $sort: { title: 1 },
         $select: [
           "record_id",
@@ -41,6 +40,7 @@ function Records({ embedded, itemAction, filter = {}, excludeIds = [], useStore 
           "primary_instance_thumbnail",
           "primary_instance_format_text",
         ],
+        ...forcedFilter,
       };
       if (!non_digitized) {
         query.has_digital = true;
@@ -60,7 +60,7 @@ function Records({ embedded, itemAction, filter = {}, excludeIds = [], useStore 
       }
       return query;
     },
-    [excludeIds]
+    [forcedFilter]
   );
 
   return (
