@@ -112,7 +112,6 @@ data/
 backend.bak/
 config/local.json
 # public/
-public/index.html
 
 dbtools/bak/
 interferencedb/
@@ -127,7 +126,6 @@ sharp-libvips/sharp-libvips
 
 frontend/dist/*
 frontend/public/assets/*
-public/
 config/production.json
 
 dbtools/cruft/*
