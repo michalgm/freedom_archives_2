@@ -20,21 +20,21 @@ const sideBarConfig = {
   Collections: [
     { label: "Manage Collections", icon: "", href: "/collections" },
     { label: "New Collection", icon: "", href: "/collections/new" },
+  ],
+  Records: [
+    { label: "Search Records", icon: "", href: "/search" },
+    { label: "Manage Records", icon: "", href: "/records" },
+    { label: "New Record", icon: "", href: "/records/new" },
+  ],
+  "Site Management": [
+    { label: "Site Settings", icon: "", href: "/site/settings", authRole: "staff" },
+    { label: "Manage Featured Records", icon: "", href: "/records/featured", authRole: "staff" },
     {
       label: "Manage Featured Collections",
       icon: "",
       href: "/collections/featured",
       authRole: "staff",
     },
-  ],
-  Records: [
-    { label: "Search Records", icon: "", href: "/search" },
-    { label: "Manage Records", icon: "", href: "/records" },
-    { label: "New Record", icon: "", href: "/records/new" },
-    { label: "Manage Featured Records", icon: "", href: "/records/featured", authRole: "staff" },
-  ],
-  "Site Management": [
-    { label: "Site Settings", icon: "", href: "/site/settings", authRole: "staff" },
     { label: "Edit List Values", icon: "", href: "/site/edit-list-values", authRole: "staff" },
     { label: "Export Collections", icon: "", authRole: "staff" },
     { label: "Find Duplicate Records", icon: "", authRole: "staff" },
