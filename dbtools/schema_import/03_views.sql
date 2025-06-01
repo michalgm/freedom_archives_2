@@ -4,43 +4,59 @@ CREATE VIEW
     instances_view AS
 SELECT
     a.*,
-    JSONB_BUILD_OBJECT(
-        'item',
-        format_lookup.item,
-        'list_item_id',
-        format_lookup.list_item_id
-    ) AS format_item,
-    JSONB_BUILD_OBJECT(
-        'item',
-        quality_lookup.item,
-        'list_item_id',
-        quality_lookup.list_item_id
-    ) AS quality_item,
-    JSONB_BUILD_OBJECT(
-        'item',
-        generation_lookup.item,
-        'list_item_id',
-        generation_lookup.list_item_id
-    ) AS generation_item,
+    TRIM(
+        COALESCE(call_number_lookup.item, '')||' '||COALESCE(a.call_number_suffix, '')
+    ) AS call_number,
+    CASE
+        WHEN call_number_lookup.list_item_id IS NOT NULL THEN JSONB_BUILD_OBJECT(
+            'item',
+            call_number_lookup.item,
+            'list_item_id',
+            call_number_lookup.list_item_id
+        )
+        ELSE NULL
+    END AS call_number_item,
+    CASE
+        WHEN format_lookup.list_item_id IS NOT NULL THEN JSONB_BUILD_OBJECT(
+            'item',
+            format_lookup.item,
+            'list_item_id',
+            format_lookup.list_item_id
+        )
+        ELSE NULL
+    END AS format_item,
+    CASE
+        WHEN quality_lookup.list_item_id IS NOT NULL THEN JSONB_BUILD_OBJECT(
+            'item',
+            quality_lookup.item,
+            'list_item_id',
+            quality_lookup.list_item_id
+        )
+        ELSE NULL
+    END AS quality_item,
+    CASE
+        WHEN generation_lookup.list_item_id IS NOT NULL THEN JSONB_BUILD_OBJECT(
+            'item',
+            generation_lookup.item,
+            'list_item_id',
+            generation_lookup.list_item_id
+        )
+        ELSE NULL
+    END AS generation_item,
     contributor.firstname||' '||contributor.lastname AS contributor_name,
     contributor.username AS contributor_username,
     creator.firstname||' '||creator.lastname AS creator_name,
     creator.username AS creator_username,
-    EXISTS (
-        SELECT
-            record_id
-        FROM
-            records
-        WHERE
-            instance_id=records.primary_instance_id
-    ) AS is_primary
+    (primary_record.record_id IS NOT NULL) AS is_primary
 FROM
     instances a
-    LEFT JOIN list_items format_lookup ON FORMAT=format_lookup.list_item_id
+    LEFT JOIN list_items call_number_lookup ON call_number_id=call_number_lookup.list_item_id
+    LEFT JOIN list_items format_lookup ON "format"=format_lookup.list_item_id
     LEFT JOIN list_items quality_lookup ON quality=quality_lookup.list_item_id
     LEFT JOIN list_items generation_lookup ON generation=generation_lookup.list_item_id
     LEFT JOIN users contributor ON a.contributor_user_id=contributor.user_id
-    LEFT JOIN users creator ON a.creator_user_id=creator.user_id;
+    LEFT JOIN users creator ON a.creator_user_id=creator.user_id
+    LEFT JOIN records primary_record ON a.instance_id=primary_record.primary_instance_id;
 
 DROP VIEW IF EXISTS records_list_items_view;
 
@@ -137,7 +153,9 @@ SELECT
     a.collection_name,
     a.parent_collection_id,
     a.thumbnail,
-    a.call_number,
+    TRIM(
+        COALESCE(call_numbers.item, '')||' '||COALESCE(a.call_number_suffix, '')
+    ) AS call_number,
     a.display_order,
     COALESCE(
         (
@@ -150,9 +168,13 @@ SELECT
                         collection_name,
                         thumbnail,
                         parent_collection_id,
-                        call_number
+                        TRIM(
+                            COALESCE(parent_call_numbers.item, '')||' '||COALESCE(c.call_number_suffix, '')
+                        ) AS call_number
                     FROM
                         collections c
+                        LEFT JOIN list_items parent_call_numbers ON c.call_number_id=parent_call_numbers.list_item_id
+                        AND parent_call_numbers.type='call_number'
                     WHERE
                         a.parent_collection_id=c.collection_id
                 ) c
@@ -160,7 +182,9 @@ SELECT
         '{}'
     ) AS parent
 FROM
-    collections a;
+    collections a
+    LEFT JOIN list_items call_numbers ON call_numbers.type='call_number'
+    AND a.call_number_id=call_numbers.list_item_id;
 
 DROP VIEW IF EXISTS collections_view;
 
@@ -168,16 +192,31 @@ CREATE VIEW
     collections_view AS
 SELECT
     a.*,
+    TRIM(
+        COALESCE(call_numbers.item, '')||' '||COALESCE(a.call_number_suffix, '')
+    ) AS call_number,
     contributor.firstname||' '||contributor.lastname AS contributor_name,
     contributor.username AS contributor_username,
     creator.firstname||' '||creator.lastname AS creator_name,
     creator.username AS creator_username,
-    JSONB_BUILD_OBJECT(
-        'item',
-        publisher_lookup.item,
-        'list_item_id',
-        publisher_lookup.list_item_id
-    ) AS publisher,
+    CASE
+        WHEN call_numbers.list_item_id IS NOT NULL THEN JSONB_BUILD_OBJECT(
+            'item',
+            call_numbers.item,
+            'list_item_id',
+            call_numbers.list_item_id
+        )
+        ELSE NULL
+    END AS call_number_item,
+    CASE
+        WHEN publisher_lookup.list_item_id IS NOT NULL THEN JSONB_BUILD_OBJECT(
+            'item',
+            publisher_lookup.item,
+            'list_item_id',
+            publisher_lookup.list_item_id
+        )
+        ELSE NULL
+    END AS publisher,
     COALESCE(subjects.items, '[]') AS subjects,
     COALESCE(keywords.items, '[]') AS keywords,
     subjects.items_text AS subjects_text,
@@ -255,7 +294,15 @@ SELECT
         TO_TSVECTOR('english', COALESCE(a.collection_name, '')),
         'A'
     )||SETWEIGHT(
-        TO_TSVECTOR('english', COALESCE(a.call_number, '')),
+        TO_TSVECTOR(
+            'english',
+            CASE
+                WHEN call_numbers.item IS NULL THEN ''
+                ELSE TRIM(
+                    call_numbers.item||' '||COALESCE(a.call_number_suffix, '')
+                )
+            END
+        ),
         'A'
     )||SETWEIGHT(
         TO_TSVECTOR('english', COALESCE(a.summary, '')),
@@ -271,7 +318,7 @@ SELECT
         'C'
     ) AS fulltext,
     LOWER(
-        COALESCE(a.collection_name, '')||COALESCE(a.call_number, '')||COALESCE(a.summary, '')||COALESCE(a.description_search, '')||COALESCE(keywords.items_text, '')||COALESCE(subjects.items_text, '')
+        COALESCE(a.collection_name, '')||' '||COALESCE(call_numbers.item, '')||' '||COALESCE(a.call_number_suffix, '')||' '||COALESCE(a.summary, '')||' '||COALESCE(a.description_search, '')||' '||COALESCE(keywords.items_text, '')||' '||COALESCE(subjects.items_text, '')
     ) AS search_text
 FROM
     collections a
@@ -281,7 +328,9 @@ FROM
     LEFT JOIN collections_list_items_view subjects ON subjects.type='subject'
     AND subjects.collection_id=a.collection_id
     LEFT JOIN collections_list_items_view keywords ON keywords.type='keyword'
-    AND keywords.collection_id=a.collection_id;
+    AND keywords.collection_id=a.collection_id
+    LEFT JOIN list_items call_numbers ON call_numbers.type='call_number'
+    AND a.call_number_id=call_numbers.list_item_id;
 
 DROP TABLE IF EXISTS _unified_collections CASCADE;
 
@@ -417,12 +466,12 @@ SELECT
                 a.instance_id
         )
     ) AS instances,
-    ARRAY_REMOVE(ARRAY_AGG(DISTINCT call_number), NULL) AS call_numbers,
+    ARRAY_AGG(DISTINCT call_number) AS call_numbers,
     STRING_AGG(DISTINCT call_number, ' ') AS call_numbers_text,
-    ARRAY_REMOVE(ARRAY_AGG(DISTINCT "format"), NULL) AS formats,
-    ARRAY_REMOVE(ARRAY_AGG(DISTINCT quality), NULL) AS qualitys,
-    ARRAY_REMOVE(ARRAY_AGG(DISTINCT generation), NULL) AS generations,
-    ARRAY_REMOVE(ARRAY_AGG(DISTINCT media_type), NULL) AS media_types
+    ARRAY_AGG(DISTINCT "format") AS formats,
+    ARRAY_AGG(DISTINCT quality) AS qualitys,
+    ARRAY_AGG(DISTINCT generation) AS generations,
+    ARRAY_AGG(DISTINCT media_type) AS media_types
 FROM
     instances_view a
 GROUP BY
@@ -443,18 +492,24 @@ SELECT
     (
         COALESCE(a.year::TEXT, '1900')::TEXT||'-'||COALESCE(a.month::TEXT, '01')::TEXT||'-'||COALESCE(a.day::TEXT, '01')::TEXT
     )::date AS date,
-    JSONB_BUILD_OBJECT(
-        'item',
-        publisher_lookup.item,
-        'list_item_id',
-        publisher_lookup.list_item_id
-    ) AS publisher,
-    JSONB_BUILD_OBJECT(
-        'item',
-        program_lookup.item,
-        'list_item_id',
-        program_lookup.list_item_id
-    ) AS PROGRAM,
+    CASE
+        WHEN publisher_lookup.list_item_id IS NOT NULL THEN JSONB_BUILD_OBJECT(
+            'item',
+            publisher_lookup.item,
+            'list_item_id',
+            publisher_lookup.list_item_id
+        )
+        ELSE NULL
+    END AS publisher,
+    CASE
+        WHEN program_lookup.list_item_id IS NOT NULL THEN JSONB_BUILD_OBJECT(
+            'item',
+            program_lookup.item,
+            'list_item_id',
+            program_lookup.list_item_id
+        )
+        ELSE NULL
+    END AS PROGRAM,
     COALESCE(instances.instances, '[]') AS instances,
     instances.has_digital AS has_digital,
     COALESCE(instances.instance_count, 0) AS instance_count,
@@ -586,61 +641,67 @@ SELECT
     b.primary_instance_format_text,
     b.primary_instance_media_type,
     b.collection,
-    ARRAY (
+    children.children,
+    siblings.siblings,
+    parent.parent,
+    continuations.continuations
+FROM
+    _unified_records a
+    JOIN record_summaries b USING (record_id)
+    -- Parent record (simple LEFT JOIN)
+    LEFT JOIN record_summaries parent_record ON a.parent_record_id=parent_record.record_id
+    -- Children records (LATERAL join for aggregation)
+    LEFT JOIN LATERAL (
         SELECT
-            ROW_TO_JSON(record_summaries)
+            ARRAY_AGG(
+                ROW_TO_JSON(record_summaries)
+                ORDER BY
+                    record_summaries.title
+            ) AS children
         FROM
             record_summaries
         WHERE
             record_summaries.parent_record_id=a.record_id
-    ) AS children,
-    ARRAY (
+    ) children ON TRUE
+    -- Siblings records (LATERAL join for aggregation)  
+    LEFT JOIN LATERAL (
         SELECT
-            ROW_TO_JSON(record_summaries)
+            ARRAY_AGG(
+                ROW_TO_JSON(record_summaries)
+                ORDER BY
+                    record_summaries.title
+            ) AS siblings
         FROM
             record_summaries
         WHERE
             record_summaries.parent_record_id=a.parent_record_id
             AND record_summaries.record_id!=a.record_id
-    ) AS siblings,
-    COALESCE(
-        (
-            SELECT
-                ROW_TO_JSON(parent)
-            FROM
-                record_summaries parent
-            WHERE
-                a.parent_record_id=parent.record_id
-        ),
-        NULL
-    ) AS parent,
-    COALESCE(
-        ARRAY (
-            SELECT
-                ROW_TO_JSON(cr)
-            FROM
-                (
-                    SELECT
-                        c.continuation_id,
-                        continuation_records,
-                        rs.*
-                    FROM
-                        continuations c,
-                        UNNEST(c.continuation_records)
-                    WITH
-                        ORDINALITY rid
-                        JOIN record_summaries rs ON rid=rs.record_id
-                    WHERE
-                        a.record_id=ANY (c.continuation_records)
+    ) siblings ON TRUE
+    -- Continuations (LATERAL join for complex logic)
+    LEFT JOIN LATERAL (
+        SELECT
+            COALESCE(
+                ARRAY_AGG(
+                    ROW_TO_JSON(cr)
                     ORDER BY
-                        ARRAY_POSITION(c.continuation_records, rid)
-                ) cr
-        ),
-        '{}'
-    ) AS continuations -- (select parent from record_summaries parent where a.parent_record_id = parent.record_id) as parent,
-FROM
-    _unified_records a
-    JOIN record_summaries b USING (record_id);
+                        ARRAY_POSITION(c.continuation_records, cr.record_id)
+                ),
+                '{}'
+            ) AS continuations
+        FROM
+            continuations c,
+            UNNEST(c.continuation_records)
+        WITH
+            ORDINALITY rid
+            JOIN record_summaries cr ON rid=cr.record_id
+        WHERE
+            a.record_id=ANY (c.continuation_records)
+    ) continuations ON TRUE
+    -- Convert parent record to JSON
+    CROSS JOIN LATERAL (
+        SELECT
+            COALESCE(ROW_TO_JSON(parent_record), NULL) AS parent
+    ) parent;
 
 DROP TABLE IF EXISTS unknown_relations;
 
@@ -913,8 +974,8 @@ SELECT
     COUNT(DISTINCT i.instance_id) AS instances_count
 FROM
     list_items li
-    LEFT JOIN collections c ON li.item=SPLIT_PART(c.call_number, ' ', 1)
-    LEFT JOIN instances i ON li.item=SPLIT_PART(i.call_number, ' ', 1)
+    LEFT JOIN collections c ON li.list_item_id=c.call_number_id
+    LEFT JOIN instances i ON li.list_item_id=i.call_number_id
 WHERE
     li.type='call_number'
 GROUP BY

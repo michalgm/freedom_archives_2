@@ -24,8 +24,8 @@ CREATE TABLE
         username TEXT NOT NULL UNIQUE,
         firstname TEXT DEFAULT NULL,
         lastname TEXT DEFAULT NULL,
-        ROLE user_role DEFAULT NULL,
-        PASSWORD TEXT DEFAULT NULL,
+        "role" user_role DEFAULT NULL,
+        "password" TEXT DEFAULT NULL,
         active BOOLEAN DEFAULT FALSE,
         email TEXT DEFAULT NULL,
         full_name TEXT GENERATED ALWAYS AS (TRIM(firstname||' '||lastname)) STORED,
@@ -66,7 +66,8 @@ CREATE TABLE
         description TEXT,
         description_search TEXT,
         summary TEXT DEFAULT NULL,
-        call_number TEXT,
+        call_number_id INTEGER REFERENCES list_items,
+        call_number_suffix TEXT,
         publisher_id INTEGER REFERENCES list_items,
         -- publisher text,
         notes TEXT,
@@ -81,6 +82,14 @@ CREATE TABLE
         date_modified timestamptz DEFAULT NULL
     );
 
+CREATE INDEX collections_parent_collection_id_idx ON collections (parent_collection_id);
+
+CREATE INDEX collections_archive_id_idx ON collections (archive_id);
+
+CREATE INDEX collections_call_number_id_idx ON collections (call_number_id);
+
+CREATE INDEX collection_display_order_idx ON collections (display_order);
+
 CREATE TABLE
     records (
         record_id serial PRIMARY KEY,
@@ -88,14 +97,15 @@ CREATE TABLE
         title TEXT,
         description TEXT,
         notes TEXT,
-        LOCATION TEXT DEFAULT NULL,
+        "location" TEXT DEFAULT NULL,
         vol_number TEXT DEFAULT NULL,
         collection_id INTEGER DEFAULT 1000 REFERENCES collections,
         parent_record_id INTEGER,
         primary_instance_id INTEGER,
-        YEAR INT,
-        MONTH INT,
-        DAY INT,
+        "year" INT,
+        "month" INT,
+        "day" INT,
+        year_is_circa BOOLEAN DEFAULT FALSE,
         publisher_id INTEGER REFERENCES list_items,
         program_id INTEGER REFERENCES list_items,
         needs_review bool DEFAULT FALSE,
@@ -106,14 +116,23 @@ CREATE TABLE
         date_modified timestamptz DEFAULT NULL
     );
 
+CREATE INDEX records_parent_record_id_idx ON records (parent_record_id);
+
+CREATE INDEX records_collection_id_idx ON records (collection_id);
+
+CREATE INDEX records_primary_instance_id_idx ON records (primary_instance_id);
+
+CREATE INDEX records_archive_id_idx ON records (archive_id);
+
 CREATE TABLE
     instances (
         instance_id serial PRIMARY KEY,
         archive_id INTEGER REFERENCES archives ON DELETE CASCADE,
-        call_number TEXT,
+        call_number_id INTEGER REFERENCES list_items,
+        call_number_suffix TEXT,
         record_id INTEGER NOT NULL REFERENCES records ON DELETE CASCADE,
         -- is_primary bool DEFAULT false,
-        FORMAT INTEGER REFERENCES list_items,
+        "format" INTEGER REFERENCES list_items,
         no_copies INTEGER DEFAULT '1',
         quality INTEGER REFERENCES list_items,
         generation INTEGER REFERENCES list_items,
@@ -127,7 +146,9 @@ CREATE TABLE
         original_doc_id INTEGER DEFAULT NULL
     );
 
-CREATE INDEX instances_call_number ON instances (call_number);
+CREATE INDEX instances_call_number_suffix ON instances (call_number_suffix);
+
+CREATE INDEX instances_call_number_id ON instances (call_number_id);
 
 CREATE INDEX instances_format ON instances (FORMAT);
 

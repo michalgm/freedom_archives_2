@@ -2,6 +2,16 @@ import zod from "zod";
 
 const z = zod;
 
+const callNumberSuffixSchema = z.union([
+  z.string().regex(/^[\d.]{1,5}([A-Z]| +R[\d])?$/, {
+    message: "Call number suffix must be in format '123' or '123A' or '123 R1'",
+  }),
+  z.literal(""),
+  z.null(),
+])
+  .nullable()
+  .optional();
+
 // --- Basic referenced schemas ---
 const settingsSchema = z.object({
   archive_id: z.number(),
@@ -83,20 +93,12 @@ const common_modification_fields = {
 };
 
 // --- Instances ---
-const instanceSchema = z.object({
+const instancesSchema = z.object({
   instance_id: z.number().nullable().optional(),
   archive_id: z.number().nullable().optional(),
   record_id: z.number(),
-  call_number: z
-    .union([
-      z.string().regex(/^([A-Z/]{1,5}|Vin) [\d.]{1,5}( ?[A-Z]| +R[123]| \d{3})?$/, {
-        message: "Call number must be in format 'XX 123'",
-      }),
-      z.literal(""),
-      z.null(),
-    ])
-    .nullable()
-    .optional(),
+  call_number_id: z.number().nullable().optional(),
+  call_number_suffix: callNumberSuffixSchema,
   format: z.number().nullable().optional(),
   no_copies: z.number().min(1).nullable().optional().describe("Copies Count"),
   quality: z.string().nullable().optional(),
@@ -105,6 +107,7 @@ const instanceSchema = z.object({
   // url: z.string().url().nullable(),
   thumbnail: z.string().nullable().optional(),
   media_type: z.enum(["Audio", "Webpage", "Image", "Video", "PDF"]),
+  call_number_item: listItemsSchema.nullable().optional().describe("Call Number"),
   generation_item: listItemsSchema.nullable().optional().describe("Generation"),
   format_item: listItemsSchema.required().describe("Format"),
   quality_item: listItemsSchema.nullable().optional().describe("Quality"),
@@ -179,7 +182,7 @@ const recordsSchema = z.object({
 
   publisher: listItemsSchema.nullable().optional(),
   program: listItemsSchema.nullable().optional(),
-  instances: z.array(instanceSchema).describe('Media').min(1).default([]),
+  instances: z.array(instancesSchema).describe('Media').min(1).default([]),
   has_digital: z.boolean().default(false),
   authors: z.array(listItemsSchema).nullable().optional(),
   subjects: z.array(listItemsSchema).nullable().optional(),
@@ -225,14 +228,20 @@ const recordItemSchema = recordsSchema.pick({
   title: true,
 });
 
-const instanceDataSchema = instanceSchema.pick({
+const instancesDataSchema = instancesSchema.pick({
   instance_id: true,
-  call_number: true,
+  call_number_item: true,
+  call_number_suffix: true,
   generation_item: true,
   format_item: true,
   quality_item: true,
   no_copies: true,
   url: true,
+}).refine((data) => {
+  return !data.call_number_item || data.call_number_suffix;
+}, {
+  message: "Required if call number class is provided",
+  path: ["call_number_suffix"],
 });
 
 const recordsDataSchema = recordsSchema
@@ -263,7 +272,7 @@ const recordsDataSchema = recordsSchema
       .optional(),
     continuations: z.array(recordItemSchema).nullable().optional(),
     collection: z.lazy(() => collectionItemSchema),
-    instances: z.array(instanceDataSchema).describe('Media').min(1, { message: "At least one media item is required" }),
+    instances: z.array(instancesDataSchema).describe('Media').min(1, { message: "At least one media item is required" }),
   });
 
 const embeddedRecordSchema = recordsSchema
@@ -287,13 +296,15 @@ const collectionsSchema = z.object({
   collection_name: z.string().min(1),
   description: z.string().nullable().optional(),
   summary: z.string().nullable().optional(),
-  call_number: z.string().nullable().optional(),
+  call_number_id: z.number().nullable().optional(),
+  call_number_suffix: callNumberSuffixSchema,
   publisher_id: z.number().nullable().optional(),
   notes: z.string().nullable().optional(),
   thumbnail: z.string().nullable().optional(),
   display_order: z.number().nullable().optional(),
   needs_review: z.boolean().default(false),
   is_hidden: z.boolean().default(false),
+  call_number_item: listItemsSchema.nullable().optional().describe("Call Number"),
   publisher: listItemsSchema.nullable().optional(),
   subjects: z.array(listItemsSchema).nullable().optional(),
   keywords: z.array(listItemsSchema).nullable().optional(),
@@ -325,7 +336,8 @@ const collectionsDataSchema = collectionsSchema
     collection_name: true,
     description: true,
     summary: true,
-    call_number: true,
+    call_number_suffix: true,
+    call_number_item: true,
     notes: true,
     thumbnail: true,
     display_order: true,
@@ -349,6 +361,8 @@ export default {
   usersSchema,
   recordsSchema,
   recordsDataSchema,
+  instancesSchema,
+  instancesDataSchema,
   collectionsSchema,
   collectionsDataSchema,
   settingsSchema,

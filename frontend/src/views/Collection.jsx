@@ -201,8 +201,43 @@ function CollectionFields() {
         }
       </Stack>
       <FieldRow>
-        <Field name="call_number" field_type="call_number" />
-        <Field field_type="editableItem" service="collections" name="parent" />
+        <Grid2 container spacing={0}>
+          <Grid2 size={6}>
+            <Field
+              field_type="list_item"
+              itemType="call_number"
+              label="Call Number"
+              name={`call_number_item`}
+              textFieldProps={{
+                sx: {
+                  // width: 130,
+                  "& .MuiInputBase-root": {
+                    borderRadius: "var(--mui-shape-borderRadius) 0px 0px var(--mui-shape-borderRadius)",
+                  },
+                },
+              }}
+              fetchAll
+              // disableClearable
+            />
+          </Grid2>
+          <Grid2 size={6}>
+            <Field
+              fullWidth={false}
+              label="Suffix"
+              name={`call_number_suffix`}
+              sx={{
+                // width: 90,
+                "& .MuiInputBase-root": {
+                  borderRadius: "0px var(--mui-shape-borderRadius) var(--mui-shape-borderRadius) 0px",
+                  marginLeft: "-1px",
+                },
+              }}
+            />
+          </Grid2>
+        </Grid2>
+        <Grid2 size={12}>
+          <Field field_type="editableItem" service="collections" name="parent" />
+        </Grid2>
       </FieldRow>
       <FieldRow>
         <Field name="is_hidden" field_type="checkbox" />
@@ -212,7 +247,6 @@ function CollectionFields() {
         <Field field_type="list_item" itemType="publisher" name="publisher" />
         <Field name="date_range" />
       </FieldRow>
-      <FieldRow></FieldRow>
       <FieldRow>
         <Field name="keywords" multiple field_type="list_item" itemType="keyword" create />
         <Field name="subjects" multiple field_type="list_item" itemType="subject" create />

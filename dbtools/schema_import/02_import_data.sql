@@ -99,7 +99,7 @@ INSERT INTO
 INSERT INTO
     collections (collection_id, collection_name, display_order)
 VALUES
-    (0, 'Uncategorized', 0);
+    (0, 'Featured', 0);
 
 INSERT INTO
     collections (
@@ -111,7 +111,23 @@ INSERT INTO
             public.clean_html ((a.description)),
             public.strip_tags (public.clean_html (a.description)),
             summary,
-            TRIM(call_number),
+            (
+                SELECT
+                    list_item_id
+                FROM
+                    list_items
+                WHERE
+                    item=TRIM(SPLIT_PART(call_number, ' ', 1))
+                    AND
+                TYPE='call_number'
+            ),
+            TRIM(
+                SUBSTRING(
+                    call_number
+                    FROM
+                        '^[A-z\/]+ (.+)$'
+                )
+            ),
             publisher_lookup.list_item_id,
             internal_notes AS notes,
             thumbnail,
@@ -130,13 +146,6 @@ INSERT INTO
             LEFT JOIN users b ON LOWER(a.creator)=b.username
             LEFT JOIN users c ON LOWER(a.contributor)=c.username
     );
-
-UPDATE collections
-SET
-    call_number=NULL
-WHERE
-    TRIM(call_number)=''
-    OR call_number='null';
 
 /* FIXME: Call number relation */
 /* FIXME: list_items missing stuff */
@@ -161,6 +170,7 @@ INSERT INTO
             NULLIF(REGEXP_REPLACE(YEAR, '[^0-9]', '', 'g'), '')::INT,
             NULLIF(REGEXP_REPLACE(MONTH, '[^0-9]', '', 'g'), '')::INT,
             NULLIF(REGEXP_REPLACE(DAY, '[^0-9]', '', 'g'), '')::INT,
+            year_is_circa,
             publisher_lookup.list_item_id,
             program_lookup.list_item_id,
             needs_review::bool,
@@ -222,239 +232,6 @@ values
 ) as i(month, value)
 ) b using (month)
 ) b on a.record_id = b.docid */
-UPDATE records
-SET
-    MONTH='1'
-WHERE
-    record_id IN (
-        SELECT
-            docid
-        FROM
-            freedom_archives_old.documents
-        WHERE
-            MONTH='Ja'
-    );
-
-UPDATE records
-SET
-    MONTH='2'
-WHERE
-    record_id IN (
-        SELECT
-            docid
-        FROM
-            freedom_archives_old.documents
-        WHERE
-            MONTH='Fe'
-    );
-
-UPDATE records
-SET
-    MONTH='3'
-WHERE
-    record_id IN (
-        SELECT
-            docid
-        FROM
-            freedom_archives_old.documents
-        WHERE
-            MONTH='Ma'
-    );
-
-UPDATE records
-SET
-    MONTH='4'
-WHERE
-    record_id IN (
-        SELECT
-            docid
-        FROM
-            freedom_archives_old.documents
-        WHERE
-            MONTH='Ap'
-    );
-
-UPDATE records
-SET
-    MONTH='5'
-WHERE
-    record_id IN (
-        SELECT
-            docid
-        FROM
-            freedom_archives_old.documents
-        WHERE
-            MONTH='Ma'
-    );
-
-UPDATE records
-SET
-    MONTH='6'
-WHERE
-    record_id IN (
-        SELECT
-            docid
-        FROM
-            freedom_archives_old.documents
-        WHERE
-            MONTH='Ju'
-    );
-
-UPDATE records
-SET
-    MONTH='7'
-WHERE
-    record_id IN (
-        SELECT
-            docid
-        FROM
-            freedom_archives_old.documents
-        WHERE
-            MONTH='Ju'
-    );
-
-UPDATE records
-SET
-    MONTH='8'
-WHERE
-    record_id IN (
-        SELECT
-            docid
-        FROM
-            freedom_archives_old.documents
-        WHERE
-            MONTH='Au'
-            OR MONTH='Ag'
-    );
-
-UPDATE records
-SET
-    MONTH='9'
-WHERE
-    record_id IN (
-        SELECT
-            docid
-        FROM
-            freedom_archives_old.documents
-        WHERE
-            MONTH='Se'
-    );
-
-UPDATE records
-SET
-    MONTH='10'
-WHERE
-    record_id IN (
-        SELECT
-            docid
-        FROM
-            freedom_archives_old.documents
-        WHERE
-            MONTH='Oc'
-    );
-
-UPDATE records
-SET
-    MONTH='11'
-WHERE
-    record_id IN (
-        SELECT
-            docid
-        FROM
-            freedom_archives_old.documents
-        WHERE
-            MONTH='No'
-    );
-
-UPDATE records
-SET
-    MONTH='12'
-WHERE
-    record_id IN (
-        SELECT
-            docid
-        FROM
-            freedom_archives_old.documents
-        WHERE
-            MONTH='De'
-    );
-
-UPDATE records
-SET
-    DAY=30
-WHERE
-    MONTH IN (6, 9)
-    AND DAY=31;
-
-UPDATE records
-SET
-    YEAR=2005
-WHERE
-    record_id=28007;
-
-UPDATE records
-SET
-    YEAR=YEAR+1900
-WHERE
-    YEAR>(
-        EXTRACT(
-            YEAR
-            FROM
-                CURRENT_DATE
-        ) - 2000
-    )
-    AND YEAR<=99;
-
-UPDATE records
-SET
-    YEAR=YEAR+2000
-WHERE
-    YEAR<=(
-        EXTRACT(
-            YEAR
-            FROM
-                CURRENT_DATE
-        ) - 2000
-    );
-
-UPDATE records
-SET
-    YEAR=2005
-WHERE
-    YEAR=20042005;
-
-SELECT
-    record_id,
-    title,
-    YEAR
-FROM
-    records
-WHERE
-    YEAR>EXTRACT(
-        YEAR
-        FROM
-            CURRENT_DATE
-    );
-
-SELECT
-    record_id,
-    title,
-    YEAR
-FROM
-    records
-WHERE
-    YEAR<1900;
-
-UPDATE records
-SET
-    YEAR=NULL
-WHERE
-    YEAR>EXTRACT(
-        YEAR
-        FROM
-            CURRENT_DATE
-    );
-
 INSERT INTO
     records_to_list_items (
         SELECT DISTINCT
@@ -512,7 +289,9 @@ WHERE
 INSERT INTO
     instances (
         record_id,
-        call_number,
+        archive_id,
+        call_number_id,
+        call_number_suffix,
         FORMAT,
         no_copies,
         quality,
@@ -528,7 +307,24 @@ INSERT INTO
     )
 SELECT
     docid AS record_id,
-    TRIM(call_number) AS call_number,
+    1,
+    (
+        SELECT
+            list_item_id
+        FROM
+            list_items
+        WHERE
+            item=TRIM(SPLIT_PART(call_number, ' ', 1))
+            AND
+        TYPE='call_number'
+    ),
+    TRIM(
+        SUBSTRING(
+            call_number
+            FROM
+                '^[A-z\/]+ (.+)$'
+        )
+    ),
     format_lookup.list_item_id,
     no_copies,
     quality_lookup.list_item_id,
@@ -578,7 +374,9 @@ WHERE
 INSERT INTO
     instances (
         record_id,
-        call_number,
+        archive_id,
+        call_number_id,
+        call_number_suffix,
         FORMAT,
         no_copies,
         quality,
@@ -594,7 +392,24 @@ INSERT INTO
     )
 SELECT
     x.docid_1 AS record_id,
-    TRIM(a.call_number) AS call_number,
+    1,
+    (
+        SELECT
+            list_item_id
+        FROM
+            list_items
+        WHERE
+            item=TRIM(SPLIT_PART(a.call_number, ' ', 1))
+            AND
+        TYPE='call_number'
+    ),
+    TRIM(
+        SUBSTRING(
+            a.call_number
+            FROM
+                '^[A-z\/]+ (.+)$'
+        )
+    ),
     format_lookup.list_item_id,
     no_copies,
     quality_lookup.list_item_id,
@@ -634,45 +449,17 @@ FROM
     LEFT JOIN list_items generation_lookup ON a.generation=generation_lookup.item
     AND generation_lookup.type='generation';
 
-UPDATE instances
-SET
-    call_number=NULL
-WHERE
-    call_number=''
-    OR call_number='null';
-
-UPDATE instances
-SET
-    call_number=REPLACE(call_number, 'JG/', 'JG/LS')
-WHERE
-    call_number LIKE 'JG/ %';
-
-UPDATE instances
-SET
-    call_number=REGEXP_REPLACE(call_number, '  +', ' ')
-WHERE
-    call_number~'  +';
-
-UPDATE instances
-SET
-    call_number=REGEXP_REPLACE(call_number, ' +(A|B|C)$', '\1')
-WHERE
-    call_number~' +(A|B|C)$';
-
-UPDATE instances
-SET
-    call_number=REGEXP_REPLACE(call_number, '^Vin (.+)', 'VIN \1')
-WHERE
-    call_number~'^Vin ';
-
-UPDATE list_items
-SET
-    item='VIN'
-WHERE
-    item='Vin'
-    AND
-TYPE='call_number';
-
+-- UPDATE instances
+-- SET
+--     call_number=NULL
+-- WHERE
+--     call_number=''
+--     OR call_number='null';
+-- UPDATE instances
+-- SET
+--     call_number=REPLACE(call_number, 'JG/', 'JG/LS')
+-- WHERE
+--     call_number LIKE 'JG/ %';
 INSERT INTO
     config
 SELECT
@@ -681,15 +468,3 @@ SELECT
     TO_JSON(VALUE)
 FROM
     freedom_archives_old.config;
-
-UPDATE collections
-SET
-    parent_collection_id=NULL
-WHERE
-    collection_id=1000;
-
-UPDATE collections
-SET
-    collection_name='Featured'
-WHERE
-    collection_id=0;

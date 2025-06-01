@@ -99,6 +99,7 @@ import Link from "../components/Link";
 
 function Instance({ instance = {}, index, actions: { remove, update, move } }) {
   const edit = !instance.delete;
+
   return (
     <React.Fragment key={`${instance.instance_id}-${index}`}>
       <TableRow className={`instance ${instance.delete ? "deleted" : ""}`} style={{ verticalAlign: "top" }}>
@@ -119,7 +120,39 @@ function Instance({ instance = {}, index, actions: { remove, update, move } }) {
           </IconButton>
         </TableCell>
         <TableCell>
-          <Field ro={!edit} fullWidth={false} label=" " name={`instances.${index}.call_number`} />
+          <Grid2 container spacing={0}>
+            <Grid2 size={7.5}>
+              <Field
+                field_type="list_item"
+                itemType="call_number"
+                ro={!edit}
+                label="Class"
+                name={`instances.${index}.call_number_item`}
+                textFieldProps={{
+                  sx: {
+                    "& .MuiInputBase-root": {
+                      borderRadius: "var(--mui-shape-borderRadius) 0px 0px var(--mui-shape-borderRadius)",
+                    },
+                  },
+                }}
+                fetchAll
+                fullWidth
+              />
+            </Grid2>
+            <Grid2 size={4.5}>
+              <Field
+                ro={!edit}
+                label="Suffix"
+                name={`instances.${index}.call_number_suffix`}
+                sx={{
+                  "& .MuiInputBase-root": {
+                    borderRadius: "0px var(--mui-shape-borderRadius) var(--mui-shape-borderRadius) 0px",
+                    marginLeft: "-1px",
+                  },
+                }}
+              />
+            </Grid2>
+          </Grid2>
         </TableCell>
         <TableCell>
           <Field
@@ -204,7 +237,7 @@ function Instances({ record }) {
           <TableRow>
             <TableCell style={{ width: 50 }}></TableCell>
             <TableCell style={{ width: 60 }}>Primary</TableCell>
-            <TableCell style={{ width: 120 }}>Call Number</TableCell>
+            <TableCell style={{ width: 220 }}>Call Number</TableCell>
             <TableCell>Generation</TableCell>
             <TableCell>Format</TableCell>
             <TableCell>Quality</TableCell>

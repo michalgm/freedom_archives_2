@@ -160,6 +160,10 @@ export default (function (app) {
         data[`publisher_id`] = data["publisher"] ? data["publisher"].list_item_id : null;
         delete data["publisher"];
       }
+      if ("call_number_item" in data) {
+        data.call_number_id = data.call_number_item?.list_item_id;
+        delete data.call_number_item;
+      }
       // if ('collection' in data) {
       //   data.collection_id = data.collection ? data.collection.collection_id : null;
       //   delete data.collection;

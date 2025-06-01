@@ -54,7 +54,7 @@ JSONB_ARRAY_ELEMENTS(r.producers) AS VALUE
 FROM
             unified_records r
             JOIN collections c USING(collection_id)
-            JOIN instances i ON r.primary_instance_id = i.instance_id
+            JOIN instances_view i ON r.primary_instance_id = i.instance_id
 WHERE
 r.is_hidden = FALSE AND
 c.is_hidden = FALSE AND

@@ -7,7 +7,8 @@ function FieldRow({ children, ro = false, ...props }) {
   return fields.map((element, index) => {
     return (
       <Grid2 key={element.props.name || index} size={element.props.width || width} {...props}>
-        {React.cloneElement(element, { ro })}
+        {element}
+        {/* {React.cloneElement(element, { ro })} */}
       </Grid2>
     );
   });

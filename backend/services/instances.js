@@ -41,6 +41,12 @@ export default (function (app) {
         delete data[`${key}_item`];
       }
     });
+
+    if ("call_number_item" in data) {
+      data.call_number_id = data.call_number_item?.list_item_id;
+      delete data.call_number_item;
+    }
+
     ["contributor_name", "contributor_username", "creator_name", "creator_username", "is_primary", "delete"].forEach(
       (key) => delete data[key]
     );
