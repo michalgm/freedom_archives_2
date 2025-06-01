@@ -179,7 +179,7 @@ const recordsSchema = z.object({
       }
     })
     .describe("Date"),
-
+  year_is_circa: z.boolean().default(false).describe("Approximate Date"),
   publisher: listItemsSchema.nullable().optional(),
   program: listItemsSchema.nullable().optional(),
   instances: z.array(instancesSchema).describe('Media').min(1).default([]),
@@ -260,6 +260,7 @@ const recordsDataSchema = recordsSchema
     publisher: true,
     location: true,
     date_string: true,
+    year_is_circa: true,
     notes: true,
     primary_instance_id: true,
   })

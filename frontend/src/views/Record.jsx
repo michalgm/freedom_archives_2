@@ -419,12 +419,20 @@ function Record({ id /*  embedded = false */ }) {
                     </FieldRow>
                     <FieldRow>
                       <Field name="location" />
-                      <Field
-                        name="date_string"
-                        label="Date"
-                        field_type="datestring"
-                        helperText="MM/DD/YYYY format - enter '00' for unknown day or month"
-                      />
+                      <Grid2 container spacing={2} direction={"row"}>
+                        <Grid2 size={6}>
+                          <Field
+                            name="date_string"
+                            label="Date"
+                            field_type="datestring"
+                            helperText="MM/DD/YYYY format - enter '00' for unknown day or month"
+                            fullWidth={false}
+                          />
+                        </Grid2>
+                        <Grid2 size={6}>
+                          <Field name="year_is_circa" label="Approximate date" field_type="checkbox" />
+                        </Grid2>
+                      </Grid2>
                     </FieldRow>
                     <FieldRow>
                       <Field name="notes" multiline rows={4} />
