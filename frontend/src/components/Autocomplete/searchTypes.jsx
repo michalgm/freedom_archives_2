@@ -20,10 +20,6 @@ const searchTypes = {
     label: "title",
     renderOption: (item) => <RecordItem record={item} component="div" dense />,
   },
-  value_lookup: {
-    id: "value",
-    label: "value",
-  },
   users: {
     id: "user_id",
     label: "full_name",

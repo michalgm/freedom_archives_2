@@ -11,7 +11,6 @@ import snapshots from "./snapshots.js";
 import unified_collections from "./unified_collections.js";
 import unified_records from "./unified_records.js";
 import users from "./users/users.service.js";
-import value_lookup from "./value_lookup.js";
 
 export default (function (app) {
   app.configure(users);
@@ -22,7 +21,6 @@ export default (function (app) {
   app.configure(collections);
   app.configure(unified_records);
   app.configure(unified_collections);
-  app.configure(value_lookup);
   app.configure(list_items_lookup);
   app.configure(review_changes);
   app.configure(public_records);

@@ -124,6 +124,7 @@ const prepData = async (context) => {
         delete data[key];
       }
     });
+
     if ("collection" in data) {
       data.collection_id = data.collection ? data.collection.collection_id : null;
       delete data.collection;

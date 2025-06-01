@@ -679,18 +679,17 @@ ORDER BY
 
 DROP TABLE IF EXISTS parent_lookup;
 
-CREATE VIEW
-    value_lookup AS
-SELECT DISTINCT
-    call_number AS VALUE
-FROM
-    instances
-WHERE
-    call_number!=''
-    AND call_Number!=' '
-ORDER BY
-    call_number;
-
+-- CREATE VIEW
+--     value_lookup AS
+-- SELECT DISTINCT
+--     call_number AS VALUE
+-- FROM
+--     instances
+-- WHERE
+--     call_number!=''
+--     AND call_Number!=' '
+-- ORDER BY
+--     call_number;
 SELECT
     SETVAL(
         'collections_collection_id_seq',
