@@ -55,7 +55,7 @@ export const getDefaultValuesFromSchema = (schemaName, userDefaults = {}) => {
 
     // Handle objects
     if (zodSchema._def.typeName === "ZodObject") {
-      const shape = zodSchema._def.shape();
+      const shape = getShape(zodSchema);
       const defaults = {};
       let hasDefaults = false;
 
@@ -91,8 +91,10 @@ export const getDefaultValuesFromSchema = (schemaName, userDefaults = {}) => {
   return cleanedDefaults;
 };
 
+const getShape = (schema) => schema?.shape || schema?._def?.schema?.shape || {};
+
 const mapSchema = (schema, callback, parentKey = "") => {
-  const shape = schema?.shape || {};
+  const shape = getShape(schema);
 
   return Object.keys(shape).reduce((acc, key) => {
     const field = shape[key];
@@ -102,11 +104,11 @@ const mapSchema = (schema, callback, parentKey = "") => {
     if (value) {
       acc.push(value);
     }
-
     // If it's an object, recurse
     if (field._def?.typeName === "ZodObject") {
       return acc.concat(mapSchema(field, callback, fullPath));
-    } else if (field._def?.typeName === "ZodArray" && field._def.type?._def?.typeName === "ZodObject") {
+      // } else if (field._def?.typeName === "ZodArray" && (field._def.type?._def?.typeName === "ZodObject" || field._def.type?._def?.typeName === "ZodEffects")) {
+    } else if (field._def?.typeName === "ZodArray") {
       return acc.concat(mapSchema(field._def.type, callback, `${fullPath}[]`));
     }
     // if (!field.isOptional?.() && !field._def?.innerType?.isOptional?.()) {
