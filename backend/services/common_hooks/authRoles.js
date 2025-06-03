@@ -3,7 +3,6 @@ import { Forbidden } from '@feathersjs/errors';
 const ROLE_HIERARCHY = ['intern', 'staff', 'administrator'];
 
 const SERVICE_PERMISSIONS = {
-  'list_items': 'staff',
   'users': 'staff',
   'settings': 'staff',
   'snapshots': 'admin',
