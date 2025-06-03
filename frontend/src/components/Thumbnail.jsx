@@ -16,7 +16,7 @@ const MEDIA_TYPE_BADGES = {
 
 export default function Thumbnail({ item, src: _src, width = 75, alt = "", type: _type }) {
   const [brokenLink, setBrokenLink] = useState(false);
-  const type = item?.record_id ? "record" : "collection";
+  const type = item?.record_id != null ? "record" : "collection";
   let src = "";
   const media_type = item?.primary_instance_media_type || item.media_type;
 

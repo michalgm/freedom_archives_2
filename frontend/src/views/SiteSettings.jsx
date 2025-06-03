@@ -44,10 +44,14 @@ const SiteSettings = () => {
                 link={false}
                 service="collections"
                 onChange={(value, { setValue }) => {
-                  setValue("settings.featured_collection_id", value?.collection_id ? `${value.collection_id}` : null, {
-                    shouldValidate: true,
-                    shouldDirty: true,
-                  });
+                  setValue(
+                    "settings.featured_collection_id",
+                    value?.collection_id != null ? `${value.collection_id}` : null,
+                    {
+                      shouldValidate: true,
+                      shouldDirty: true,
+                    }
+                  );
                 }}
               />
               <FormRow name="settings.site_intro_text" field_type="html" />

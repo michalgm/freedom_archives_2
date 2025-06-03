@@ -22,7 +22,7 @@ function Collections({ embedded, itemAction, filter = {}, excludeIds = [], useSt
       const query = {
         collection_id: { $nin: excludeIds },
         $sort: { display_order: 1, collection_name: 1 },
-        $select: ["collection_id", "collection_name", "summary", "thumbnail", "parent"],
+        $select: ["collection_id", "collection_name", "summary", "thumbnail", "parent", "call_number"],
       };
       if (!hidden) {
         query.is_hidden = false;

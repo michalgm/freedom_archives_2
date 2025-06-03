@@ -249,9 +249,8 @@ export function Item({
     },
   };
   let Container = Box;
-
-  if ((link && id) || onClickHandler) {
-    if (link && id) {
+  if ((link && id != null) || onClickHandler) {
+    if (link && id != null) {
       list_item_props.component = Link;
       list_item_props.to = `/${type}s/${id}`;
     }
@@ -276,7 +275,7 @@ export function Item({
         </ListItemAvatar>
         <ListItemText
           disableTypography
-          primary={id ? title : missingRecordText}
+          primary={id != null ? title : missingRecordText}
           secondary={
             <>
               <RecordItemDetails details={details} dense={dense} />
@@ -312,6 +311,7 @@ export default function RecordItem({ record = {}, description: showDescription, 
     primary_instance_format_text,
     collection: { collection_name, collection_id } = {},
     description,
+    call_numbers = [],
   } = record || {};
   const details = [
     {
@@ -320,6 +320,8 @@ export default function RecordItem({ record = {}, description: showDescription, 
       link: `/collections/${collection_id}`,
     },
     { type: "Format", label: primary_instance_format_text },
+    { type: "ID", label: record_id },
+    { type: "Call Numbers", label: call_numbers.join(", ") },
   ];
   if (itemAction) {
     props.onClick = () => itemAction(record);
@@ -338,17 +340,18 @@ export default function RecordItem({ record = {}, description: showDescription, 
 }
 
 export function CollectionItem({ collection = {}, description: showDescription, itemAction, ...props }) {
-  const { collection_name, collection_id, summary, parent } = collection;
-  const details =
-    parent && parent.collection_id
-      ? [
-          {
-            type: "Parent Collection",
-            label: parent.collection_name,
-            link: `/collections/${parent.collection_id}`,
-          },
-        ]
-      : [];
+  const { collection_name, collection_id, summary, parent, call_number } = collection;
+  const details = [
+    { type: "ID", label: collection_id },
+    { type: "Call Number", label: call_number },
+  ];
+  if (parent && parent.collection_id) {
+    details.unshift({
+      type: "Parent Collection",
+      label: parent.collection_name,
+      link: `/collections/${parent.collection_id}`,
+    });
+  }
   if (itemAction) {
     props.onClick = () => itemAction(collection);
   }

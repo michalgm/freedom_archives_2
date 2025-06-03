@@ -39,6 +39,7 @@ function Records({ embedded, itemAction, filter = {}, forcedFilter = {}, useStor
           "description",
           "primary_instance_media_type",
           "primary_instance_format_text",
+          "call_numbers",
         ],
         ...forcedFilter,
       };
