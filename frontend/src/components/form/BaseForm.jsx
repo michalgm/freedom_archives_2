@@ -1,18 +1,18 @@
 import { Alert, AlertTitle } from "@mui/material";
 import React, { useEffect } from "react";
-import { FormContainer } from "react-hook-form-mui";
+import { FormContainer, useFormContext } from "react-hook-form-mui";
 import { getFieldLabel } from "src/components/form/schemaUtils";
 import { useFormManager } from "src/hooks/useFormManager";
 import { flattenErrors } from "src/utils";
 
-import useFormManagerContext, { FormManagerContext } from "./FormManagerContext";
+import { FormManagerContext } from "./FormManagerContext";
 import { FormStateHandler } from "./FormStateHandler";
 import { parseError } from "./schemaUtils";
 
 export const FormErrors = ({ service, embedded = false }) => {
   const {
     formState: { errors },
-  } = useFormManagerContext();
+  } = useFormContext();
   const [hideErrors, setHideErrors] = React.useState(false);
 
   useEffect(() => {
@@ -31,7 +31,7 @@ export const FormErrors = ({ service, embedded = false }) => {
   return (
     <Alert severity="error" {...props} onClose={() => setHideErrors(true)}>
       <AlertTitle>
-        {errorCount} error{errorCount > 1 ? "s" : ""} prohibited this {service.replace(/s$/, "")} from being saved
+        {errorCount} error{errorCount > 1 ? "s" : ""} prohibited this {service?.replace(/s$/, "")} from being saved
       </AlertTitle>
       <ul style={{ margin: 0 }}>{errorMessages}</ul>
     </Alert>

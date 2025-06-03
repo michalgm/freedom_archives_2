@@ -55,7 +55,7 @@ function ChangePassword({ open, user: { user_id, username }, handleClose }) {
   const validatePasswords = ({ password1, password2 }) => {
     logger.log({ password1, password2 });
     const errors = {};
-    if (password1 && password2) {
+    if (password1 || password2) {
       if (password1 !== password2) {
         errors.password1 = { message: "Passwords do not match" };
       } else if (password1.length < 8) {
@@ -66,7 +66,6 @@ function ChangePassword({ open, user: { user_id, username }, handleClose }) {
         errors.password1 = { message: "Password must contain at least one special character" };
       }
     }
-    logger.log(errors);
     return { values: { password1, password2 }, errors };
   };
 
@@ -84,14 +83,6 @@ function ChangePassword({ open, user: { user_id, username }, handleClose }) {
       <Dialog open={open} onClose={handleClose} maxWidth="sm">
         <DialogTitle>Change password for user &quot;{username}&quot;</DialogTitle>
         <DialogContent sx={{ textAlign: "center" }}>
-          <Box sx={{ textAlign: "left" }}>
-            Passwords must:
-            <List sx={{ listStyleType: "disc", listStylePosition: "inside" }} dense>
-              <ListItem sx={{ display: "list-item" }}>Be at least 8 characters long</ListItem>
-              <ListItem sx={{ display: "list-item" }}>Contain at least one special character</ListItem>
-              <ListItem sx={{ display: "list-item" }}>Not be the same as your username</ListItem>
-            </List>
-          </Box>
           <FormContainer
             defaultValues={{ password1: "", password2: "" }}
             mode="onChange"
@@ -99,6 +90,14 @@ function ChangePassword({ open, user: { user_id, username }, handleClose }) {
             onSuccess={savePassword}
           >
             <FormErrors />
+            <Box sx={{ textAlign: "left" }}>
+              Passwords must:
+              <List sx={{ listStyleType: "disc", listStylePosition: "inside" }} dense>
+                <ListItem sx={{ display: "list-item" }}>Be at least 8 characters long</ListItem>
+                <ListItem sx={{ display: "list-item" }}>Contain at least one special character</ListItem>
+                <ListItem sx={{ display: "list-item" }}>Not be the same as your username</ListItem>
+              </List>
+            </Box>
             <Stack spacing={2} direction="row" sx={{ my: 2 }}>
               <Field
                 autoFocus

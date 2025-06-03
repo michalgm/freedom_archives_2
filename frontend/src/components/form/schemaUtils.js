@@ -163,8 +163,8 @@ export const checkRequired = (field, schemaName) => {
   return requiredFields?.[schema]?.includes(field.replace(/\d/g, ""));
 };
 
-export const getFieldLabel = (field, schemaName, fullPath) => {
-  if (!fullPath) {
+export const getFieldLabel = (field, schemaName, useFullPath) => {
+  if (!useFullPath) {
     return fieldLabels?.[`${schemaName}DataSchema`]?.[field.replace(/\[\d\]/g, '')];
   }
   const paths = field.split('.')
@@ -176,7 +176,7 @@ export const getFieldLabel = (field, schemaName, fullPath) => {
     }
     paths.push(path)
     const fullPath = paths.join('.')
-    let label = fieldLabels?.[`${schemaName}DataSchema`]?.[fullPath.replace(/\[\]$/, '')];
+    let label = fieldLabels?.[`${schemaName}DataSchema`]?.[fullPath.replace(/\[\]$/, '')] || formatLabel(null, path);
     if (count) {
       label = ` ${getOrdinal(count)} ${label}`
     }
