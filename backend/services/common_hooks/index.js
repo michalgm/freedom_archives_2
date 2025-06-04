@@ -190,5 +190,14 @@ export const debugQuery = (context) => {
   return context;
 };
 
+export const allowDisablePagination = (context) => {
+  const { method, params } = context;
+  if (["find", "get"].includes(method) && params.query.$disable_pagination) {
+    context.params.paginate = false;
+    delete params.query.$disable_pagination;
+  }
+  return context;
+};
+
 export { allowAnonymous, updateThumbnail, rankedSearch, authRoles };
 

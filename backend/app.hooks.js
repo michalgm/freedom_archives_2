@@ -1,7 +1,7 @@
 import { authenticate } from "@feathersjs/authentication";
 import { transaction } from "@feathersjs/knex";
 
-import { allowAnonymous, authRoles, debugQuery, setArchive } from "./services/common_hooks/index.js";
+import { allowAnonymous, allowDisablePagination, authRoles, debugQuery, setArchive } from "./services/common_hooks/index.js";
 // Application hooks that run for every service
 const public_services = ["api/public_records"];
 const checkAuth = async (context) => {
@@ -15,7 +15,7 @@ const checkAuth = async (context) => {
 };
 export const before = {
   all: [checkAuth, authRoles],
-  find: [],
+  find: [allowDisablePagination],
   get: [],
   create: [transaction.start(), setArchive], //FIXME for new archives/archive users
   update: [transaction.start()],

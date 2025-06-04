@@ -341,7 +341,7 @@ export const EditableDataTable = ({
         getRowId={getRowId}
         {...gridHandlers}
         {...props}
-      />
+        showToolbar />
     </Box>
   );
 };

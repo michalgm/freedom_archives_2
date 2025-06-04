@@ -25,6 +25,7 @@ const sideBarConfig = {
     { label: "Search Records", icon: "", href: "/search" },
     { label: "Manage Records", icon: "", href: "/records" },
     { label: "New Record", icon: "", href: "/records/new" },
+    { label: "Table View", icon: "", href: "/records/table" },
   ],
   "Site Management": [
     { label: "Site Settings", icon: "", href: "/site/settings", authRole: "staff" },

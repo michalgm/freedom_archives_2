@@ -18,6 +18,7 @@ const Search = React.lazy(() => import("./views/Search"));
 const Collection = React.lazy(() => import("./views/Collection"));
 const Users = React.lazy(() => import("./views/Users"));
 const SiteSettings = React.lazy(() => import("./views/SiteSettings"));
+const Table = React.lazy(() => import("./views/Table"));
 
 function LoginRedirect() {
   const location = useLocation();
@@ -82,6 +83,8 @@ const router = createBrowserRouter(
           path="/records/featured"
           element={<Collection key="featured_records" id={0} mode="featured_records" />}
         />
+        <Route path="/records/table/" element={<Table />} />
+
         <Route path="/records/:id" element={<Record showForm />} />
         {/* <Route path="/records-old/:id" element={<RecordOld showForm />} /> */}
         <Route path="/relationships/:skip" element={<Relationships />} />
