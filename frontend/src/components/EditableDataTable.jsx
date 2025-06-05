@@ -5,10 +5,12 @@ import EditIcon from "@mui/icons-material/Edit";
 import SaveIcon from "@mui/icons-material/Save";
 import { Box, Button, Stack, Tooltip } from "@mui/material";
 import { DataGrid, GridActionsCellItem, GridEditInputCell, GridToolbar, useGridApiRef } from "@mui/x-data-grid";
-import { merge, startCase } from "lodash-es";
+import { merge, omit, startCase } from "lodash-es";
 import { useConfirm } from "material-ui-confirm";
 import { useCallback, useEffect, useMemo, useState } from "react";
+import { parseError, schemas } from "src/components/form/schemaUtils";
 import { useAddNotification } from "src/stores";
+import { diffShallow } from "src/utils";
 
 import * as API from "../api";
 
@@ -50,7 +52,6 @@ export const EditableDataTable = ({
   model,
   itemType,
   getItemName,
-  prepareItem,
   autosizeColumns = false,
   readonly = false,
   headerControls = [],
@@ -84,6 +85,22 @@ export const EditableDataTable = ({
     [idField, localRows]
   );
 
+  const validateRow = useCallback(
+    (field) =>
+      ({ props, hasChanged }) => {
+        const schema = schemas[`${model}DataSchema`];
+        let error = false;
+        if (schema && hasChanged) {
+          const result = schema.pick({ [field]: true }).safeParse({ [field]: props.value });
+          if (!result.success) {
+            error = parseError(field)(result.error.issues[0]);
+          }
+        }
+        return { ...props, error };
+      },
+    [model]
+  );
+
   const processRowUpdate = useCallback(
     async (newRow, oldRow) => {
       const name = getItemName(newRow);
@@ -98,15 +115,14 @@ export const EditableDataTable = ({
           },
         });
         if (confirmed) {
-          const prepared = prepareItem ? prepareItem(newRow) : newRow;
+          // const prepared = diffShallow(newRow, oldRow);
           if (newRow.delete) {
             await API[model].remove(id);
           } else if (id === -1) {
-            delete prepared[idField];
-            newRow = await API[model].create(prepared);
+            newRow = await API[model].create(omit(newRow, [idField]));
             onNew(newRow);
           } else {
-            newRow = await API[model].patch(id, prepared);
+            newRow = await API[model].patch(id, diffShallow(newRow, oldRow));
           }
           addNotification({ message: `${itemType} "${name}" ${action.toLowerCase()}d!` });
           await onUpdate(newRow);
@@ -119,7 +135,7 @@ export const EditableDataTable = ({
       resetEdit(newRow);
       return newRow;
     },
-    [getItemName, idField, resetEdit, confirm, itemType, prepareItem, addNotification, onUpdate, model, onNew]
+    [getItemName, idField, resetEdit, confirm, itemType, addNotification, onUpdate, model, onNew]
   );
 
   const deleteRow = useCallback(
@@ -174,7 +190,7 @@ export const EditableDataTable = ({
         : [
             ["Edit", EditIcon, () => updateRow(id)],
             disableDelete ? null : ["Delete", DeleteIcon, () => deleteRow(row)],
-            ...extraActions.map(([label, Icon, action]) => [label, Icon, () => action(row)]),
+            ...extraActions.map(([label, Icon, action]) => [label, Icon, () => action(row, apiRef)]),
           ];
 
       const actions = icons
@@ -193,6 +209,7 @@ export const EditableDataTable = ({
     const updateColumns = columns.map((column) => {
       const { flex, ...rest } = column;
       rest.headerName = rest.headerName || startCase(rest.field);
+      rest.preProcessEditCellProps = validateRow(rest.field);
       if (column.preProcessEditCellProps) {
         rest.renderEditCell = RenderInputCell;
       }
@@ -219,7 +236,19 @@ export const EditableDataTable = ({
         width: columnWidths["actions"] || (2 + extraActions.length) * 40,
       },
     ];
-  }, [editRow, columns, deleteRow, extraActions, updateRow, columnWidths, autosizeColumns, readonly, disableDelete]);
+  }, [
+    columns,
+    readonly,
+    columnWidths,
+    extraActions,
+    editRow,
+    disableDelete,
+    updateRow,
+    deleteRow,
+    apiRef,
+    validateRow,
+    autosizeColumns,
+  ]);
 
   useEffect(() => {
     if (autosizeColumns && !loading && localRows.length > 0 && apiRef.current) {
@@ -341,7 +370,8 @@ export const EditableDataTable = ({
         getRowId={getRowId}
         {...gridHandlers}
         {...props}
-        showToolbar />
+        showToolbar
+      />
     </Box>
   );
 };

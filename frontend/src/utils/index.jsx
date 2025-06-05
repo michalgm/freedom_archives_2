@@ -1,3 +1,4 @@
+import { isEqual, pickBy } from "lodash-es";
 import { useEffect, useRef } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 
@@ -91,6 +92,10 @@ export const getOrdinal = (n) => {
   }
 
   return `${n}${ord}`;
+};
+
+export const diffShallow = (obj1, obj2) => {
+  return pickBy(obj1, (val, key) => Object.prototype.hasOwnProperty.call(obj2, key) && !isEqual(val, obj2[key]));
 };
 
 // export function DebugProps({ name, ...props }) {
