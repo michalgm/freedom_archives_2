@@ -292,10 +292,10 @@ INSERT INTO
         archive_id,
         call_number_id,
         call_number_suffix,
-        FORMAT,
+        format_id,
         no_copies,
-        quality,
-        generation,
+        quality_id,
+        generation_id,
         url,
         thumbnail,
         media_type,
@@ -341,11 +341,11 @@ FROM
     freedom_archives_old.documents a
     LEFT JOIN users b ON LOWER(a.creator)=b.username
     LEFT JOIN users c ON LOWER(a.contributor)=c.username
-    LEFT JOIN list_items format_lookup ON a.format=format_lookup.item
+    LEFT JOIN list_items format_lookup ON LOWER(a.format)=LOWER(format_lookup.item)
     AND format_lookup.type='format'
-    LEFT JOIN list_items quality_lookup ON a.quality=quality_lookup.item
+    LEFT JOIN list_items quality_lookup ON LOWER(a.quality)=LOWER(quality_lookup.item)
     AND quality_lookup.type='quality'
-    LEFT JOIN list_items generation_lookup ON a.generation=generation_lookup.item
+    LEFT JOIN list_items generation_lookup ON LOWER(a.generation)=LOWER(generation_lookup.item)
     AND generation_lookup.type='generation';
 
 UPDATE records a
@@ -377,10 +377,10 @@ INSERT INTO
         archive_id,
         call_number_id,
         call_number_suffix,
-        FORMAT,
+        format_id,
         no_copies,
-        quality,
-        generation,
+        quality_id,
+        generation_id,
         url,
         thumbnail,
         media_type,
@@ -442,11 +442,11 @@ FROM
     JOIN freedom_archives_old.documents a ON a.docid=x.docid_2
     LEFT JOIN users b ON LOWER(a.creator)=b.username
     LEFT JOIN users c ON LOWER(a.contributor)=c.username
-    LEFT JOIN list_items format_lookup ON a.format=format_lookup.item
+    LEFT JOIN list_items format_lookup ON LOWER(a.format)=LOWER(format_lookup.item)
     AND format_lookup.type='format'
-    LEFT JOIN list_items quality_lookup ON a.quality=quality_lookup.item
+    LEFT JOIN list_items quality_lookup ON LOWER(a.quality)=LOWER(quality_lookup.item)
     AND quality_lookup.type='quality'
-    LEFT JOIN list_items generation_lookup ON a.generation=generation_lookup.item
+    LEFT JOIN list_items generation_lookup ON LOWER(a.generation)=LOWER(generation_lookup.item)
     AND generation_lookup.type='generation';
 
 -- UPDATE instances

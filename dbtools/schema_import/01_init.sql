@@ -132,10 +132,10 @@ CREATE TABLE
         call_number_suffix TEXT,
         record_id INTEGER NOT NULL REFERENCES records ON DELETE CASCADE,
         -- is_primary bool DEFAULT false,
-        "format" INTEGER REFERENCES list_items,
+        format_id INTEGER REFERENCES list_items ON DELETE SET NULL,
         no_copies INTEGER DEFAULT '1',
-        quality INTEGER REFERENCES list_items,
-        generation INTEGER REFERENCES list_items,
+        quality_id INTEGER REFERENCES list_items ON DELETE SET NULL,
+        generation_id INTEGER REFERENCES list_items ON DELETE SET NULL,
         url TEXT NOT NULL DEFAULT '',
         thumbnail TEXT DEFAULT NULL,
         media_type TEXT NOT NULL DEFAULT '',
@@ -150,11 +150,11 @@ CREATE INDEX instances_call_number_suffix ON instances (call_number_suffix);
 
 CREATE INDEX instances_call_number_id ON instances (call_number_id);
 
-CREATE INDEX instances_format ON instances (FORMAT);
+CREATE INDEX instances_format ON instances (format_id);
 
-CREATE INDEX instances_quality ON instances (quality);
+CREATE INDEX instances_quality ON instances (quality_id);
 
-CREATE INDEX instances_generation ON instances (generation);
+CREATE INDEX instances_generation ON instances (generation_id);
 
 CREATE INDEX instances_media_type ON instances (media_type);
 

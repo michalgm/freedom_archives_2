@@ -51,9 +51,9 @@ SELECT
 FROM
     instances a
     LEFT JOIN list_items call_number_lookup ON call_number_id=call_number_lookup.list_item_id
-    LEFT JOIN list_items format_lookup ON "format"=format_lookup.list_item_id
-    LEFT JOIN list_items quality_lookup ON quality=quality_lookup.list_item_id
-    LEFT JOIN list_items generation_lookup ON generation=generation_lookup.list_item_id
+    LEFT JOIN list_items format_lookup ON format_id=format_lookup.list_item_id
+    LEFT JOIN list_items quality_lookup ON quality_id=quality_lookup.list_item_id
+    LEFT JOIN list_items generation_lookup ON generation_id=generation_lookup.list_item_id
     LEFT JOIN users contributor ON a.contributor_user_id=contributor.user_id
     LEFT JOIN users creator ON a.creator_user_id=creator.user_id
     LEFT JOIN records primary_record ON a.instance_id=primary_record.primary_instance_id;
@@ -236,8 +236,8 @@ SELECT
                     b.parent_record_id,
                     'primary_instance_thumbnail',
                     primary_instance.thumbnail,
-                    'primary_instance_format',
-                    primary_instance.format,
+                    'primary_instance_format_id',
+                    primary_instance.format_id,
                     'primary_instance_format_text',
                     list_items.item,
                     'primary_instance_media_type',
@@ -246,7 +246,7 @@ SELECT
             FROM
                 records b
                 LEFT JOIN instances primary_instance ON b.primary_instance_id=primary_instance.instance_id
-                LEFT JOIN list_items ON primary_instance.format=list_items.list_item_id
+                LEFT JOIN list_items ON primary_instance.format_id=list_items.list_item_id
                 AND list_items.type='format'
             WHERE
                 a.collection_id=b.collection_id
@@ -266,8 +266,8 @@ SELECT
                     b.parent_record_id,
                     'primary_instance_thumbnail',
                     primary_instance.thumbnail,
-                    'primary_instance_format',
-                    primary_instance.format,
+                    'primary_instance_format_id',
+                    primary_instance.format_id,
                     'primary_instance_format_text',
                     list_items.item,
                     'primary_instance_media_type',
@@ -281,7 +281,7 @@ SELECT
                 records b
                 LEFT JOIN featured_records f ON b.record_id=f.record_id
                 LEFT JOIN instances primary_instance ON b.primary_instance_id=primary_instance.instance_id
-                LEFT JOIN list_items ON primary_instance.format=list_items.list_item_id
+                LEFT JOIN list_items ON primary_instance.format_id=list_items.list_item_id
                 AND list_items.type='format'
             WHERE
                 a.collection_id=f.collection_id
@@ -429,7 +429,7 @@ SELECT
     a.title,
     a.parent_record_id,
     primary_instance.thumbnail AS primary_instance_thumbnail,
-    primary_instance.format AS primary_instance_format,
+    primary_instance.format_id AS primary_instance_format_id,
     list_items.item AS primary_instance_format_text,
     primary_instance.media_type AS primary_instance_media_type,
     COALESCE(
@@ -446,7 +446,7 @@ SELECT
 FROM
     records a
     LEFT JOIN instances primary_instance ON a.primary_instance_id=primary_instance.instance_id
-    LEFT JOIN list_items ON primary_instance.format=list_items.list_item_id
+    LEFT JOIN list_items ON primary_instance.format_id=list_items.list_item_id
     AND list_items.type='format';
 
 /* FIXME collection */
@@ -468,9 +468,9 @@ SELECT
     ) AS instances,
     ARRAY_AGG(DISTINCT call_number) AS call_numbers,
     STRING_AGG(DISTINCT call_number, ' ') AS call_numbers_text,
-    ARRAY_AGG(DISTINCT "format") AS formats,
-    ARRAY_AGG(DISTINCT quality) AS qualitys,
-    ARRAY_AGG(DISTINCT generation) AS generations,
+    ARRAY_AGG(DISTINCT format_id) AS formats,
+    ARRAY_AGG(DISTINCT quality_id) AS qualitys,
+    ARRAY_AGG(DISTINCT generation_id) AS generations,
     ARRAY_AGG(DISTINCT media_type) AS media_types
 FROM
     instances_view a
@@ -637,7 +637,7 @@ CREATE OR REPLACE VIEW
 SELECT
     a.*,
     b.primary_instance_thumbnail,
-    b.primary_instance_format,
+    b.primary_instance_format_id,
     b.primary_instance_format_text,
     b.primary_instance_media_type,
     b.collection,
@@ -917,7 +917,7 @@ SELECT
     COUNT(DISTINCT i.instance_id) AS instances_count
 FROM
     list_items li
-    LEFT JOIN instances i ON li.list_item_id=i.format
+    LEFT JOIN instances i ON li.list_item_id=i.format_id
 WHERE
     li.type='format'
 GROUP BY
@@ -936,7 +936,7 @@ SELECT
     COUNT(DISTINCT i.instance_id) AS instances_count
 FROM
     list_items li
-    LEFT JOIN instances i ON li.list_item_id=i.quality
+    LEFT JOIN instances i ON li.list_item_id=i.quality_id
 WHERE
     li.type='quality'
 GROUP BY
@@ -955,7 +955,7 @@ SELECT
     COUNT(DISTINCT i.instance_id) AS instances_count
 FROM
     list_items li
-    LEFT JOIN instances i ON li.list_item_id=i.generation
+    LEFT JOIN instances i ON li.list_item_id=i.generation_id
 WHERE
     li.type='generation'
 GROUP BY

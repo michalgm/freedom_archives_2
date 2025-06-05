@@ -37,7 +37,7 @@ export default (function (app) {
     const { data } = context;
     ["format", "quality", "generation"].forEach((key) => {
       if (data[`${key}_item`] !== undefined) {
-        data[key] = data[`${key}_item`].list_item_id;
+        data[`${key}_id`] = data[`${key}_item`].list_item_id;
         delete data[`${key}_item`];
       }
     });
