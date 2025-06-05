@@ -68,10 +68,7 @@ export const rankedSearch = async (context) => {
   const exactBoostCases = knex.raw(`CASE WHEN search_text = ? THEN ${EXACT_MATCH_BOOST} ELSE 0 END`, [searchTerm]).toString();
   const callNumbersBoost = tableName.match(/(records|collections)/) ? knex.raw(
     `CASE 
-      WHEN EXISTS(
-        SELECT 1 FROM unnest(call_numbers) AS elem 
-        WHERE elem ILIKE ?
-      ) THEN ${CALL_NUMBERS_WEIGHT}
+      WHEN ${tableName.match('record') ? `EXISTS( SELECT 1 FROM unnest(call_numbers) AS elem WHERE elem ILIKE ? )` : `call_number ILIKE ?`} THEN ${CALL_NUMBERS_WEIGHT}
       ELSE 0 
      END`,
     [`${searchTerm}%`]
