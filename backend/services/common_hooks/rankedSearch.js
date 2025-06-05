@@ -3,6 +3,7 @@ import tsquery from "pg-tsquery";
 const parser = tsquery();
 
 const FULLTEXT_WEIGHT = 1000;
+const CALL_NUMBERS_WEIGHT = 500;
 const TRIGRAM_WEIGHT = 100;
 const EXACT_MATCH_BOOST = 10000;
 const POSITION_BOOST_WEIGHT = 5;
@@ -64,7 +65,17 @@ export const rankedSearch = async (context) => {
 
   const tsqueryString = parser(applyBasicPrefixing(searchTerm));
 
-  const exactBoostCases = knex.raw(`WHEN search_text = ? THEN ${EXACT_MATCH_BOOST}`, [searchTerm]).toString();
+  const exactBoostCases = knex.raw(`CASE WHEN search_text = ? THEN ${EXACT_MATCH_BOOST} ELSE 0 END`, [searchTerm]).toString();
+  const callNumbersBoost = tableName.match(/(records|collections)/) ? knex.raw(
+    `CASE 
+      WHEN EXISTS(
+        SELECT 1 FROM unnest(call_numbers) AS elem 
+        WHERE elem ILIKE ?
+      ) THEN ${CALL_NUMBERS_WEIGHT}
+      ELSE 0 
+     END`,
+    [`${searchTerm}%`]
+  ).toString() : '0';
 
   const positionScoreExpr = knex.raw(
     `CASE WHEN position(? in search_text) > 0 THEN ${(POSITION_BOOST_WEIGHT)}::float / position(? in search_text) ELSE 0 END`,
@@ -94,18 +105,19 @@ export const rankedSearch = async (context) => {
     .select(
       knex.raw(
         `(
-          CASE WHEN ${idTest} THEN 1
+          CASE WHEN ${idTest} THEN 1000000
               ELSE
           CASE
-            WHEN fulltext @@ ts_query.query THEN 
-              ${FULLTEXT_WEIGHT} * ts_rank(fulltext, ts_query.query)
+          WHEN fulltext @@ ts_query.query THEN 
+            ${FULLTEXT_WEIGHT} * ts_rank(fulltext, ts_query.query, 1)
             ELSE 
               ${idValue !== null ? '0' : `${TRIGRAM_WEIGHT} * ${trigram}`}
             END
-            + CASE ${exactBoostCases} ELSE 0 END
+            + ${callNumbersBoost}
+            + ${exactBoostCases} 
             + (${positionScoreExpr} ) 
-            END ) as rank
-        `,
+            END
+        ) as rank`,
       )
     );
 
