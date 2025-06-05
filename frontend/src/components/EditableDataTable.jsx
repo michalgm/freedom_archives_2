@@ -35,7 +35,9 @@ function RenderInputCell(props) {
         arrow: { sx: { color: "error.main", left: "50% !important", transform: "translateX(-50%) !important" } },
       }}
     >
-      <GridEditInputCell {...props} />
+      <Box sx={{ width: "100%" }}>
+        <GridEditInputCell {...props} />
+      </Box>
     </Tooltip>
   );
 }

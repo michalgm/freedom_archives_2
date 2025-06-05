@@ -4,15 +4,14 @@ import { getOrdinal } from "src/utils";
 import schemas from "../../../../backend/services/zod_schema";
 
 const errorRegex = /^(String|Number)\b/;
-const requiredRegex = /^(Required|String must contain at least 1 character(s)|Expected[^,]+, received null)\b/;
+const requiredRegex = /(Required|must contain at least 1 character|Expected[^,]+, received null)/;
+
 export const parseError = (name, _label) => (error) => {
   if (!error.message) {
-    error = Object.values(error)[0]
+    error.message = Object.values(error)[0]
   }
   const label = formatLabel(_label, name);
-  if (errorRegex.test(error.message)) {
-    return error.message.replace(errorRegex, label);
-  }
+  error.message = error.message.replace(errorRegex, label);
   if (requiredRegex.test(error.message)) {
     return `${label} is required`;
   }
