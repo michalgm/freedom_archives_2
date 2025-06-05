@@ -26,9 +26,10 @@ const archivesSchema = z.object({
   title: z.string(),
 });
 
-const listItemsSchema = z.object({
+const list_itemsSchema = z.object({
   list_item_id: z.number(),
   item: z.string(),
+  description: z.string().nullable().optional(),
 });
 
 const usersSchema = z.object({
@@ -107,10 +108,10 @@ const instancesSchema = z.object({
   // url: z.string().url().nullable(),
   thumbnail: z.string().nullable().optional(),
   media_type: z.enum(["Audio", "Webpage", "Image", "Video", "PDF"]),
-  call_number_item: listItemsSchema.nullable().optional().describe("Call Number"),
-  generation_item: listItemsSchema.nullable().optional().describe("Generation"),
-  format_item: listItemsSchema.required().describe("Format"),
-  quality_item: listItemsSchema.nullable().optional().describe("Quality"),
+  call_number_item: list_itemsSchema.nullable().optional().describe("Call Number"),
+  generation_item: list_itemsSchema.nullable().optional().describe("Generation"),
+  format_item: list_itemsSchema.describe("Format"),
+  quality_item: list_itemsSchema.nullable().optional().describe("Quality"),
   original_doc_id: z.number().nullable().optional(),
   is_primary: z.boolean(),
   ...common_modification_fields,
@@ -180,14 +181,14 @@ const recordsSchema = z.object({
     })
     .describe("Date"),
   year_is_circa: z.boolean().default(false).describe("Approximate Date"),
-  publisher: listItemsSchema.nullable().optional(),
-  program: listItemsSchema.nullable().optional(),
+  publisher: list_itemsSchema.nullable().optional(),
+  program: list_itemsSchema.nullable().optional(),
   instances: z.array(instancesSchema).describe('Media').min(1).default([]),
   has_digital: z.boolean().default(false),
-  authors: z.array(listItemsSchema).nullable().optional(),
-  subjects: z.array(listItemsSchema).nullable().optional(),
-  keywords: z.array(listItemsSchema).nullable().optional(),
-  producers: z.array(listItemsSchema).nullable().optional(),
+  authors: z.array(list_itemsSchema).nullable().optional(),
+  subjects: z.array(list_itemsSchema).nullable().optional(),
+  keywords: z.array(list_itemsSchema).nullable().optional(),
+  producers: z.array(list_itemsSchema).nullable().optional(),
   primary_instance_thumbnail: z.string().nullable().optional(),
   primary_instance_format_id: z.number().nullable().optional(),
   primary_instance_format_text: z.string().nullable().optional(),
@@ -305,10 +306,10 @@ const collectionsSchema = z.object({
   display_order: z.number().nullable().optional(),
   needs_review: z.boolean().default(false),
   is_hidden: z.boolean().default(false),
-  call_number_item: listItemsSchema.nullable().optional().describe("Call Number"),
-  publisher: listItemsSchema.nullable().optional(),
-  subjects: z.array(listItemsSchema).nullable().optional(),
-  keywords: z.array(listItemsSchema).nullable().optional(),
+  call_number_item: list_itemsSchema.nullable().optional().describe("Call Number"),
+  publisher: list_itemsSchema.nullable().optional(),
+  subjects: z.array(list_itemsSchema).nullable().optional(),
+  keywords: z.array(list_itemsSchema).nullable().optional(),
   child_records: z.array(embeddedRecordSchema),
   featured_records: z.array(embeddedRecordSchema),
   parent: z.lazy(() => embeddedCollectionSchema),
@@ -358,8 +359,10 @@ const collectionsDataSchema = collectionsSchema
 
 export default {
   archivesSchema,
-  listItemsSchema,
+  list_itemsSchema,
+  list_itemsDataSchema: list_itemsSchema,
   usersSchema,
+  usersDataSchema: usersSchema,
   recordsSchema,
   recordsDataSchema,
   instancesSchema,

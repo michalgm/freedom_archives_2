@@ -4,12 +4,16 @@ import { getOrdinal } from "src/utils";
 import schemas from "../../../../backend/services/zod_schema";
 
 const errorRegex = /^(String|Number)\b/;
+const requiredRegex = /^(Required|String must contain at least 1 character(s)|Expected[^,]+, received null)\b/;
 export const parseError = (name, _label) => (error) => {
+  if (!error.message) {
+    error = Object.values(error)[0]
+  }
   const label = formatLabel(_label, name);
   if (errorRegex.test(error.message)) {
     return error.message.replace(errorRegex, label);
   }
-  if (["Required", "String must contain at least 1 character(s)"].includes(error.message)) {
+  if (requiredRegex.test(error.message)) {
     return `${label} is required`;
   }
   if (error.message === "Invalid") {
@@ -178,7 +182,7 @@ export const getFieldLabel = (field, schemaName, useFullPath) => {
     const fullPath = paths.join('.')
     let label = fieldLabels?.[`${schemaName}DataSchema`]?.[fullPath.replace(/\[\]$/, '')] || formatLabel(null, path);
     if (count) {
-      label = ` ${getOrdinal(count)} ${label}`
+      label = ` ${getOrdinal(count)} ${label} entry`
     }
     // console.log({ count, path, fullPath, labels, label })
     labels.push(label)
@@ -188,3 +192,5 @@ export const getFieldLabel = (field, schemaName, useFullPath) => {
 
   return labels.reverse().join(' of the ');
 };
+
+export { schemas }
