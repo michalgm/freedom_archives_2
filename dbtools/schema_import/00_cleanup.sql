@@ -219,6 +219,12 @@ SET
 WHERE
     username='greg';
 
+UPDATE freedom_archives_old.users
+SET
+    firstname='Intern'
+WHERE
+    username='intern';
+
 INSERT INTO
     freedom_archives_old.list_items (
         item,
