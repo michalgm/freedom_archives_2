@@ -54,15 +54,6 @@ const fields = [
   },
   {
     name: "date_modified",
-    label: "Changes since",
-    field_type: "datetime",
-    slotProps: {
-      field: { clearable: true },
-    },
-    fullWidth: false,
-    InputProps: {
-      sx: { borderTopRightRadius: 0, borderBottomRightRadius: 0 },
-    },
   },
   { name: "title" },
   {
