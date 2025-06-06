@@ -17,20 +17,25 @@ const filter_types = {
 };
 
 const sort_options = {
-  relevance: { label: "Search Relevance", sort: { rank: -1, collection_name: 1, date_created: -1 } },
-  collection_name: { label: "Collection Name", sort: { collection_name: 1, rank: -1, date_created: -1 } },
-  date_modified: { label: "Date Modified", sort: { date_modified: -1, rank: -1, collection_name: 1 } },
-  date_created: { label: "Date Created", sort: { date_created: -1, rank: -1, collection_name: 1 } },
-  call_number: { label: "Call Number", sort: { call_number: 1, rank: -1, collection_name: 1 } },
+  relevance: { label: "Search Relevance", sort: { rank: -1, display_order: 1, collection_name: 1, date_created: -1 } },
+  collection_name: {
+    label: "Collection Name",
+    sort: { collection_name: 1, display_order: 1, rank: -1, date_created: -1 },
+  },
+  date_modified: {
+    label: "Date Modified",
+    sort: { date_modified: -1, display_order: 1, rank: -1, collection_name: 1 },
+  },
+  date_created: { label: "Date Created", sort: { date_created: -1, display_order: 1, rank: -1, collection_name: 1 } },
+  call_number: { label: "Call Number", sort: { call_number: 1, display_order: 1, rank: -1, collection_name: 1 } },
 };
 
 function Collections({ embedded, itemAction, filter = {}, excludeIds = [], useStore }) {
   const createQuery = useCallback(
     (filter) => {
-      const { search, hidden, needs_review, sort, sort_desc } = filter;
+      const { search, hidden, needs_review, sort = "relevance", sort_desc = true } = filter;
       const query = {
         collection_id: { $nin: excludeIds },
-        $sort: { display_order: 1, collection_name: 1 },
         $select: ["collection_id", "collection_name", "summary", "thumbnail", "parent", "call_number"],
       };
       if (!hidden) {

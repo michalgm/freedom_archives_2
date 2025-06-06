@@ -37,7 +37,15 @@ const sort_options = {
 function Records({ embedded, itemAction, filter = {}, forcedFilter = {}, useStore }) {
   const createQuery = useCallback(
     (formFilter) => {
-      const { search, non_digitized, hidden, needs_review, collection_id, sort, sort_desc } = formFilter;
+      const {
+        search,
+        non_digitized,
+        hidden,
+        needs_review,
+        collection_id,
+        sort = "relevance",
+        sort_desc = true,
+      } = formFilter;
 
       const query = {
         // $sort: { title: 1 },
