@@ -8,7 +8,8 @@ import { fileURLToPath } from "url";
 const fs = { promises }.promises;
 const OUTPUT_DIR = "img/thumbnails/";
 const SIZES = {
-  default: 75,
+  default: 100,
+  small: 75,
   large: 250,
 };
 const __filename = fileURLToPath(import.meta.url);
