@@ -197,7 +197,22 @@ function RecordItemDetails({ details, dense }) {
   const items = details.reduce((acc, { label, type, link }) => {
     if (label) {
       const item = (
-        <Grid2 key={type} style={{ paddingTop: 0, paddingBottom: 0 }}>
+        <Grid2
+          key={type}
+          sx={{
+            p: 1,
+            paddingTop: 0,
+            paddingBottom: 0,
+            backgroundColor: "var(--mui-palette-action-hover)",
+            borderRadius: 4,
+            rowGap: 20,
+            whiteSpace: "nowrap",
+            flexWrap: "wrap",
+          }}
+          rowSpacing={1}
+          columnSpacing={1}
+        >
+          {/* <KVChip keyName={type} value={label} /> */}
           <Typography color="textSecondary" variant="caption">
             {type}:&nbsp;
             <b> {label} </b>
@@ -217,7 +232,14 @@ function RecordItemDetails({ details, dense }) {
   }, []);
 
   return (
-    <Stack direction="row" divider={<Divider orientation="vertical" flexItem />} spacing={1}>
+    <Stack
+      direction="row"
+      // divider={<Divider orientation="vertical" flexItem />}
+      spacing={1}
+      flexWrap={"wrap"}
+      rowGap={0.5}
+      columnGap={0.5}
+    >
       {items}
     </Stack>
   );
@@ -321,7 +343,7 @@ export default function RecordItem({ record = {}, description: showDescription, 
     },
     { type: "Format", label: primary_instance_format_text },
     { type: "ID", label: record_id },
-    { type: "Call Numbers", label: call_numbers.join(", ") },
+    { type: "Call Numbers", label: call_numbers?.join(", ") },
   ];
   if (itemAction) {
     props.onClick = () => itemAction(record);
