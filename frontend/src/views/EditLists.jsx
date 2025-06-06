@@ -1,9 +1,27 @@
-import { Box, Paper, Tab, Tabs } from "@mui/material";
+import { Merge } from "@mui/icons-material";
+import {
+  Box,
+  Button,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogContentText,
+  DialogTitle,
+  Paper,
+  Stack,
+  Tab,
+  Tabs,
+} from "@mui/material";
 import { startCase } from "lodash-es";
 import { useCallback, useEffect, useState } from "react";
+import { FormContainer } from "react-hook-form-mui";
+import { Field } from "src/components/form/Field";
+import Notifications from "src/components/Notifications";
+import Show from "src/components/Show";
+import { useAddNotification } from "src/stores";
 import { checkUnique } from "src/utils";
 
-import { list_items_lookup } from "../api";
+import { list_items, list_items_lookup } from "../api";
 import EditableDataTable from "../components/EditableDataTable";
 
 const item_types = {
@@ -86,6 +104,7 @@ function EditLists() {
   const [order, setOrder] = useState(initialOrder);
   const [pagination, setPagination] = useState(initialPage);
   const [loading, setLoading] = useState(true);
+  const [mergeItem, setMergeItem] = useState(null);
 
   useEffect(() => {
     setOrder(initialOrder);
@@ -142,6 +161,8 @@ function EditLists() {
   };
   const itemType = startCase(type);
 
+  const mergeAction = ["Merge", Merge, setMergeItem];
+
   return (
     <Paper className="FlexContainer" sx={{ p: 0 }}>
       <Tabs value={type} variant="scrollable" scrollButtons="auto" onChange={(_, type) => setType(type.toLowerCase())}>
@@ -175,6 +196,7 @@ function EditLists() {
           rowCount={values.total}
           columnVisibilityModel={{
             description: Boolean(item_types[type].description),
+            list_item_id: true,
             records_count: Boolean(item_types[type].records),
             collections_count: Boolean(item_types[type].collections),
             instances_count: Boolean(item_types[type].instances),
@@ -183,9 +205,96 @@ function EditLists() {
           sortingOrder={["desc", "asc"]}
           onSortModelChange={handleSortModelChange}
           defaultValues={{ type }}
+          extraActions={[mergeAction]}
         />
+        <MergeItemModal item={mergeItem} onClose={() => setMergeItem(null)} fetchValues={fetchValues} />
       </Box>
     </Paper>
   );
 }
+
+const MergeItemModal = ({ item, onClose: _onClose, fetchValues }) => {
+  const [mergeItem, setMergeItem] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const addNotification = useAddNotification();
+
+  const onClose = useCallback(() => {
+    setMergeItem(null);
+    _onClose();
+  }, [_onClose]);
+  const type = item?.type;
+
+  const mergeItems = useCallback(async () => {
+    if (!mergeItem) return;
+    setLoading(true);
+    try {
+      await list_items.update(item.list_item_id, { merge_target_id: mergeItem.list_item_id });
+      addNotification({ message: `Merged ${type} "${item.item}" into "${mergeItem.item}"` });
+      fetchValues();
+      onClose();
+    } finally {
+      setLoading(false);
+    }
+  }, [mergeItem, item?.list_item_id, item?.item, addNotification, type, fetchValues, onClose]);
+
+  if (!item) return null;
+
+  return (
+    <Dialog open={true} onClose={onClose}>
+      <DialogTitle>
+        Merge {type} "{item.item}"
+      </DialogTitle>
+      <DialogContent>
+        <Notifications embedded />
+        <Stack spacing={2}>
+          <DialogContentText>
+            Merging this {type} will replace all of its instances in the database with the item you choose below.
+          </DialogContentText>
+          <FormContainer defaultValues={{}}>
+            <Field
+              name="merge_target_id"
+              field_type="list_item"
+              itemType={type}
+              fullWidth
+              label={`Select ${type} to merge into`}
+              highlightDirty={false}
+              sx={{ width: "100%" }}
+              excludeIds={[item.list_item_id]}
+              onChange={(value) => {
+                setMergeItem(value);
+              }}
+            />{" "}
+          </FormContainer>
+          <Show when={mergeItem}>
+            <DialogContentText>
+              Merging will replace all {type} instances of "<b>{item.item}</b>" with "<b>{mergeItem?.item}</b>" across:
+              <Box sx={{ listStyleType: "disc inside", ml: 4 }}>
+                {["records", "collections", "instances"].map((type) => {
+                  const count = parseInt(item[`${type}_count`], 10);
+                  const displayType = type === "instances" ? "record media" : type;
+                  if (count)
+                    return (
+                      <li key={type}>
+                        <b>
+                          {count} {count === 1 ? displayType.replace(/s$/, "") : displayType}
+                        </b>
+                      </li>
+                    );
+                })}
+              </Box>
+            </DialogContentText>
+          </Show>
+        </Stack>
+      </DialogContent>
+
+      <DialogActions>
+        <Button onClick={onClose}>Cancel</Button>
+        <Button variant="contained" color="primary" onClick={mergeItems} disabled={!mergeItem} loading={loading}>
+          Merge
+        </Button>
+      </DialogActions>
+    </Dialog>
+  );
+};
+
 export default EditLists;

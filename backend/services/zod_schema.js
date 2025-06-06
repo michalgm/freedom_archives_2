@@ -28,8 +28,9 @@ const archivesSchema = z.object({
 
 const list_itemsSchema = z.object({
   list_item_id: z.number(),
-  item: z.string(),
+  item: z.string().min(1),
   description: z.string().nullable().optional(),
+  merge_target_id: z.number().nullable().optional(),
 });
 
 const usersSchema = z.object({
