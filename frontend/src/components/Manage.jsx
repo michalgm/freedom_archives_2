@@ -160,9 +160,9 @@ const FilterBar = ({
         alignItems={"flex-start"}
         // justifyContent={"space-between"}
       >
-        <Grid2 container flex="1 1 fit-content" spacing={2}>
-          <Grid2 container flex="0 1 fit-content" rowSpacing={1}>
-            <Grid2 flex="1 0 30%" sx={{ minWidth: 150 }}>
+        <Grid2 container flex="1 1 fit-content" spacing={1}>
+          <Grid2 container flex="1 1 fit-content" rowSpacing={1}>
+            <Grid2 flex="1" sx={{ minWidth: 150 }}>
               <Field
                 highlightDirty={false}
                 size={size}
@@ -184,7 +184,7 @@ const FilterBar = ({
               />
             </Grid2>
             <Show when={service === "records"}>
-              <Grid2 flex="1 0 30%" sx={{ minWidth: 150 }}>
+              <Grid2 flex="1" sx={{ minWidth: 150 }}>
                 <Field
                   name="collection_id"
                   label="Collection"
@@ -198,7 +198,7 @@ const FilterBar = ({
                 />
               </Grid2>
             </Show>
-            <Grid2 flex="1 0 30%" sx={{ minWidth: 150 }} container spacing={0}>
+            <Grid2 flex="1" sx={{ minWidth: 150 }} container spacing={0}>
               <Grid2 flex="1 0 fit-content">
                 <Field
                   name="sort"

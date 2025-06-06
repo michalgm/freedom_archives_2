@@ -1,4 +1,4 @@
-import { Box, Button, Grid2, Stack, Typography } from "@mui/material";
+import { Box, Button, Divider, Grid2, Stack, Typography } from "@mui/material";
 import dayjs from "dayjs";
 import { startCase } from "lodash-es";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
@@ -328,34 +328,47 @@ function ReviewChanges() {
       ]}
       noPaper
     >
-      <EditableDataTable
-        rows={values.data}
-        columns={columns}
-        idField="id"
-        model="list_items"
-        sortingMode="server"
-        paginationMode="server"
-        loading={loading}
-        initialState={{
-          sorting: {
-            sortModel: [initialOrder],
-          },
-        }}
-        // autosizeColumns
-        paginationModel={{ page: pagination.skip / pagination.limit, pageSize: pagination.limit }}
-        onPaginationModelChange={handlePaginationModelChange}
-        pageSizeOptions={[pagination.limit]}
-        rowCount={values.total}
-        sortModel={[order]}
-        sortingOrder={["desc", "asc"]}
-        onSortModelChange={handleSortModelChange}
-        readonly
-        slotProps={{
-          toolbar: {
-            showQuickFilter: false,
-          },
-        }}
-      />
+      <Stack
+        container
+        spacing={3}
+        direction={"column"}
+        sx={{ height: "100%" }}
+        divider={<Divider orientation="horizontal" flexItem />}
+      >
+        <Box sx={{ display: "flex", justifyContent: "center", flexGrow: 1, flexShrink: 1, overflow: "hidden" }}>
+          <EditableDataTable
+            rows={values.data}
+            columns={columns}
+            idField="id"
+            model="list_items"
+            sortingMode="server"
+            paginationMode="server"
+            loading={loading}
+            initialState={{
+              sorting: {
+                sortModel: [initialOrder],
+              },
+            }}
+            // autosizeColumns
+            paginationModel={{ page: pagination.skip / pagination.limit, pageSize: pagination.limit }}
+            onPaginationModelChange={handlePaginationModelChange}
+            pageSizeOptions={[pagination.limit]}
+            rowCount={values.total}
+            sortModel={[order]}
+            sortingOrder={["desc", "asc"]}
+            onSortModelChange={handleSortModelChange}
+            readonly
+            slotProps={{
+              toolbar: {
+                showQuickFilter: false,
+              },
+            }}
+          />
+        </Box>
+        {/* <Box sx={{ display: "flex", justifyContent: "center", flexGrow: 1, flexShrink: 1, overflow: "hidden" }}>
+          <Record id={4760} embedded />
+        </Box> */}
+      </Stack>
     </ViewContainer>
   );
 }
