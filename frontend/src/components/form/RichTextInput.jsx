@@ -24,6 +24,7 @@ import {
   RichTextReadOnly,
 } from "mui-tiptap";
 import { useEffect, useRef, useState } from "react";
+import { parseError } from "src/components/form/schemaUtils";
 
 const RichTextInput = (props) => {
   const {
@@ -47,6 +48,7 @@ const RichTextInput = (props) => {
       setLabelWidth(labelRef.current.getBoundingClientRect().width);
     }
   }, [label]);
+  const hasError = Boolean(error);
 
   const editor = rteRef.current?.editor;
   useEffect(() => {
@@ -212,9 +214,9 @@ const RichTextInput = (props) => {
             )}
           </RichTextEditor>
         </Box>
-        {((error?.message && !disabled) || helperText) && (
-          <FormHelperText id={props.name} error={Boolean(error)}>
-            {error?.message && !disabled ? error.message : helperText}
+        {(helperText || (hasError && !disabled)) && (
+          <FormHelperText id={props.name} error={hasError}>
+            {hasError && !disabled ? parseError(name, label)(error) : helperText}
           </FormHelperText>
         )}
       </FormControl>

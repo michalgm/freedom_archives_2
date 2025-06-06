@@ -297,7 +297,7 @@ const collectionsSchema = z.object({
   archive_id: z.number().nullable().optional(),
   parent_collection_id: z.number().nullable().optional(),
   collection_name: z.string().min(1),
-  description: z.string().nullable().optional(),
+  description: z.string().min(1).default(""),
   summary: z.string().nullable().optional(),
   call_number_id: z.number().nullable().optional(),
   call_number_suffix: callNumberSuffixSchema,
