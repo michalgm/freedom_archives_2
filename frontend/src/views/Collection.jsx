@@ -148,10 +148,10 @@ function Collection({ id, mode = "" }) {
             >
               {/* <GridBlock title="" spacing={2} className="FlexContainer"> */}
               <Stack sx={{ height: "100%" }} className="FlexContainer">
-                {!isFeaturedRecords && (
+                {!isFeaturedRecords && !isFeaturedCollections && (
                   <Tabs sx={{ flex: "0 0 auto" }} value={tab} onChange={(_, tab) => setTab(tab)}>
-                    {!isFeaturedCollections && <Tab label="Edit Collection" value="collection"></Tab>}
-                    {!isFeaturedCollections && <Tab label="Featured Records" value="featured"></Tab>}
+                    <Tab label="Edit Collection" value="collection"></Tab>
+                    <Tab label="Featured Records" value="featured"></Tab>
                     <Tab label="Subcollections" value="subcollections"></Tab>
                     <Tab label="Records" value="records"></Tab>
                   </Tabs>
