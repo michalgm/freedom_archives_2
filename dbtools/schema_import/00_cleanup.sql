@@ -221,6 +221,13 @@ WHERE
 
 UPDATE freedom_archives_old.users
 SET
+    status='active',
+    ROLE='staff'
+WHERE
+    username='dlb';
+
+UPDATE freedom_archives_old.users
+SET
     firstname='Intern'
 WHERE
     username='intern';
