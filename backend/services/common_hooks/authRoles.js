@@ -17,13 +17,16 @@ const authRoles = async (context) => {
     return context;
   }
   const { user } = params;
+  // if (!user) {
+  //   return context;
+  // }
   const serviceName = (service.options?.name || context.path).replace('api/', '');
   const userRole = user?.role;
 
   const userRoleValue = ROLE_HIERARCHY.indexOf(userRole);
   const serviceRoleValue = ROLE_HIERARCHY.indexOf(SERVICE_PERMISSIONS[serviceName]);
-  console.log('USER', userRole, userRoleValue);
-  console.log('SERVICE', serviceName, SERVICE_PERMISSIONS[serviceName], serviceRoleValue);
+  // console.log('USER', userRole, userRoleValue);
+  // console.log('SERVICE', serviceName, SERVICE_PERMISSIONS[serviceName], serviceRoleValue);
   // Only apply to write operations
 
 

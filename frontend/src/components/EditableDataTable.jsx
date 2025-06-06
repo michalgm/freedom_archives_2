@@ -118,13 +118,14 @@ export const EditableDataTable = ({
         });
         if (confirmed) {
           // const prepared = diffShallow(newRow, oldRow);
+          const data = newRow;
           if (newRow.delete) {
             await API[model].remove(id);
           } else if (id === -1) {
-            newRow = await API[model].create(omit(newRow, [idField]));
+            newRow = await API[model].create(omit(data, [idField]));
             onNew(newRow);
           } else {
-            newRow = await API[model].patch(id, diffShallow(newRow, oldRow));
+            newRow = await API[model].patch(id, diffShallow(data, oldRow));
           }
           addNotification({ message: `${itemType} "${name}" ${action.toLowerCase()}d!` });
           await onUpdate(newRow);
@@ -191,8 +192,8 @@ export const EditableDataTable = ({
           ]
         : [
             ["Edit", EditIcon, () => updateRow(id)],
+            ...extraActions.map(([label, Icon, action]) => [label, Icon, () => action(row, apiRef, id, setEditRow)]),
             disableDelete ? null : ["Delete", DeleteIcon, () => deleteRow(row)],
-            ...extraActions.map(([label, Icon, action]) => [label, Icon, () => action(row, apiRef)]),
           ];
 
       const actions = icons

@@ -33,6 +33,7 @@ export default (function (app) {
       await app.service("api/records").patch(data.record_id, {}, { user, transaction: { trx } });
     }
   };
+
   const cleanupMeta = (context) => {
     const { data } = context;
     ["format", "quality", "generation"].forEach((key) => {
@@ -52,6 +53,7 @@ export default (function (app) {
     );
     return context;
   };
+
   service.hooks({
     before: {
       all: [],

@@ -20,7 +20,7 @@ export const FormButton = ({
   ...props
 }) => {
   const [loading, setLoading] = useState(false);
-  const { handleSubmit, formState: { isValid = true, isSubmitted = false } = {} } = formContext || {};
+  const { handleSubmit, formState: {} = {} } = formContext || {};
 
   const click = useCallback(
     async (e) => {
