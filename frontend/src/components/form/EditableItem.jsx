@@ -4,8 +4,9 @@ import { useEffect, useRef, useState } from "react";
 import { useFormContext } from "react-hook-form";
 import RecordItem, { CollectionItem } from "src/components/EditableItemsList";
 import { Field } from "src/components/form/Field";
+import { parseError } from "src/components/form/schemaUtils";
 
-export function EditableItem({ service, name, link = true, label, parseError, ...props }) {
+export function EditableItem({ service, name, link = true, label, ...props }) {
   const { value } = props;
   const inputRef = useRef(null);
   // logger.log(name, props);
@@ -51,11 +52,13 @@ export function EditableItem({ service, name, link = true, label, parseError, ..
   } else {
     const { tag: ItemTag, itemName } = services[service];
     // logger.log(props.error, errors[name]?.message, props.helperText, errors, name);
+    const error = errors[name];
+    const hasError = Boolean(error);
 
     const missingText = name === "parent" ? `Parent ${startCase(itemName)}` : "Collection";
 
     return (
-      <FormControl variant="outlined" fullWidth size="small" margin="dense" error={props.error}>
+      <FormControl variant="outlined" fullWidth size="small" margin="dense" error={hasError}>
         <InputLabel sx={{ backgroundColor: "#fff" }} shrink>
           {startCase(label)}
         </InputLabel>
@@ -65,8 +68,8 @@ export function EditableItem({ service, name, link = true, label, parseError, ..
             width: "100%",
             border: "1px solid",
             borderRadius: 1,
-            borderColor: props.error ? "error.main" : "grey.400",
-            color: props.error ? "error.main" : "inherit",
+            borderColor: hasError ? "error.main" : "grey.400",
+            color: hasError ? "error.main" : "inherit",
             padding: 0,
           }}
         >
@@ -86,8 +89,8 @@ export function EditableItem({ service, name, link = true, label, parseError, ..
             )}
           />
         </List>
-        {(props.helperText || props.error) && (
-          <FormHelperText>{(props.error && parseError(errors[name])) || props.helperText}</FormHelperText>
+        {(props.helperText || hasError) && (
+          <FormHelperText>{(hasError && parseError(name, label)(error)) || props.helperText}</FormHelperText>
         )}
       </FormControl>
     );
