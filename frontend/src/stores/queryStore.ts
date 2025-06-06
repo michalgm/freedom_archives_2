@@ -39,6 +39,8 @@ interface FilterItem {
 interface SearchFilter {
   search: string;
   hidden: boolean;
+  sort: string;
+  sort_desc: boolean;
   needs_review: boolean;
   [key: string]: string | number | boolean | undefined | FilterItem[];
   filters?: FilterItem[];
@@ -82,7 +84,9 @@ const initialSearchData: SearchData = {
     hidden: false,
     needs_review: false,
     search: "",
-    filters: []
+    filters: [],
+    sort: 'relevance',
+    sort_desc: false
   },
   total: 0,
   offset: 0,
@@ -102,7 +106,9 @@ export const initialSearch = {
     search_index: 0,
   } as SearchState<RecordSearchData>,
   collections: {
-    search: initialSearchData,
+    search: {
+      ...initialSearchData,
+    },
     search_index: 0,
   } as SearchState<SearchData>,
 }

@@ -415,17 +415,18 @@ export const BaseField = ({
 
   const renderCheckbox = () => {
     const Component = isRHF ? CheckboxElement : Checkbox;
+    const { labelProps: _lp, ...rest } = props;
     return (
       <Component
         name={name}
         label={props.label}
-        labelProps={{ color, sx: { userSelect: "none" } }}
+        labelProps={{ color, size, sx: { userSelect: "none" }, ...props.labelProps }}
         onChange={onChange}
         color={color}
         helperText={helperText}
         required={props.required}
         size={size}
-        {...props}
+        {...rest}
       />
     );
     // return <FormGroup>

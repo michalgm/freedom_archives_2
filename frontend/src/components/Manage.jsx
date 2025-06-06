@@ -1,4 +1,4 @@
-import { Close, Search } from "@mui/icons-material";
+import { ArrowDownward, ArrowUpward, Close, Search } from "@mui/icons-material";
 import { Box, Button, Grid2, Icon, IconButton, InputAdornment, Paper, Stack, Tooltip } from "@mui/material";
 import { isEqual, merge, startCase } from "lodash-es";
 import { useCallback, useEffect, useMemo, useState } from "react";
@@ -65,6 +65,9 @@ function Filter({ index, remove, filterTypes, filter, update }) {
         backgroundColor: "#fff",
       },
     };
+  } else if (type === "checkbox") {
+    valueFieldProps.label = filterTypes[field]?.label || startCase(field);
+    valueFieldProps.field_type = type;
   } else {
     valueFieldProps.field_type = type;
     valueFieldProps.sx = {
@@ -116,6 +119,7 @@ const FilterBar = ({
   searchHelperText,
   embedded,
   filter,
+  sortOptions,
 }) => {
   const formContext = useForm({
     defaultValues: merge(structuredClone(filter), defaultFilter),
@@ -158,7 +162,7 @@ const FilterBar = ({
       >
         <Grid2 container flex="1 1 fit-content" spacing={2}>
           <Grid2 container flex="0 1 fit-content" rowSpacing={1}>
-            <Grid2 flex="1 0 45%" sx={{ minWidth: 150 }}>
+            <Grid2 flex="1 0 30%" sx={{ minWidth: 150 }}>
               <Field
                 highlightDirty={false}
                 size={size}
@@ -180,7 +184,7 @@ const FilterBar = ({
               />
             </Grid2>
             <Show when={service === "records"}>
-              <Grid2 flex="1 0 45%" sx={{ minWidth: 150 }}>
+              <Grid2 flex="1 0 30%" sx={{ minWidth: 150 }}>
                 <Field
                   name="collection_id"
                   label="Collection"
@@ -194,6 +198,53 @@ const FilterBar = ({
                 />
               </Grid2>
             </Show>
+            <Grid2 flex="1 0 30%" sx={{ minWidth: 150 }} container spacing={0}>
+              <Grid2 flex="1 0 fit-content">
+                <Field
+                  name="sort"
+                  label="Sort By"
+                  highlightDirty={false}
+                  field_type="select"
+                  size={size}
+                  margin="none"
+                  disableClearable
+                  returnFullObject={false}
+                  options={Object.entries(sortOptions).map(([key, value]) => ({
+                    id: key,
+                    label: value.label,
+                    value: key,
+                  }))}
+                />
+              </Grid2>
+              <Grid2>
+                <Field
+                  name="sort_desc"
+                  field_type="checkbox"
+                  label=""
+                  margin="none"
+                  size={size}
+                  highlightDirty={false}
+                  icon={<ArrowUpward size={size} />}
+                  checkedIcon={<ArrowDownward size={size} />}
+                  color={"text.primary"}
+                  labelProps={{ size, sx: { m: 0 } }}
+                  sx={{
+                    m: 0,
+                    "& .MuiFormControlLabel-root": {
+                      margin: 0,
+                      width: "100%",
+                    },
+                    ml: "-1px",
+                    borderRadius: 1,
+                    borderBottomLeftRadius: 0,
+                    borderTopLeftRadius: 0,
+                    border: 1,
+                    BorderLeft: "none",
+                    borderColor: "rgba(var(--mui-palette-common-onBackgroundChannel) / 0.23)",
+                  }}
+                />
+              </Grid2>
+            </Grid2>
           </Grid2>
           <Grid2 flex="1 1 min-content" container spacing={0} flexWrap={"wrap"}>
             <Show when={service === "records"}>
@@ -203,31 +254,33 @@ const FilterBar = ({
                 name="non_digitized"
                 label="Include Non-Digitized"
                 margin="none"
-                size="small"
+                size={embedded ? "x-small" : "small"}
                 sx={{ py: 0.5 }}
                 labelProps={{ sx: { whiteSpace: "nowrap" } }}
               />
             </Show>
-            <Field
-              field_type="checkbox"
-              highlightDirty={false}
-              name="hidden"
-              label="Include Hidden"
-              margin="none"
-              size="small"
-              sx={{ py: 0.5 }}
-              labelProps={{ sx: { whiteSpace: "nowrap" } }}
-            />
-            <Field
-              field_type="checkbox"
-              highlightDirty={false}
-              name="needs_review"
-              label="Needs Review"
-              margin="none"
-              size="small"
-              sx={{ py: 0.5 }}
-              labelProps={{ sx: { whiteSpace: "nowrap" } }}
-            />
+            <Show when={!embedded}>
+              <Field
+                field_type="checkbox"
+                highlightDirty={false}
+                name="hidden"
+                label="Include Hidden"
+                margin="none"
+                size={embedded ? "x-small" : "small"}
+                sx={{ py: 0.5 }}
+                labelProps={{ sx: { whiteSpace: "nowrap" } }}
+              />
+              <Field
+                field_type="checkbox"
+                highlightDirty={false}
+                name="needs_review"
+                label="Needs Review"
+                margin="none"
+                size={embedded ? "x-small" : "small"}
+                sx={{ py: 0.5 }}
+                labelProps={{ sx: { whiteSpace: "nowrap" } }}
+              />
+            </Show>
           </Grid2>
         </Grid2>
         <Grid2
@@ -306,6 +359,7 @@ const ManageBase = ({
   embedded,
   itemAction,
   useStore,
+  sortOptions = {},
 }) => {
   const [items, setItems] = useState([]);
   const [digitizedTotal, setDigitizedTotal] = useState(0);
@@ -420,6 +474,7 @@ const ManageBase = ({
           defaultFilter={defaultFilter}
           searchHelperText={searchHelperText}
           embedded={embedded}
+          sortOptions={sortOptions}
         />,
       ]}
     >

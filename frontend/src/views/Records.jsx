@@ -1,3 +1,4 @@
+import { cloneDeep } from "lodash-es";
 import { useCallback } from "react";
 
 import Manage from "../components/Manage";
@@ -22,15 +23,24 @@ const filter_types = {
   qualitys: { input: "listitem", match: "contained" },
   generations: { input: "listitem", match: "contained" },
   media_types: { input: "simpleSelect", match: "contained" },
+  is_hidden: { input: "checkbox", match: "exact", label: "Hidden" },
+};
+
+const sort_options = {
+  relevance: { label: "Search Relevance", sort: { rank: -1, title: 1, date_created: -1 } },
+  title: { label: "Title", sort: { title: 1, rank: -1, date_created: -1 } },
+  date_modified: { label: "Date Modified", sort: { date_modified: -1, rank: -1, title: 1 } },
+  date_created: { label: "Date Created", sort: { date_created: -1, rank: -1, title: 1 } },
+  call_number: { label: "Call Number", sort: { call_numbers: 1, rank: -1, title: 1 } },
 };
 
 function Records({ embedded, itemAction, filter = {}, forcedFilter = {}, useStore }) {
   const createQuery = useCallback(
     (formFilter) => {
-      const { search, non_digitized, hidden, needs_review, collection_id } = formFilter;
+      const { search, non_digitized, hidden, needs_review, collection_id, sort, sort_desc } = formFilter;
 
       const query = {
-        $sort: { title: 1 },
+        // $sort: { title: 1 },
         $select: [
           "record_id",
           "title",
@@ -55,9 +65,16 @@ function Records({ embedded, itemAction, filter = {}, forcedFilter = {}, useStor
       if (collection_id != null) {
         query.collection_id = collection_id;
       }
+      query.$sort = cloneDeep(sort_options[sort].sort);
       if (search) {
         query.$fullText = search;
-        query.$sort = { rank: -1, title: 1 };
+      } else {
+        delete query.$sort.rank;
+      }
+      if (sort_desc) {
+        for (const key in query.$sort) {
+          query.$sort[key] *= -1;
+        }
       }
       return query;
     },
@@ -74,6 +91,7 @@ function Records({ embedded, itemAction, filter = {}, forcedFilter = {}, useStor
       itemAction={itemAction}
       searchHelperText="Search title, description, keywords, producers, and call number"
       useStore={useStore}
+      sortOptions={sort_options}
     />
   );
 }

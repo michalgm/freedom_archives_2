@@ -44,6 +44,9 @@ const xSmallInputStyles = {
   "& svg": {
     fontSize: "1.2rem",
   },
+  "& .MuiFormControlLabel-label": {
+    fontSize: xSmallInputFontSize,
+  },
   "& .MuiInputLabel-root": {
     fontSize: xSmallInputFontSize,
     transform: "translate(10px, 7px) scale(1)",
@@ -64,6 +67,22 @@ export const theme = createTheme({
     h6: { fontSize: "1.2rem" },
   },
   components: {
+    MuiFormControlLabel: {
+      variants: [
+        {
+          props: { size: "x-small" },
+          style: xSmallInputStyles,
+        },
+      ],
+    },
+    MuiCheckbox: {
+      variants: [
+        {
+          props: { size: "x-small" },
+          style: xSmallGroupButtonStyles,
+        },
+      ],
+    },
     MuiButton: {
       defaultProps: {
         size: "small",

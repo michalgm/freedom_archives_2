@@ -1,5 +1,6 @@
 import { BrokenImage } from "@mui/icons-material";
 import { Avatar, ListItemAvatar, ListItemText, Typography } from "@mui/material";
+import { cloneDeep } from "lodash-es";
 import { useCallback } from "react";
 
 import Manage from "../components/Manage";
@@ -15,10 +16,18 @@ const filter_types = {
   subjects: { input: "listitem", match: "listitem" },
 };
 
+const sort_options = {
+  relevance: { label: "Search Relevance", sort: { rank: -1, collection_name: 1, date_created: -1 } },
+  collection_name: { label: "Collection Name", sort: { collection_name: 1, rank: -1, date_created: -1 } },
+  date_modified: { label: "Date Modified", sort: { date_modified: -1, rank: -1, collection_name: 1 } },
+  date_created: { label: "Date Created", sort: { date_created: -1, rank: -1, collection_name: 1 } },
+  call_number: { label: "Call Number", sort: { call_number: 1, rank: -1, collection_name: 1 } },
+};
+
 function Collections({ embedded, itemAction, filter = {}, excludeIds = [], useStore }) {
   const createQuery = useCallback(
     (filter) => {
-      const { search, hidden, needs_review } = filter;
+      const { search, hidden, needs_review, sort, sort_desc } = filter;
       const query = {
         collection_id: { $nin: excludeIds },
         $sort: { display_order: 1, collection_name: 1 },
@@ -30,9 +39,16 @@ function Collections({ embedded, itemAction, filter = {}, excludeIds = [], useSt
       if (needs_review) {
         query.needs_review = true;
       }
+      query.$sort = cloneDeep(sort_options[sort].sort);
       if (search) {
         query.$fullText = search;
-        query.$sort = { rank: -1, collection_name: 1 };
+      } else {
+        delete query.$sort.rank;
+      }
+      if (sort_desc) {
+        for (const key in query.$sort) {
+          query.$sort[key] *= -1;
+        }
       }
       return query;
     },
@@ -90,6 +106,7 @@ function Collections({ embedded, itemAction, filter = {}, excludeIds = [], useSt
       itemAction={itemAction}
       searchHelperText={"Search name, description, summary, keywords, subjects, and call number"}
       useStore={useStore}
+      sortOptions={sort_options}
     />
   );
 }
