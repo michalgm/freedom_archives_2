@@ -1,3 +1,4 @@
+import { zodResolver } from "@hookform/resolvers/zod";
 import { Visibility, VisibilityOff } from "@mui/icons-material";
 import {
   Box,
@@ -10,12 +11,14 @@ import {
   ListItem,
   Stack,
 } from "@mui/material";
+import { isEmpty } from "lodash-es";
 import { useState } from "react";
 import { FormContainer } from "react-hook-form-mui";
 import { FormErrors } from "src/components/form/BaseForm";
 import ButtonsHeader from "src/components/form/ButtonsHeader";
 import { Field } from "src/components/form/Field";
 import { useAddNotification } from "src/stores";
+import { z } from "zod";
 
 import { users } from "../api";
 
@@ -52,22 +55,58 @@ function ChangePassword({ open, user: { user_id, username }, handleClose }) {
       </InputAdornment>
     ),
   };
-  const validatePasswords = ({ password1, password2 }) => {
-    logger.log({ password1, password2 });
-    const errors = {};
-    if (password1 || password2) {
-      if (password1 !== password2) {
-        errors.password1 = { message: "Passwords do not match" };
-      } else if (password1.length < 8) {
-        errors.password1 = { message: "Password must be at least 8 characters" };
-      } else if (password1 == username) {
-        errors.password1 = { message: "Password cannot be the same as username" };
-      } else if (password1.match(/^[A-z0-9]+$/)) {
-        errors.password1 = { message: "Password must contain at least one special character" };
+
+  const passwordSchema = z
+    .object({
+      password1: z
+        .string()
+        .min(8, "Password must be at least 8 characters")
+        .regex(/[^A-Za-z0-9]/, "Password must contain at least one special character"),
+      password2: z.string(),
+    })
+    .refine(
+      (data) => {
+        if (data.password1 === username) {
+          return false;
+        }
+        return true;
+      },
+      {
+        message: "Password cannot be the same as username",
+        path: ["password1"],
       }
-    }
-    return { values: { password1, password2 }, errors };
-  };
+    )
+    .refine(
+      (data) => {
+        if (data.password1 !== data.password2) {
+          return false;
+        }
+        return true;
+      },
+      {
+        message: "Passwords do not match",
+        path: ["password2"],
+      }
+    );
+
+  // const validatePasswords = ({ password1, password2 }) => {
+  //   logger.log({ password1, password2 });
+  //   const errors = {};
+  //   if (password1 && password2) {
+  //     if (password1 != password2) {
+  //       errors.password1 = { message: "Passwords do not match" };
+  //       errors.password2 = { message: "Passwords do not match" };
+  //     } else if (password1.length < 8) {
+  //       errors.password1 = { message: "Password must be at least 8 characters" };
+  //     } else if (password1 == username) {
+  //       errors.password1 = { message: "Password cannot be the same as username" };
+  //     } else if (password1.match(/^[A-z0-9]+$/)) {
+  //       errors.password1 = { message: "Password must contain at least one special character" };
+  //     }
+  //   }
+  //   const hasError = !isEmpty(errors);
+  //   return { values: hasError ? {} : { password1, password2 }, errors };
+  // };
 
   const buttons = [
     {
@@ -86,7 +125,7 @@ function ChangePassword({ open, user: { user_id, username }, handleClose }) {
           <FormContainer
             defaultValues={{ password1: "", password2: "" }}
             mode="onChange"
-            resolver={validatePasswords}
+            resolver={zodResolver(passwordSchema)} // Use Zod resolver instead
             onSuccess={savePassword}
           >
             <FormErrors />
