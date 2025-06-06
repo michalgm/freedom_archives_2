@@ -16,6 +16,10 @@ const MEDIA_TYPE_BADGES = {
 
 export default function Thumbnail({ item, src: _src, width = 75, alt = "", type: _type }) {
   const [brokenLink, setBrokenLink] = useState(false);
+  const onError = useCallback((_e) => {
+    setBrokenLink(true);
+  }, []);
+
   const type = item?.record_id != null ? "record" : "collection";
   let src = "";
   const media_type = item?.primary_instance_media_type || item.media_type;
@@ -23,7 +27,7 @@ export default function Thumbnail({ item, src: _src, width = 75, alt = "", type:
   let Icon = brokenLink ? BrokenImage : MEDIA_TYPE_ICONS[media_type];
 
   if (!Icon) {
-    const cache_buster = item?.date_modified ? `?${item.date_modified}` : "";
+    const cache_buster = item?.date_modified ? `?${item?.date_modified}` : "";
     if (!_src) {
       if (type === "collection") {
         if (item?.thumbnail) {
@@ -38,10 +42,6 @@ export default function Thumbnail({ item, src: _src, width = 75, alt = "", type:
       src = _src;
     }
   }
-
-  const onError = useCallback((_e) => {
-    setBrokenLink(true);
-  }, []);
 
   if (Icon) {
     const bgcolor = Icon === BrokenImage ? undefined : "primary.main";

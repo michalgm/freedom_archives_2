@@ -17,16 +17,18 @@ import {
   TableCell,
   TableHead,
   TableRow,
+  Tooltip,
   Typography,
 } from "@mui/material/";
-import React from "react";
+import React, { useCallback } from "react";
 import { useFieldArray, useFormContext } from "react-hook-form-mui";
 import { useNavigate, useParams } from "react-router";
+import { records } from "src/api";
 import { EditableItemsList, RecordsList } from "src/components/EditableItemsList";
 // import ButtonsHeader from "src/components/form/ButtonsHeader";
 import Show from "src/components/Show";
 import Thumbnail from "src/components/Thumbnail";
-import { useTitle } from "src/stores";
+import { useAddNotification, useTitle } from "src/stores";
 import EditItemView from "src/views/EditItemView";
 
 import FieldRow from "../components/FieldRow";
@@ -97,11 +99,11 @@ import Link from "../components/Link";
 //   continuations: [],
 // };
 
-function Instance({ instance = {}, index, actions: { remove, update, move } }) {
+function Instance({ instance = {}, index, actions: { swap, remove, update } }) {
   const edit = !instance.delete;
 
   return (
-    <React.Fragment key={`${instance.instance_id}-${index}`}>
+    <React.Fragment key={`${instance.instance_id}-${instance.id}`}>
       <TableRow className={`instance ${instance.delete ? "deleted" : ""}`} style={{ verticalAlign: "top" }}>
         <TableCell className="instance-action">
           <IconButton
@@ -115,7 +117,7 @@ function Instance({ instance = {}, index, actions: { remove, update, move } }) {
           </IconButton>
         </TableCell>
         <TableCell>
-          <IconButton onClick={() => move(index, 0)} size="large" sx={{ mt: 1, py: 1 }}>
+          <IconButton onClick={() => swap(index, 0)} size="large" sx={{ mt: 1, py: 1 }}>
             {index === 0 ? <RadioButtonCheckedOutlined /> : <RadioButtonUncheckedOutlined />}
           </IconButton>
         </TableCell>
@@ -339,9 +341,21 @@ function Record({ id /*  embedded = false */ }) {
   const { id: paramId } = useParams();
   id ??= paramId;
   const navigate = useNavigate();
+  const addNotification = useAddNotification();
   const newRecord = id === "new";
 
   const setTitle = useTitle();
+
+  const forceThumbnailUpdate = useCallback(
+    async (record, reset) => {
+      const { url, instance_id } = record?.instances?.[0] || {};
+      if (!url || record.record_id == null || !instance_id) return;
+      const res = await records.patch(record.record_id, { instances: [{ url, instance_id }] });
+      await reset(res);
+      addNotification({ message: "Thumbnail updated" });
+    },
+    [addNotification]
+  );
 
   logger.log("Record RENDER");
 
@@ -365,6 +379,8 @@ function Record({ id /*  embedded = false */ }) {
       >
         {(manager) => {
           const { formData: record } = manager;
+          const thumbnailAvailable = Boolean(record?.instances?.[0]?.url);
+
           return (
             <>
               <EditItemView item={record} newItem={newRecord} service="records" noPaper>
@@ -391,6 +407,22 @@ function Record({ id /*  embedded = false */ }) {
                           >
                             <Show unless={newRecord}>
                               <Thumbnail item={record} width={100} />
+                              <Tooltip
+                                title={
+                                  thumbnailAvailable ? "" : "No thumbnail available - first media item must have a URL"
+                                }
+                              >
+                                <span>
+                                  <Button
+                                    onClick={() => forceThumbnailUpdate(record, manager.reset)}
+                                    disabled={!thumbnailAvailable}
+                                    variant="outlined"
+                                    sx={{ width: "100px" }}
+                                  >
+                                    Update Thumbnail
+                                  </Button>
+                                </span>
+                              </Tooltip>
                             </Show>
                           </Grid2>
                         }

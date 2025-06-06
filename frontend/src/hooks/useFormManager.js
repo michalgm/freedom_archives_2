@@ -378,7 +378,7 @@ function useFormManager({
     hasDirtyFields,
     loading,
     validate: trigger,
-    reset,
+    reset: resetForm,
     shouldBlockNavigation: formState.isDirty && hasDirtyFields && !skipDirtyCheck,
   };
 }
