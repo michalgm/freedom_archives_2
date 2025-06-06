@@ -178,21 +178,6 @@ export const appConfig = {
       },
     ],
   },
-  "": {
-    icon: "person",
-    routes: [
-      {
-        path: "/login",
-        component: "Login",
-        public: true,
-        authRole: "intern",
-        sidebar: {
-          label: "Logout",
-          icon: "",
-        },
-      },
-    ],
-  },
 
   // Routes that don't appear in navigation
   Hidden: {
