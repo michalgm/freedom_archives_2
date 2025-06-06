@@ -17,7 +17,7 @@ SET
 
 --- Documents/Records
 ALTER TABLE freedom_archives_old.documents
-ADD COLUMN year_is_circa BOOLEAN;
+ADD COLUMN year_is_circa BOOLEAN NOT NULL DEFAULT FALSE;
 
 UPDATE freedom_archives_old.documents
 SET
@@ -222,7 +222,7 @@ WHERE
 UPDATE freedom_archives_old.users
 SET
     status='active',
-    ROLE='staff'
+    user_type='staff'
 WHERE
     username='dlb';
 

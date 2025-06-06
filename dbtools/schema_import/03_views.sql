@@ -4,8 +4,11 @@ CREATE VIEW
     instances_view AS
 SELECT
     a.*,
-    TRIM(
-        COALESCE(call_number_lookup.item, '')||' '||COALESCE(a.call_number_suffix, '')
+    NULLIF(
+        TRIM(
+            COALESCE(call_number_lookup.item, '')||' '||COALESCE(a.call_number_suffix, '')
+        ),
+        ''
     ) AS call_number,
     CASE
         WHEN call_number_lookup.list_item_id IS NOT NULL THEN JSONB_BUILD_OBJECT(
@@ -153,8 +156,11 @@ SELECT
     a.collection_name,
     a.parent_collection_id,
     a.thumbnail,
-    TRIM(
-        COALESCE(call_numbers.item, '')||' '||COALESCE(a.call_number_suffix, '')
+    NULLIF(
+        TRIM(
+            COALESCE(call_numbers.item, '')||' '||COALESCE(a.call_number_suffix, '')
+        ),
+        ''
     ) AS call_number,
     a.display_order,
     COALESCE(
@@ -192,8 +198,11 @@ CREATE VIEW
     collections_view AS
 SELECT
     a.*,
-    TRIM(
-        COALESCE(call_numbers.item, '')||' '||COALESCE(a.call_number_suffix, '')
+    NULLIF(
+        TRIM(
+            COALESCE(call_numbers.item, '')||' '||COALESCE(a.call_number_suffix, '')
+        ),
+        ''
     ) AS call_number,
     contributor.firstname||' '||contributor.lastname AS contributor_name,
     contributor.username AS contributor_username,
@@ -466,12 +475,30 @@ SELECT
                 a.instance_id
         )
     ) AS instances,
-    ARRAY_AGG(DISTINCT call_number) AS call_numbers,
-    STRING_AGG(DISTINCT call_number, ' ') AS call_numbers_text,
-    ARRAY_AGG(DISTINCT format_id) AS formats,
-    ARRAY_AGG(DISTINCT quality_id) AS qualitys,
-    ARRAY_AGG(DISTINCT generation_id) AS generations,
-    ARRAY_AGG(DISTINCT media_type) AS media_types
+    ARRAY_AGG(DISTINCT call_number) FILTER (
+        WHERE
+            call_number IS NOT NULL
+    ) AS call_numbers,
+    STRING_AGG(DISTINCT call_number, ' ') FILTER (
+        WHERE
+            call_number IS NOT NULL
+    ) AS call_numbers_text,
+    ARRAY_AGG(DISTINCT format_id) FILTER (
+        WHERE
+            format_id IS NOT NULL
+    ) AS formats,
+    ARRAY_AGG(DISTINCT quality_id) FILTER (
+        WHERE
+            quality_id IS NOT NULL
+    ) AS qualitys,
+    ARRAY_AGG(DISTINCT generation_id) FILTER (
+        WHERE
+            generation_id IS NOT NULL
+    ) AS generations,
+    ARRAY_AGG(DISTINCT media_type) FILTER (
+        WHERE
+            media_type IS NOT NULL
+    ) AS media_types
 FROM
     instances_view a
 GROUP BY
