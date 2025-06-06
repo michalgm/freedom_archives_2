@@ -102,7 +102,7 @@ const FileUpload = ({
       }
 
       // Check file type
-      if (!accept.some((mime) => RegExp(RegExp.escape(mime).replace("*", ".*")).test(file.type))) {
+      if (!accept.some((mime) => mime === file.type)) {
         setUploadError(`File type '${file.type}' not supported. Supported files types are: ${parseMimes(accept)}`);
         return;
       }
