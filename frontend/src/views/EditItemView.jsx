@@ -78,13 +78,19 @@ const EditItemFooter = ({ service, item }) => {
 };
 
 const EditItemView = ({ newItem, item, service, deleteOptions, className, children, ...props }) => {
-  const buttons = [
-    { label: "Save", type: "submit", color: "primary", icon: <Save /> },
-    { label: "Delete", type: "delete", color: "secondary", icon: <Delete />, variant: "outlined", deleteOptions },
-  ];
+  const buttons = [{ label: "Save", type: "submit", color: "primary", icon: <Save /> }];
 
   let footerElements = [];
   if (!newItem && service) {
+    buttons.push({
+      label: "Delete",
+      type: "delete",
+      color: "secondary",
+      icon: <Delete />,
+      variant: "outlined",
+      deleteOptions,
+    });
+
     const id = item[getServiceID(service)];
     buttons.unshift({
       label: "Old Admin Link",
