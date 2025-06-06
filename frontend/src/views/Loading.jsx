@@ -40,7 +40,7 @@ export default function Loading({ children }) {
   return (
     <>
       {loading && (
-        <LinearProgress sx={{ width: "100%", position: "fixed", top: 64, zIndex: 100 }} color="secondary" size={100} />
+        <LinearProgress sx={{ width: "100%", position: "fixed", top: 48, zIndex: 100 }} color="secondary" size={100} />
       )}
       {/* {children({ loading })} */}
       {children}

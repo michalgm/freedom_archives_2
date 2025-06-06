@@ -1,8 +1,22 @@
-import { AppBar, Box, Button, Container, Icon, Stack, Toolbar, Typography } from "@mui/material";
-import { useEffect } from "react";
-import { Link, Outlet, useLocation } from "react-router";
+import { AccountCircle } from "@mui/icons-material";
+import {
+  AppBar,
+  Box,
+  Container,
+  Divider,
+  Icon,
+  IconButton,
+  ListItemIcon,
+  Menu,
+  MenuItem,
+  Stack,
+  Toolbar,
+} from "@mui/material";
+import { useEffect, useState } from "react";
+import { Outlet, useLocation } from "react-router";
 import { useAppStore, useAuth } from "src/stores";
 import logger from "src/utils/logger";
+import ChangePassword from "src/views/ChangePassword";
 
 import { app } from "./api";
 import Authentication from "./Authentication";
@@ -47,7 +61,7 @@ export default function Layout() {
           className="FlexContainer"
           style={style}
         >
-          <Toolbar />
+          <Toolbar variant="dense" />
           <Loading>
             <Main />
           </Loading>
@@ -71,15 +85,64 @@ function NavigationListener() {
 
 export function Logout() {
   const { isAuthenticated, user } = useAuth();
+  const [openChangePassword, setOpenChangePassword] = useState(false);
+  const [anchorEl, setAnchorEl] = useState(null);
+  const open = Boolean(anchorEl);
+  const handleClick = (event) => {
+    setAnchorEl(event.currentTarget);
+  };
+  const handleClose = () => {
+    setAnchorEl(null);
+  };
+  const changePassword = () => {
+    handleClose();
+    setOpenChangePassword(true);
+  };
+
+  const logout = () => {
+    handleClose();
+    app.logout();
+  };
+
   return isAuthenticated ? (
     <div className="logout">
-      <Typography variant="caption">
-        <Icon>person</Icon>
-        {user.firstname} {user.lastname}
-      </Typography>
-      <Button color="inherit" component={Link} to="/login" onClick={app.logout}>
-        Logout
-      </Button>
+      <IconButton
+        aria-controls={open ? "basic-menu" : undefined}
+        aria-haspopup="true"
+        aria-expanded={open ? "true" : undefined}
+        onClick={handleClick}
+        color="inherit"
+        sx={{ backgroundColor: "primary.light", width: 30, height: 30 }}
+      >
+        <AccountCircle />
+      </IconButton>
+      <Menu
+        id="basic-menu"
+        anchorEl={anchorEl}
+        open={open}
+        onClose={handleClose}
+        slotProps={{
+          list: {
+            "aria-labelledby": "basic-button",
+          },
+        }}
+      >
+        <MenuItem sx={{ pointerEvents: "none", color: "text.primary", fontWeight: "bold" }}>{user.full_name}</MenuItem>
+        <Divider />
+        <MenuItem onClick={changePassword}>
+          <ListItemIcon>
+            <Icon>password</Icon>
+          </ListItemIcon>
+          Change Password
+        </MenuItem>
+        <MenuItem onClick={logout}>
+          <ListItemIcon>
+            <Icon>logout</Icon>
+          </ListItemIcon>
+          Logout
+        </MenuItem>
+      </Menu>
+      <ChangePassword open={openChangePassword} handleClose={() => setOpenChangePassword(false)} user={user} />
     </div>
   ) : (
     ""
@@ -89,7 +152,7 @@ export function Logout() {
 function NavBar() {
   return (
     <AppBar color="primary" position="fixed" elevation={0} sx={{ zIndex: (theme) => theme.zIndex.drawer + 1 }}>
-      <Toolbar className="topnav">
+      <Toolbar className="topnav" variant="dense">
         <Breadcrumbs />
         <Logout />
       </Toolbar>
@@ -103,7 +166,6 @@ export function Main() {
   const loadingStyle = loading
     ? {
         opacity: 0.6,
-        // marginTop: "-2px",
       }
     : {};
   logger.log("Main RENDER", location);
