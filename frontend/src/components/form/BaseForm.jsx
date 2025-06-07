@@ -59,6 +59,7 @@ const BaseForm = ({ children, autoComplete = "off", formConfig, formID, ...props
         service: formManager.service,
         submitForm: formManager.submitForm,
         isLoading: formManager.isLoading,
+        reset: formManager.reset,
       }}
     >
       <FormContainer

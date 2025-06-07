@@ -26,6 +26,7 @@ import { useNavigate, useParams } from "react-router";
 import { records } from "src/api";
 import { EditableItemsList, RecordsList } from "src/components/EditableItemsList";
 // import ButtonsHeader from "src/components/form/ButtonsHeader";
+import useFormManagerContext from "src/components/form/FormManagerContext";
 import Show from "src/components/Show";
 import Thumbnail from "src/components/Thumbnail";
 import { useAddNotification, useTitle } from "src/stores";
@@ -337,25 +338,52 @@ function RecordParent() {
   );
 }
 
+function UpdateThumbnailButton() {
+  const {
+    reset,
+    formContext: { getValues },
+  } = useFormManagerContext();
+
+  const {
+    record_id,
+    instances: [instance],
+  } = getValues();
+
+  const thumbnailAvailable = Boolean(instance?.url);
+
+  const addNotification = useAddNotification();
+
+  const forceThumbnailUpdate = useCallback(async () => {
+    const { url, instance_id } = instance || {};
+    if (!url || record_id == null || !instance_id) return;
+    const res = await records.patch(record_id, { instances: [{ url, instance_id }] });
+    await reset(res);
+    addNotification({ message: "Thumbnail updated" });
+  }, [addNotification, instance, record_id, reset]);
+
+  return (
+    <Tooltip title={thumbnailAvailable ? "" : "No thumbnail available - first media item must have a URL"}>
+      <span>
+        <Button
+          onClick={forceThumbnailUpdate}
+          disabled={!thumbnailAvailable}
+          variant="outlined"
+          sx={{ width: "100px" }}
+        >
+          Update Thumbnail
+        </Button>
+      </span>
+    </Tooltip>
+  );
+}
+
 function Record({ id /*  embedded = false */ }) {
   const { id: paramId } = useParams();
   id ??= paramId;
   const navigate = useNavigate();
-  const addNotification = useAddNotification();
   const newRecord = id === "new";
 
   const setTitle = useTitle();
-
-  const forceThumbnailUpdate = useCallback(
-    async (record, reset) => {
-      const { url, instance_id } = record?.instances?.[0] || {};
-      if (!url || record.record_id == null || !instance_id) return;
-      const res = await records.patch(record.record_id, { instances: [{ url, instance_id }] });
-      await reset(res);
-      addNotification({ message: "Thumbnail updated" });
-    },
-    [addNotification]
-  );
 
   logger.log("Record RENDER");
 
@@ -379,7 +407,6 @@ function Record({ id /*  embedded = false */ }) {
       >
         {(manager) => {
           const { formData: record } = manager;
-          const thumbnailAvailable = Boolean(record?.instances?.[0]?.url);
 
           return (
             <>
@@ -407,22 +434,7 @@ function Record({ id /*  embedded = false */ }) {
                           >
                             <Show unless={newRecord}>
                               <Thumbnail item={record} width={100} />
-                              <Tooltip
-                                title={
-                                  thumbnailAvailable ? "" : "No thumbnail available - first media item must have a URL"
-                                }
-                              >
-                                <span>
-                                  <Button
-                                    onClick={() => forceThumbnailUpdate(record, manager.reset)}
-                                    disabled={!thumbnailAvailable}
-                                    variant="outlined"
-                                    sx={{ width: "100px" }}
-                                  >
-                                    Update Thumbnail
-                                  </Button>
-                                </span>
-                              </Tooltip>
+                              <UpdateThumbnailButton />
                             </Show>
                           </Grid2>
                         }

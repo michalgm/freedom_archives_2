@@ -19,8 +19,7 @@ export default function Thumbnail({ item, src: _src, width = 75, alt = "", type:
   const onError = useCallback((_e) => {
     setBrokenLink(true);
   }, []);
-
-  const type = item?.record_id != null ? "record" : "collection";
+  const type = _type || (item?.record_id != null ? "record" : "collection");
   let src = "";
   const media_type = item?.primary_instance_media_type || item.media_type;
 
