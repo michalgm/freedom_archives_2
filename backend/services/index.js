@@ -10,6 +10,7 @@ import settings from "./settings.js";
 import snapshots from "./snapshots.js";
 import unified_collections from "./unified_collections.js";
 import unified_records from "./unified_records.js";
+import unified_search from "./unified_search/unified_search.service.js";
 import users from "./users/users.service.js";
 
 export default (function (app) {
@@ -26,4 +27,5 @@ export default (function (app) {
   app.configure(public_records);
   app.configure(snapshots);
   app.configure(settings);
+  app.configure(unified_search);
 });
