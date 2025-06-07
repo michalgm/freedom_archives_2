@@ -5,7 +5,7 @@ const parser = tsquery();
 const FULLTEXT_WEIGHT = 1000;
 const CALL_NUMBERS_WEIGHT = 500;
 const TRIGRAM_WEIGHT = 100;
-const EXACT_MATCH_BOOST = 10000;
+const FULL_TERM_MATCH_BOOST = 200;
 const POSITION_BOOST_WEIGHT = 5;
 
 function applyBasicPrefixing(input) {
@@ -65,7 +65,7 @@ export const rankedSearch = async (context) => {
 
   const tsqueryString = parser(applyBasicPrefixing(searchTerm));
 
-  const exactBoostCases = knex.raw(`CASE WHEN search_text = ? THEN ${EXACT_MATCH_BOOST} ELSE 0 END`, [searchTerm]).toString();
+  const fullTermBoostCases = knex.raw(`CASE WHEN search_text ilike ? THEN ${FULL_TERM_MATCH_BOOST} ELSE 0 END`, [`%${searchTerm}%`]).toString();
   const callNumbersBoost = tableName.match(/(records|collections)/) ? knex.raw(
     `CASE 
       WHEN ${tableName.match('record') ? `EXISTS( SELECT 1 FROM unnest(call_numbers) AS elem WHERE elem ILIKE ? )` : `call_number ILIKE ?`} THEN ${CALL_NUMBERS_WEIGHT}
@@ -111,7 +111,7 @@ export const rankedSearch = async (context) => {
               ${idValue !== null ? '0' : `${TRIGRAM_WEIGHT} * ${trigram}`}
             END
             + ${callNumbersBoost}
-            + ${exactBoostCases} 
+            + ${fullTermBoostCases} 
             + (${positionScoreExpr} ) 
             END
         ) as rank`,
