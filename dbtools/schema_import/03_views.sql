@@ -1059,3 +1059,44 @@ FROM
     unified_collections
 WHERE
     date_modified IS NOT NULL;
+
+DROP VIEW IF EXISTS unified_search_view;
+
+CREATE OR REPLACE VIEW
+    unified_search_view AS
+SELECT
+    'record' AS result_type,
+    record_id AS id,
+    title,
+    collection,
+    date_modified,
+    description,
+    search_text,
+    fulltext,
+    call_numbers,
+    ARRAY_TO_STRING(call_numbers, ' ') AS call_number_text,
+    primary_instance_media_type,
+    has_digital,
+    NULL AS thumbnail
+FROM
+    unified_records
+UNION ALL
+SELECT
+    'collection' AS result_type,
+    collection_id AS id,
+    collection_name AS title,
+    parent,
+    date_modified,
+    description,
+    search_text,
+    fulltext,
+    CASE
+        WHEN call_number IS NOT NULL THEN ARRAY[call_number]
+        ELSE ARRAY[]::TEXT[]
+    END AS call_numbers,
+    call_number AS call_number_text,
+    NULL,
+    TRUE,
+    thumbnail
+FROM
+    unified_collections;

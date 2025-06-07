@@ -44,6 +44,8 @@ export const snapshots = app.service("/api/snapshots");
 
 export const settings = app.service("/api/settings");
 
+export const unified_search = app.service("/api/unified_search");
+
 export const getServiceID = (service) => `${service.replace(/s$/, "")}_id`;
 
 export const authenticate = async (username, password) => {

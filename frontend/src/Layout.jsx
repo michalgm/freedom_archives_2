@@ -14,6 +14,7 @@ import {
 } from "@mui/material";
 import { useEffect, useState } from "react";
 import { Outlet, useLocation } from "react-router";
+import QuickSearch from "src/components/QuickSearch";
 import { useAppStore, useAuth } from "src/stores";
 import logger from "src/utils/logger";
 import ChangePassword from "src/views/ChangePassword";
@@ -152,8 +153,9 @@ export function Logout() {
 function NavBar() {
   return (
     <AppBar color="primary" position="fixed" elevation={0} sx={{ zIndex: (theme) => theme.zIndex.drawer + 1 }}>
-      <Toolbar className="topnav" variant="dense">
+      <Toolbar className="topnav" variant="dense" sx={{ gap: 1 }}>
         <Breadcrumbs />
+        <QuickSearch />
         <Logout />
       </Toolbar>
     </AppBar>

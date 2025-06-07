@@ -39,21 +39,4 @@ body,
   .MuiContainer-root {
     padding-top: 8px;
   }
-  .topnav {
-    .logout,
-    .logout .MuiTypography-root {
-      display: flex;
-      align-items: center;
-      flex-wrap: nowrap;
-      .material-icons {
-        font-size: initial;
-        margin-right: 5px;
-      }
-    }
-    .logout {
-      flex: 0 0 auto;
-      white-space: nowrap;
-      padding-left: 24px;
-    }
-  }
 }
