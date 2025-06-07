@@ -16,7 +16,6 @@ import {
   ToggleButtonGroup,
 } from "@mui/material";
 import { Box } from "@mui/system";
-import { DatePicker, DateTimePicker } from "@mui/x-date-pickers";
 import { merge } from "lodash-es";
 import React, { Suspense, useMemo } from "react";
 import {
@@ -28,7 +27,6 @@ import {
   TextFieldElement,
   ToggleButtonGroupElement,
 } from "react-hook-form-mui";
-import { DatePickerElement, DateTimePickerElement } from "react-hook-form-mui/date-pickers";
 import FileUpload from "src/components/form/FileUpload";
 import { formatLabel } from "src/components/form/schemaUtils";
 import { convertSvgToDataUrl } from "src/utils";
@@ -39,6 +37,7 @@ import DateStringField from "../DateStringField";
 import { EditableItem } from "./EditableItem";
 
 const RichTextInput = React.lazy(() => import("./RichTextInput"));
+const DateField = React.lazy(() => import("./DateField"));
 
 const selectOptions = {
   day: Array.from({ length: 32 }, (v, k) => ({
@@ -200,17 +199,11 @@ export const BaseField = ({
   ]);
 
   const renderDatePicker = () => {
-    const Component = isRHF
-      ? field_type === "date-time"
-        ? DateTimePickerElement
-        : DatePickerElement
-      : field_type === "date-time"
-        ? DateTimePicker
-        : DatePicker;
     delete props.disabled;
     return (
-      <Component
+      <DateField
         {...props}
+        field_type={field_type}
         label={props.label}
         name={name}
         onChange={onChange}

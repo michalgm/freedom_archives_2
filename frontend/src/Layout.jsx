@@ -12,9 +12,8 @@ import {
   Stack,
   Toolbar,
 } from "@mui/material";
-import { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Outlet, useLocation } from "react-router";
-import QuickSearch from "src/components/QuickSearch";
 import { useAppStore, useAuth } from "src/stores";
 import logger from "src/utils/logger";
 import ChangePassword from "src/views/ChangePassword";
@@ -27,6 +26,7 @@ import Notifications from "./components/Notifications";
 import Loading from "./views/Loading";
 import Sidebar from "./views/Sidebar";
 
+const QuickSearch = React.lazy(() => import("./components/QuickSearch"));
 const DRAWERWIDTH = 256;
 
 export default function Layout() {
