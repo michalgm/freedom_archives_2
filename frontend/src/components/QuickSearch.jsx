@@ -63,9 +63,12 @@ function QuickSearch() {
   const performSearch = useDebouncedCallback(
     useCallback(async (query) => {
       setLoading(true);
-      const res = await unified_search.find({ query, noLoading: true });
-      setResults(res.data);
-      setLoading(false);
+      try {
+        const res = await unified_search.find({ query, noLoading: true });
+        setResults(res.data);
+      } finally {
+        setLoading(false);
+      }
     }, []),
     300
   );
