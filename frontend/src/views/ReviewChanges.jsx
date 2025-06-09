@@ -43,7 +43,7 @@ const createQuery = (filter, publishDate) => {
   return query;
 };
 
-const initialOrder = { field: "date_modified", sort: "desc" };
+const initialOrder = [{ field: "date_modified", sort: "desc" }];
 const initialPage = { skip: 0, limit: 15 };
 const fields = [
   {
@@ -199,7 +199,7 @@ function ReviewChanges() {
 
   useEffect(() => {
     setPagination(initialPage);
-  }, [order]);
+  }, [filter]);
 
   useEffect(() => {
     const fetchPublishDate = async () => {
@@ -219,7 +219,7 @@ function ReviewChanges() {
     useCallback(async () => {
       setLoading(true);
       const query = createQuery(filter, publishDate);
-      const { field = "date_modified", sort = "asc" } = order || {};
+      const { field = "date_modified", sort = "asc" } = order[0] || {};
       const $sort = { [field || "date_modified"]: sort === "desc" ? 0 : 1 };
       if (field !== "item") {
         $sort.date_modified = sort === "desc" ? 0 : 1;
@@ -307,9 +307,10 @@ function ReviewChanges() {
     fetchValues();
   }, [filter, fetchValues, order, pagination.skip]);
 
-  const handleSortModelChange = ([order]) => {
+  const handleSortModelChange = (order) => {
     setOrder(order);
   };
+
   const handlePaginationModelChange = ({ page, pageSize }) => {
     setPagination({ skip: page * pageSize, limit: pageSize });
   };
@@ -329,7 +330,6 @@ function ReviewChanges() {
       noPaper
     >
       <Stack
-        container
         spacing={3}
         direction={"column"}
         sx={{ height: "100%" }}
@@ -346,7 +346,7 @@ function ReviewChanges() {
             loading={loading}
             initialState={{
               sorting: {
-                sortModel: [initialOrder],
+                sortModel: initialOrder,
               },
             }}
             // autosizeColumns
@@ -354,7 +354,7 @@ function ReviewChanges() {
             onPaginationModelChange={handlePaginationModelChange}
             pageSizeOptions={[pagination.limit]}
             rowCount={values.total}
-            sortModel={[order]}
+            sortModel={order}
             sortingOrder={["desc", "asc"]}
             onSortModelChange={handleSortModelChange}
             readonly

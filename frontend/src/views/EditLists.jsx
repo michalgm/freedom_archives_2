@@ -95,8 +95,9 @@ const columns = [
   },
 ];
 
-const initialOrder = { field: "item", sort: "asc" };
+const initialOrder = [{ field: "item", sort: "asc" }];
 const initialPage = { skip: 0, limit: 100 };
+
 function EditLists() {
   const [values, setValues] = useState({ data: [], total: 0 });
   const [type, setType] = useState("author");
@@ -113,7 +114,7 @@ function EditLists() {
 
   useEffect(() => {
     setPagination(initialPage);
-  }, [order, filter]);
+  }, [filter]);
 
   const fetchValues = useCallback(async () => {
     setLoading(true);
@@ -153,7 +154,7 @@ function EditLists() {
     setFilter(value || "");
   }, []);
 
-  const handleSortModelChange = ([order]) => {
+  const handleSortModelChange = (order) => {
     setOrder(order);
   };
   const handlePaginationModelChange = ({ page, pageSize }) => {
@@ -186,7 +187,7 @@ function EditLists() {
           loading={loading}
           initialState={{
             sorting: {
-              sortModel: [initialOrder],
+              sortModel: initialOrder,
             },
           }}
           paginationModel={{ page: pagination.skip / pagination.limit, pageSize: pagination.limit }}
@@ -201,7 +202,7 @@ function EditLists() {
             collections_count: Boolean(item_types[type].collections),
             instances_count: Boolean(item_types[type].instances),
           }}
-          sortModel={[order]}
+          sortModel={order}
           sortingOrder={["desc", "asc"]}
           onSortModelChange={handleSortModelChange}
           defaultValues={{ type }}
