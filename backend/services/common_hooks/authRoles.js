@@ -5,7 +5,7 @@ const ROLE_HIERARCHY = ['intern', 'staff', 'administrator'];
 const SERVICE_PERMISSIONS = {
   'users': 'staff',
   'settings': 'staff',
-  'snapshots': 'admin',
+  'snapshots': 'administator',
 };
 
 const INTERN_REVIEW_SERVICES = ['records', 'collections'];
