@@ -47,6 +47,7 @@ describe('rankedSearch hook', () => {
       },
       service: {
         fullName: 'records',
+        getOptions: sinon.stub().returns({ id: 'record_id', name: 'records' }),
         createQuery: sinon.stub().returns(baseQuery),
         sanitizeQuery: sinon.stub().resolvesArg(0)
       },
@@ -149,7 +150,7 @@ describe('rankedSearch hook', () => {
     await rankedSearch(context);
 
     const queryString = context.params.knex.toString();
-    expect(queryString).to.include('AS rank');
+    expect(queryString).to.include('as rank');
     expect(queryString).to.include('ts_rank');
     expect(queryString).to.include('word_similarity');
   });

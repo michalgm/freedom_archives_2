@@ -61,19 +61,19 @@ async function debugSearch(serviceName, searchTerm, fields, limit = 10) {
   });
 }
 
-// Example usage
-if (require.main === module) {
-  const args = process.argv.slice(2);
-  const searchTerm = args[0] || 'freedom';
-  const fields = args[1] ? args[1].split(',') : ['title', 'description', 'authors_text', 'subjects_text'];
-  const limit = parseInt(args[2] || '10', 10);
+// // Example usage
+// if (require.main === module) {
+//   const args = process.argv.slice(2);
+//   const searchTerm = args[0] || 'freedom';
+//   const fields = args[1] ? args[1].split(',') : ['title', 'description', 'authors_text', 'subjects_text'];
+//   const limit = parseInt(args[2] || '10', 10);
 
-  debugSearch('records', searchTerm, fields, limit)
-    .then(() => process.exit(0))
-    .catch(err => {
-      console.error('Error:', err);
-      process.exit(1);
-    });
-}
-
-module.exports = { debugSearch };
+//   debugSearch('records', searchTerm, fields, limit)
+//     .then(() => process.exit(0))
+//     .catch(err => {
+//       console.error('Error:', err);
+//       process.exit(1);
+//     });
+// }
+export default debugSearch;
+// module.exports = { debugSearch };

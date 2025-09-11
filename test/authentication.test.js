@@ -8,7 +8,6 @@ let sandbox;
 describe("authentication", () => {
   before(async () => {
     sandbox = sinon.createSandbox();
-    sandbox.stub(console, 'error');
   });
 
   after(() => {
@@ -20,19 +19,27 @@ describe("authentication", () => {
   });
 
   describe("local strategy", () => {
-    const userInfo = {
-      username: "someone@example.com",
-      password: "supersecret",
+    const adminUser = {
       archive_id: 1,
+      role: "administrator",
     };
 
-    before(async () => {
-      try {
-        // @ts-expect-error
-        await app.service("api/users").create(userInfo, { user: { archive_id: 1 } });
-      } catch (error) {
-        // Do nothing, it just means the user already exists and can be tested
-        // ready exists and can be tested
+    const userInfo = {
+      username: "someone@example.com",
+      password: "supersecret!!",
+      archive_id: 1,
+      active: true,
+    };
+
+    beforeEach(async () => {
+      const { data: [user] } = await app.service('api/users').find({
+        query: {
+          username: userInfo.username,
+          $limit: 1,
+        },
+      });
+      if (!user) {
+        app.service("api/users").create(userInfo, { user: adminUser });
       }
     });
 

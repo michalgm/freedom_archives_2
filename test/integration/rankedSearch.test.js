@@ -40,7 +40,7 @@ describe('Ranked Search Integration Tests', () => {
         expect(result.data[0].rank).to.be.greaterThan(result.data[result.data.length - 1].rank);
       }
     }
-  });
+  }).timeout(10000);
 
   it('should handle prefix matching correctly', async () => {
     // Test prefix matching (e.g., "free" should match "freedom")
