@@ -2,7 +2,8 @@
 set -e
 
 REPO=https://github.com/lovell/sharp-libvips
-RELEASE_TAG=$(curl -s "https://api.github.com/repos/lovell/sharp-libvips/releases/latest" | jq -r .tag_name)
+# RELEASE_TAG=$(curl -s "https://api.github.com/repos/lovell/sharp-libvips/releases/latest" | jq -r .tag_name)
+RELEASE_TAG=v8.16.1
 rm -rf sharp-libvips
 
 git clone --depth 1 --branch $RELEASE_TAG "${REPO}"
