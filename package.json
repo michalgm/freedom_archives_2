@@ -74,7 +74,7 @@
     "pg": "^8.13.3",
     "pg-tsquery": "^8.4.2",
     "serve-favicon": "^2.5.0",
-    "sharp": "^0.34.0",
+    "sharp": "0.34.2",
     "string-strip-html": "^13.4.12",
     "winston": "^3.17.0",
     "zod": "^3.25.34"
@@ -101,5 +101,8 @@
     "workerDirectory": [
       "frontend/public"
     ]
+  },
+  "overrides": {
+    "@img/sharp-libvips-linux-x64": "https://raw.githubusercontent.com/michalgm/freedom_archives_2/master/sharp-libvips/img-sharp-libvips-linux-x64-1.1.0.tgz"
   }
 }
