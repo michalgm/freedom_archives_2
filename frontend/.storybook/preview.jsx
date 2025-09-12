@@ -1,4 +1,4 @@
-/** @type { import('@storybook/react').Preview } */
+/** @type { import('@storybook/react-vite').Preview } */
 // import "@fontsource/material-icons";
 // import "@fontsource/roboto/300.css";
 // import "@fontsource/roboto/400.css";
@@ -9,7 +9,6 @@ import { LocalizationProvider } from "@mui/x-date-pickers";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import { initialize, mswLoader } from "msw-storybook-addon";
 
-import { StateProvider } from "../src/appContext";
 import Authentication from "../src/Authentication";
 import { theme } from "../src/theme";
 
@@ -40,10 +39,8 @@ const preview = {
       <ThemeProvider theme={theme}>
         <CssBaseline />
         <LocalizationProvider dateAdapter={AdapterDayjs}>
-          <StateProvider>
-            <Authentication />
-            <Story />
-          </StateProvider>
+          <Authentication />
+          <Story />
         </LocalizationProvider>
       </ThemeProvider>
     ),

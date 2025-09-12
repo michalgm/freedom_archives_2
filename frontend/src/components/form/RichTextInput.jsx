@@ -1,8 +1,6 @@
 import { Box, FormControl, FormHelperText, InputLabel } from "@mui/material";
-import { Link } from "@tiptap/extension-link";
-import { TextAlign } from "@tiptap/extension-text-align";
-import { Underline } from "@tiptap/extension-underline";
-import { StarterKit } from "@tiptap/starter-kit";
+import TextAlign from "@tiptap/extension-text-align";
+import StarterKit from "@tiptap/starter-kit";
 import { merge } from "lodash-es";
 import {
   LinkBubbleMenu,
@@ -65,10 +63,13 @@ const RichTextInput = (props) => {
   }, [content, editor, editor?.isEditable, editor?.isFocused]);
 
   const extensions = [
-    StarterKit,
+    StarterKit.configure({
+      link: {
+        openOnClick: false,
+        enableClickSelection: true,
+      },
+    }),
     LinkBubbleMenuHandler,
-    Link,
-    Underline,
     TextAlign.configure({
       types: [
         "paragraph",

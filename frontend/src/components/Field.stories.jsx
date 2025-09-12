@@ -7,8 +7,6 @@ import { useState } from "react";
 import { AutocompleteElement, FormContainer } from "react-hook-form-mui";
 import { theme } from "src/theme";
 
-import { StateProvider } from "../appContext";
-
 import { Field } from "./form/Field";
 
 export default {
@@ -21,31 +19,29 @@ export default {
     (Story) => (
       <ThemeProvider theme={theme}>
         <LocalizationProvider dateAdapter={AdapterDayjs}>
-          <StateProvider>
-            <FormContainer
-              defaultValues={{
-                textField: "Sample text",
-                numberField: 42,
-                multilineField: "This is a\nmultiline text field",
-                checkboxField: true,
-                radioField: "option1",
-                dateField: dayjs(),
-                dateStringField: "05/15/2023",
-                selectField: "option2",
-                htmlField: "<p>This is <strong>HTML</strong> content</p>",
-                ItemSelect: { id: 2, label: "Option 2" },
-                yearField: { id: 2022, label: "2022" },
-                monthField: { id: 5, label: "May" },
-                dayField: { id: 15, label: "15" },
-                mediaTypeField: { id: "PDF", label: "PDF" },
-                autocomplete: { id: "option1", label: "Option 1" },
-              }}
-              onSubmit={() => {}}
-            >
-              <Story />
-              <Button type="submit">Submit</Button>
-            </FormContainer>
-          </StateProvider>
+          <FormContainer
+            defaultValues={{
+              textField: "Sample text",
+              numberField: 42,
+              multilineField: "This is a\nmultiline text field",
+              checkboxField: true,
+              radioField: "option1",
+              dateField: dayjs(),
+              dateStringField: "05/15/2023",
+              selectField: "option2",
+              htmlField: "<p>This is <strong>HTML</strong> content</p>",
+              ItemSelect: { id: 2, label: "Option 2" },
+              yearField: { id: 2022, label: "2022" },
+              monthField: { id: 5, label: "May" },
+              dayField: { id: 15, label: "15" },
+              mediaTypeField: { id: "PDF", label: "PDF" },
+              autocomplete: { id: "option1", label: "Option 1" },
+            }}
+            onSubmit={() => {}}
+          >
+            <Story />
+            <Button type="submit">Submit</Button>
+          </FormContainer>
         </LocalizationProvider>
       </ThemeProvider>
     ),
