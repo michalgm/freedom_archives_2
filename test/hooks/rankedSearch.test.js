@@ -42,6 +42,7 @@ describe('rankedSearch hook', () => {
 
     // Setup context
     context = {
+      path: 'api/records',
       app: {
         get: sinon.stub().withArgs('postgresqlClient').returns(db)
       },

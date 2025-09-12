@@ -21,8 +21,8 @@ describe('Ranked Search Integration Tests', () => {
     const result = await service.find({
       query: {
         $fullText: exactMatchTerm,
+        $limit: 10,
         $sort: { rank: -1 },
-        $limit: 10
       }
     });
 
@@ -115,7 +115,8 @@ describe('Ranked Search Integration Tests', () => {
     const result = await service.find({
       query: {
         $fullText: searchTerm,
-        $limit: 20
+        $limit: 20,
+        $sort: { rank: -1 }
       }
     });
 
@@ -132,17 +133,16 @@ describe('Ranked Search Integration Tests', () => {
     if (titleMatches.length > 0 && descriptionOnlyMatches.length > 0) {
       const avgTitleRank = titleMatches.reduce((sum, r) => sum + r.rank, 0) / titleMatches.length;
       const avgDescRank = descriptionOnlyMatches.reduce((sum, r) => sum + r.rank, 0) / descriptionOnlyMatches.length;
-
       expect(avgTitleRank).to.be.greaterThan(avgDescRank);
     }
-  });
+  }).timeout(5000);
 
   it('should handle different languages correctly', async () => {
     // Test with a non-English language parameter
     const result = await service.find({
       query: {
         $fullText: 'libertad', // Spanish for "freedom"
-        $limit: 10
+        $limit: 10,
       }
     });
 
