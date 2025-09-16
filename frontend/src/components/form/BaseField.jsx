@@ -75,7 +75,7 @@ const transformOptions = (options) => {
   if (!options) return null;
   return options.map((option) => {
     if (typeof option === "string") {
-      return { id: option, value: option, label: formatLabel(option) };
+      return { id: option, value: option, label: formatLabel(undefined, option) };
     }
     return option;
   });
