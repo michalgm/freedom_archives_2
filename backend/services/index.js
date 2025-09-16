@@ -2,7 +2,9 @@ import collections from "./collections.js";
 import instances from "./instances.js";
 import list_items from "./list_items.js";
 import list_items_lookup from "./list_items_lookup.js";
+import public_collections from "./public_collections.js";
 import public_records from "./public_records.js";
+import public_settings from "./public_settings.js";
 import records from "./records/records.service.js";
 import relationships from "./relationships.js";
 import review_changes from "./review_changes.js";
@@ -28,4 +30,6 @@ export default (function (app) {
   app.configure(snapshots);
   app.configure(settings);
   app.configure(unified_search);
+  app.configure(public_settings);
+  app.configure(public_collections);
 });

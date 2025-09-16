@@ -3,7 +3,7 @@ import { transaction } from "@feathersjs/knex";
 
 import { allowAnonymous, allowDisablePagination, authRoles, debugQuery, setArchive } from "./services/common_hooks/index.js";
 // Application hooks that run for every service
-const public_services = ["api/public_records"];
+const public_services = ["api/public/records", "api/public/settings", "api/public/collections"];
 const checkAuth = async (context) => {
   if (public_services.includes(context.path)) {
     allowAnonymous()(context);

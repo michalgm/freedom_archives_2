@@ -38,7 +38,10 @@ export const list_items_lookup = app.service("/api/list_items_lookup");
 
 export const review_changes = app.service("/api/review_changes");
 
-export const public_records = app.service("/api/public_records");
+export const public_records = app.service("/api/public/records");
+
+export const public_settings = app.service("/api/public/settings");
+export const public_collections = app.service("/api/public/collections");
 
 export const snapshots = app.service("/api/snapshots");
 
@@ -75,6 +78,7 @@ export const services = {
   public_records,
   snapshots,
   settings,
+  public_settings,
 };
 
 export const getAuthentication = app.get("/api/authentication");

@@ -169,9 +169,9 @@ export default (function (app) {
     authentication: false,
   };
   // Initialize our service with any options it requires
-  app.use("/api/public_records", new PublicRecords(options), {
+  app.use("/api/public/records", new PublicRecords(options), {
     methods: ["find"],
   });
-  const service = app.service("api/public_records");
+  const service = app.service("api/public/records");
   service.hooks(hooks);
 });
