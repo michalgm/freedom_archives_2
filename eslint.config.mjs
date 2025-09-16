@@ -2,6 +2,7 @@ import js from "@eslint/js";
 import tseslint from "@typescript-eslint/eslint-plugin";
 import tsParser from "@typescript-eslint/parser";
 import { defineConfig } from "eslint/config";
+import compat from "eslint-plugin-compat";
 import importPlugin from "eslint-plugin-import";
 import reactPlugin from "eslint-plugin-react";
 import reactHooks from "eslint-plugin-react-hooks";
@@ -74,6 +75,10 @@ const eslintConfig = [
         },
     },
     {
+        ...compat.configs["flat/recommended"],
+        ...reactPlugin.configs.flat.recommended,
+        ...reactPlugin.configs.flat['jsx-runtime'],
+        ...reactHooks.configs['recommended-latest'],
         name: "frontend",
         files: ["frontend/**/*.{js,jsx,ts,tsx}"],
         languageOptions: {
@@ -99,6 +104,7 @@ const eslintConfig = [
             react: reactPlugin,
             import: importPlugin,
             "@typescript-eslint": tseslint,
+            'compat': compat
         },
         ignores: ["frontend/dist/**/*", "frontend/public/**/*"],
 
@@ -119,6 +125,10 @@ const eslintConfig = [
             "import/no-named-as-default": "warn",
             "no-undef": "error",
             "no-unused-vars": "off",
+            // "padding-line-between-statements": [
+            //     "error",
+            //     { blankLine: "always", prev: ["multiline-const", "multiline-let", "export", "function"], next: ["multiline-const", "multiline-let", "export", "function"] },
+            // ],
             "@typescript-eslint/no-unused-vars": [
                 "warn",
                 {
@@ -131,11 +141,13 @@ const eslintConfig = [
             "@typescript-eslint/no-explicit-any": "warn",
             "@typescript-eslint/explicit-function-return-type": "off",
             "@typescript-eslint/explicit-module-boundary-types": "off",
+            'compat/compat': 'warn',
         },
         settings: {
             react: {
                 version: "detect",
             },
+            "lintAllEsApis": true,
         },
     },
     // {
