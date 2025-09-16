@@ -4,7 +4,8 @@ import { RouterProvider } from "react-router/dom";
 import { hasAccess, getRoutes } from "src/config/routes";
 import { useAuth } from "src/stores";
 
-import Layout from "./Layout";
+const Layout = React.lazy(() => import("./layouts/Layout"));
+const PublicLayout = React.lazy(() => import("./layouts/PublicLayout"));
 
 const componentMap = {
   Collections: React.lazy(() => import("./views/Collections")),
@@ -16,11 +17,13 @@ const componentMap = {
   Records: React.lazy(() => import("./views/Records")),
   Relationships: React.lazy(() => import("./views/Relationships")),
   ReviewChanges: React.lazy(() => import("./views/ReviewChanges")),
-  Search: React.lazy(() => import("./views/Search")),
   Collection: React.lazy(() => import("./views/Collection")),
   Users: React.lazy(() => import("./views/Users")),
   SiteSettings: React.lazy(() => import("./views/SiteSettings")),
   Table: React.lazy(() => import("./views/Table")),
+  PublicSearch: React.lazy(() => import("./views/PublicSearch")),
+  PublicCollections: React.lazy(() => import("./views/PublicCollections")),
+  PublicHome: React.lazy(() => import("./views/PublicHome")),
 };
 
 function LoginRedirect() {
@@ -97,22 +100,34 @@ getRoutes().forEach(([path, config]) => {
   }
 });
 
+const PublicSearch = componentMap["PublicSearch"];
+const PublicCollections = componentMap["PublicCollections"];
+const PublicHome = componentMap["PublicHome"];
+
 const router = createBrowserRouter(
   createRoutesFromElements(
-    <Route element={<Layout />}>
-      {publicRoutes}
-      <Route
-        element={
-          <RequireAuth>
-            <Suspense fallback={<div>Loading...</div>}>
-              <Outlet />
-            </Suspense>
-          </RequireAuth>
-        }
-      >
-        {protectedRoutes}
+    <Route>
+      <Route element={<PublicLayout />} path="/public">
+        <Route path="search" element={<PublicSearch />} />
+        <Route path="collections" element={<PublicCollections />} />
+        <Route path="" element={<PublicHome />} />
+        <Route path="*" element={<PublicHome />} />
       </Route>
-      <Route path="*" element={<LoginRedirect />} />
+      <Route element={<Layout />}>
+        {publicRoutes}
+        <Route
+          element={
+            <RequireAuth>
+              <Suspense fallback={<div>Loading...</div>}>
+                <Outlet />
+              </Suspense>
+            </RequireAuth>
+          }
+        >
+          {protectedRoutes}
+        </Route>
+        <Route path="*" element={<LoginRedirect />} />
+      </Route>
     </Route>
   )
 );

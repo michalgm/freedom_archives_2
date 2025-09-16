@@ -35,7 +35,7 @@ export const appConfig = {
       },
       {
         path: "/search",
-        component: "Search",
+        component: "PublicSearch",
         sidebar: {
           label: "Search Records",
           icon: "",
@@ -193,6 +193,11 @@ export const appConfig = {
         component: "Forbidden",
         public: true,
       },
+      // {
+      //   path: "/search",
+      //   component: "Search",
+      //   public: true,
+      // },
     ],
   },
 };

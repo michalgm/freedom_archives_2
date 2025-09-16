@@ -12,6 +12,18 @@ body,
   right: 0;
   overflow: auto;
 }
+code {
+  font-family: source-code-pro, Menlo, Monaco, Consolas, "Courier New", monospace;
+}
+
+.loading {
+  opacity: 0.5;
+}
+.loading input,
+.loading button {
+  pointer-events: none;
+}
+
 .App {
   .FlexContainer {
     display: flex;

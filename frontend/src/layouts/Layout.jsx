@@ -18,15 +18,15 @@ import { useAppStore, useAuth } from "src/stores";
 import logger from "src/utils/logger";
 import ChangePassword from "src/views/ChangePassword";
 
-import { app } from "./api";
-import Authentication from "./Authentication";
-import Breadcrumbs from "./components/Breadcrumbs";
-import ErrorBoundary from "./components/ErrorBoundary";
-import Notifications from "./components/Notifications";
-import Loading from "./views/Loading";
-import Sidebar from "./views/Sidebar";
+import { app } from "../api";
+import Authentication from "../Authentication";
+import Breadcrumbs from "../components/Breadcrumbs";
+import ErrorBoundary from "../components/ErrorBoundary";
+import Notifications from "../components/Notifications";
+import Loading from "../views/Loading";
+import Sidebar from "../views/Sidebar";
 
-const QuickSearch = React.lazy(() => import("./components/QuickSearch"));
+const QuickSearch = React.lazy(() => import("../components/QuickSearch"));
 const DRAWERWIDTH = 256;
 
 export default function Layout() {
