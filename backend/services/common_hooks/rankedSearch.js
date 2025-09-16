@@ -125,7 +125,7 @@ function buildWhere(qb, { idField, idValue, searchTerm, useIdCheck = true, useFu
 // Usage in rankedSearch:
 export const rankedSearch = async (context) => {
   const { query = {} } = context.params;
-  const isPublic = context.path.includes('/public_');
+  const isPublic = context.path.includes('/public/');
   const useIdCheck = !isPublic;
   const useFuzzy = !isPublic;
   const language = 'english';
