@@ -11,7 +11,7 @@ function PaginationFooter({
   embedded,
   ...props
 }) {
-  const label = `${total} ${startCase(type)} ${
+  const label = `${total.toLocaleString()} ${startCase(type)} ${
     type === "records" && digitizedTotal !== undefined ? `(${digitizedTotal} digitized)` : ""
   }`;
 
