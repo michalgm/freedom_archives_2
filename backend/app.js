@@ -29,6 +29,7 @@ const app = feathersExpress(feathers(), expressApp);
 app.configure(configuration());
 // Set up Plugins and providers
 const publicPath = path.resolve(__dirname, app.get("public")); // Adjust relative path as necessary
+const frontendDistPath = path.resolve(__dirname, '../frontend/dist');
 // Load app configuration
 // Enable security, CORS, compression, favicon and body parsing
 app.use(
@@ -41,9 +42,9 @@ app.use(compress());
 app.use(json({ limit: "13mb" }));
 app.configure(rest());
 app.use(urlencoded({ extended: true }));
-app.use(favicon(path.join(publicPath, "favicon.ico")));
+app.use(favicon(path.join(frontendDistPath, "favicon.ico")));
 // Host the public folder
-app.use("/", express.static(publicPath));
+app.use("/", express.static(frontendDistPath));
 app.use("/images/thumbnails", thumbnailProxy(app, publicPath));
 // Configure a middleware for 404s and the error handler
 app.configure(knex);
@@ -63,7 +64,7 @@ app.use(
   errorHandler({
     logger,
     html: {
-      404: path.join(publicPath, "index.html"),
+      404: path.join(frontendDistPath, "index.html"),
     },
   })
 );
