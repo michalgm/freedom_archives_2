@@ -566,7 +566,10 @@ SELECT
         TO_TSVECTOR('english', COALESCE(a.title, '')),
         'A'
     )||SETWEIGHT(
-        TO_TSVECTOR('english', COALESCE(instances.call_numbers_text)),
+        TO_TSVECTOR(
+            'english',
+            COALESCE(instances.call_numbers_text, '')
+        ),
         'A'
     )||SETWEIGHT(
         TO_TSVECTOR('english', COALESCE(a.description, '')),
