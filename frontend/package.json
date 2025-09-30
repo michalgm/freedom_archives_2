@@ -7,12 +7,12 @@
   "type": "module",
   "main": "index.js",
   "scripts": {
-    "start": "vite dev",
-    "build": "vite build && mkdir -p public/img/thumbnails",
-    "preview": "vite preview",
-    "publish": "npm run build && scp -Crp dist/* freedomarc:work/freedom_archives_2/frontend/build/",
-    "storybook": "storybook dev -p 6006 --no-open",
-    "build-storybook": "storybook build"
+    "start": "yarn vite dev",
+    "build": "yarn vite build && mkdir -p public/img/thumbnails",
+    "preview": "yarn vite preview",
+    "publish": "yarn run build && scp -Crp dist/* freedomarc:work/freedom_archives_2/frontend/build/",
+    "storybook": "yarn storybook dev -p 6006 --no-open",
+    "build-storybook": "yarn storybook build"
   },
   "dependencies": {
     "@babel/core": "^7.28.4",
