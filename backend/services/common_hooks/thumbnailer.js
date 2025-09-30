@@ -7,7 +7,7 @@ import { fileURLToPath } from "url";
 
 const fs = { promises }.promises;
 const OUTPUT_DIR = "img/thumbnails/";
-const SIZES = {
+export const SIZES = {
   default: 100,
   small: 75,
   large: 250,
@@ -30,7 +30,13 @@ const MEDIA_TYPES = {
 };
 
 const thumbnailApis = {
-  'vimeo.com:': (url) => `https://vimeo.com/api/oembed.json?url=${url}`,
+  'vimeo.com': async (url) => {
+    const { data } = await axios.get(`https://vimeo.com/api/oembed.json?url=${url}`, { headers: { 'Referer': 'http://freedomarchives.org/' } });
+    if (data.thumbnail_url) {
+      return data.thumbnail_url;
+    }
+    throw new Error(`Bad vimeo url: ${url}`);
+  },
   '(?:(?!www.))archive.org': (url) => {
     const id = url.split('/').pop();
     return (`https://archive.org/services/img/${id}`);
@@ -62,10 +68,17 @@ const processDataUrl = (dataUrl) => {
 
 const writeThumbnailsFromUrl = async ({ url, filename, basedir }) => {
   let data;
-  try {
-    data = await fetchExternalImage(url);
-  } catch (error) {
-    throw new BadRequest(`Error fetching media url "${url}": ${error}`);
+  if (url.startsWith('data:')) {
+    data = processDataUrl(url);
+  } else {
+    if (!url.match(/^https?:\/\//)) {
+      url = `https://search.freedomarchives.org/${url}`;
+    }
+    try {
+      data = await fetchExternalImage(url);
+    } catch (error) {
+      throw new BadRequest(`Error fetching media url "${url}": ${error}`);
+    }
   }
   return writeThumbnails({ data, filename, basedir });
 };
@@ -87,7 +100,7 @@ const writeThumbnails = async ({ data, filename, basedir }) => {
 };
 
 const writeThumbnail = async ({ image, filename, size, basedir }) => {
-  const output_name = `${filename}${size === "default" ? "" : `-${size}`}.${OUTPUT_FORMAT}`;
+  const output_name = `${filename}${size === "default" ? "" : `_${size}`}.${OUTPUT_FORMAT}`;
   const base_path = path.resolve(__dirname, path.join("../../", basedir));
   const output_path = path.join(base_path, OUTPUT_DIR, output_name);
   await fs.mkdir(path.dirname(output_path), { recursive: true });
@@ -122,7 +135,7 @@ const updateThumbnail = async (context) => {
 
     const params = { user, transaction: { trx } };
     if (type === 'collections') {
-      const paths = await writeThumbnailsFromDataUrl(args);
+      const paths = await writeThumbnailsFromUrl(args);
       for (const path of paths) {
         if (path.endsWith(`${filename}.jpg`)) {
           await context.service._patch(id, { thumbnail: path }, params);
@@ -133,7 +146,7 @@ const updateThumbnail = async (context) => {
       let media_type = '';
       for (const [key, value] of Object.entries(thumbnailApis)) {
         if (url.match(key)) {
-          args.url = value(url);
+          args.url = await value(url);
           media_type = 'Video';
           break;
         }
@@ -141,6 +154,9 @@ const updateThumbnail = async (context) => {
       if (!media_type) {
         const ext = url.split('.').pop().replace(/\?.*/g, '').toLowerCase();
         media_type = MEDIA_TYPES[ext] || 'Webpage';
+        if (!MEDIA_TYPES[ext]) {
+          console.log(`  - Inferred media type for ${url} as ${media_type} from file extension .${ext}`);
+        }
       }
       if (['Video', 'Image', 'PDF'].includes(media_type)) {
         await writeThumbnailsFromUrl(args);
@@ -149,7 +165,7 @@ const updateThumbnail = async (context) => {
       if (method === 'create') {
         relation_data.instances[0].media_type = media_type;
       } else {
-        await context.app.service('api/instances').patch(relation_data.instances[0].instance_id, { media_type }, params);
+        await context.app.service('api/instances')._patch(relation_data.instances[0].instance_id, { media_type }, params);
       }
     }
   }
