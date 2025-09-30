@@ -56,9 +56,9 @@ function Sidebar({ ...props }) {
 
   return (
     <Drawer {...props}>
-      <Stack className="FlexContainer">
+      <Stack className="flex-container">
         <Toolbar variant="dense" />
-        <Box sx={{ overflow: "auto" }} className="FlexContainer">
+        <Box sx={{ overflow: "auto" }} className="flex-container">
           {sidebarLinks}
         </Box>
       </Stack>

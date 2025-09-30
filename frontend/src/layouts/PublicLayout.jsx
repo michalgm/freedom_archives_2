@@ -6,7 +6,6 @@ import { public_settings } from "src/api";
 import ButtonLink from "src/components/ButtonLink";
 import ErrorBoundary from "src/components/ErrorBoundary";
 import { theme } from "src/theme";
-
 import "./PublicLayout.scss";
 
 // import FranchiseBold from "font/franchise-bold-webfont.woff";
@@ -73,42 +72,81 @@ const PublicLayout = () => {
   return (
     <ThemeProvider theme={getPublicTheme}>
       <Box
-        id="header"
         sx={{
-          height: 240,
-          textAlign: "center",
-          background: `url("/static/images/freedom_archives_header.jpg") no-repeat scroll center top #b00000`,
-          minWidth: 990,
+          display: "grid",
+          gridTemplateRows: "auto minmax(0, 1fr) auto",
+          maxHeight: "calc(100dvh + 68px + 32px)",
         }}
+        className="App"
       >
-        <div id="header_image">
-          <Container>
-            <Stack direction="row" justifyContent="flex-end" alignItems="end" spacing={1} sx={{ pt: 3 }}>
-              {headerLinks.map((link) => (
-                <ButtonLink
-                  key={link.title}
-                  size="small"
-                  variant="contained"
-                  color="darkPrimary"
-                  to={link.href}
-                  title={`Go to ${link.title}`}
-                  // sx={{ backgroundColor: "darkPrimary.main", border: "none" }}
-                >
-                  <span style={{ color: "white" }}>{link.title}</span>
-                </ButtonLink>
-              ))}
-            </Stack>
-          </Container>
-        </div>
-      </Box>
-      <Container id="container">
         <Box
-          id="main_content"
-          sx={{ border: "3px solid", borderColor: "rgba(0, 0, 0, 0.05)", p: 1, backgroundColor: grey[50], mt: -8 }}
+          sx={{
+            backgroundColor: "#b00000",
+            background: `url("/static/images/freedom_archives_header.jpg") no-repeat scroll  #b00000`,
+            backgroundPosition: "top center",
+            // backgroundPosition: {
+            //   lg: "-280px",
+            //   md: "-200px -10px",
+            //   sm: "-180px -10px",
+            //   xs: "-140px -16px",
+            // },
+            height: 240,
+          }}
         >
-          <Box id="welcome_text" sx={{ mb: 2, p: 2, backgroundColor: "secondary.main" }}>
-            {settings?.introText && <div dangerouslySetInnerHTML={{ __html: settings?.introText || "" }} />}
-          </Box>
+          <Container disableGutters>
+            <Box
+              id="header"
+              sx={{
+                // mx: -30,
+                // height: {
+                //   lg: 240,
+                //   md: 200,
+                //   sm: 180,
+                //   xs: 140,
+                // },
+                textAlign: "center",
+
+                // backgroundSize: "auto 100%",
+                // flex: "0 0 auto",
+              }}
+            >
+              <div id="header_image">
+                <Stack direction="row" justifyContent="flex-end" alignItems="end" spacing={1} sx={{ pt: 3 }}>
+                  {headerLinks.map((link) => (
+                    <ButtonLink
+                      key={link.title}
+                      size="small"
+                      variant="contained"
+                      color="darkPrimary"
+                      to={link.href}
+                      title={`Go to ${link.title}`}
+                      // sx={{ backgroundColor: "darkPrimary.main", border: "none" }}
+                    >
+                      <span style={{ color: "white" }}>{link.title}</span>
+                    </ButtonLink>
+                  ))}
+                </Stack>
+              </div>
+            </Box>
+          </Container>
+        </Box>
+
+        <Container
+          id="main_content"
+          sx={{
+            // overflow: "hidden",
+            // backgroundColor: "blue",
+            border: "3px solid",
+            borderColor: "rgba(0, 0, 0, 0.05)",
+            p: 1,
+            backgroundColor: grey[50],
+            mt: -8,
+            minHeight: 0,
+            display: "flex",
+            flexDirection: "column",
+            // flex: "1 1 auto",
+          }}
+        >
           {/* <div id="help_info">
             <h2>Search Help</h2>
             <div id="help_contents">
@@ -160,28 +198,53 @@ const PublicLayout = () => {
             <button onclick="$.modal.close();">Close</button>
           </div> */}
           {/* <Notifications /> */}
-
-          <ErrorBoundary>
-            <Suspense fallback={<div>Loading...</div>}>
-              <Outlet context={settings} />
-            </Suspense>
-          </ErrorBoundary>
+          {/* <Box flexGrow={1} overflow={"auto"} maxHeight={600}> */}
+          <Box
+            sx={{
+              display: "flex",
+              minHeight: 0,
+              flexDirection: "column",
+              // overflow: "auto",
+              flex: "1 1 auto",
+            }}
+          >
+            <ErrorBoundary>
+              <Suspense fallback={<div>Loading...</div>}>
+                <Outlet context={settings} />
+              </Suspense>
+            </ErrorBoundary>
+          </Box>
+          {/* </Box> */}
+        </Container>
+        <Box id="footer" sx={{ textAlign: "right", mt: 2, mb: 2, flex: "0 0 auto" }}>
+          <Container
+            sx={{
+              display: "flex",
+              flexDirection: "row",
+              justifyContent: "space-between",
+              alignItems: "center",
+              px: {
+                lg: 0,
+                md: 2,
+              },
+            }}
+          >
+            <Box>
+              <Button variant="outlined" href="https://freedomarchives.org/donation">
+                DONATE
+              </Button>
+            </Box>
+            <Typography variant="caption" id="contact" component={"div"}>
+              <b>The Freedom Archives</b>
+              <br />
+              1615 Hopkins Street, Berkeley, CA 94707
+              <br />
+              Phone: (415) 863-9977 &bull; E-mail:{" "}
+              <Link href="mailto:info@freedomarchives.org">info [at] freedomarchives [dot] org</Link>
+            </Typography>
+          </Container>
         </Box>
-
-        <Box id="footer" sx={{ textAlign: "right", mt: 2, mb: 2 }}>
-          <Button variant="outlined" href="https://freedomarchives.org/donation">
-            DONATE
-          </Button>
-          <Typography variant="caption" id="contact" component={"div"} sx={{ mt: 1 }}>
-            <b>The Freedom Archives</b>
-            <br />
-            1615 Hopkins Street, Berkeley, CA 94707
-            <br />
-            Phone: (415) 863-9977 &bull; E-mail:{" "}
-            <Link href="mailto:info@freedomarchives.org">info [at] freedomarchives [dot] org</Link>
-          </Typography>
-        </Box>
-      </Container>
+      </Box>
     </ThemeProvider>
   );
 };

@@ -388,7 +388,7 @@ function Record({ id /*  embedded = false */ }) {
   logger.log("Record RENDER");
 
   return (
-    <Box className="record ScrollContainer">
+    <Box className="record scroll-container">
       <BaseForm
         formConfig={{
           service: "records",

@@ -27,7 +27,7 @@ const SiteSettings = () => {
 
   const buttons = [{ label: "Save", type: "submit" }];
   return (
-    <div className="site-settings ScrollContainer">
+    <div className="site-settings scroll-container">
       <BaseForm
         formConfig={{
           service: "settings",

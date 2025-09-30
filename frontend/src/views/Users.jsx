@@ -155,7 +155,7 @@ export default function Users() {
   ];
 
   return (
-    <Paper className="users FlexContainer" sx={{ p: 0 }}>
+    <Paper className="users flex-container" sx={{ p: 0 }}>
       <EditableDataTable
         {...{
           rows: users,

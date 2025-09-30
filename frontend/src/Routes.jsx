@@ -3,6 +3,7 @@ import { Navigate, Outlet, Route, createBrowserRouter, createRoutesFromElements,
 import { RouterProvider } from "react-router/dom";
 import { hasAccess, getRoutes } from "src/config/routes";
 import { useAuth } from "src/stores";
+import PublicCollections from "src/views/Public/PublicCollections";
 
 const Layout = React.lazy(() => import("./layouts/Layout"));
 const PublicLayout = React.lazy(() => import("./layouts/PublicLayout"));
@@ -21,9 +22,8 @@ const componentMap = {
   Users: React.lazy(() => import("./views/Users")),
   SiteSettings: React.lazy(() => import("./views/SiteSettings")),
   Table: React.lazy(() => import("./views/Table")),
-  PublicSearch: React.lazy(() => import("./views/PublicSearch")),
-  PublicCollections: React.lazy(() => import("./views/PublicCollections")),
-  PublicHome: React.lazy(() => import("./views/PublicHome")),
+  PublicSearch: React.lazy(() => import("./views/Public/PublicSearch")),
+  PublicHome: React.lazy(() => import("./views/Public/PublicHome")),
 };
 
 function LoginRedirect() {
@@ -101,7 +101,6 @@ getRoutes().forEach(([path, config]) => {
 });
 
 const PublicSearch = componentMap["PublicSearch"];
-const PublicCollections = componentMap["PublicCollections"];
 const PublicHome = componentMap["PublicHome"];
 
 const router = createBrowserRouter(
@@ -109,7 +108,7 @@ const router = createBrowserRouter(
     <Route>
       <Route element={<PublicLayout />} path="/public">
         <Route path="search" element={<PublicSearch />} />
-        <Route path="collections" element={<PublicCollections />} />
+        <Route path="collections/:collection_id" element={<PublicCollections />} />
         <Route path="" element={<PublicHome />} />
         <Route path="*" element={<PublicHome />} />
       </Route>

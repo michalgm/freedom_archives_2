@@ -3,9 +3,7 @@ import "./PublicSearch.scss";
 import {
   Box,
   Button,
-  Card,
   Chip,
-  CircularProgress,
   Divider,
   Grid2,
   Icon,
@@ -14,25 +12,20 @@ import {
   ListItem,
   ListItemButton,
   ListItemText,
-  Link as MULink,
   Stack,
   Typography,
 } from "@mui/material";
-import { alpha, useTheme } from "@mui/material/styles";
+import { alpha } from "@mui/material/styles";
 import { merge, omit, startCase } from "lodash-es";
-import React, { useCallback, useEffect, useRef, useState } from "react";
-import { CheckboxElement, SelectElement, TextFieldElement } from "react-hook-form-mui";
+import React, { useCallback, useEffect, useState } from "react";
+import { CheckboxElement, SelectElement, TextFieldElement, useFormContext } from "react-hook-form-mui";
 import { useSearchParams } from "react-router";
+import { public_records as recordsService } from "src/api";
 import AutoSubmit from "src/components/AutoSubmit";
+import Form from "src/components/form/Form";
+import PaginationFooter from "src/components/PaginationFooter";
+import { ItemStack } from "src/views/Public/ItemCard";
 import { useImmer } from "use-immer";
-
-import { public_records as recordsService } from "../api";
-import Form from "../components/form/Form";
-import KVChip from "../components/KVChip";
-import PaginationFooter from "../components/PaginationFooter";
-import Thumbnail from "../components/Thumbnail";
-
-const DESCRIPTION_MAX_LINES = 5;
 
 const PAGE_SIZE = 10;
 
@@ -57,61 +50,6 @@ const SORT_OPTIONS = {
   Oldest: { date: 1, title: 1 },
   Title: { title: 1, rank: -1 },
 };
-
-function Description({ text }) {
-  const theme = useTheme();
-  const [open, setopen] = useState(false);
-  const [height, setHeight] = useState(0);
-  const ref = useRef(null);
-
-  useEffect(() => {
-    const size = parseFloat(getComputedStyle(ref.current.parentElement).fontSize);
-    setHeight(ref.current.clientHeight / size);
-  }, [setHeight]);
-
-  const lineHeight = DESCRIPTION_MAX_LINES * theme.typography.body2.lineHeight;
-
-  return (
-    <Box sx={{ width: "100%" }}>
-      <Box
-        sx={[
-          { transition: "0.4s", maxHeight: 800 },
-          !open && {
-            maxHeight: `${lineHeight}em`,
-            overflow: "hidden",
-          },
-        ]}
-      >
-        <Typography variant="body2" color="text.secondary" ref={ref}>
-          {text}
-        </Typography>
-      </Box>
-      {height > lineHeight && (
-        <Typography
-          color="text.secondary"
-          variant="caption"
-          sx={{
-            textAlign: "right",
-            display: "flex",
-            alignItems: "center",
-            flexWrap: "wrap",
-            float: "right",
-            cursor: "pointer",
-            "& .MuiIcon-root": {
-              transition: "transform 400ms cubic-bezier(0.4, 0, 0.2, 1) 0ms",
-            },
-            "& .MuiIcon-root.open": {
-              transform: "rotate(180deg)",
-            },
-          }}
-          onClick={() => setopen(!open)}
-        >
-          <Icon className={open ? "open" : ""}>expand_more</Icon> View {open ? "Less" : "More"}
-        </Typography>
-      )}
-    </Box>
-  );
-}
 
 const RenderFilterItem = ({ value, label, count, type, addFilter, search }) => {
   return (
@@ -177,14 +115,14 @@ const SearchFilters = ({ search, setSearch, filters }) => {
   // const nonDigitizedTotalString = (parseInt(nonDigitizedTotal, 10) || 0).toLocaleString();
 
   return (
-    <Box p={1} sx={{ backgroundColor: (theme) => theme.palette.background.paper }}>
+    <Box p={1} sx={{ backgroundColor: (theme) => theme.palette.background.paper }} className="flex-container">
       <Grid2 size={12} container alignItems="center" justifyContent="space-between">
-        <Typography variant="header">Filter Results</Typography>
+        <Typography variant="h6">Filter Search Results</Typography>
         <Button startIcon={<Icon>clear</Icon>} color="inherit" size="small" variant="outlined" onClick={clearFilters}>
           Clear Filters
         </Button>
       </Grid2>
-      <Grid2 size={12}>
+      <Grid2 size={12} className="flex-scroller">
         {/* <List sx={{ backgroundColor: (theme) => theme.palette.background.paper }} dense>
             {FILTER_TYPES.map((type) => {
               return <Filter key={type} type={type} values={filters[type]} addFilter={addFilter} search={search} />;
@@ -204,46 +142,19 @@ const SearchFilters = ({ search, setSearch, filters }) => {
   );
 };
 
-function RecordLink({ url, children }) {
-  if (url) {
-    return (
-      <MULink href={url} target="_blank" rel="noopener" underline="hover">
-        {children}
-      </MULink>
-    );
-  }
-  return children;
-}
-
-export function RecordCard({ record }) {
-  return (
-    <Grid2 size={12} key={record.record_id}>
-      <Card sx={{ p: 2, border: "none" }} variant="outlined">
-        <Stack spacing={2} direction="row">
-          <Box>
-            <RecordLink url={record.url}>
-              <Thumbnail item={record} width={75} />
-            </RecordLink>
-          </Box>
-          <Box>
-            <Typography variant="h6" sx={{ fontWeight: 700, lineHeight: 1.2, mb: 0.5 }}>
-              <RecordLink url={record.url}>{record.title || record.collection_name}</RecordLink>
-            </Typography>
-            <Grid2 container spacing={1} style={{ marginBottom: 3, marginTop: 3 }}>
-              {(record.details || []).map(([key, value]) => (
-                <Grid2 key={key}>
-                  <KVChip keyName={startCase(key)} value={value} variant="outlined" size="small" />
-                </Grid2>
-              ))}
-            </Grid2>
-            <Description text={record.description} />
-          </Box>
-        </Stack>
-      </Card>
-    </Grid2>
-  );
-}
-export function SearchInput({ ...props }) {
+// export function LoadingCard() {
+//   return (
+//     // <ItemCard
+//     //   item={{
+//     //     title: <Skeleton />,
+//     //     description: <Skeleton sx={{ width: "100%", height: 80 }} />,
+//     //     details: [<Skeleton sx={{ width: "100%", height: 30 }} />],
+//     //   }}
+//     //   type="record"
+//     // />
+//   );
+// }
+export function SearchInput({ focus, ...props }) {
   return (
     <TextFieldElement
       name="fullText"
@@ -269,19 +180,19 @@ export function SearchInput({ ...props }) {
         ),
       }}
       // placeholder="Search Archives"
-      autoFocus
+      autoFocus={focus}
       fullWidth
       {...props}
     />
   );
 }
-export function SearchForm({ search, doSearch, records, loading, offset, total, setOffset }) {
+export function SearchForm({ search, doSearch, nonDigitizedTotal, loading, offset, total, setOffset, focus }) {
   return (
     <Form defaultValues={search} onSubmit={doSearch}>
       <AutoSubmit action={doSearch} timeout={300} />
       <Grid2 container spacing={1} direction="row" alignItems="center" sx={{ p: 1 }}>
         <Grid2 size={5}>
-          <SearchInput />
+          <SearchInput focus={focus} />
         </Grid2>
         <Grid2 size={3}>
           <SelectElement
@@ -294,7 +205,6 @@ export function SearchForm({ search, doSearch, records, loading, offset, total, 
         </Grid2>
         <Grid2 size={3}>
           <CheckboxElement
-            highlightDirty={false}
             name="include_non_digitized"
             label={`Include non-digitized records`}
             field_type="checkbox"
@@ -310,31 +220,61 @@ export function SearchForm({ search, doSearch, records, loading, offset, total, 
             width={12}
           />
         </Grid2>
-        {records.length !== 0 && !loading && (
-          <Box sx={{ width: "100%" }}>
-            <Divider sx={{ my: 1 }} orientation="horizontal" flexItem />
-            <PaginationFooter offset={offset} total={total} page_size={PAGE_SIZE} setOffset={setOffset} size="small" />
-          </Box>
-        )}
+        <SearchResults
+          total={total}
+          nonDigitizedTotal={nonDigitizedTotal}
+          offset={offset}
+          setOffset={setOffset}
+          loading={loading}
+        />
       </Grid2>
     </Form>
   );
 }
 
-function Search() {
+function SearchResults({ total, nonDigitizedTotal, offset, setOffset, loading }) {
+  const { setValue } = useFormContext();
+  return (
+    <Box sx={{ width: "100%" }}>
+      <Divider sx={{ my: 1 }} orientation="horizontal" flexItem />
+      {total === 0 ? (
+        <Typography variant="body2" color="text.secondary" sx={{ p: 2 }}>
+          No records found.
+          <br />
+          Hiding {nonDigitizedTotal} non-digitized records.{" "}
+          <Button size="small" onClick={() => setValue("include_non_digitized", true)}>
+            Show All
+          </Button>
+        </Typography>
+      ) : (
+        <PaginationFooter
+          offset={offset}
+          total={total}
+          page_size={PAGE_SIZE}
+          setOffset={setOffset}
+          size="small"
+          loading={loading}
+        />
+      )}
+    </Box>
+  );
+}
+
+function Search({ searchFilters = {}, focus = true }) {
   const [searchParams] = useSearchParams();
   const [records, setRecords] = useState({ count: 0, records: [] });
   const [total, setTotal] = useState(0);
   const [offset, setOffset] = useState(0);
   // const [time, setTime] = useState(0);
   const [loading, setLoading] = useState(true);
+  // const [collectionFilters, setCollectionFilters] = useState([]);
   const [search, setSearch] = useImmer({
     fullText: searchParams.get("search") || "",
     include_non_digitized: false,
     sort: "Relevance",
+    ...searchFilters,
   });
   const [filters, setFilters] = useState([]);
-
   useEffect(() => {
     setOffset(0);
   }, [search]);
@@ -345,6 +285,7 @@ function Search() {
       // const time = new Date();
       try {
         const { fullText, include_non_digitized, sort } = search;
+
         const query = {
           $select: [
             "record_id",
@@ -376,17 +317,20 @@ function Search() {
         }
         FILTER_TYPES.forEach((type) => {
           if (search[type]) {
-            if (["year", "title", "collection_id", "format", "media_type"].includes(type)) {
+            if (["year", "title", "format", "media_type"].includes(type)) {
               query[type] = search[type][0];
+            } else if (type === "collection_id") {
+              query[type] = { $in: search[type] };
             } else {
               query[type] = { $contains: search[type] };
             }
           }
         });
         // console.log("Query", query);
-        const { total, data: records, filters = [] } = await recordsService.find({ query });
+        const { total, data: records, nonDigitizedTotal, filters = [] } = await recordsService.find({ query });
         setRecords({
           total,
+          nonDigitizedTotal,
           records: records.map((record) => {
             const keys = [
               "year",
@@ -420,8 +364,8 @@ function Search() {
         setFilters(filters);
         // setTime((new Date() - time) / 1000);
         setTotal(total);
-      } catch {
-        //empty
+      } catch (error) {
+        console.error("Error fetching records:", error);
       } finally {
         setLoading(false);
       }
@@ -437,57 +381,51 @@ function Search() {
     },
     [setSearch]
   );
-
   return (
-    <Stack
-      direction="row"
-      className="records"
-      sx={{ height: "100%" }}
-      divider={<Divider orientation="vertical" flexItem />}
-      spacing={2}
-    >
-      <Box sx={{ flexBasis: 300, flexGrow: 0, flexShrink: 0 }} className="FlexScroller">
-        <SearchFilters {...{ search, setSearch, filters, setFilters }} nonDigitizedTotal={records.nonDigitizedTotal} />
-      </Box>
-      <Box sx={{ flexGrow: 1, flexShrink: 1 }} className="FlexContainer">
-        <Box
-          sx={{
-            position: "sticky",
-            top: 0,
-            zIndex: 1,
-            backgroundColor: (theme) => theme.palette.background.paper,
-            mb: 1,
-          }}
-        >
-          {
-            <SearchForm
-              search={search}
-              doSearch={doSearch}
-              records={records}
-              loading={loading}
-              offset={offset}
-              total={total}
-              setOffset={setOffset}
-            />
-          }
+    <Box className="flex-container search-page">
+      <Stack
+        direction="row"
+        className="records"
+        sx={{ height: "100%" }}
+        divider={<Divider orientation="vertical" flexItem />}
+        spacing={2}
+        // useFlexGap
+      >
+        <Box sx={{ flexBasis: 300, flexGrow: 0, flexShrink: 0 }}>
+          <SearchFilters
+            {...{ search, setSearch, filters, setFilters }}
+            nonDigitizedTotal={records.nonDigitizedTotal}
+          />
         </Box>
-        <Stack spacing={2} className="FlexContainer" sx={{ padding: "1px" }}>
-          <Stack spacing={2} className="FlexScroller">
-            {loading ? (
-              <Box
-                textAlign="center"
-                sx={{ p: 2, backgroundColor: (theme) => theme.palette.background.paper, borderRadius: 2 }}
-              >
-                <CircularProgress size={64} />
-              </Box>
-            ) : (
-              records.records.map((record) => <RecordCard key={record.record_id} record={record} />)
-            )}
-          </Stack>
-        </Stack>
-      </Box>
-    </Stack>
+        <Box sx={{ flexGrow: 1 }} className="flex-container">
+          <Box
+            sx={{
+              backgroundColor: (theme) => theme.palette.background.paper,
+              mb: 1,
+            }}
+          >
+            {
+              <SearchForm
+                search={search}
+                doSearch={doSearch}
+                records={records}
+                loading={loading}
+                offset={offset}
+                total={total}
+                setOffset={setOffset}
+                nonDigitizedTotal={records.nonDigitizedTotal}
+                focus={focus}
+              />
+            }
+          </Box>
+
+          <Grid2 className="flex-container">
+            {loading ? "Loading..." : null}
+            <ItemStack title="" type="record" loading={loading} items={records.records} />
+          </Grid2>
+        </Box>
+      </Stack>
+    </Box>
   );
 }
-
 export default React.memo(Search);

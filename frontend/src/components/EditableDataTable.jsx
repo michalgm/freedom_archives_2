@@ -332,7 +332,7 @@ export const EditableDataTable = ({
   );
 
   return (
-    <Box className="FlexContainer" sx={{ position: "relative" }}>
+    <Box className="flex-container" sx={{ position: "relative" }}>
       {
         <Stack
           direction="row"

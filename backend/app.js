@@ -40,8 +40,8 @@ app.use(
 app.use(cors());
 app.use(compress());
 app.use(json({ limit: "13mb" }));
-app.configure(rest());
 app.use(urlencoded({ extended: true }));
+app.configure(rest());
 app.use(favicon(path.join(frontendDistPath, "favicon.ico")));
 // Host the public folder
 app.use("/", express.static(frontendDistPath));

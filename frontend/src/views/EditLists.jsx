@@ -165,14 +165,14 @@ function EditLists() {
   const mergeAction = ["Merge", Merge, setMergeItem];
 
   return (
-    <Paper className="FlexContainer" sx={{ p: 0 }}>
+    <Paper className="flex-container" sx={{ p: 0 }}>
       <Tabs value={type} variant="scrollable" scrollButtons="auto" onChange={(_, type) => setType(type.toLowerCase())}>
         {types.map(([value, label]) => (
           <Tab key={value} label={label} value={value} />
         ))}
       </Tabs>
 
-      <Box className="FlexContainer" sx={{ p: 1 }}>
+      <Box className="flex-container" sx={{ p: 1 }}>
         <EditableDataTable
           rows={values.data}
           columns={columns}

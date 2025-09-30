@@ -42,9 +42,9 @@ function ViewContainer({
   }
   const Container = noPaper ? Box : Paper;
   return (
-    <Stack direction="column" spacing={embedded ? 1 : 2} useFlexGap className="ScrollContainer">
+    <Stack direction="column" spacing={embedded ? 1 : 2} useFlexGap className="scroll-container">
       <Section elements={headerElements} header service={service} embedded={embedded} />
-      <Container id="contents" className="FlexContainer" {...containerProps} elevation={embedded ? 0 : 1}>
+      <Container id="contents" className="flex-container" {...containerProps} elevation={embedded ? 0 : 1}>
         <Show when={!isLoading}>{children}</Show>
       </Container>
       <Section type="footer" elements={footerElements} embedded={embedded} />

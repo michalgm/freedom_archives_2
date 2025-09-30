@@ -97,9 +97,14 @@ INSERT INTO
     );
 
 INSERT INTO
-    collections (collection_id, collection_name, display_order)
+    collections (
+        collection_id,
+        collection_name,
+        display_order,
+        archive_id
+    )
 VALUES
-    (0, 'Featured', 0);
+    (0, 'Featured', 0, 1);
 
 INSERT INTO
     collections (

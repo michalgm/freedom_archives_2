@@ -212,8 +212,8 @@ function Relationships() {
           </Grid2>,
         ]}
       />
-      <div className="FlexContainer">
-        <Grid2 size={12} className="FlexContainer">
+      <div className="flex-container">
+        <Grid2 size={12} className="flex-container">
           <Relationship id={relation.id} key={relation.id} />
         </Grid2>
       </div>

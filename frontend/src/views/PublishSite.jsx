@@ -128,7 +128,7 @@ const PublishSite = () => {
   return (
     <Stack className="snapshots" sx={{ height: "100%" }} spacing={2}>
       <Section header elements={[<ButtonsHeader key={"buttons"} buttons={buttons} />]} />
-      <Paper sx={{ p: 0 }} className="FlexContainer">
+      <Paper sx={{ p: 0 }} className="flex-container">
         <Typography sx={{ m: "10px" }} variant="h6">
           Site Snapshots
         </Typography>

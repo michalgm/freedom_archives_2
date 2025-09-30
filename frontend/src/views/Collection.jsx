@@ -120,7 +120,7 @@ function Collection({ id, mode = "" }) {
   };
 
   return (
-    <Box className="collection ScrollContainer">
+    <Box className="collection scroll-container">
       <BaseForm
         formConfig={{
           service: "collections",
@@ -143,11 +143,11 @@ function Collection({ id, mode = "" }) {
               id={id}
               newItem={newCollection}
               service={isFeaturedRecords || isFeaturedCollections ? null : "collections"}
-              className="FlexContainer"
+              className="flex-container"
               deleteOptions={deleteOptions}
             >
-              {/* <GridBlock title="" spacing={2} className="FlexContainer"> */}
-              <Stack sx={{ height: "100%" }} className="FlexContainer">
+              {/* <GridBlock title="" spacing={2} className="flex-container"> */}
+              <Stack sx={{ height: "100%" }} className="flex-container">
                 {!isFeaturedRecords && !isFeaturedCollections && (
                   <Tabs sx={{ flex: "0 0 auto" }} value={tab} onChange={(_, tab) => setTab(tab)}>
                     <Tab label="Edit Collection" value="collection"></Tab>
@@ -289,7 +289,7 @@ function EditList({
   }
 
   return (
-    <Grid2 className="FlexContainer" sx={{ backgroundColor: "grey.200", p: 1 }}>
+    <Grid2 className="flex-container" sx={{ backgroundColor: "grey.200", p: 1 }}>
       <Stack
         direction={"row"}
         sx={{ height: "100%" }}

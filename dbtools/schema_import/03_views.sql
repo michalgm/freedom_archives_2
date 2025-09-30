@@ -281,6 +281,8 @@ SELECT
                     list_items.item,
                     'primary_instance_media_type',
                     primary_instance.media_type,
+                    'primary_instance_url',
+                    primary_instance.url,
                     'label',
                     f.label,
                     'record_order',

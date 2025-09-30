@@ -5,12 +5,13 @@ body,
   min-height: 100%;
 }
 #root {
-  position: fixed;
-  top: 0;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  overflow: auto;
+  // position: fixed;
+  // top: 0;
+  // bottom: 0;
+  // left: 0;
+  // right: 0;
+  // overflow: auto;
+  min-height: 100dvh;
 }
 code {
   font-family: source-code-pro, Menlo, Monaco, Consolas, "Courier New", monospace;
@@ -25,18 +26,19 @@ code {
 }
 
 .App {
-  .FlexContainer {
+  .flex-container {
     display: flex;
     flex-direction: column;
     flex-grow: 1;
     height: 100%;
     overflow-x: hidden;
   }
-  .ScrollContainer {
+  .scroll-container {
     height: 100%;
     overflow: visible;
+    scroll-behavior: smooth;
   }
-  .FlexScroller {
+  .flex-scroller {
     overflow-x: auto;
     height: 100%;
     padding: 1px;

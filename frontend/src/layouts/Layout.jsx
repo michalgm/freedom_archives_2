@@ -59,7 +59,7 @@ export default function Layout() {
           sx={{
             backgroundColor: "#efefef",
           }}
-          className="FlexContainer"
+          className="flex-container"
           style={style}
         >
           <Toolbar variant="dense" />
