@@ -1,11 +1,11 @@
-import { Box, Grid2, Typography } from "@mui/material";
+import { Box, Divider, Grid2, Stack, Typography } from "@mui/material";
 import { useEffect, useState } from "react";
 import { useNavigate, useOutletContext } from "react-router";
 import { public_collections } from "src/api";
 import Carousel from "src/components/Carousel";
 import Form from "src/components/form/Form";
-import { ItemStack } from "src/views/Public/ItemCard";
-import { SearchInput } from "src/views/Public/PublicSearch";
+import { ItemStack } from "src/public/ItemCard";
+import { SearchInput } from "src/public/PublicSearch/SearchForm";
 
 const PublicHome = () => {
   const [topCollections, setTopCollections] = useState([]);
@@ -30,36 +30,45 @@ const PublicHome = () => {
   }, []);
 
   return (
-    <Box className="flex-container">
+    <Stack direction="column" spacing={2} className="flex-container">
       <Box
         id="welcome_text"
-        sx={{ mb: 2, p: 2, backgroundColor: "secondary.main" }}
+        sx={{ p: 2, backgroundColor: "secondary.main" }}
         dangerouslySetInnerHTML={{ __html: introText || "" }}
       />
+      <Stack size={12}>
+        <Typography variant="header" gutterBottom>
+          Search the Archives
+        </Typography>
+        <Box className="flex-scroller">
+          <Form defaultValues={{ search: "" }} onSuccess={onSubmit}>
+            <SearchInput name="search" />
+          </Form>
+        </Box>
+      </Stack>
+      <Divider />
       <Grid2 container spacing={2} sx={{ overflowX: "auto !important" }}>
-        <Grid2 size={12}>
-          <Typography variant="header" gutterBottom>
-            Search the Archives
-          </Typography>
-          <Box className="flex-scroller">
-            <Form defaultValues={{ search: "" }} onSuccess={onSubmit}>
-              <SearchInput name="search" />
-            </Form>
-          </Box>
+        <Grid2 size={3} className="flex-container">
+          <ItemStack
+            title="Browse by Collection"
+            type="collection"
+            items={topCollections}
+          />
         </Grid2>
-        <Grid2 size={4} className="flex-container">
-          <ItemStack title="Browse by Collection" type="collection" items={topCollections} />
+        <Grid2 size="auto">
+          <Divider orientation="vertical" />
         </Grid2>
-        <Grid2 size={4} className="flex-container">
+
+        <Grid2 size={2} className="flex-container">
           <Typography variant="header" gutterBottom>
             Featured Content
           </Typography>
-          <Box sx={{ maxWidth: 450 }} className="flex-scroller">
+          <Box className="flex-scroller">
             <Carousel items={featuredRecords} />
           </Box>
         </Grid2>
       </Grid2>
-    </Box>
+    </Stack>
   );
 };
 export default PublicHome;

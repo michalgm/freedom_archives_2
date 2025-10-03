@@ -129,3 +129,4 @@ frontend/public/assets/*
 config/production.json
 
 dbtools/cruft/*
+.yarn/*

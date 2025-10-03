@@ -4,6 +4,12 @@ body,
 .App {
   min-height: 100%;
 }
+
+html {
+  height: 100%;
+  overflow-y: auto;
+  scroll-snap-type: y mandatory;
+}
 #root {
   // position: fixed;
   // top: 0;
@@ -14,7 +20,8 @@ body,
   min-height: 100dvh;
 }
 code {
-  font-family: source-code-pro, Menlo, Monaco, Consolas, "Courier New", monospace;
+  font-family:
+    source-code-pro, Menlo, Monaco, Consolas, "Courier New", monospace;
 }
 
 .loading {

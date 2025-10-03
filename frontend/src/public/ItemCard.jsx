@@ -18,7 +18,7 @@ import { Link } from "react-router";
 import Thumbnail from "src/components/Thumbnail";
 import useExpandableText from "src/hooks/useExpandableText";
 
-import KVChip from "../../components/KVChip";
+import KVChip from "../components/KVChip";
 
 export function ItemCardLayout({
   url,
@@ -59,7 +59,15 @@ export function ItemCardLayout({
   );
 
   return (
-    <Card variant="outlined" sx={{ flexShrink: 0, border: dense ? "none" : "inhertit" }} {...cardProps}>
+    <Card
+      variant="outlined"
+      sx={{
+        flexShrink: 0,
+        border: dense ? "none" : "inhertit",
+        scrollSnapAlign: "start",
+      }}
+      {...cardProps}
+    >
       {url ? (
         <ItemLink item={item}>
           <CardActionArea>{content}</CardActionArea>
@@ -67,42 +75,75 @@ export function ItemCardLayout({
       ) : (
         content
       )}
-      {isOverflowing && <CardActions sx={{ textAlign: "right", justifyContent: "flex-end" }}>{actions}</CardActions>}
+      {isOverflowing && (
+        <CardActions sx={{ textAlign: "right", justifyContent: "flex-end" }}>
+          {actions}
+        </CardActions>
+      )}
     </Card>
   );
 }
 
 export function ItemLink({ item, children, ...props }) {
-  const url = item.collection_id ? `/public/collections/${item.collection_id}` : item.url || item.primary_instance_url;
+  const url = item.collection_id
+    ? `/public/collections/${item.collection_id}`
+    : item.url || item.primary_instance_url;
   const target = item.collection_id ? "_self" : "_blank";
   if (!url) return children;
   return (
-    <Link to={url} style={{ textDecoration: "none", color: "inherit" }} target={target} {...props}>
+    <Link
+      to={url}
+      style={{ textDecoration: "none", color: "inherit" }}
+      target={target}
+      preventScrollReset
+      {...props}
+    >
       {children}
     </Link>
   );
 }
-export function ItemCard({ item = {}, expand = false, url, dense = false, ...props }) {
+export function ItemCard({
+  item = {},
+  expand = false,
+  url,
+  dense = false,
+  ...props
+}) {
   const title = item.title || item.collection_name || "Untitled";
   const { details = [], description, summary } = item;
   const text = summary || description || "";
   const textRef = useRef(null);
 
-  const { isOverflowing, isExpanded, setIsExpanded, styles } = useExpandableText({ textRef, expand });
+  const { isOverflowing, isExpanded, setIsExpanded, styles } =
+    useExpandableText({ textRef, expand });
   const detailChips = details.map(([key, value]) => (
     <Grid2 key={key}>
-      <KVChip keyName={startCase(key)} value={value} variant="outlined" size="small" />
+      <KVChip
+        keyName={startCase(key)}
+        value={value}
+        variant="outlined"
+        size="small"
+      />
     </Grid2>
   ));
 
   const body = (
-    <Typography variant="body2" color="text.secondary" ref={textRef} sx={styles}>
+    <Typography
+      variant="body2"
+      color="text.secondary"
+      ref={textRef}
+      sx={styles}
+    >
       {text}
     </Typography>
   );
   const actions =
     expand && !isExpanded && isOverflowing ? (
-      <Button startIcon={<ExpandMore />} size="small" onClick={() => setIsExpanded(!isExpanded)}>
+      <Button
+        startIcon={<ExpandMore />}
+        size="small"
+        onClick={() => setIsExpanded(!isExpanded)}
+      >
         View More
       </Button>
     ) : null;
@@ -127,13 +168,24 @@ export function ItemCard({ item = {}, expand = false, url, dense = false, ...pro
 
 export function RecordCard({ record, ...props }) {
   return (
-    <ItemCard item={record} type="record" expand={true} url={record.url || record.primary_instance_url} {...props} />
+    <ItemCard
+      item={record}
+      type="record"
+      expand={true}
+      url={record.url || record.primary_instance_url}
+      {...props}
+    />
   );
 }
 
 export function CollectionCard({ collection, ...props }) {
   return (
-    <ItemCard item={collection} type="collection" url={`/public/collections/${collection.collection_id}`} {...props} />
+    <ItemCard
+      item={collection}
+      type="collection"
+      url={`/public/collections/${collection.collection_id}`}
+      {...props}
+    />
   );
 }
 export function LoadingCard({ ...props }) {
@@ -154,13 +206,27 @@ export function LoadingCard({ ...props }) {
   );
 }
 
-export function ItemStack({ title, type, loading = false, dense = false, items = [], ...props }) {
+export function ItemStack({
+  title,
+  type,
+  loading = false,
+  dense = false,
+  items = [],
+  ...props
+}) {
   return (
     <Box className="flex-container" {...props}>
       <Typography variant="header" gutterBottom>
         {title}
       </Typography>
-      <Stack spacing={dense ? 0 : 2} className="flex-scroller" divider={dense ? <Divider /> : null}>
+      <Stack
+        spacing={dense ? 0 : 2}
+        className="flex-scroller"
+        sx={{
+          scrollSnapType: "y mandatory",
+        }}
+        divider={dense ? <Divider /> : null}
+      >
         {loading ? (
           <>
             <LoadingCard dense={dense} />
@@ -172,8 +238,12 @@ export function ItemStack({ title, type, loading = false, dense = false, items =
             type === "record" ? (
               <RecordCard key={child.record_id} record={child} dense={dense} />
             ) : (
-              <CollectionCard key={child.collection_id} collection={child} dense={dense} />
-            )
+              <CollectionCard
+                key={child.collection_id}
+                collection={child}
+                dense={dense}
+              />
+            ),
           )
         )}
       </Stack>

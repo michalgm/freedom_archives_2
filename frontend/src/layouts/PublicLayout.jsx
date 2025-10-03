@@ -1,5 +1,13 @@
-import { Box, Button, Container, createTheme, Link, Stack, ThemeProvider, Typography } from "@mui/material";
-import { grey } from "@mui/material/colors";
+import {
+  Box,
+  Button,
+  Container,
+  createTheme,
+  Link,
+  Stack,
+  ThemeProvider,
+  Typography,
+} from "@mui/material";
 import { Suspense, useEffect, useState } from "react";
 import { Outlet } from "react-router";
 import { public_settings } from "src/api";
@@ -34,6 +42,7 @@ const publicTheme = {
       fontWeight: "normal",
       textTransform: "lowercase",
       color: "#920000",
+      // marginBottom: "8px !important",
     },
   },
   components: {
@@ -48,7 +57,11 @@ const publicTheme = {
   cssVariables: { cssVarPrefix: "public" },
 };
 
-const getPublicTheme = createTheme(publicTheme);
+const getPublicTheme = createTheme(publicTheme, {
+  // colorSchemes: {
+  //   dark: true,
+  // },
+});
 
 const headerLinks = [
   { title: "Search Home", href: "/public/" },
@@ -75,7 +88,7 @@ const PublicLayout = () => {
         sx={{
           display: "grid",
           gridTemplateRows: "auto minmax(0, 1fr) auto",
-          maxHeight: "calc(100dvh + 68px + 32px)",
+          scrollSnapAlign: "start",
         }}
         className="App"
       >
@@ -111,7 +124,13 @@ const PublicLayout = () => {
               }}
             >
               <div id="header_image">
-                <Stack direction="row" justifyContent="flex-end" alignItems="end" spacing={1} sx={{ pt: 3 }}>
+                <Stack
+                  direction="row"
+                  justifyContent="flex-end"
+                  alignItems="end"
+                  spacing={1}
+                  sx={{ pt: 3 }}
+                >
                   {headerLinks.map((link) => (
                     <ButtonLink
                       key={link.title}
@@ -139,11 +158,17 @@ const PublicLayout = () => {
             border: "3px solid",
             borderColor: "rgba(0, 0, 0, 0.05)",
             p: 1,
-            backgroundColor: grey[50],
+            backgroundColor: "background.default",
             mt: -8,
             minHeight: 0,
             display: "flex",
             flexDirection: "column",
+            scrollSnapAlign: "start",
+            scrollSnapStop: "always", // Add this
+            scrollMarginTop: 8,
+            height: "calc(100dvh - 16px)",
+
+            // height: "100dvh",
             // flex: "1 1 auto",
           }}
         >
@@ -216,7 +241,17 @@ const PublicLayout = () => {
           </Box>
           {/* </Box> */}
         </Container>
-        <Box id="footer" sx={{ textAlign: "right", mt: 2, mb: 2, flex: "0 0 auto" }}>
+        <Box
+          id="footer"
+          sx={{
+            textAlign: "right",
+            mt: 2,
+            mb: 2,
+            flex: "0 0 auto",
+            scrollSnapAlign: "end",
+            scrollMarginBlockEnd: 16,
+          }}
+        >
           <Container
             sx={{
               display: "flex",
@@ -230,7 +265,10 @@ const PublicLayout = () => {
             }}
           >
             <Box>
-              <Button variant="outlined" href="https://freedomarchives.org/donation">
+              <Button
+                variant="outlined"
+                href="https://freedomarchives.org/donation"
+              >
                 DONATE
               </Button>
             </Box>
@@ -240,7 +278,9 @@ const PublicLayout = () => {
               1615 Hopkins Street, Berkeley, CA 94707
               <br />
               Phone: (415) 863-9977 &bull; E-mail:{" "}
-              <Link href="mailto:info@freedomarchives.org">info [at] freedomarchives [dot] org</Link>
+              <Link href="mailto:info@freedomarchives.org">
+                info [at] freedomarchives [dot] org
+              </Link>
             </Typography>
           </Container>
         </Box>

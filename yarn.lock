@@ -3569,12 +3569,30 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@types/react-tagcloud@npm:^2":
+  version: 2.3.2
+  resolution: "@types/react-tagcloud@npm:2.3.2"
+  dependencies:
+    "@types/react": "npm:*"
+  checksum: 10c0/ac24dfb45b36e17167fcef1b145e8c90f14e3639297d313cbc07f7cb9ec8787a0fb1d271ad3a6225a91a34b34fbfd53de0be106e0a92a75222f4836a53f954a3
+  languageName: node
+  linkType: hard
+
 "@types/react-transition-group@npm:^4.4.11, @types/react-transition-group@npm:^4.4.12":
   version: 4.4.12
   resolution: "@types/react-transition-group@npm:4.4.12"
   peerDependencies:
     "@types/react": "*"
   checksum: 10c0/0441b8b47c69312c89ec0760ba477ba1a0808a10ceef8dc1c64b1013ed78517332c30f18681b0ec0b53542731f1ed015169fed1d127cc91222638ed955478ec7
+  languageName: node
+  linkType: hard
+
+"@types/react@npm:*":
+  version: 19.2.0
+  resolution: "@types/react@npm:19.2.0"
+  dependencies:
+    csstype: "npm:^3.0.2"
+  checksum: 10c0/a280e146df2abd3b06eaa2f5332dade9f7ebe916334a40699ee11139c5f22aeb49b5b78b6de8c55b53ef2fa94285e1bc2feaf4fbce6fe259a7de92dc1bf67b17
   languageName: node
   linkType: hard
 
@@ -6534,6 +6552,7 @@ __metadata:
     "@types/lodash-es": "npm:^4.17.12"
     "@types/react": "npm:^19.1.16"
     "@types/react-dom": "npm:^19.1.9"
+    "@types/react-tagcloud": "npm:^2"
     "@vitejs/plugin-react": "npm:^5.0.2"
     "@vitest/browser": "npm:^3.2.4"
     "@vitest/coverage-v8": "npm:^3.2.4"
@@ -6574,6 +6593,7 @@ __metadata:
     react-hook-form-mui: "npm:^7.6.0"
     react-imask: "npm:^7.3.0"
     react-router: "npm:^7.5.0"
+    react-tagcloud: "npm:^2.3.3"
     sass: "npm:^1.49.7"
     storybook: "npm:^9.1.6"
     typescript: "npm:^5.9.2"
@@ -9802,6 +9822,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"randomcolor@npm:^0.6.2":
+  version: 0.6.2
+  resolution: "randomcolor@npm:0.6.2"
+  checksum: 10c0/845b8b4a31ff4a6fe590930217db93ca5741b0eb7b363c564d5db72d52449383bd4cc44b77b8ae64cf4b70118ef7b8b9062134743e9ec7a6798d6a6f84318a2a
+  languageName: node
+  linkType: hard
+
 "range-parser@npm:~1.2.1":
   version: 1.2.1
   resolution: "range-parser@npm:1.2.1"
@@ -9999,6 +10026,20 @@ __metadata:
     react-dom:
       optional: true
   checksum: 10c0/ad77654d53df38b66415d158dfeb42d589e732691da6cb3ce77e8e31cb295a809f2a280e2ea203119d2b9e944992ca87f309db5c6524649cba6fa6539f6c4a83
+  languageName: node
+  linkType: hard
+
+"react-tagcloud@npm:^2.3.3":
+  version: 2.3.3
+  resolution: "react-tagcloud@npm:2.3.3"
+  dependencies:
+    prop-types: "npm:^15.6.2"
+    randomcolor: "npm:^0.6.2"
+    seedrandom: "npm:^3.0.5"
+    shuffle-array: "npm:^1.0.1"
+  peerDependencies:
+    react: ">=16.8.0"
+  checksum: 10c0/a5d625c8fd70d6cac31d6a78fd60dce8c0bd024c910d268934e65c5f7845294e845b638cf3becc68e26c4f76452c26b5ed3530561233be9e9ebff359d72fca80
   languageName: node
   linkType: hard
 
@@ -10492,6 +10533,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"seedrandom@npm:^3.0.5":
+  version: 3.0.5
+  resolution: "seedrandom@npm:3.0.5"
+  checksum: 10c0/929752ac098ff4990b3f8e0ac39136534916e72879d6eb625230141d20db26e2f44c4d03d153d457682e8cbaab0fb7d58a1e7267a157cf23fd8cf34e25044e88
+  languageName: node
+  linkType: hard
+
 "semver@npm:^5.3.0":
   version: 5.7.2
   resolution: "semver@npm:5.7.2"
@@ -10727,6 +10775,13 @@ __metadata:
   version: 1.8.3
   resolution: "shell-quote@npm:1.8.3"
   checksum: 10c0/bee87c34e1e986cfb4c30846b8e6327d18874f10b535699866f368ade11ea4ee45433d97bf5eada22c4320c27df79c3a6a7eb1bf3ecfc47f2c997d9e5e2672fd
+  languageName: node
+  linkType: hard
+
+"shuffle-array@npm:^1.0.1":
+  version: 1.0.1
+  resolution: "shuffle-array@npm:1.0.1"
+  checksum: 10c0/beabc298e781073fa416f1623ac3b8ea26504aba562263550b5916ab22756ac6aa5b4f82af81393b8b3c0f019e89c2fca51dd0f16c4c0b12e021cb9ec6881731
   languageName: node
   linkType: hard
 

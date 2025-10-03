@@ -1,9 +1,15 @@
 import React, { Suspense } from "react";
-import { Navigate, Outlet, Route, createBrowserRouter, createRoutesFromElements, useLocation } from "react-router";
+import {
+  Navigate,
+  Outlet,
+  Route,
+  createBrowserRouter,
+  createRoutesFromElements,
+  useLocation,
+} from "react-router";
 import { RouterProvider } from "react-router/dom";
 import { hasAccess, getRoutes } from "src/config/routes";
 import { useAuth } from "src/stores";
-import PublicCollections from "src/views/Public/PublicCollections";
 
 const Layout = React.lazy(() => import("./layouts/Layout"));
 const PublicLayout = React.lazy(() => import("./layouts/PublicLayout"));
@@ -22,8 +28,9 @@ const componentMap = {
   Users: React.lazy(() => import("./views/Users")),
   SiteSettings: React.lazy(() => import("./views/SiteSettings")),
   Table: React.lazy(() => import("./views/Table")),
-  PublicSearch: React.lazy(() => import("./views/Public/PublicSearch")),
-  PublicHome: React.lazy(() => import("./views/Public/PublicHome")),
+  PublicSearch: React.lazy(() => import("./public/PublicSearch/PublicSearch")),
+  PublicHome: React.lazy(() => import("./public/PublicHome")),
+  PublicCollections: React.lazy(() => import("./public/PublicCollections")),
 };
 
 function LoginRedirect() {
@@ -63,7 +70,13 @@ function createRouteElement(path, config) {
   const { component, redirect, authRole, props, public: isPublic } = config;
 
   if (redirect) {
-    return <Route key={path} path={path} element={<Navigate replace to={redirect} />} />;
+    return (
+      <Route
+        key={path}
+        path={path}
+        element={<Navigate replace to={redirect} />}
+      />
+    );
   }
 
   if (!component) {
@@ -79,7 +92,9 @@ function createRouteElement(path, config) {
   let element = <Component key={path} {...props} />;
 
   if (authRole && !isPublic) {
-    element = <RoleProtectedRoute requiredRole={authRole}>{element}</RoleProtectedRoute>;
+    element = (
+      <RoleProtectedRoute requiredRole={authRole}>{element}</RoleProtectedRoute>
+    );
   }
 
   return <Route key={path} path={path} element={element} />;
@@ -102,13 +117,17 @@ getRoutes().forEach(([path, config]) => {
 
 const PublicSearch = componentMap["PublicSearch"];
 const PublicHome = componentMap["PublicHome"];
+const PublicCollections = componentMap["PublicCollections"];
 
 const router = createBrowserRouter(
   createRoutesFromElements(
     <Route>
       <Route element={<PublicLayout />} path="/public">
         <Route path="search" element={<PublicSearch />} />
-        <Route path="collections/:collection_id" element={<PublicCollections />} />
+        <Route
+          path="collections/:collection_id"
+          element={<PublicCollections />}
+        />
         <Route path="" element={<PublicHome />} />
         <Route path="*" element={<PublicHome />} />
       </Route>
@@ -127,8 +146,8 @@ const router = createBrowserRouter(
         </Route>
         <Route path="*" element={<LoginRedirect />} />
       </Route>
-    </Route>
-  )
+    </Route>,
+  ),
 );
 
 export default function Router() {

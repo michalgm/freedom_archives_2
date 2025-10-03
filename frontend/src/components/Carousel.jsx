@@ -1,10 +1,18 @@
 import { ChevronLeft, ChevronRight } from "@mui/icons-material";
-import { alpha, Box, IconButton, Paper, Stack, Tooltip, Typography } from "@mui/material";
+import {
+  alpha,
+  Box,
+  IconButton,
+  Paper,
+  Stack,
+  Tooltip,
+  Typography,
+} from "@mui/material";
 import Autoplay from "embla-carousel-autoplay";
 import useEmblaCarousel from "embla-carousel-react";
 import React, { useEffect, useState } from "react";
 import Thumbnail from "src/components/Thumbnail";
-import { ItemLink } from "src/views/Public/ItemCard";
+import { ItemLink } from "src/public/ItemCard";
 
 const TEXT_PADDING = 48;
 
@@ -24,9 +32,15 @@ const CarouselSlide = ({ item, index, selectedIndex, width }) => (
     <ItemLink item={item}>
       <Box
         sx={(_theme) => ({
-          backgroundColor: index === selectedIndex ? alpha(_theme.palette.primary.dark, 0.9) : "transparent",
+          backgroundColor:
+            index === selectedIndex
+              ? alpha(_theme.palette.primary.dark, 0.9)
+              : "transparent",
           ":hover": {
-            backgroundColor: index === selectedIndex ? alpha(_theme.palette.primary.main, 1) : "transparent",
+            backgroundColor:
+              index === selectedIndex
+                ? alpha(_theme.palette.primary.main, 1)
+                : "transparent",
           },
           py: 2,
           width: width + TEXT_PADDING,
@@ -78,7 +92,13 @@ const CarouselSlide = ({ item, index, selectedIndex, width }) => (
 );
 
 // Navigation arrows component
-const NavigationArrows = ({ items, scrollPrev, scrollNext, pauseAutoplay, startAutoplay }) => {
+const NavigationArrows = ({
+  items,
+  scrollPrev,
+  scrollNext,
+  pauseAutoplay,
+  startAutoplay,
+}) => {
   if (items.length <= 1) return null;
 
   return (
@@ -161,11 +181,17 @@ const DotIndicators = ({ items, selectedIndex, scrollTo, width }) => {
               width: 12,
               height: 12,
               borderRadius: "50%",
-              bgcolor: index === selectedIndex ? "primary.main" : "rgba(255, 255, 255, 0.5)",
+              bgcolor:
+                index === selectedIndex
+                  ? "primary.main"
+                  : "rgba(255, 255, 255, 0.5)",
               cursor: "pointer",
               transition: "all 0.2s ease",
               "&:hover": {
-                bgcolor: index === selectedIndex ? "primary.dark" : "rgba(255, 255, 255, 0.8)",
+                bgcolor:
+                  index === selectedIndex
+                    ? "primary.dark"
+                    : "rgba(255, 255, 255, 0.8)",
               },
             }}
           />
@@ -186,7 +212,7 @@ const useCarouselControls = (autoAdvanceInterval) => {
         stopOnMouseEnter: true,
         stopOnInteraction: false,
       }),
-    [autoAdvanceInterval]
+    [autoAdvanceInterval],
   );
 
   return {
@@ -196,15 +222,22 @@ const useCarouselControls = (autoAdvanceInterval) => {
   };
 };
 
-export function Carousel({ items = [], autoAdvanceInterval = 6000, width = 250, loop = true, ...props }) {
-  const { selectedIndex, setSelectedIndex, autoplay } = useCarouselControls(autoAdvanceInterval);
+export function Carousel({
+  items = [],
+  autoAdvanceInterval = 6000,
+  width = 250,
+  loop = true,
+  ...props
+}) {
+  const { selectedIndex, setSelectedIndex, autoplay } =
+    useCarouselControls(autoAdvanceInterval);
 
   const [emblaRef, emblaApi] = useEmblaCarousel(
     {
       loop,
       align: "center",
     },
-    [autoplay]
+    [autoplay],
   );
 
   useEffect(() => {
@@ -239,7 +272,11 @@ export function Carousel({ items = [], autoAdvanceInterval = 6000, width = 250, 
   }
 
   return (
-    <Paper variant="outlined" sx={{ py: 1, position: "relative", ...props.sx }} {...props}>
+    <Paper
+      variant="outlined"
+      sx={{ py: 1, position: "relative", ...props.sx }}
+      {...props}
+    >
       <Box
         sx={{
           position: "relative",

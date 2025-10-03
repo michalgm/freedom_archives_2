@@ -34,9 +34,10 @@ const xSmallInputStyles = {
     fontSize: xSmallInputFontSize,
     padding: "6px 8px",
   },
-  "& .MuiInputBase-input.MuiSelect-select, & .MuiInputBase-input.MuiAutocomplete-input": {
-    padding: "2.5px 4px 2.5px 8px",
-  },
+  "& .MuiInputBase-input.MuiSelect-select, & .MuiInputBase-input.MuiAutocomplete-input":
+    {
+      padding: "2.5px 4px 2.5px 8px",
+    },
   "& .MuiInputBase-adornedStart": { paddingLeft: "8px" },
   "& .MuiInputBase-inputAdornedStart": { paddingLeft: 0 },
   "& .MuiInputBase-adornedEnd": { paddingRight: "8px" },
@@ -57,6 +58,9 @@ const xSmallInputStyles = {
 };
 
 export const theme = createTheme({
+  // colorSchemes: {
+  //   dark: true,
+  // },
   cssVariables: true,
   typography: {
     h1: { fontSize: "2.5rem" },
@@ -189,14 +193,16 @@ export const theme = createTheme({
             width: "100%",
             outline: "1px solid var(--mui-palette-success-main)",
             borderRadius: "2px",
-            backgroundColor: "rgba(var(--mui-palette-success-lightChannel) / 0.1) !important",
+            backgroundColor:
+              "rgba(var(--mui-palette-success-lightChannel) / 0.1) !important",
           },
           "& .MuiCheckbox-colorSuccess": {
             color: "var(--mui-palette-success-main)", // Success color for default state
           },
           "& .MuiInputBase-colorSuccess": {
             "&": {
-              backgroundColor: "rgba(var(--mui-palette-success-lightChannel) / 0.1) !important",
+              backgroundColor:
+                "rgba(var(--mui-palette-success-lightChannel) / 0.1) !important",
             },
             "& .MuiOutlinedInput-notchedOutline": {
               borderColor: "var(--mui-palette-success-main)", // Success color for default state
@@ -209,14 +215,16 @@ export const theme = createTheme({
             width: "100%",
             outline: "1px solid var(--mui-palette-warning-main)",
             borderRadius: "2px",
-            backgroundColor: "rgba(var(--mui-palette-warning-lightChannel) / 0.1) !important",
+            backgroundColor:
+              "rgba(var(--mui-palette-warning-lightChannel) / 0.1) !important",
           },
           "& .MuiCheckbox-colorWarning": {
             color: "var(--mui-palette-warning-main)", // Success color for default state
           },
           "& .MuiInputBase-colorWarning": {
             "&": {
-              backgroundColor: "rgba(var(--mui-palette-warning-lightChannel) / 0.1) !important",
+              backgroundColor:
+                "rgba(var(--mui-palette-warning-lightChannel) / 0.1) !important",
             },
             "& .MuiOutlinedInput-notchedOutline": {
               borderColor: "var(--mui-palette-warning-main)", // Success color for default state

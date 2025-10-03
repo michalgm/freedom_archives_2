@@ -5,8 +5,21 @@ import { public_collections as collectionsService } from "src/api";
 import Carousel from "src/components/Carousel";
 import Show from "src/components/Show";
 import Thumbnail from "src/components/Thumbnail";
-import { ItemStack } from "src/views/Public/ItemCard";
-import Search from "src/views/Public/PublicSearch";
+import { ItemStack } from "src/public/ItemCard";
+import Search from "src/public/PublicSearch/PublicSearch";
+
+const scrollToSection = (e, id) => {
+  e.preventDefault();
+  const element = document.getElementById(id);
+  if (element) {
+    element.scrollIntoView({
+      behavior: "smooth",
+      // container: "nearest",
+      block: "nearest",
+      inline: "start",
+    });
+  }
+};
 
 const PublicCollections = () => {
   const { collection_id } = useParams();
@@ -27,7 +40,10 @@ const PublicCollections = () => {
           });
           setCollection(collection);
           setSearch({
-            collection_id: [...(collection.descendant_collection_ids || []), collection.collection_id],
+            collection_id: [
+              ...(collection.descendant_collection_ids || []),
+              collection.collection_id,
+            ],
             // collection_id: [[collection.collection_name, collection.total_records, collection.collection_id]],
           });
         } catch {
@@ -66,7 +82,8 @@ const PublicCollections = () => {
   if (!collection) {
     return null;
   }
-  const hasFeatured = collection.featured_records && collection.featured_records.length !== 0;
+  const hasFeatured =
+    collection.featured_records && collection.featured_records.length !== 0;
   const hasChildren = collection.children && collection.children.length !== 0;
   // const hasSidebar = hasFeatured || hasChildren;
   return (
@@ -89,39 +106,29 @@ const PublicCollections = () => {
         <Typography variant="header" sx={{ mb: 1.5 }}>
           {collection.collection_name}
         </Typography>
-        <Tabs value={tab} onChange={(_e, newValue) => setTab(newValue)} variant="scrollable" scrollButtons="auto">
+        <Tabs
+          value={tab}
+          onChange={(_e, newValue) => setTab(newValue)}
+          variant="scrollable"
+          scrollButtons="auto"
+        >
           <Tab
             label="Overview"
-            onClick={(e) => {
-              e.preventDefault();
-              document.getElementById("overview")?.scrollIntoView({ behavior: "smooth" });
-            }}
+            onClick={(e) => scrollToSection(e, "overview")}
           />
           {hasFeatured && (
             <Tab
               label="Featured Content"
-              onClick={(e) => {
-                e.preventDefault();
-                document.getElementById("featured")?.scrollIntoView({ behavior: "smooth" });
-              }}
+              onClick={(e) => scrollToSection(e, "featured")}
             />
           )}
           {hasChildren && (
             <Tab
               label="Subcollections"
-              onClick={(e) => {
-                e.preventDefault();
-                document.getElementById("subcollections")?.scrollIntoView({ behavior: "smooth" });
-              }}
+              onClick={(e) => scrollToSection(e, "subcollections")}
             />
           )}
-          <Tab
-            label="Records"
-            onClick={(e) => {
-              e.preventDefault();
-              document.getElementById("records")?.scrollIntoView({ behavior: "smooth" });
-            }}
-          />
+          <Tab label="Records" onClick={(e) => scrollToSection(e, "records")} />
         </Tabs>
       </Box>
       <Stack
@@ -132,12 +139,32 @@ const PublicCollections = () => {
           flex: "1 1 auto",
           minHeight: 0,
           overflow: "auto",
+          scrollSnapType: "y mandatory",
         }}
       >
-        <Grid2 container spacing={2} id="overview">
+        <Grid2
+          container
+          spacing={2}
+          id="overview"
+          sx={{ scrollSnapAlign: "start" }}
+        >
           <Grid2 item size={{ xs: 12, md: hasFeatured ? 7 : 12 }}>
-            <Paper variant="outlined" sx={{ p: 2, clear: "both", overflow: "auto", height: "fit-content" }}>
-              <Box sx={{ display: "flex", flexDirection: { xs: "column", sm: "row" }, gap: 2 }}>
+            <Paper
+              variant="outlined"
+              sx={{
+                p: 2,
+                clear: "both",
+                overflow: "auto",
+                height: "fit-content",
+              }}
+            >
+              <Box
+                sx={{
+                  display: "flex",
+                  flexDirection: { xs: "column", sm: "row" },
+                  gap: 2,
+                }}
+              >
                 <Box sx={{ flexShrink: 0 }}>
                   <Thumbnail item={collection} width={200} />
                 </Box>
@@ -153,9 +180,17 @@ const PublicCollections = () => {
             </Paper>
           </Grid2>
           <Show when={hasFeatured}>
-            <Grid2 item size={{ xs: 12, md: 5 }} id="featured">
-              <Paper variant="outlined" sx={{ p: 2, flexGrow: 1, height: "fit-content" }}>
-                <Typography variant="header" gutterBottom sx={{ mb: 2 }}>
+            <Grid2
+              item
+              size={{ xs: 12, md: 5 }}
+              id="featured"
+              sx={{ scrollSnapAlign: "start" }}
+            >
+              <Paper
+                variant="outlined"
+                sx={{ p: 2, flexGrow: 1, height: "fit-content" }}
+              >
+                <Typography variant="header" sx={{ mb: 2 }}>
                   Featured Content
                 </Typography>
                 <Box sx={{ mb: 2 }} className="flex-scroller">
@@ -166,11 +201,13 @@ const PublicCollections = () => {
           </Show>
         </Grid2>
         <Show when={collection.children && collection.children.length !== 0}>
-          <Paper id="subcollections" variant="outlined" sx={{ p: 2 }}>
-            <Typography variant="header" gutterBottom sx={{ mb: 2 }}>
-              Subcollections
-            </Typography>
+          <Paper
+            id="subcollections"
+            variant="outlined"
+            sx={{ p: 2, scrollSnapAlign: "start" }}
+          >
             <ItemStack
+              title="Subcollections"
               type="collection"
               loading={loading}
               items={collection.children}
@@ -188,18 +225,17 @@ const PublicCollections = () => {
             flexDirection: "column",
             display: "flex",
             flexShrink: 0,
-
-            // flex: "1 1 auto",
+            scrollSnapAlign: "start",
           }}
-          // height={recordsContainerHeight + "px"}
-          // className="flex-container"
-          // height={"fit-content"}
         >
-          <Typography variant="header" gutterBottom sx={{ mb: 2 }}>
-            Records
-          </Typography>
+          <Typography variant="header">Records</Typography>
           <Box className="flex-container">
-            <Search searchFilters={search} focus={false} />
+            <Search
+              searchFilters={search}
+              focus={false}
+              key={collection_id}
+              loading={loading}
+            />
           </Box>
         </Paper>
       </Stack>
