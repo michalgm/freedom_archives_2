@@ -28,7 +28,7 @@ const isNumeric = /^\d+$/;
 
 
 function getFulltextRank() {
-  return `${FULLTEXT_WEIGHT} * COALESCE(ts_rank(fulltext, ts_query.query, 1), 0)`;
+  return `${FULLTEXT_WEIGHT} * COALESCE(ts_rank_cd(fulltext, ts_query.query, 1), 0)`;
 }
 
 function getTrigramRank(knex, searchTerm) {
