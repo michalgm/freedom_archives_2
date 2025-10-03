@@ -155,6 +155,8 @@ SELECT
     a.collection_id,
     a.collection_name,
     a.parent_collection_id,
+    a.summary,
+    a.description,
     a.thumbnail,
     NULLIF(
         TRIM(
@@ -398,7 +400,8 @@ SELECT
         ORDER BY
             collection_summaries.display_order
     ) AS children,
-    d.descendant_ids AS descendant_collection_ids
+    d.descendant_ids AS descendant_collection_ids,
+    ancestors.ancestors AS ancestors
 FROM
     _unified_collections a
     LEFT JOIN collection_summaries b USING (collection_id)
@@ -429,7 +432,43 @@ FROM
             ) AS descendant_ids
         FROM
             d
-    ) AS d ON TRUE;
+    ) AS d ON TRUE
+      LEFT JOIN LATERAL (
+        WITH RECURSIVE
+            ancestors_cte AS (
+                -- Start with the current collection's parent
+                SELECT
+                    cs.collection_id,
+                    cs.collection_name,
+                    cs.parent_collection_id,
+                    1 AS level
+                FROM
+                    collection_summaries cs
+                WHERE
+                    cs.collection_id = a.parent_collection_id
+                UNION ALL
+                -- Recursively find parent's parents
+                SELECT
+                    cs.collection_id,
+                    cs.collection_name,
+                    cs.parent_collection_id,
+                    ac.level + 1
+                FROM
+                    collection_summaries cs
+                    JOIN ancestors_cte ac ON cs.collection_id = ac.parent_collection_id
+            )
+        SELECT
+            ARRAY_AGG(
+                JSON_BUILD_OBJECT(
+                    'collection_id', ancestors_cte.collection_id,
+                    'collection_name', ancestors_cte.collection_name
+                )
+                ORDER BY ancestors_cte.level DESC  -- Ascending order of parentage (root first)
+            ) AS ancestors
+        FROM
+            ancestors_cte
+    ) AS ancestors ON TRUE
+;
 
 DROP VIEW IF EXISTS record_summaries;
 

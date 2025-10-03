@@ -1,8 +1,19 @@
-import { Box, Grid2, Paper, Stack, Tab, Tabs, Typography } from "@mui/material";
+import { NavigateNext } from "@mui/icons-material";
+import {
+  Box,
+  Breadcrumbs,
+  Grid2,
+  Paper,
+  Stack,
+  Tab,
+  Tabs,
+  Typography,
+} from "@mui/material";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useParams } from "react-router";
 import { public_collections as collectionsService } from "src/api";
 import Carousel from "src/components/Carousel";
+import Link from "src/components/Link";
 import Show from "src/components/Show";
 import Thumbnail from "src/components/Thumbnail";
 import { ItemStack } from "src/public/ItemCard";
@@ -103,6 +114,29 @@ const PublicCollections = () => {
           borderBottom: "1px solid rgba(0, 0, 0, 0.05)",
         }}
       >
+        <Breadcrumbs
+          aria-label="Breadcrumb"
+          separator={<NavigateNext fontSize="small" />}
+        >
+          <Link color="primary.main" to="/public/">
+            Search Home
+          </Link>
+          {collection.ancestors &&
+            collection.ancestors
+              .filter(({ collection_id }) => collection_id !== 0)
+              .map((ancestor) => (
+                <Link
+                  key={ancestor.collection_id}
+                  color="primary.main"
+                  to={`/public/collections/${ancestor.collection_id}`}
+                >
+                  {ancestor.collection_name}
+                </Link>
+              ))}
+          <Typography color="text.primary" fontWeight={600}>
+            {collection.collection_name}
+          </Typography>
+        </Breadcrumbs>
         <Typography variant="header" sx={{ mb: 1.5 }}>
           {collection.collection_name}
         </Typography>
