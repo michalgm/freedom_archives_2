@@ -146,7 +146,7 @@ export const rankedSearch = async (context) => {
 
   const rankExpr = buildRankExpr(
     {
-      useFulltext: !isPublic,
+      useFulltext: true,
       useTrigram: useFuzzy,
       useCallNumbers: !isPublic,
       useFullTerm: true,
