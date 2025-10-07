@@ -161,33 +161,44 @@ const PublicCollections = () => {
             {collection.collection_name}
           </Typography>
         </Breadcrumbs>
-        <Typography variant="header" sx={{ mb: 1.5 }}>
-          {collection.collection_name}
-        </Typography>
-        <Tabs
-          value={tab}
-          onChange={(_e, newValue) => setTab(newValue)}
-          variant="scrollable"
-          scrollButtons="auto"
+        <Stack
+          direction="row"
+          alignItems="center"
+          spacing={1}
+          sx={{ mb: 1 }}
+          justifyContent={"space-between"}
         >
-          <Tab
-            label="Overview"
-            onClick={(e) => scrollToSection(e, "overview")}
-          />
-          {hasFeatured && (
+          <Typography variant="header" sx={{ mb: 1.5 }}>
+            {collection.collection_name}
+          </Typography>
+          <Tabs
+            value={tab}
+            onChange={(_e, newValue) => setTab(newValue)}
+            variant="scrollable"
+            scrollButtons="auto"
+          >
             <Tab
-              label="Featured Content"
-              onClick={(e) => scrollToSection(e, "featured")}
+              label="Overview"
+              onClick={(e) => scrollToSection(e, "overview")}
             />
-          )}
-          {hasChildren && (
+            {hasFeatured && (
+              <Tab
+                label="Featured Content"
+                onClick={(e) => scrollToSection(e, "featured")}
+              />
+            )}
+            {hasChildren && (
+              <Tab
+                label="Subcollections"
+                onClick={(e) => scrollToSection(e, "subcollections")}
+              />
+            )}
             <Tab
-              label="Subcollections"
-              onClick={(e) => scrollToSection(e, "subcollections")}
+              label="Records"
+              onClick={(e) => scrollToSection(e, "records")}
             />
-          )}
-          <Tab label="Records" onClick={(e) => scrollToSection(e, "records")} />
-        </Tabs>
+          </Tabs>
+        </Stack>
       </Box>
       <Stack
         spacing={2}
