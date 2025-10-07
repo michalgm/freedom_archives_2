@@ -1,5 +1,7 @@
+import dayjs from "dayjs";
 import { isEqual, merge, omit } from "lodash-es";
 import { useCallback, useEffect, useRef, useState } from "react";
+import { get } from "react-hook-form";
 import { useSearchParams } from "react-router";
 import { public_records as recordsService } from "src/api";
 import { useImmer } from "use-immer";
@@ -44,8 +46,10 @@ export const usePublicSearch = (
 
       const query = {
         $select: [
+          "collection_name",
           "record_id",
           "title",
+          "date",
           "description",
           "year",
           "publisher",
@@ -96,7 +100,8 @@ export const usePublicSearch = (
         nonDigitizedTotal,
         records: recordsData.map((record) => {
           const keys = [
-            "year",
+            "collection_name",
+            "date",
             "producers",
             "publisher",
             "authors",
@@ -107,7 +112,7 @@ export const usePublicSearch = (
           ];
           record.details = [];
           keys.forEach((key) => {
-            let value = record[key];
+            let value = get(record, key);
             if (value) {
               if (Array.isArray(value)) {
                 if (value.length) {
@@ -115,10 +120,18 @@ export const usePublicSearch = (
                 }
               } else if (typeof value === "object") {
                 value = value.item;
+              } else if (key === "date") {
+                if (value.match(/^1900/)) {
+                  return;
+                }
+                value = dayjs(value).format("MMMM D, YYYY");
               }
             }
+            let label = key;
+            if (key === "vol_number") label = "Volume";
+            if (key === "collection_name") label = "Collection";
             if (value && value.toString().trim()) {
-              record.details.push([key, value]);
+              record.details.push([label, value]);
             }
           });
           return record;
