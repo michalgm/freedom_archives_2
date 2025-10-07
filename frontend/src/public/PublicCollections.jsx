@@ -2,6 +2,7 @@ import { NavigateNext } from "@mui/icons-material";
 import {
   Box,
   Breadcrumbs,
+  Chip,
   Grid2,
   Paper,
   Stack,
@@ -30,6 +31,29 @@ const scrollToSection = (e, id) => {
       inline: "start",
     });
   }
+};
+
+const DetailsRow = ({ label, value }) => {
+  if (!value) return null;
+  return (
+    <>
+      <Typography
+        component="dt"
+        variant="caption"
+        color="text.secondary"
+        sx={{
+          textTransform: "uppercase",
+          fontWeight: 700,
+          display: "inline-flex",
+          // alignItems: "center",
+          gap: 1,
+        }}
+      >
+        {label}
+      </Typography>
+      <Typography component="dd">{value}</Typography>
+    </>
+  );
 };
 
 const PublicCollections = () => {
@@ -199,16 +223,56 @@ const PublicCollections = () => {
                   gap: 2,
                 }}
               >
-                <Box sx={{ flexShrink: 0 }}>
-                  <Thumbnail item={collection} width={200} />
-                </Box>
-                <Box sx={{ flex: 1 }}>
+                <Box sx={{ flex: 1, maxHeight: "50vh", overflow: "auto" }}>
+                  <Thumbnail
+                    item={collection}
+                    width={200}
+                    sx={{ float: "left", mr: 1 }}
+                  />
                   <Typography
-                    variant="body2"
+                    variant="body1"
                     component={"div"}
                     dangerouslySetInnerHTML={{ __html: collection.description }}
-                    sx={{ "& p": { mt: 0, mb: 1 } }}
+                    sx={{ "& p": { mt: 0, mb: 1 }, textAlign: "justify" }}
                   />
+                  <Typography variant="caption" color="text.secondary">
+                    <Box
+                      component="dl"
+                      sx={{
+                        display: "grid",
+                        gap: 1.5,
+                        mt: 1.5,
+                        gridTemplateColumns: "max-content 1fr",
+                      }}
+                    >
+                      <DetailsRow
+                        label="Date Range"
+                        value={collection.date_range}
+                      />
+
+                      <DetailsRow
+                        label="Keywords"
+                        value={
+                          <Stack
+                            spacing={1}
+                            useFlexGap
+                            direction="row"
+                            flexWrap={"wrap"}
+                            rowGap={1}
+                          >
+                            {collection.keywords.map(({ item }) => (
+                              <Chip
+                                key={item.id}
+                                label={item}
+                                size="small"
+                                variant="outlined"
+                              />
+                            ))}
+                          </Stack>
+                        }
+                      />
+                    </Box>
+                  </Typography>
                 </Box>
               </Box>
             </Paper>
