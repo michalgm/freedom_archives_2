@@ -27,15 +27,28 @@ function LoginForm() {
         navigate("/", { replace: true });
       }
     },
-    [location, navigate]
+    [location, navigate],
   );
 
-  const buttons = [{ label: "Log In", type: "submit", color: "primary", icon: <Login />, onClick: login }];
+  const buttons = [
+    {
+      label: "Log In",
+      type: "submit",
+      color: "primary",
+      icon: <Login />,
+      onClick: login,
+    },
+  ];
   return (
     <Grid2 container justifyContent="center">
       <Grid2 size={{ md: 7, lg: 5 }}>
         <Paper style={{ padding: "20px 28px" }}>
-          <Typography variant="h4" align="center" gutterBottom sx={{ paddingTop: hasError ? "50px" : 0 }}>
+          <Typography
+            variant="h4"
+            align="center"
+            gutterBottom
+            sx={{ paddingTop: hasError ? "50px" : 0 }}
+          >
             Log in
           </Typography>
           <FormContainer onSuccess={login} initialValues={{}}>
@@ -53,7 +66,11 @@ function LoginForm() {
                 highlightDirty={false}
                 rules={{ required: "Password is required" }}
               />
-              <ButtonsHeader useFormManager={false} buttons={buttons} justifyContent="flex-start" />
+              <ButtonsHeader
+                useFormManager={false}
+                buttons={buttons}
+                justifyContent="flex-start"
+              />
             </Stack>
           </FormContainer>
         </Paper>
