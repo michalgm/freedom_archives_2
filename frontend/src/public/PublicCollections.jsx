@@ -208,16 +208,10 @@ const PublicCollections = () => {
           flex: "1 1 auto",
           minHeight: 0,
           overflow: "auto",
-          scrollSnapType: "y mandatory",
         }}
       >
-        <Grid2
-          container
-          spacing={2}
-          id="overview"
-          sx={{ scrollSnapAlign: "start" }}
-        >
-          <Grid2 item size={{ xs: 12, md: hasFeatured ? 7 : 12 }}>
+        <Grid2 container spacing={2} id="overview">
+          <Grid2 size={{ xs: 12, md: hasFeatured ? 7 : 12 }}>
             <Paper
               variant="outlined"
               sx={{
@@ -289,12 +283,7 @@ const PublicCollections = () => {
             </Paper>
           </Grid2>
           <Show when={hasFeatured}>
-            <Grid2
-              item
-              size={{ xs: 12, md: 5 }}
-              id="featured"
-              sx={{ scrollSnapAlign: "start" }}
-            >
+            <Grid2 size={{ xs: 12, md: 5 }} id="featured">
               <Paper
                 variant="outlined"
                 sx={{ p: 2, flexGrow: 1, height: "fit-content" }}
@@ -310,11 +299,7 @@ const PublicCollections = () => {
           </Show>
         </Grid2>
         <Show when={collection.children && collection.children.length !== 0}>
-          <Paper
-            id="subcollections"
-            variant="outlined"
-            sx={{ p: 2, scrollSnapAlign: "start" }}
-          >
+          <Paper id="subcollections" variant="outlined" sx={{ p: 2 }}>
             <ItemStack
               title="Subcollections"
               type="collection"
@@ -334,7 +319,6 @@ const PublicCollections = () => {
             flexDirection: "column",
             display: "flex",
             flexShrink: 0,
-            scrollSnapAlign: "start",
           }}
         >
           <Typography variant="header">Records</Typography>

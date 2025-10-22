@@ -62,11 +62,11 @@ const FilterItem = ({ value, label, count, type, addFilter, search }) => {
 const Filter = ({ type, values = [], addFilter, search }) => {
   const [limit, setlimit] = useState(INITIAL_FILTER_DISPLAY_COUNT);
   return (
-    <Box key={type} sx={{ scrollSnapAlign: "start" }}>
+    <Box key={type}>
       <Typography variant="overline" sx={{ color: "text.secondary" }}>
         {startCase(FILTER_TYPE_LABELS[type] || type)}
       </Typography>
-      <List dense sx={{ p: 0, scrollSnapAlign: "end" }}>
+      <List dense sx={{ p: 0 }}>
         {(values || []).slice(0, limit).map(([label, count, value]) => (
           <FilterItem
             key={label}
@@ -187,11 +187,7 @@ export const SearchFilters = ({
           Clear Filters
         </Button>
       </Grid2>
-      <Grid2
-        size={12}
-        className="flex-scroller"
-        sx={{ scrollSnapType: "y proximity" }}
-      >
+      <Grid2 size={12} className="flex-scroller">
         <Stack
           spacing={1}
           divider={<Divider orientation="horizontal" flexItem />}
