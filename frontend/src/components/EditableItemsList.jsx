@@ -274,7 +274,7 @@ export function Item({
   if ((link && id != null) || onClickHandler) {
     if (link && id != null) {
       list_item_props.component = Link;
-      list_item_props.to = `/${type}s/${id}`;
+      list_item_props.to = `/admin/${type}s/${id}`;
     }
     if (onClickHandler) {
       list_item_props.onClick = (e) => onClickHandler(index, e);
@@ -339,7 +339,7 @@ export default function RecordItem({ record = {}, description: showDescription, 
     {
       type: "Collection",
       label: collection_name,
-      link: `/collections/${collection_id}`,
+      link: `/admin/collections/${collection_id}`,
     },
     { type: "Format", label: primary_instance_format_text },
     { type: "ID", label: record_id },
@@ -371,7 +371,7 @@ export function CollectionItem({ collection = {}, description: showDescription, 
     details.unshift({
       type: "Parent Collection",
       label: parent.collection_name,
-      link: `/collections/${parent.collection_id}`,
+      link: `/admin/collections/${parent.collection_id}`,
     });
   }
   if (itemAction) {

@@ -18,13 +18,17 @@ function LoginForm() {
     async ({ username, password }) => {
       await authenticate(username.toLowerCase(), password);
       const { state } = location;
-      if (state && state.referrer && state.referrer.pathname !== "/login") {
+      if (
+        state &&
+        state.referrer &&
+        state.referrer.pathname !== "/admin/login"
+      ) {
         navigate(state.referrer.pathname, {
           replace: true,
           state: state.referrer.state,
         });
       } else {
-        navigate("/", { replace: true });
+        navigate("/admin/records", { replace: true });
       }
     },
     [location, navigate],

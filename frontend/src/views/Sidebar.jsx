@@ -69,9 +69,11 @@ function Sidebar({ ...props }) {
 function SidebarItem({ label, /* icon, */ href }) {
   const location = useLocation();
   // logger.log(location)?
-  const pattern = new RegExp(`^${href}(?:/\\d+)?/?$`);
+  const pattern = new RegExp(`^/admin/${href}(?:/\\d+)?/?$`);
+
   const current =
-    Boolean(pattern.test(location.pathname) && href) || (location.pathname === "/" && href === "/records");
+    Boolean(pattern.test(location.pathname) && href) ||
+    (location.pathname === "/admin/" && href === "/records");
 
   // logger.log({ label, href, pathname, current });
   return (
@@ -82,7 +84,14 @@ function SidebarItem({ label, /* icon, */ href }) {
 }
 
 function ListItemLink(props) {
-  return <ListItemButton disabled={!props.href} component={props.href ? Link : "div"} to={props.href} {...props} />;
+  return (
+    <ListItemButton
+      disabled={!props.href}
+      component={props.href ? Link : "div"}
+      to={props.href}
+      {...props}
+    />
+  );
 }
 
 export default Sidebar;

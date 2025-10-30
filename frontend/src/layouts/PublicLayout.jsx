@@ -64,7 +64,7 @@ const getPublicTheme = createTheme(publicTheme, {
 });
 
 const headerLinks = [
-  { title: "Search Home", href: "/public/" },
+  { title: "Search Home", href: "/" },
   { title: "Freedom Archives Home", href: "https://freedomarchives.org" },
 ];
 

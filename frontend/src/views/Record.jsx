@@ -306,7 +306,7 @@ function Relationships({ id, relationships = [] }) {
               <TableRow>
                 <TableCell rowSpan={2}>{index + 1}</TableCell>
                 <TableCell>
-                  <Link to={`/record/${doc_id}`}>{relation[`title_${side}`]}</Link>
+                  <Link to={`/admin/record/${doc_id}`}> {relation[`title_${side}`]} </Link>
                 </TableCell>
                 <TableCell>{relation[`generation_${side}`]}</TableCell>
                 <TableCell>{relation[`call_number_${side}`]}</TableCell>
@@ -318,7 +318,7 @@ function Relationships({ id, relationships = [] }) {
                 </TableCell>
               </TableRow>
               <TableRow>
-                <TableCell colSpan={7}>{relation[`description_${side}`]}</TableCell>
+                <TableCell colSpan={7}> {relation[`description_${side}`]} </TableCell>
               </TableRow>
             </React.Fragment>
           );
@@ -394,12 +394,12 @@ function Record({ id /*  embedded = false */ }) {
           service: "records",
           id: newRecord ? null : id,
           namePath: "title",
-          onCreate: ({ record_id }) => navigate(`/records/${record_id}`),
+          onCreate: ({ record_id }) => navigate(`/admin/records/${record_id}`),
           onFetch: (record) => {
             setTitle(record.title || "New Record");
             return record;
           },
-          onDelete: () => navigate(`/records`),
+          onDelete: () => navigate(`/admin/records`),
           defaultValues: {
             instances: [{ no_copies: 1 }],
           },

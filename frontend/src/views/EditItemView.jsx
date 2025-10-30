@@ -24,7 +24,7 @@ const NeighborLink = ({ type, service, neighbors, setSearchIndex, search_index }
       <Grid2 size="grow" component={Box} textAlign={type === "prev" ? "left" : "right"} style={{ flex: "0 0 auto" }}>
         <ButtonLink
           disabled={!neighbors[type]}
-          to={`/${service}/${neighbors[type]}`}
+          to={`/admin/${service}/${neighbors[type]}`}
           onClick={() => setSearchIndex(search_index + offset)}
           startIcon={type === "prev" && <Icon>arrow_backward</Icon>}
           endIcon={type !== "prev" && <Icon>arrow_forward</Icon>}

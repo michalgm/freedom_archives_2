@@ -19,7 +19,7 @@ function Forbidden() {
         <Typography variant="h6" color="text.secondary" gutterBottom>
           You don't have permission to access this page.
         </Typography>
-        <Button component={Link} to="/records" variant="contained">
+        <Button component={Link} to="/admin/records" variant="contained">
           Go to Records
         </Button>
       </Paper>

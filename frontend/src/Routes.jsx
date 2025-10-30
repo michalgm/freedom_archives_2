@@ -35,7 +35,7 @@ const componentMap = {
 
 function LoginRedirect() {
   const location = useLocation();
-  return <Navigate to="/login" state={{ referrer: location }} />;
+  return <Navigate to="/admin/login" state={{ referrer: location }} />;
 }
 
 function RequireAuth({ children }) {
@@ -49,7 +49,9 @@ function RequireAuth({ children }) {
 
   if (isAuthenticated === false) {
     // Redirect to login with the current location
-    return <Navigate to="/login" state={{ referrer: location }} replace />;
+    return (
+      <Navigate to="/admin/login" state={{ referrer: location }} replace />
+    );
   }
 
   return children;
@@ -122,7 +124,7 @@ const PublicCollections = componentMap["PublicCollections"];
 const router = createBrowserRouter(
   createRoutesFromElements(
     <Route>
-      <Route element={<PublicLayout />} path="/public">
+      <Route element={<PublicLayout />} path="/">
         <Route path="search" element={<PublicSearch />} />
         <Route
           path="collections/:collection_id"
@@ -131,7 +133,7 @@ const router = createBrowserRouter(
         <Route path="" element={<PublicHome />} />
         <Route path="*" element={<PublicHome />} />
       </Route>
-      <Route element={<Layout />}>
+      <Route path="/admin" element={<Layout />}>
         {publicRoutes}
         <Route
           element={

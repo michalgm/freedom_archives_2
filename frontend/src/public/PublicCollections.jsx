@@ -10,6 +10,7 @@ import {
   Tabs,
   Typography,
 } from "@mui/material";
+import { isArray } from "lodash-es";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useParams } from "react-router";
 import { public_collections as collectionsService } from "src/api";
@@ -34,7 +35,18 @@ const scrollToSection = (e, id) => {
 };
 
 const DetailsRow = ({ label, value }) => {
-  if (!value) return null;
+  if (!value || !value.length) return null;
+
+  const displayValue = isArray(value) ? (
+    <Stack spacing={1} useFlexGap direction="row" flexWrap={"wrap"} rowGap={1}>
+      {value.map(({ item, list_item_id }) => (
+        <Chip key={list_item_id} label={item} size="small" variant="outlined" />
+      ))}
+    </Stack>
+  ) : (
+    [value]
+  );
+
   return (
     <>
       <Typography
@@ -51,7 +63,7 @@ const DetailsRow = ({ label, value }) => {
       >
         {label}
       </Typography>
-      <Typography component="dd">{value}</Typography>
+      <Typography component="dd">{displayValue}</Typography>
     </>
   );
 };
@@ -142,7 +154,7 @@ const PublicCollections = () => {
           aria-label="Breadcrumb"
           separator={<NavigateNext fontSize="small" />}
         >
-          <Link color="primary.main" to="/public/">
+          <Link color="primary.main" to="/">
             Search Home
           </Link>
           {collection.ancestors &&
@@ -152,7 +164,7 @@ const PublicCollections = () => {
                 <Link
                   key={ancestor.collection_id}
                   color="primary.main"
-                  to={`/public/collections/${ancestor.collection_id}`}
+                  to={`/collections/${ancestor.collection_id}`}
                 >
                   {ancestor.collection_name}
                 </Link>
@@ -257,24 +269,7 @@ const PublicCollections = () => {
 
                       <DetailsRow
                         label="Keywords"
-                        value={
-                          <Stack
-                            spacing={1}
-                            useFlexGap
-                            direction="row"
-                            flexWrap={"wrap"}
-                            rowGap={1}
-                          >
-                            {collection.keywords.map(({ item }) => (
-                              <Chip
-                                key={item.id}
-                                label={item}
-                                size="small"
-                                variant="outlined"
-                              />
-                            ))}
-                          </Stack>
-                        }
+                        value={collection.keywords}
                       />
                     </Box>
                   </Typography>

@@ -86,7 +86,7 @@ export function ItemCardLayout({
 
 export function ItemLink({ item, children, ...props }) {
   const url = item.collection_id
-    ? `/public/collections/${item.collection_id}`
+    ? `/collections/${item.collection_id}`
     : item.url || item.primary_instance_url;
   const target = item.collection_id ? "_self" : "_blank";
   if (!url) return children;
@@ -95,7 +95,7 @@ export function ItemLink({ item, children, ...props }) {
       to={url}
       style={{ textDecoration: "none", color: "inherit" }}
       target={target}
-      preventScrollReset
+      preventScrollReset={true}
       {...props}
     >
       {children}
@@ -183,7 +183,7 @@ export function CollectionCard({ collection, ...props }) {
     <ItemCard
       item={collection}
       type="collection"
-      url={`/public/collections/${collection.collection_id}`}
+      url={`/collections/${collection.collection_id}`}
       {...props}
     />
   );

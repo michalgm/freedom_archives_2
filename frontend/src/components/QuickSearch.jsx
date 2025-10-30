@@ -131,7 +131,7 @@ function QuickSearch() {
         onChange={(event, value) => {
           if (value && value.id) {
             resetSearch();
-            navigate(`/${value.result_type}s/${value.id}`);
+            navigate(`/admin/${value.result_type}s/${value.id}`);
           }
         }}
         renderOption={(props, item) => {

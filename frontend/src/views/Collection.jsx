@@ -126,12 +126,13 @@ function Collection({ id, mode = "" }) {
           service: "collections",
           id: newCollection ? null : id,
           namePath: "collection_name",
-          onCreate: ({ collection_id }) => navigate(`/collections/${collection_id}`),
+          onCreate: ({ collection_id }) =>
+            navigate(`/admin/collections/${collection_id}`),
           onFetch: (collection) => {
             setTitle(collection.collection_name || "New Collection");
             return collection;
           },
-          onDelete: () => navigate(`/collections`),
+          onDelete: () => navigate(`/admin/collections`),
         }}
         // style={{ height: "100%" }}
       >

@@ -14,7 +14,7 @@ const PublicHome = () => {
   const navigate = useNavigate();
   const onSubmit = (data) => {
     const query = new URLSearchParams(data).toString();
-    navigate(`/public/search?${query}`);
+    navigate(`/search?${query}`);
   };
 
   useEffect(() => {

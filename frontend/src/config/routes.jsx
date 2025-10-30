@@ -5,7 +5,7 @@ export const appConfig = {
     icon: "library_books",
     routes: [
       {
-        path: "/collections",
+        path: "collections",
         component: "Collections",
         sidebar: {
           label: "Manage Collections",
@@ -13,14 +13,14 @@ export const appConfig = {
         },
       },
       {
-        path: "/collections/new",
+        path: "collections/new",
         sidebar: {
           label: "New Collection",
           icon: "",
         },
       },
       {
-        path: "/collections/:id",
+        path: "collections/:id",
         component: "Collection",
       },
     ],
@@ -30,11 +30,11 @@ export const appConfig = {
     icon: "description",
     routes: [
       {
-        path: "/",
-        redirect: "/records",
+        path: "",
+        redirect: "/admin/records",
       },
       {
-        path: "/search",
+        path: "search",
         component: "PublicSearch",
         sidebar: {
           label: "Search Records",
@@ -42,7 +42,7 @@ export const appConfig = {
         },
       },
       {
-        path: "/records",
+        path: "records",
         component: "Records",
         sidebar: {
           label: "Manage Records",
@@ -50,14 +50,14 @@ export const appConfig = {
         },
       },
       {
-        path: "/records/new",
+        path: "records/new",
         sidebar: {
           label: "New Record",
           icon: "",
         },
       },
       {
-        path: "/records/table",
+        path: "records/table",
         component: "Table",
         authRole: "staff",
         sidebar: {
@@ -66,7 +66,7 @@ export const appConfig = {
         },
       },
       {
-        path: "/records/:id",
+        path: "records/:id",
         component: "Record",
         props: { showForm: true },
       },
@@ -77,7 +77,7 @@ export const appConfig = {
     icon: "settings",
     routes: [
       {
-        path: "/site/settings",
+        path: "site/settings",
         component: "SiteSettings",
         authRole: "staff",
         sidebar: {
@@ -86,7 +86,7 @@ export const appConfig = {
         },
       },
       {
-        path: "/records/featured",
+        path: "records/featured",
         component: "Collection",
         authRole: "staff",
         props: { id: 0, mode: "featured_records" },
@@ -96,7 +96,7 @@ export const appConfig = {
         },
       },
       {
-        path: "/collections/featured",
+        path: "collections/featured",
         component: "Collection",
         authRole: "staff",
         props: { id: 0, mode: "featured_collections" },
@@ -106,7 +106,7 @@ export const appConfig = {
         },
       },
       {
-        path: "/site/edit-list-values",
+        path: "site/edit-list-values",
         component: "EditLists",
         authRole: "staff",
         sidebar: {
@@ -115,7 +115,7 @@ export const appConfig = {
         },
       },
       {
-        path: "export-collections",
+        // path: "export-collections",
         authRole: "staff",
         sidebar: {
           label: "Export Collections",
@@ -123,7 +123,7 @@ export const appConfig = {
         },
       },
       {
-        path: "find-duplicates",
+        // path: "find-duplicates",
         authRole: "staff",
         sidebar: {
           label: "Find Duplicate Records",
@@ -131,7 +131,7 @@ export const appConfig = {
         },
       },
       {
-        path: "/site/review-changes",
+        path: "site/review-changes",
         component: "ReviewChanges",
         authRole: "administrator",
         sidebar: {
@@ -146,7 +146,7 @@ export const appConfig = {
     icon: "admin_panel_settings",
     routes: [
       {
-        path: "/relationships",
+        path: "relationships",
         component: "Relationships",
         authRole: "administrator",
         sidebar: {
@@ -155,7 +155,7 @@ export const appConfig = {
         },
       },
       {
-        path: "/admin/users",
+        path: "admin/users",
         component: "Users",
         authRole: "staff",
         sidebar: {
@@ -164,7 +164,7 @@ export const appConfig = {
         },
       },
       {
-        path: "/admin/publish-site",
+        path: "admin/publish-site",
         component: "PublishSite",
         authRole: "administrator",
         sidebar: {
@@ -173,7 +173,7 @@ export const appConfig = {
         },
       },
       {
-        path: "/relationships/:skip",
+        path: "relationships/:skip",
         component: "Relationships",
         authRole: "administrator",
       },
@@ -184,17 +184,17 @@ export const appConfig = {
   Hidden: {
     routes: [
       {
-        path: "/login",
+        path: "login",
         component: "Login",
         public: true,
       },
       {
-        path: "/forbidden",
+        path: "forbidden",
         component: "Forbidden",
         public: true,
       },
       // {
-      //   path: "/search",
+      //   path: "search",
       //   component: "Search",
       //   public: true,
       // },
@@ -243,7 +243,7 @@ export function getSidebarConfig() {
         sectionRoutes.push({
           label,
           icon,
-          href: path && path.startsWith("/") ? path : undefined,
+          href: path,
           authRole,
         });
       }
