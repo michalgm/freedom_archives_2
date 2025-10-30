@@ -23,11 +23,10 @@ export const parseError = (name, _label) => (error) => {
 
 export function isEmptyValue(value) {
   return (
-    value === undefined || // Null
-    value === null || // Null
-    value === "" || // Empty string
-    (isArray(value) && value.length === 0) || // Empty array
-    (isObject(value) && isEmpty(value)) // Empty object after recursion
+    (value === undefined || // Null
+      value === null || // Null
+      value === "" || // Empty string
+      (isArray(value) && value.length === 0) || (isObject(value) && isEmpty(value)))
   );
 }
 
