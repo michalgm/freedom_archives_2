@@ -1,5 +1,5 @@
 import { Login } from "@mui/icons-material";
-import { Grid2, Paper, Stack, Typography } from "@mui/material/";
+import { Grid, Paper, Stack, Typography } from "@mui/material";
 import { useCallback } from "react";
 import { FormContainer } from "react-hook-form-mui";
 import { useLocation, useNavigate } from "react-router";
@@ -44,8 +44,8 @@ function LoginForm() {
     },
   ];
   return (
-    <Grid2 container justifyContent="center">
-      <Grid2 size={{ md: 7, lg: 5 }}>
+    <Grid container justifyContent="center">
+      <Grid size={{ md: 7, lg: 5 }}>
         <Paper style={{ padding: "20px 28px" }}>
           <Typography
             variant="h4"
@@ -78,8 +78,8 @@ function LoginForm() {
             </Stack>
           </FormContainer>
         </Paper>
-      </Grid2>
-    </Grid2>
+      </Grid>
+    </Grid>
   );
 }
 

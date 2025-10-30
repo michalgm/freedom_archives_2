@@ -6,7 +6,7 @@ import {
   FormGroup,
   FormHelperText,
   FormLabel,
-  Grid2,
+  Grid,
   InputAdornment,
   Radio,
   Skeleton,
@@ -392,7 +392,7 @@ export const BaseField = ({
       );
     }
     return (
-      <Grid2 container spacing={2}>
+      <Grid container spacing={2}>
         <FormControl sx={{ m: 3 }} component="fieldset" variant="standard" onChange={onChange} color={color}>
           <FormLabel component="legend">{props.label}</FormLabel>
           <FormGroup>
@@ -402,7 +402,7 @@ export const BaseField = ({
           </FormGroup>
           <FormHelperText>{helperText}</FormHelperText>
         </FormControl>
-      </Grid2>
+      </Grid>
     );
   };
 

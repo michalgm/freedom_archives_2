@@ -5,7 +5,7 @@ import {
   AccordionSummary,
   Box,
   Button,
-  Grid2,
+  Grid,
   Stack,
   Tooltip,
   Typography,
@@ -74,9 +74,9 @@ const FormSection = ({
         </Stack>
       </AccordionSummary>
       <AccordionDetails>
-        <Grid2 container spacing={2} sx={{ m: 0 }} size={12}>
+        <Grid container spacing={2} sx={{ m: 0 }} size={12}>
           {children}
-        </Grid2>
+        </Grid>
       </AccordionDetails>
     </Accordion>
   )

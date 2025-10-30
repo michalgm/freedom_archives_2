@@ -3,7 +3,7 @@ import {
   Button,
   Chip,
   Divider,
-  Grid2,
+  Grid,
   Icon,
   InputAdornment,
   List,
@@ -167,7 +167,7 @@ export const SearchFilters = ({
       sx={{ backgroundColor: (theme) => theme.palette.background.paper }}
       className="flex-container"
     >
-      <Grid2
+      <Grid
         size={12}
         container
         alignItems="center"
@@ -186,8 +186,8 @@ export const SearchFilters = ({
         >
           Clear Filters
         </Button>
-      </Grid2>
-      <Grid2 size={12} className="flex-scroller">
+      </Grid>
+      <Grid size={12} className="flex-scroller">
         <Stack
           spacing={1}
           divider={<Divider orientation="horizontal" flexItem />}
@@ -210,7 +210,7 @@ export const SearchFilters = ({
             );
           })}
         </Stack>
-      </Grid2>
+      </Grid>
     </Box>
   );
 };
@@ -260,17 +260,17 @@ export function SearchForm({
   return (
     <Form defaultValues={search} onSubmit={doSearch}>
       <AutoSubmit action={doSearch} timeout={300} />
-      <Grid2
+      <Grid
         container
         spacing={1}
         direction="row"
         alignItems="center"
         sx={{ p: 1 }}
       >
-        <Grid2 size={5}>
+        <Grid size={5}>
           <SearchInput focus={focus} />
-        </Grid2>
-        <Grid2 size={3}>
+        </Grid>
+        <Grid size={3}>
           <SelectElement
             name="sort"
             label="Sort by"
@@ -278,8 +278,8 @@ export function SearchForm({
             size="small"
             fullWidth
           />
-        </Grid2>
-        <Grid2 size={3}>
+        </Grid>
+        <Grid size={3}>
           <CheckboxElement
             name="include_non_digitized"
             label={`Include non-digitized records`}
@@ -295,7 +295,7 @@ export function SearchForm({
             // autoSubmit
             width={12}
           />
-        </Grid2>
+        </Grid>
         <SearchResults
           total={total}
           nonDigitizedTotal={nonDigitizedTotal}
@@ -303,7 +303,7 @@ export function SearchForm({
           setOffset={setOffset}
           loading={filtersLoading}
         />
-      </Grid2>
+      </Grid>
     </Form>
   );
 }

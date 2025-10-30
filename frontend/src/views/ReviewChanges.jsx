@@ -1,4 +1,4 @@
-import { Box, Button, Divider, Grid2, Stack, Typography } from "@mui/material";
+import { Box, Button, Divider, Grid, Stack, Typography } from "@mui/material";
 import dayjs from "dayjs";
 import { startCase } from "lodash-es";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
@@ -109,7 +109,7 @@ const ReviewChangesForm = React.memo(function ({ setFilter, publishDate }) {
 
   const customLabel = (
     <Stack direction={"row"} spacing={1} alignItems="center" justifyContent={"space-between"}>
-      <Grid2 size={4} sx={{ maxWidth: "100px" }}>
+      <Grid size={4} sx={{ maxWidth: "100px" }}>
         <Field
           field_type="number"
           name="since_amount"
@@ -120,8 +120,8 @@ const ReviewChangesForm = React.memo(function ({ setFilter, publishDate }) {
           // size={{ xs: 6 }}
           // sx={{ width: 1 / 2 }}
         />
-      </Grid2>
-      <Grid2 size={7}>
+      </Grid>
+      <Grid size={7}>
         <Field
           field_type="select"
           name="since_unit"
@@ -137,10 +137,10 @@ const ReviewChangesForm = React.memo(function ({ setFilter, publishDate }) {
 
           // sx={{ flex: "1 1 auto" }}
         />
-      </Grid2>
-      <Grid2 size="auto">
+      </Grid>
+      <Grid size="auto">
         <span>ago</span>
-      </Grid2>
+      </Grid>
     </Stack>
   );
   if (!publishDate) {
@@ -151,11 +151,11 @@ const ReviewChangesForm = React.memo(function ({ setFilter, publishDate }) {
     <Box>
       <Form formContext={formContext}>
         <AutoSubmit action={setFilter} />
-        <Grid2 container spacing={2}>
+        <Grid container spacing={2}>
           {fields.map((field) => {
             if (field.name === "date_modified") {
               return (
-                <Grid2 key="date_modified" size={{ xs: 12, md: 9.6 }} direction={"row"} textAlign={"left"}>
+                <Grid key="date_modified" size={{ xs: 12, md: 9.6 }} direction={"row"} textAlign={"left"}>
                   <Field
                     field_type="radio_group"
                     name="changes_since"
@@ -173,17 +173,17 @@ const ReviewChangesForm = React.memo(function ({ setFilter, publishDate }) {
                       { id: "custom", label: customLabel },
                     ]}
                   />
-                </Grid2>
+                </Grid>
               );
             } else {
               return (
-                <Grid2 key={field.name} size={{ xs: 12, md: 2.4 }}>
+                <Grid key={field.name} size={{ xs: 12, md: 2.4 }}>
                   <Field {...field} highlightDirty={false} fullWidth />
-                </Grid2>
+                </Grid>
               );
             }
           })}
-        </Grid2>
+        </Grid>
       </Form>
     </Box>
   );

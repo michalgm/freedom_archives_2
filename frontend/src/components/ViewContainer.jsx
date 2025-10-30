@@ -1,4 +1,4 @@
-import { Box, Grid2, Paper, Stack } from "@mui/material";
+import { Box, Grid, Paper, Stack } from "@mui/material";
 import { FormErrors } from "src/components/form/BaseForm";
 import ButtonsHeader from "src/components/form/ButtonsHeader";
 import useFormManagerContext from "src/components/form/FormManagerContext";
@@ -9,16 +9,16 @@ export const Section = ({ header, elements, service, embedded, ...props }) => {
   const justifyContent = elements.length === 1 ? "center" : "space-between";
   return (
     <Paper {...props} elevation={embedded ? 0 : 1}>
-      <Grid2 size="grow" style={{ flex: "none" }}>
-        <Grid2 container alignContent="center" alignItems="center" justifyContent={justifyContent} spacing={2}>
+      <Grid size="grow" style={{ flex: "none" }}>
+        <Grid container alignContent="center" alignItems="center" justifyContent={justifyContent} spacing={2}>
           {elements.map((item) => (
-            <Grid2 key={item.key} flex="1 1 auto" style={{ textAlign: "center" }}>
+            <Grid key={item.key} flex="1 1 auto" style={{ textAlign: "center" }}>
               {item}
-            </Grid2>
+            </Grid>
           ))}
-        </Grid2>
+        </Grid>
         {header && service && <FormErrors service={service} embedded />}
-      </Grid2>
+      </Grid>
     </Paper>
   );
 };

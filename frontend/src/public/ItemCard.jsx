@@ -9,7 +9,7 @@ import {
   CardActionArea,
   CardActions,
   CardContent,
-  Grid2,
+  Grid,
   Divider,
 } from "@mui/material";
 import { startCase } from "lodash-es";
@@ -48,9 +48,9 @@ export function ItemCardLayout({
             {header}
           </Typography>
           {details && details.length > 0 && (
-            <Grid2 container spacing={1} sx={{ my: 1 }}>
+            <Grid container spacing={1} sx={{ my: 1 }}>
               {details}
-            </Grid2>
+            </Grid>
           )}
           {body}
         </Box>
@@ -117,14 +117,14 @@ export function ItemCard({
   const { isOverflowing, isExpanded, setIsExpanded, styles } =
     useExpandableText({ textRef, expand });
   const detailChips = details.map(([key, value]) => (
-    <Grid2 key={key}>
+    <Grid key={key}>
       <KVChip
         keyName={startCase(key)}
         value={value}
         variant="outlined"
         size="small"
       />
-    </Grid2>
+    </Grid>
   ));
 
   const body = (

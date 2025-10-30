@@ -287,7 +287,6 @@ const MergeItemModal = ({ item, onClose: _onClose, fetchValues }) => {
           </Show>
         </Stack>
       </DialogContent>
-
       <DialogActions>
         <Button onClick={onClose}>Cancel</Button>
         <Button variant="contained" color="primary" onClick={mergeItems} disabled={!mergeItem} loading={loading}>

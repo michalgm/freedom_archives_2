@@ -1,4 +1,4 @@
-import { Button, Dialog, DialogActions, DialogContent, DialogTitle, Grid2, MenuItem } from "@mui/material";
+import { Button, Dialog, DialogActions, DialogContent, DialogTitle, Grid, MenuItem } from "@mui/material";
 import { memo, useCallback, useMemo, useState } from "react";
 import { AutocompleteElement, FormProvider, useForm, useFormContext } from "react-hook-form-mui";
 import { useAutocompleteOptions } from "src/components/Autocomplete/useAutoCompleteOptions";
@@ -66,7 +66,7 @@ const NewListItemForm = ({ label, service, value, createParams, cancel, handleCl
   return (
     <FormProvider {...methods}>
       <form onSubmit={handleSubmitWithoutPropagation} autoComplete="off" noValidate>
-        <Grid2 size={12} sx={{ width: 300 }}>
+        <Grid size={12} sx={{ width: 300 }}>
           <DialogTitle id="form-dialog-title">Create a new {label}</DialogTitle>
           <DialogContent>
             <FieldRow>
@@ -87,7 +87,7 @@ const NewListItemForm = ({ label, service, value, createParams, cancel, handleCl
               Add
             </Button>
           </DialogActions>
-        </Grid2>
+        </Grid>
       </form>
     </FormProvider>
   );

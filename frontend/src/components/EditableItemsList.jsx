@@ -3,7 +3,7 @@ import {
   Box,
   Button,
   Divider,
-  Grid2,
+  Grid,
   Icon,
   IconButton,
   InputAdornment,
@@ -125,9 +125,9 @@ export function EditableItemsListBase({
       );
     }
     item.action = () => (
-      <Grid2 container direction="column">
+      <Grid container direction="column">
         {actions}
-      </Grid2>
+      </Grid>
     );
     // logger.log(item);
     return item;
@@ -197,7 +197,7 @@ function RecordItemDetails({ details, dense }) {
   const items = details.reduce((acc, { label, type, link }) => {
     if (label) {
       const item = (
-        <Grid2
+        <Grid
           key={type}
           sx={{
             p: 1,
@@ -222,7 +222,7 @@ function RecordItemDetails({ details, dense }) {
               </Icon>
             )}
           </Typography>
-        </Grid2>
+        </Grid>
       );
       // return acc === null ? [item] : [acc, item]
       return [...acc, item];

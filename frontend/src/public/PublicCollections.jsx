@@ -3,7 +3,7 @@ import {
   Box,
   Breadcrumbs,
   Chip,
-  Grid2,
+  Grid,
   Paper,
   Stack,
   Tab,
@@ -222,8 +222,8 @@ const PublicCollections = () => {
           overflow: "auto",
         }}
       >
-        <Grid2 container spacing={2} id="overview">
-          <Grid2 size={{ xs: 12, md: hasFeatured ? 7 : 12 }}>
+        <Grid container spacing={2} id="overview">
+          <Grid size={{ xs: 12, md: hasFeatured ? 7 : 12 }}>
             <Paper
               variant="outlined"
               sx={{
@@ -276,9 +276,9 @@ const PublicCollections = () => {
                 </Box>
               </Box>
             </Paper>
-          </Grid2>
+          </Grid>
           <Show when={hasFeatured}>
-            <Grid2 size={{ xs: 12, md: 5 }} id="featured">
+            <Grid size={{ xs: 12, md: 5 }} id="featured">
               <Paper
                 variant="outlined"
                 sx={{ p: 2, flexGrow: 1, height: "fit-content" }}
@@ -290,9 +290,9 @@ const PublicCollections = () => {
                   <Carousel items={collection.featured_records} width={180} />
                 </Box>
               </Paper>
-            </Grid2>
+            </Grid>
           </Show>
-        </Grid2>
+        </Grid>
         <Show when={collection.children && collection.children.length !== 0}>
           <Paper id="subcollections" variant="outlined" sx={{ p: 2 }}>
             <ItemStack

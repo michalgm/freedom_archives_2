@@ -1,6 +1,6 @@
 import "./PublicSearch.scss";
 
-import { Box, Divider, Grid2, Stack } from "@mui/material";
+import { Box, Divider, Grid, Stack } from "@mui/material";
 import React from "react";
 import { ItemStack } from "src/public/ItemCard";
 import {
@@ -87,14 +87,14 @@ function Search({
             }
           </Box>
 
-          <Grid2 className="flex-container">
+          <Grid className="flex-container">
             <ItemStack
               title=""
               type="record"
               loading={recordsLoading}
               items={records.records}
             />
-          </Grid2>
+          </Grid>
         </Box>
       </Stack>
     </Box>

@@ -1,5 +1,5 @@
 import { ArrowDownward, ArrowUpward, Close, Search } from "@mui/icons-material";
-import { Box, Button, Grid2, Icon, IconButton, InputAdornment, Paper, Stack, Tooltip } from "@mui/material";
+import { Box, Button, Grid, Icon, IconButton, InputAdornment, Paper, Stack, Tooltip } from "@mui/material";
 import { isEqual, merge, startCase } from "lodash-es";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { FormProvider, useFieldArray, useForm } from "react-hook-form-mui";
@@ -76,7 +76,7 @@ function Filter({ index, remove, filterTypes, filter, update }) {
   }
 
   return (
-    <Grid2 size={"auto"}>
+    <Grid size={"auto"}>
       <Paper sx={{ bgcolor: "grey.200", width: 360, p: 1 }}>
         <Stack direction="row" spacing={1} alignItems={"center"}>
           <IconButton onClick={() => remove(index)} variant="outlined" size="small" sx={{ p: 0, height: 18 }}>
@@ -106,7 +106,7 @@ function Filter({ index, remove, filterTypes, filter, update }) {
           </Box>
         </Stack>
       </Paper>
-    </Grid2>
+    </Grid>
   );
 }
 
@@ -152,7 +152,7 @@ const FilterBar = ({
   return (
     <FormProvider {...formContext}>
       <AutoSubmit action={onSuccess} />
-      <Grid2
+      <Grid
         container
         spacing={2}
         flexWrap={"nowrap"}
@@ -160,9 +160,9 @@ const FilterBar = ({
         alignItems={"flex-start"}
         // justifyContent={"space-between"}
       >
-        <Grid2 container flex="1 1 fit-content" spacing={1}>
-          <Grid2 container flex="1 1 fit-content" rowSpacing={1}>
-            <Grid2 flex="1" sx={{ minWidth: 150 }}>
+        <Grid container flex="1 1 fit-content" spacing={1}>
+          <Grid container flex="1 1 fit-content" rowSpacing={1}>
+            <Grid flex="1" sx={{ minWidth: 150 }}>
               <Field
                 highlightDirty={false}
                 size={size}
@@ -182,9 +182,9 @@ const FilterBar = ({
                   },
                 }}
               />
-            </Grid2>
+            </Grid>
             <Show when={service === "records"}>
-              <Grid2 flex="1" sx={{ minWidth: 150 }}>
+              <Grid flex="1" sx={{ minWidth: 150 }}>
                 <Field
                   name="collection_id"
                   label="Collection"
@@ -196,10 +196,10 @@ const FilterBar = ({
                   returnFullObject={false}
                   expandOptions
                 />
-              </Grid2>
+              </Grid>
             </Show>
-            <Grid2 flex="1" sx={{ minWidth: 150 }} container spacing={0}>
-              <Grid2 flex="1 0 fit-content">
+            <Grid flex="1" sx={{ minWidth: 150 }} container spacing={0}>
+              <Grid flex="1 0 fit-content">
                 <Field
                   name="sort"
                   label="Sort By"
@@ -215,8 +215,8 @@ const FilterBar = ({
                     value: key,
                   }))}
                 />
-              </Grid2>
-              <Grid2>
+              </Grid>
+              <Grid>
                 <Field
                   name="sort_desc"
                   field_type="checkbox"
@@ -243,10 +243,10 @@ const FilterBar = ({
                     borderColor: "rgba(var(--mui-palette-common-onBackgroundChannel) / 0.23)",
                   }}
                 />
-              </Grid2>
-            </Grid2>
-          </Grid2>
-          <Grid2 flex="1 1 min-content" container spacing={0} flexWrap={"wrap"}>
+              </Grid>
+            </Grid>
+          </Grid>
+          <Grid flex="1 1 min-content" container spacing={0} flexWrap={"wrap"}>
             <Show when={service === "records"}>
               <Field
                 field_type="checkbox"
@@ -281,9 +281,9 @@ const FilterBar = ({
                 labelProps={{ sx: { whiteSpace: "nowrap" } }}
               />
             </Show>
-          </Grid2>
-        </Grid2>
-        <Grid2
+          </Grid>
+        </Grid>
+        <Grid
           container
           justifyContent={"flex-end"}
           flex="0 0 fit-content"
@@ -315,9 +315,9 @@ const FilterBar = ({
           >
             Clear Filters
           </Button>
-        </Grid2>
-      </Grid2>
-      <Grid2 size={12} container spacing={1}>
+        </Grid>
+      </Grid>
+      <Grid size={12} container spacing={1}>
         {fields.map((filter, index) => (
           <Filter
             key={filter.id}
@@ -330,7 +330,7 @@ const FilterBar = ({
             }}
           />
         ))}
-      </Grid2>
+      </Grid>
     </FormProvider>
   );
 };

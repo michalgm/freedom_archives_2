@@ -1,4 +1,4 @@
-import { Box, Divider, Grid2, Stack, Tab, Tabs, Typography } from "@mui/material/";
+import { Box, Divider, Grid, Stack, Tab, Tabs, Typography } from "@mui/material";
 import { startCase } from "lodash-es";
 import { useEffect, useMemo, useState } from "react";
 import { useFieldArray, useFormContext } from "react-hook-form";
@@ -157,9 +157,9 @@ function Collection({ id, mode = "" }) {
                     <Tab label="Records" value="records"></Tab>
                   </Tabs>
                 )}
-                <Grid2 container spacing={2} sx={{ height: "100%", overflowY: "auto" }}>
+                <Grid container spacing={2} sx={{ height: "100%", overflowY: "auto" }}>
                   {formContents(collection)}
-                </Grid2>
+                </Grid>
               </Stack>
               {/* </GridBlock> */}
             </EditItemView>
@@ -174,16 +174,16 @@ function CollectionFields() {
   return (
     <>
       <Stack direction={"row"} spacing={2} sx={{ mt: 2 }}>
-        <Grid2 container spacing={2}>
-          <Grid2 size={12}>
+        <Grid container spacing={2}>
+          <Grid size={12}>
             <Field name="collection_name" />
-          </Grid2>
-          <Grid2 size={12}>
+          </Grid>
+          <Grid size={12}>
             <Field name="description" field_type="html" />
-          </Grid2>
-        </Grid2>
+          </Grid>
+        </Grid>
         {
-          <Grid2
+          <Grid
             container
             size="auto"
             className="record-thumbnail"
@@ -198,12 +198,12 @@ function CollectionFields() {
               width={100}
               accept={["image/gif", "image/jpeg", "image/png", "image/webp", "image/tiff", "application/pdf"]}
             />
-          </Grid2>
+          </Grid>
         }
       </Stack>
       <FieldRow>
-        <Grid2 container spacing={0}>
-          <Grid2 size={6}>
+        <Grid container spacing={0}>
+          <Grid size={6}>
             <Field
               field_type="list_item"
               itemType="call_number"
@@ -220,8 +220,8 @@ function CollectionFields() {
               fetchAll
               // disableClearable
             />
-          </Grid2>
-          <Grid2 size={6}>
+          </Grid>
+          <Grid size={6}>
             <Field
               fullWidth={false}
               label="Suffix"
@@ -234,11 +234,11 @@ function CollectionFields() {
                 },
               }}
             />
-          </Grid2>
-        </Grid2>
-        <Grid2 size={12}>
+          </Grid>
+        </Grid>
+        <Grid size={12}>
           <Field field_type="editableItem" service="collections" name="parent" />
-        </Grid2>
+        </Grid>
       </FieldRow>
       <FieldRow>
         <Field name="is_hidden" field_type="checkbox" />
@@ -290,7 +290,7 @@ function EditList({
   }
 
   return (
-    <Grid2 className="flex-container" sx={{ backgroundColor: "grey.200", p: 1 }}>
+    <Grid className="flex-container" sx={{ backgroundColor: "grey.200", p: 1 }}>
       <Stack
         direction={"row"}
         sx={{ height: "100%" }}
@@ -335,7 +335,7 @@ function EditList({
           />
         </Box>
       </Stack>
-    </Grid2>
+    </Grid>
   );
 }
 

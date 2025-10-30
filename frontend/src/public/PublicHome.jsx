@@ -1,4 +1,4 @@
-import { Box, Divider, Grid2, Stack, Typography } from "@mui/material";
+import { Box, Divider, Grid, Stack, Typography } from "@mui/material";
 import { useEffect, useState } from "react";
 import { useNavigate, useOutletContext } from "react-router";
 import { public_collections } from "src/api";
@@ -47,27 +47,27 @@ const PublicHome = () => {
         </Box>
       </Stack>
       <Divider />
-      <Grid2 container spacing={2} sx={{ overflowX: "auto !important" }}>
-        <Grid2 size={3} className="flex-container">
+      <Grid container spacing={2} sx={{ overflowX: "auto !important" }}>
+        <Grid size={3} className="flex-container">
           <ItemStack
             title="Browse by Collection"
             type="collection"
             items={topCollections}
           />
-        </Grid2>
-        <Grid2 size="auto">
+        </Grid>
+        <Grid size="auto">
           <Divider orientation="vertical" />
-        </Grid2>
+        </Grid>
 
-        <Grid2 size={2} className="flex-container">
+        <Grid size={2} className="flex-container">
           <Typography variant="header" gutterBottom>
             Featured Content
           </Typography>
           <Box className="flex-scroller">
             <Carousel items={featuredRecords} />
           </Box>
-        </Grid2>
-      </Grid2>
+        </Grid>
+      </Grid>
     </Stack>
   );
 };

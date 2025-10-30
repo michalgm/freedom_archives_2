@@ -1,6 +1,6 @@
 import "./Relationships.scss";
 
-import { Box, Button, Grid2, LinearProgress, MenuItem, Stack, TextField, Typography } from "@mui/material";
+import { Box, Button, Grid, LinearProgress, MenuItem, Stack, TextField, Typography } from "@mui/material";
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router";
 import { Section } from "src/components/ViewContainer";
@@ -142,12 +142,12 @@ function Relationships() {
       <Section
         header
         elements={[
-          <Grid2 size={12} key={"header"}>
-            <Grid2 container spacing={2} justifyContent="center" alignItems="flex-start" direction="row">
-              <Grid2 size={12} style={{ paddingBottom: 0 }}>
+          <Grid size={12} key={"header"}>
+            <Grid container spacing={2} justifyContent="center" alignItems="flex-start" direction="row">
+              <Grid size={12} style={{ paddingBottom: 0 }}>
                 <LinearProgressWithLabel value={complete} />
-              </Grid2>
-              <Grid2 size={12}>
+              </Grid>
+              <Grid size={12}>
                 <ButtonLink to={`/relationships/${$skip - 1}`} disabled={$skip <= 1}>
                   Prev
                 </ButtonLink>
@@ -159,8 +159,8 @@ function Relationships() {
                   Next Unreviewed
                 </ButtonLink>
                 <div></div>
-              </Grid2>
-              <Grid2 size={6}>
+              </Grid>
+              <Grid size={6}>
                 <Stack spacing={1}>
                   <TextField
                     select
@@ -196,8 +196,8 @@ function Relationships() {
                     </Typography>
                   )}
                 </Stack>
-              </Grid2>
-              <Grid2 size={6}>
+              </Grid>
+              <Grid size={6}>
                 <TextField
                   variant="outlined"
                   value={notes}
@@ -207,15 +207,15 @@ function Relationships() {
                   onChange={updateNotes}
                   fullWidth
                 />
-              </Grid2>
-            </Grid2>
-          </Grid2>,
+              </Grid>
+            </Grid>
+          </Grid>,
         ]}
       />
       <div className="flex-container">
-        <Grid2 size={12} className="flex-container">
+        <Grid size={12} className="flex-container">
           <Relationship id={relation.id} key={relation.id} />
-        </Grid2>
+        </Grid>
       </div>
     </Stack>
   );

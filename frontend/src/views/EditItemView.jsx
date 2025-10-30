@@ -1,5 +1,5 @@
 import { Delete, Link, Save } from "@mui/icons-material";
-import { Box, Grid2, Icon, Typography } from "@mui/material";
+import { Box, Grid, Icon, Typography } from "@mui/material";
 import { isEmpty, startCase } from "lodash-es";
 import { useEffect, useState } from "react";
 import { getServiceID, services } from "src/api";
@@ -21,7 +21,7 @@ const NeighborLink = ({ type, service, neighbors, setSearchIndex, search_index }
   const offset = type === "prev" ? -1 : 1;
   if (service) {
     return (
-      <Grid2 size="grow" component={Box} textAlign={type === "prev" ? "left" : "right"} style={{ flex: "0 0 auto" }}>
+      <Grid size="grow" component={Box} textAlign={type === "prev" ? "left" : "right"} style={{ flex: "0 0 auto" }}>
         <ButtonLink
           disabled={!neighbors[type]}
           to={`/admin/${service}/${neighbors[type]}`}
@@ -31,7 +31,7 @@ const NeighborLink = ({ type, service, neighbors, setSearchIndex, search_index }
         >
           {type}
         </ButtonLink>
-      </Grid2>
+      </Grid>
     );
   }
 };
@@ -67,12 +67,12 @@ const EditItemFooter = ({ service, item }) => {
 
   return [
     <NeighborLink key="prev" type="prev" {...{ service, neighbors, setSearchIndex, search_index }} />,
-    <Grid2 key="created" size="grow" style={{ textAlign: "center" }}>
+    <Grid key="created" size="grow" style={{ textAlign: "center" }}>
       <RenderTime item={item} type="created" />
-    </Grid2>,
-    <Grid2 key="modified" size="grow" style={{ textAlign: "center" }}>
+    </Grid>,
+    <Grid key="modified" size="grow" style={{ textAlign: "center" }}>
       <RenderTime item={item} type="modified" />
-    </Grid2>,
+    </Grid>,
     <NeighborLink key="next" type="next" {...{ service, neighbors, setSearchIndex, search_index }} />,
   ];
 };

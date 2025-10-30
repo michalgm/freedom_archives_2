@@ -1,4 +1,4 @@
-import { Grid2, Paper, Stack, Typography } from "@mui/material";
+import { Grid, Paper, Stack, Typography } from "@mui/material";
 import React, { useEffect, useState } from "react";
 
 import { relationships } from "../api";
@@ -25,7 +25,7 @@ function Relationship({ id }) {
 
   return (
     <div>
-      <Grid2 container spacing={2}>
+      <Grid container spacing={2}>
         {[1, 2].map((num) => {
           const other_num = num === 1 ? 2 : 1;
           const defaultValues = {
@@ -34,7 +34,7 @@ function Relationship({ id }) {
             track_number: relation[`track_number_${other_num}`],
           };
           return (
-            <Grid2 size={6} key={num}>
+            <Grid size={6} key={num}>
               <Paper>
                 <Form defaultValues={defaultValues}>
                   <Stack direction="row" spacing={2} justifyContent="space-between">
@@ -67,20 +67,20 @@ function Relationship({ id }) {
                   />
                 </Form>
               </Paper>
-            </Grid2>
+            </Grid>
           );
         })}
 
         {[1, 2].map((num) => (
-          <Grid2 size={6} key={num}>
+          <Grid size={6} key={num}>
             <Paper>
               <div style={{ padding: 4 }}>
                 <Record id={relation[`docid_${num}`]} ro embedded />
               </div>
             </Paper>
-          </Grid2>
+          </Grid>
         ))}
-      </Grid2>
+      </Grid>
     </div>
   );
 }

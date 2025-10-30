@@ -8,7 +8,7 @@ import {
   Box,
   Button,
   Divider,
-  Grid2,
+  Grid,
   Icon,
   IconButton,
   Stack,
@@ -19,7 +19,7 @@ import {
   TableRow,
   Tooltip,
   Typography,
-} from "@mui/material/";
+} from "@mui/material";
 import React, { useCallback } from "react";
 import { useFieldArray, useFormContext } from "react-hook-form-mui";
 import { useNavigate, useParams } from "react-router";
@@ -123,8 +123,8 @@ function Instance({ instance = {}, index, actions: { swap, remove, update } }) {
           </IconButton>
         </TableCell>
         <TableCell>
-          <Grid2 container spacing={0}>
-            <Grid2 size={7.5}>
+          <Grid container spacing={0}>
+            <Grid size={7.5}>
               <Field
                 field_type="list_item"
                 itemType="call_number"
@@ -141,8 +141,8 @@ function Instance({ instance = {}, index, actions: { swap, remove, update } }) {
                 fetchAll
                 fullWidth
               />
-            </Grid2>
-            <Grid2 size={4.5}>
+            </Grid>
+            <Grid size={4.5}>
               <Field
                 ro={!edit}
                 label="Suffix"
@@ -154,8 +154,8 @@ function Instance({ instance = {}, index, actions: { swap, remove, update } }) {
                   },
                 }}
               />
-            </Grid2>
-          </Grid2>
+            </Grid>
+          </Grid>
         </TableCell>
         <TableCell>
           <Field
@@ -330,11 +330,11 @@ function Relationships({ id, relationships = [] }) {
 
 function RecordParent() {
   return (
-    <Grid2 container justifyContent="center" alignItems="center" spacing={4}>
-      <Grid2 size={12}>
+    <Grid container justifyContent="center" alignItems="center" spacing={4}>
+      <Grid size={12}>
         <Field field_type="editableItem" service="records" name="parent" />
-      </Grid2>
-    </Grid2>
+      </Grid>
+    </Grid>
   );
 }
 
@@ -411,20 +411,20 @@ function Record({ id /*  embedded = false */ }) {
           return (
             <>
               <EditItemView item={record} newItem={newRecord} service="records" noPaper>
-                <Grid2 container spacing={2}>
+                <Grid container spacing={2}>
                   <GridBlock title="" spacing={2}>
-                    <Grid2 size={12}>
+                    <Grid size={12}>
                       <Stack direction={"row"} spacing={2}>
-                        <Grid2 container spacing={2} size="grow">
-                          <Grid2 size={12}>
+                        <Grid container spacing={2} size="grow">
+                          <Grid size={12}>
                             <Field name="title" />
-                          </Grid2>
-                          <Grid2 size={12}>
+                          </Grid>
+                          <Grid size={12}>
                             <Field name="description" multiline rows={4} />
-                          </Grid2>
-                        </Grid2>
+                          </Grid>
+                        </Grid>
                         {
-                          <Grid2
+                          <Grid
                             container
                             size={"auto"}
                             className="record-thumbnail"
@@ -436,10 +436,10 @@ function Record({ id /*  embedded = false */ }) {
                               <Thumbnail item={record} width={100} />
                               <UpdateThumbnailButton />
                             </Show>
-                          </Grid2>
+                          </Grid>
                         }
                       </Stack>
-                    </Grid2>
+                    </Grid>
                     <FieldRow>
                       <Field field_type="checkbox" name="is_hidden" />
                       <Field field_type="checkbox" name="needs_review" />
@@ -463,8 +463,8 @@ function Record({ id /*  embedded = false */ }) {
                     </FieldRow>
                     <FieldRow>
                       <Field name="location" />
-                      <Grid2 container spacing={2} direction={"row"}>
-                        <Grid2 size={6}>
+                      <Grid container spacing={2} direction={"row"}>
+                        <Grid size={6}>
                           <Field
                             name="date_string"
                             label="Date"
@@ -472,11 +472,11 @@ function Record({ id /*  embedded = false */ }) {
                             helperText="MM/DD/YYYY format - enter '00' for unknown day or month"
                             fullWidth={false}
                           />
-                        </Grid2>
-                        <Grid2 size={6}>
+                        </Grid>
+                        <Grid size={6}>
                           <Field name="year_is_circa" label="Approximate date" field_type="checkbox" />
-                        </Grid2>
-                      </Grid2>
+                        </Grid>
+                      </Grid>
                     </FieldRow>
                     <FieldRow>
                       <Field name="notes" multiline rows={4} />
@@ -485,14 +485,14 @@ function Record({ id /*  embedded = false */ }) {
                   <GridBlock title="Media">
                     <Instances record={record} instances={record.instances || []} />
                   </GridBlock>
-                  <Grid2 size={12}>
+                  <Grid size={12}>
                     <Divider />
                     <Accordion>
                       <AccordionSummary expandIcon={<ExpandMore />}>
                         <Typography variant="h5">Relationships</Typography>
                       </AccordionSummary>
                       <AccordionDetails>
-                        <Grid2 container spacing={2}>
+                        <Grid container spacing={2}>
                           <GridBlock title="Parent Record">
                             <RecordParent record={record} parent={record.parent || {}} />
                           </GridBlock>
@@ -514,11 +514,11 @@ function Record({ id /*  embedded = false */ }) {
                           <GridBlock title="Old Relationships">
                             <Relationships id={id} relationships={record.relationships} />
                           </GridBlock>
-                        </Grid2>
+                        </Grid>
                       </AccordionDetails>
                     </Accordion>
-                  </Grid2>
-                </Grid2>
+                  </Grid>
+                </Grid>
               </EditItemView>
             </>
           );

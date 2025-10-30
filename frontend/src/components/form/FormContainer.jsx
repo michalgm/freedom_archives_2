@@ -1,4 +1,4 @@
-import { Box, Grid2, Stack } from "@mui/material";
+import { Box, Grid, Stack } from "@mui/material";
 import { get } from "lodash-es";
 import Loading from "src/components/Loading/Loading";
 import { useContainerWidth } from "src/lib/AppContext";
@@ -108,12 +108,12 @@ const FormContainer = ({
                 const { columns, fullSpan } = fieldsToColumns(sectionFields, schema, columnCount);
                 return (
                   <FormSection key={title} title={title} sectionActions={sectionActions}>
-                    <Grid2 container sx={{ alignItems: "start" }} size={12}>
+                    <Grid container sx={{ alignItems: "start" }} size={12}>
                       {columns.map((fieldSet, columnIndex) => (
                         // eslint-disable-next-line react/no-array-index-key
-                        <Grid2 key={columnIndex} container size={12 / columnCount}>
+                        (<Grid key={columnIndex} container size={12 / columnCount}>
                           {fieldSet.map(([key, options = {}], index) => (
-                            <Grid2 key={key} size={12}>
+                            <Grid key={key} size={12}>
                               <Field
                                 tabIndex={100 * (groupIndex + 1) + index}
                                 name={key}
@@ -121,13 +121,13 @@ const FormContainer = ({
                                 {...options}
                                 {...(fieldProps[key] || {})}
                               />
-                            </Grid2>
+                            </Grid>
                           ))}
-                        </Grid2>
+                        </Grid>)
                       ))}
-                      <Grid2 container size={12}>
+                      <Grid container size={12}>
                         {fullSpan.map(([key, options = {}], index) => (
-                          <Grid2 key={key} size={12}>
+                          <Grid key={key} size={12}>
                             <Field
                               tabIndex={100 * (groupIndex + 1) + columns.length + index}
                               highlightDirty={highlightDirty}
@@ -135,10 +135,10 @@ const FormContainer = ({
                               {...options}
                               {...(fieldProps[key] || {})}
                             />
-                          </Grid2>
+                          </Grid>
                         ))}
-                      </Grid2>
-                    </Grid2>
+                      </Grid>
+                    </Grid>
                   </FormSection>
                 );
               })}

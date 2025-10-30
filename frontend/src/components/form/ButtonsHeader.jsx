@@ -1,4 +1,4 @@
-import { Button, Grid2 } from "@mui/material";
+import { Button, Grid } from "@mui/material";
 import { useCallback, useState } from "react";
 import { useFormContext } from "react-hook-form";
 import ButtonLink from "src/components/ButtonLink";
@@ -84,11 +84,11 @@ export function ButtonsHeader({ buttons, useFormManager = true, ...props }) {
 
   const ButtonComponent = useFormManager ? FormManagerButton : ReactHookFormButton;
   return (
-    <Grid2 container className="buttons" spacing={1} justifyContent="flex-end" {...props}>
+    <Grid container className="buttons" spacing={1} justifyContent="flex-end" {...props}>
       {buttons.map((props) => (
         <ButtonComponent key={props.label || props.id} {...props} />
       ))}
-    </Grid2>
+    </Grid>
   );
 }
 
