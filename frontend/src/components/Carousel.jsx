@@ -273,7 +273,7 @@ export function Carousel({
 
   return (
     <Paper
-      variant="outlined"
+      elevation={0}
       sx={{ py: 1, position: "relative", ...props.sx }}
       {...props}
     >
@@ -286,6 +286,8 @@ export function Carousel({
           display: "flex",
           flexDirection: "column",
           alignItems: "center",
+          minWidth: 0,
+          contain: "inline-size",
           ...props.sx,
         }}
         {...props}

@@ -95,69 +95,85 @@ const PublicLayout = () => {
         <Box
           sx={{
             backgroundColor: "#b00000",
-            background: `url("/static/images/freedom_archives_header.jpg") no-repeat scroll  #b00000`,
-            backgroundPosition: "top center",
-            // backgroundPosition: {
-            //   lg: "-280px",
-            //   md: "-200px -10px",
-            //   sm: "-180px -10px",
-            //   xs: "-140px -16px",
-            // },
-            height: 240,
           }}
         >
-          <Container disableGutters>
+          <Container disableGutters sx={{ p: 0 }}>
             <Box
               id="header"
               sx={{
-                // mx: -30,
-                // height: {
-                //   lg: 240,
-                //   md: 200,
-                //   sm: 180,
-                //   xs: 140,
-                // },
+                position: "relative",
+                pr: '5px',
+                height: {
+                  lg: 240,
+                  md: 200,
+                  sm: 180,
+                  xs: 140,
+                },
                 textAlign: "center",
-
-                // backgroundSize: "auto 100%",
-                // flex: "0 0 auto",
+                overflow: "hidden",
               }}
             >
-              <div id="header_image">
-                <Stack
-                  direction="row"
-                  justifyContent="flex-end"
-                  alignItems="end"
-                  spacing={1}
-                  sx={{ pt: 3 }}
-                >
-                  {headerLinks.map((link) => (
-                    <ButtonLink
-                      key={link.title}
-                      size="small"
-                      variant="contained"
-                      color="darkPrimary"
-                      to={link.href}
-                      title={`Go to ${link.title}`}
-                      // sx={{ backgroundColor: "darkPrimary.main", border: "none" }}
-                    >
-                      <span style={{ color: "white" }}>{link.title}</span>
-                    </ButtonLink>
-                  ))}
-                </Stack>
-              </div>
+              <Box id="header_image"
+                sx={{
+                  position: "absolute",
+                  background: `url("/static/images/freedom_archives_header.jpg") no-repeat scroll  #b00000`,
+                  height: "100%",
+                  backgroundSize: "auto 100%",
+                  width: 'calc(100% + 299px)',
+                  top: {
+                    lg: 0,
+                    md: -10,
+                    sm: -10,
+                    xs: -14,
+                  },
+                  left: {
+                    lg: -299,
+                    md: -248,
+                    sm: -223,
+                    xs: -172,
+                  }
+                }}
+              />
+              <Stack
+                direction={{
+                  xs: 'column',
+                  sm: 'row',
+                }}
+                justifyContent="flex-end"
+                alignItems="end"
+                spacing={1}
+                sx={{
+                  pt: {
+                    md: 3,
+                    sm: 2,
+                    xs: 1,
+                  }
+                }}
+              >
+                {headerLinks.map((link) => (
+                  <ButtonLink
+                    key={link.title}
+                    size="small"
+                    variant="contained"
+                    color="darkPrimary"
+                    to={link.href}
+                    title={`Go to ${link.title}`}
+                  >
+                    <span style={{ color: "white" }}>{link.title}</span>
+                  </ButtonLink>
+                ))}
+              </Stack>
             </Box>
           </Container>
-        </Box>
+        </Box >
 
         <Container
           id="main_content"
           sx={{
-            // overflow: "hidden",
-            // backgroundColor: "blue",
-            border: "3px solid",
+            border: "5px solid",
             borderColor: "rgba(0, 0, 0, 0.05)",
-            p: 1,
+            backgroundClip: "padding-box",
+            p: 2,
             backgroundColor: "background.default",
             mt: -8,
             minHeight: 0,
@@ -166,11 +182,10 @@ const PublicLayout = () => {
             scrollSnapAlign: "start",
             scrollSnapStop: "always", // Add this
             scrollMarginTop: 8,
-            height: "calc(100dvh - 16px)",
-
-            // height: "100dvh",
-            // flex: "1 1 auto",
+            // height: "calc(100dvh - 16px)",
+            zIndex: 10,
           }}
+          disableGutters
         >
           {/* <div id="help_info">
             <h2>Search Help</h2>

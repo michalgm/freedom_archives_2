@@ -27,10 +27,12 @@ const scrollToSection = (e, id) => {
   if (element) {
     element.scrollIntoView({
       behavior: "smooth",
-      // container: "nearest",
-      block: "nearest",
-      inline: "start",
+      block: "start",
+      inline: "nearest",
     });
+    if (id === 'overview') {
+      document.getElementsByClassName('overview-scrollable')[0].scroll(0, 0);
+    }
   }
 };
 
@@ -174,8 +176,11 @@ const PublicCollections = () => {
           </Typography>
         </Breadcrumbs>
         <Stack
-          direction="row"
-          alignItems="center"
+          direction={{
+            xs: "column", md: "row",
+          }}
+          alignItems="flex-start"
+          flexWrap="wrap"
           spacing={1}
           sx={{ mb: 1 }}
           justifyContent={"space-between"}
@@ -188,6 +193,14 @@ const PublicCollections = () => {
             onChange={(_e, newValue) => setTab(newValue)}
             variant="scrollable"
             scrollButtons="auto"
+            sx={{
+              '& .MuiTab-root': {
+                padding: {
+                  sm: "8px 12px",
+                  md: '12px 16px'
+                }
+              },
+            }}
           >
             <Tab
               label="Overview"
@@ -237,10 +250,11 @@ const PublicCollections = () => {
                 sx={{
                   display: "flex",
                   flexDirection: { xs: "column", sm: "row" },
+                  minWidth: 0,
                   gap: 2,
                 }}
               >
-                <Box sx={{ flex: 1, maxHeight: "50vh", overflow: "auto" }}>
+                <Box className='overview-scrollable' sx={{ flex: 1, maxHeight: "50vh", overflow: "auto" }}>
                   <Thumbnail
                     item={collection}
                     width={200}
@@ -314,6 +328,7 @@ const PublicCollections = () => {
             flexDirection: "column",
             display: "flex",
             flexShrink: 0,
+            height: 'calc(100vh - 38px)',
           }}
         >
           <Typography variant="header">Records</Typography>

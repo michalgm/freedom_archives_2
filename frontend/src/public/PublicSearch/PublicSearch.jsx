@@ -48,7 +48,6 @@ function Search({
         sx={{ height: "100%" }}
         divider={<Divider orientation="vertical" flexItem />}
         spacing={2}
-        // useFlexGap
       >
         <Box sx={{ flexBasis: 300, flexGrow: 0, flexShrink: 0 }}>
           <SearchFilters
