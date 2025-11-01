@@ -1,5 +1,3 @@
-import "./PublicSearch.scss";
-
 import { Box, Divider, Grid, Stack } from "@mui/material";
 import React from "react";
 import { ItemStack } from "src/public/ItemCard";
@@ -8,6 +6,7 @@ import {
   FILTER_TYPES,
   SORT_OPTIONS,
 } from "src/public/PublicSearch/constants";
+import PlayerModal from "src/public/PublicSearch/PlayerModal";
 import { SearchFilters, SearchForm } from "src/public/PublicSearch/SearchForm";
 import { usePublicSearch } from "src/public/PublicSearch/usePublicSearch";
 
@@ -39,6 +38,7 @@ function Search({
     FILTER_TYPES,
     PAGE_SIZE,
   );
+  const [currentRecord, setCurrentRecord] = React.useState(null);
 
   return (
     <Box className="flex-container search-page">
@@ -92,10 +92,16 @@ function Search({
               type="record"
               loading={recordsLoading}
               items={records.records}
+              setCurrentRecord={setCurrentRecord}
             />
           </Grid>
         </Box>
       </Stack>
+      <PlayerModal
+        open={Boolean(currentRecord)}
+        onClose={() => setCurrentRecord(null)}
+        item={currentRecord}
+      />
     </Box>
   );
 }

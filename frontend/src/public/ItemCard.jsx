@@ -30,6 +30,7 @@ export function ItemCardLayout({
   isOverflowing,
   dense = false,
   item = {},
+  setCurrentRecord,
   ...cardProps
 }) {
   const content = (
@@ -69,7 +70,7 @@ export function ItemCardLayout({
       {...cardProps}
     >
       {url ? (
-        <ItemLink item={item}>
+        <ItemLink item={item} setCurrentRecord={setCurrentRecord}>
           <CardActionArea>{content}</CardActionArea>
         </ItemLink>
       ) : (
@@ -84,18 +85,23 @@ export function ItemCardLayout({
   );
 }
 
-export function ItemLink({ item, children, ...props }) {
+export function ItemLink({ item, children, setCurrentRecord, ...props }) {
   const url = item.collection_id
     ? `/collections/${item.collection_id}`
     : item.url || item.primary_instance_url;
   const target = item.collection_id ? "_self" : "_blank";
   if (!url) return children;
+  const onClick = ['Audio', 'Video'].includes(item.media_type) && setCurrentRecord ? (e) => {
+    e.preventDefault();
+    setCurrentRecord(item);
+  } : undefined;
   return (
     <Link
       to={url}
       style={{ textDecoration: "none", color: "inherit" }}
       target={target}
       preventScrollReset={true}
+      onClick={onClick}
       {...props}
     >
       {children}
@@ -107,6 +113,7 @@ export function ItemCard({
   expand = false,
   url,
   dense = false,
+  setCurrentRecord,
   ...props
 }) {
   const title = item.title || item.collection_name || "Untitled";
@@ -160,19 +167,21 @@ export function ItemCard({
         isOverflowing,
         dense,
         item,
+        setCurrentRecord,
         ...props,
       }}
     />
   );
 }
 
-export function RecordCard({ record, ...props }) {
+export function RecordCard({ record, setCurrentRecord, ...props }) {
   return (
     <ItemCard
       item={record}
       type="record"
       expand={true}
       url={record.url || record.primary_instance_url}
+      setCurrentRecord={setCurrentRecord}
       {...props}
     />
   );
@@ -212,6 +221,7 @@ export function ItemStack({
   loading = false,
   dense = false,
   items = [],
+  setCurrentRecord,
   ...props
 }) {
   return (
@@ -236,7 +246,7 @@ export function ItemStack({
         ) : (
           items.map((child) =>
             type === "record" ? (
-              <RecordCard key={child.record_id} record={child} dense={dense} />
+              <RecordCard key={child.record_id} record={child} dense={dense} setCurrentRecord={setCurrentRecord} />
             ) : (
               <CollectionCard
                 key={child.collection_id}

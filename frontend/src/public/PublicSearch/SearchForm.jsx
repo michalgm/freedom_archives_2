@@ -1,4 +1,4 @@
-import { Close, Help } from "@mui/icons-material";
+import { Close } from "@mui/icons-material";
 import {
   Box,
   Button,
@@ -19,7 +19,6 @@ import {
   ListItemText,
   Skeleton,
   Stack,
-  Tooltip,
   Typography,
 } from "@mui/material";
 import { alpha } from "@mui/material/styles";
