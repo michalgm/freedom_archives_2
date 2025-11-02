@@ -183,7 +183,7 @@ export const SearchFilters = ({
         <Typography variant="h6">Common Terms</Typography>
         <WordCloud loading={loading} data={filters} addFilter={addFilter} />
         <Divider flexItem sx={{ width: "100%", my: 1 }} />
-        <Typography variant="h6">Filter Search Results</Typography>
+        <Typography variant="h6">Filter Results</Typography>
         <Button
           startIcon={<Icon>clear</Icon>}
           color="inherit"

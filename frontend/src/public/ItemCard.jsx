@@ -130,6 +130,7 @@ export function ItemCard({
         value={value}
         variant="outlined"
         size="small"
+      // color={key === 'Collection' ? 'primary' : 'default'}
       />
     </Grid>
   ));

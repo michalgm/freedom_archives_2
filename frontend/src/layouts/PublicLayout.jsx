@@ -110,7 +110,6 @@ const PublicLayout = () => {
                   xs: 140,
                 },
                 textAlign: "center",
-                overflow: "hidden",
               }}
             >
               <Box id="header_image"
