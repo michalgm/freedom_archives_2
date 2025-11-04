@@ -9,15 +9,15 @@ if [ -z "$NO_BUILD" ]; then
         git pull && \
         .  ./activate.sh && \
         cd frontend && \
-        npm install && \
-    npm run build"
+        yarn install && \
+    yarn run build"
 fi
 
 echo "Updating backend..."
 ssh freedomarc "cd work/freedom_archives_2 && \
     git pull && \
     .  ./activate.sh && \
-    npm install && \
-    NODE_ENV=production npm run migrate && \
+    yarn install && \
+    NODE_ENV=production yarn run migrate && \
     /usr/sbin/cloudlinux-selector restart --interpreter nodejs --app-root work/freedom_archives_2 --json"
     
