@@ -73,8 +73,8 @@ function Collection({ id, mode = "" }) {
               newCollection || isFeaturedRecords
                 ? null
                 : {
-                    collection_id: { $in: [...(collection.descendant_collection_ids || []), collection.collection_id] },
-                  }
+                  collection_id: { $in: [...(collection.descendant_collection_ids || []), collection.collection_id] },
+                }
             }
             useStore={useFeaturedRecordsStore}
             reorder
@@ -134,7 +134,6 @@ function Collection({ id, mode = "" }) {
           },
           onDelete: () => navigate(`/admin/collections`),
         }}
-        // style={{ height: "100%" }}
       >
         {(manager) => {
           const { formData: collection } = manager;
@@ -218,7 +217,6 @@ function CollectionFields() {
                 },
               }}
               fetchAll
-              // disableClearable
             />
           </Grid>
           <Grid size={6}>

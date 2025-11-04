@@ -11,7 +11,7 @@ import {
   Typography,
 } from "@mui/material";
 import { isArray } from "lodash-es";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useParams } from "react-router";
 import { public_collections as collectionsService } from "src/api";
 import Carousel from "src/components/Carousel";
@@ -76,7 +76,7 @@ const PublicCollections = () => {
   const [search, setSearch] = useState({});
   const [loading, setLoading] = useState(false);
   const [tab, setTab] = useState(0);
-  const [recordsContainerHeight, setRecordsContainerHeight] = useState(400); // fallback value
+  // const [recordsContainerHeight, setRecordsContainerHeight] = useState(400); // fallback value
 
   const containerRef = useRef(null);
   useEffect(() => {
@@ -103,30 +103,6 @@ const PublicCollections = () => {
     };
     fetchCollection();
   }, [collection_id, setSearch]);
-
-  const updateHeaderHeight = useCallback(() => {
-    if (containerRef.current) {
-      const containerHeight = containerRef.current.clientHeight;
-      setRecordsContainerHeight(containerHeight);
-    }
-  }, [containerRef]);
-
-  // Calculate sticky header height and ensure scroll starts at top on initial load
-  useEffect(() => {
-    if (collection) {
-      // Small delay to ensure DOM is ready
-      setTimeout(() => {
-        updateHeaderHeight();
-        window.scrollTo({ top: 0, behavior: "instant" });
-      }, 150); // Slightly longer delay to ensure all content is rendered
-    }
-  }, [collection, updateHeaderHeight]);
-
-  // Update scroll margin when header height changes (e.g., responsive design)
-  useEffect(() => {
-    window.addEventListener("resize", updateHeaderHeight);
-    return () => window.removeEventListener("resize", updateHeaderHeight);
-  }, [updateHeaderHeight]);
 
   if (!collection) {
     return null;
@@ -324,7 +300,6 @@ const PublicCollections = () => {
           variant="outlined"
           sx={{
             p: 2,
-            height: recordsContainerHeight,
             flexDirection: "column",
             display: "flex",
             flexShrink: 0,
