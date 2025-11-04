@@ -67,7 +67,7 @@ export const fetchUnified = async (context) => {
 export const prepListItemRelations = (context) => {
   const { data, relation_data = {} } = context;
   if (data && Object.keys(data).length) {
-    ["subjects", "keywords", "producers", "authors"].forEach((key) => {
+    ["subjects", "keywords", "producers", "authors", "publishers"].forEach((key) => {
       if (data[key]) {
         relation_data[key] = data[key];
         delete data[key];
@@ -91,7 +91,7 @@ export const updateListItemRelations = async (context) => {
   } = context;
   const table = fullName.slice(0, -1);
   const id = parseInt(context.id || context.result[`${table}_id`], 10);
-  for (const type of ["subjects", "keywords", "producers", "authors"]) {
+  for (const type of ["subjects", "keywords", "producers", "authors", "publishers"]) {
     if (relation_data && relation_data[type] !== undefined) {
       const join_table = `${table}s_to_list_items`;
       await trx

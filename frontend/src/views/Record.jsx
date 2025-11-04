@@ -459,7 +459,7 @@ function Record({ id /*  embedded = false */ }) {
                     </FieldRow>
                     <FieldRow>
                       <Field name="program" field_type="list_item" itemType="program" create />
-                      <Field name="publisher" field_type="list_item" itemType="publisher" create />
+                      <Field name="publishers" multiple field_type="list_item" itemType="publisher" create />
                     </FieldRow>
                     <FieldRow>
                       <Field name="location" />

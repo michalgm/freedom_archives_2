@@ -219,22 +219,15 @@ SELECT
         )
         ELSE NULL
     END AS call_number_item,
-    CASE
-        WHEN publisher_lookup.list_item_id IS NOT NULL THEN JSONB_BUILD_OBJECT(
-            'item',
-            publisher_lookup.item,
-            'list_item_id',
-            publisher_lookup.list_item_id
-        )
-        ELSE NULL
-    END AS publisher,
+    COALESCE(publishers.items, '[]') AS publishers,
     COALESCE(subjects.items, '[]') AS subjects,
     COALESCE(keywords.items, '[]') AS keywords,
     subjects.items_text AS subjects_text,
     keywords.items_text AS keywords_text,
-    publisher_lookup.item AS publisher_text,
+    publishers.items_text AS publishers_text,
     subjects.items_search AS subjects_search,
     keywords.items_search AS keywords_search,
+    publishers.items_search AS publishers_search,
     ARRAY_TO_JSON(
         ARRAY (
             SELECT
@@ -335,7 +328,6 @@ SELECT
     ) AS search_text
 FROM
     collections a
-    LEFT JOIN list_items publisher_lookup ON a.publisher_id=publisher_lookup.list_item_id
     LEFT JOIN users contributor ON a.contributor_user_id=contributor.user_id
     LEFT JOIN users creator ON a.creator_user_id=creator.user_id
     LEFT JOIN collections_list_items_view subjects ON subjects.type='subject'
@@ -343,7 +335,9 @@ FROM
     LEFT JOIN collections_list_items_view keywords ON keywords.type='keyword'
     AND keywords.collection_id=a.collection_id
     LEFT JOIN list_items call_numbers ON call_numbers.type='call_number'
-    AND a.call_number_id=call_numbers.list_item_id;
+    AND a.call_number_id=call_numbers.list_item_id
+    LEFT JOIN collections_list_items_view publishers ON publishers.type='publisher'
+    AND publishers.collection_id=a.collection_id;
 
 DROP TABLE IF EXISTS _unified_collections CASCADE;
 
@@ -358,7 +352,7 @@ CREATE INDEX collections_fulltext_index ON _unified_collections USING GIN (fullt
 
 CREATE INDEX collections_search_text_index ON _unified_collections USING GIN (search_text gin_trgm_ops);
 
-CREATE INDEX collections_publisher_index ON _unified_collections (publisher_text);
+CREATE INDEX collections_publishers_index ON _unified_collections (publishers_search);
 
 CREATE INDEX collections_subjects_index ON _unified_collections USING GIN (subjects_search);
 
@@ -561,15 +555,6 @@ SELECT
         COALESCE(a.year::TEXT, '1900')::TEXT||'-'||COALESCE(a.month::TEXT, '01')::TEXT||'-'||COALESCE(a.day::TEXT, '01')::TEXT
     )::date AS date,
     CASE
-        WHEN publisher_lookup.list_item_id IS NOT NULL THEN JSONB_BUILD_OBJECT(
-            'item',
-            publisher_lookup.item,
-            'list_item_id',
-            publisher_lookup.list_item_id
-        )
-        ELSE NULL
-    END AS publisher,
-    CASE
         WHEN program_lookup.list_item_id IS NOT NULL THEN JSONB_BUILD_OBJECT(
             'item',
             program_lookup.item,
@@ -592,6 +577,7 @@ SELECT
     instances.generations,
     instances.media_types,
     COALESCE(authors.items, '[]') AS authors,
+    COALESCE(publishers.items, '[]') AS publishers,
     COALESCE(subjects.items, '[]') AS subjects,
     COALESCE(keywords.items, '[]') AS keywords,
     COALESCE(producers.items, '[]') AS producers,
@@ -599,10 +585,12 @@ SELECT
     subjects.items_text AS subjects_text,
     keywords.items_text AS keywords_text,
     producers.items_text AS producers_text,
+    publishers.items_text AS publishers_text,
     authors.items_search AS authors_search,
     subjects.items_search AS subjects_search,
     keywords.items_search AS keywords_search,
     producers.items_search AS producers_search,
+    publishers.items_search AS publishers_search,
     SETWEIGHT(
         TO_TSVECTOR('english', COALESCE(a.title, '')),
         'A'
@@ -631,7 +619,6 @@ SELECT
 FROM
     records a -- left join record_summaries b using (record_id)
     -- left join record_summaries parent on a.parent_record_id = parent.record_id
-    LEFT JOIN list_items publisher_lookup ON a.publisher_id=publisher_lookup.list_item_id
     LEFT JOIN list_items program_lookup ON a.program_id=program_lookup.list_item_id
     LEFT JOIN record_instances_view instances USING (record_id)
     LEFT JOIN instances primary_instance ON a.primary_instance_id=primary_instance.instance_id
@@ -654,6 +641,8 @@ FROM
     AND keywords.record_id=a.record_id
     LEFT JOIN records_list_items_view producers ON producers.type='producer'
     AND producers.record_id=a.record_id
+    LEFT JOIN records_list_items_view publishers ON publishers.type='publisher'
+    AND publishers.record_id=a.record_id
     -- left join records parent on a.parent_record_id = parent.record_id
 ;
 
@@ -968,8 +957,8 @@ SELECT
     0 AS instances_count
 FROM
     list_items li
-    LEFT JOIN records r ON li.list_item_id=r.publisher_id
-    LEFT JOIN collections c ON li.list_item_id=c.publisher_id
+    LEFT JOIN records_to_list_items r ON li.list_item_id=r.list_item_id
+    LEFT JOIN collections_to_list_items c ON li.list_item_id=c.list_item_id
 WHERE
     li.type='publisher'
 GROUP BY

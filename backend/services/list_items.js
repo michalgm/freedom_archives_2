@@ -9,11 +9,11 @@ const fk_map = {
   format: ['instances'],
   call_number: ['instances', 'collections'],
   program: ['records'],
-  publisher: ['records', 'collections'],
   author: ['records_to_list_items'],
   producer: ['records_to_list_items'],
   subject: ['records_to_list_items', 'collections_to_list_items'],
   keyword: ['records_to_list_items', 'collections_to_list_items'],
+  publishers: ['records_to_list_items', 'collections_to_list_items'],
 };
 
 class ListItems extends KnexService {

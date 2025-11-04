@@ -3,63 +3,68 @@
  * @returns { Promise<void> }
  */
 export const up = function (knex) {
-    return knex.raw(
-        `   
+  return knex.raw(
+    `   
           -- @block create public_records table
 DROP VIEW IF EXISTS records_snapshot_view CASCADE;
 CREATE VIEW
-    records_snapshot_view AS(
+  records_snapshot_view AS (
+    SELECT
+      r.archive_id,
+      r.record_id,
+      r.title,
+      r.description,
+      r.vol_number,
+      r.has_digital,
+      r.date_modified,
+      i.media_type AS media_type,
+      r.primary_instance_format_text AS FORMAT,
+      i.thumbnail AS thumbnail,
+      i.call_number AS call_number,
+      r.year,
+      (
         SELECT
-        r.archive_id,
-        r.record_id,
-        r.title,
-        r.description,
-        r.vol_number,
-        r.has_digital,
-        r.date_modified,
-        i.media_type AS media_type,
-        r.primary_instance_format_text AS FORMAT,
-        i.thumbnail AS thumbnail,
-        i.call_number AS call_number,
-        r.year,
-        (
-            SELECT
-                    ARRAY_AGG(DISTINCT(VALUE ->> 'list_item_id'):: INTEGER)
-                FROM
-                    JSONB_ARRAY_ELEMENTS(r.subjects) AS VALUE
-    ) AS subject_ids,
-        (
-            SELECT
-                    ARRAY_AGG(DISTINCT(VALUE ->> 'list_item_id'):: INTEGER)
+          ARRAY_AGG(DISTINCT (VALUE->>'list_item_id')::INTEGER)
+        FROM
+          JSONB_ARRAY_ELEMENTS(r.subjects) AS VALUE
+      ) AS subject_ids,
+      (
+        SELECT
+          ARRAY_AGG(DISTINCT (VALUE->>'list_item_id')::INTEGER)
+        FROM
+          JSONB_ARRAY_ELEMENTS(r.authors) AS VALUE
+      ) AS author_ids,
+      (
+        SELECT
+          ARRAY_AGG(DISTINCT (VALUE->>'list_item_id')::INTEGER)
+        FROM
+          JSONB_ARRAY_ELEMENTS(r.keywords) AS VALUE
+      ) AS keyword_ids,
+      (
+        SELECT
+          ARRAY_AGG(DISTINCT (VALUE->>'list_item_id')::INTEGER)
+        FROM
+          JSONB_ARRAY_ELEMENTS(r.producers) AS VALUE
+      ) AS producer_ids,
+      (
+        SELECT
+          ARRAY_AGG(DISTINCT (VALUE->>'list_item_id')::INTEGER)
+        FROM
+          JSONB_ARRAY_ELEMENTS(r.publishers) AS VALUE
+      ) AS publisher_ids,
+      (r.program->>'list_item_id')::INTEGER AS program_id,
+      r.collection_id,
+      r.fulltext,
+      r.search_text
     FROM
-    JSONB_ARRAY_ELEMENTS(r.authors) AS VALUE
-            ) AS author_ids,
-    (
-        SELECT
-                    ARRAY_AGG(DISTINCT(VALUE ->> 'list_item_id'):: INTEGER)
-FROM
-JSONB_ARRAY_ELEMENTS(r.keywords) AS VALUE
-            ) AS keyword_ids,
-    (
-        SELECT
-                    ARRAY_AGG(DISTINCT(VALUE ->> 'list_item_id'):: INTEGER)
-FROM
-JSONB_ARRAY_ELEMENTS(r.producers) AS VALUE
-            ) AS producer_ids,
-    (r.publisher ->> 'list_item_id')::INTEGER AS publisher_id,
-        (r.program ->> 'list_item_id')::INTEGER AS program_id,
-            r.collection_id,
-            r.fulltext,
-            r.search_text
-FROM
-            unified_records r
-            JOIN collections c USING(collection_id)
-            JOIN instances_view i ON r.primary_instance_id = i.instance_id
-WHERE
-r.is_hidden = FALSE AND
-c.is_hidden = FALSE AND
-r.needs_review = FALSE
-    );
+      unified_records r
+      JOIN collections c USING (collection_id)
+      JOIN instances_view i ON r.primary_instance_id=i.instance_id
+    WHERE
+      r.is_hidden=FALSE
+      AND c.is_hidden=FALSE
+      AND r.needs_review=FALSE
+  );
 
 DROP VIEW IF EXISTS collections_snapshot_view CASCADE;
 
@@ -135,7 +140,7 @@ CREATE INDEX records_keyword_ids_idx ON public_search.records USING GIN(keyword_
 
 CREATE INDEX records_producer_ids_idx ON public_search.records USING GIN(producer_ids);
 
-CREATE INDEX records_publisher_id_idx ON public_search.records(archive_id, publisher_id);
+CREATE INDEX records_publisher_ids_idx ON public_search.records USING GIN(publisher_ids);
 
 CREATE INDEX records_program_id_idx ON public_search.records(archive_id, program_id);
 
@@ -351,49 +356,51 @@ ADD PRIMARY KEY(snapshot_id, archive_id, list_item_id, record_id);
 --public_search.list_items_snapshot;
 
 CREATE VIEW
-public_search.records_view AS
+  public_search.records_view AS
 SELECT
-r.*,
-    collection_name,
-    JSON_BUILD_OBJECT(
-        'item',
-        programs.item,
-        'id',
-        programs.list_item_id
-    ) AS PROGRAM,
-        JSON_BUILD_OBJECT(
-            'item',
-            publishers.item,
-            'id',
-            publishers.list_item_id
-        ) AS publisher,
-            (
-                SELECT
-            JSON_AGG(
-                    JSON_BUILD_OBJECT('item', item, 'id', list_item_id)
-                )
+  r.*,
+  collection_name,
+  JSON_BUILD_OBJECT(
+    'item',
+    programs.item,
+    'id',
+    programs.list_item_id
+  ) AS PROGRAM,
+  (
+    SELECT
+      JSON_AGG(
+        JSON_BUILD_OBJECT('item', item, 'id', list_item_id)
+      )
+    FROM
+      public_search.list_items
+    WHERE
+      list_item_id=ANY (r.publisher_ids)
+  ) AS publishers,
+  (
+    SELECT
+      JSON_AGG(
+        JSON_BUILD_OBJECT('item', item, 'id', list_item_id)
+      )
+    FROM
+      public_search.list_items
+    WHERE
+      list_item_id=ANY (r.producer_ids)
+  ) AS producers,
+  (
+    SELECT
+      JSON_AGG(
+        JSON_BUILD_OBJECT('item', item, 'id', list_item_id)
+      )
+    FROM
+      public_search.list_items
+    WHERE
+      list_item_id=ANY (r.author_ids)
+  ) AS authors
 FROM
-public_search.list_items
-WHERE
-list_item_id = ANY(r.producer_ids)
-    ) AS producers,
-    (
-        SELECT
-            JSON_AGG(
-            JSON_BUILD_OBJECT('item', item, 'id', list_item_id)
-        )
-FROM
-public_search.list_items
-WHERE
-list_item_id = ANY(r.author_ids)
-    ) AS authors
-FROM
-public_search.records r
-    JOIN public_search.collections USING(collection_id)
-    LEFT JOIN public_search.list_items programs ON r.program_id = programs.list_item_id AND
-programs.type = 'program'
-    LEFT JOIN public_search.list_items publishers ON r.publisher_id = publishers.list_item_id AND
-publishers.type = 'publisher';
+  public_search.records r
+  JOIN public_search.collections USING (collection_id)
+  LEFT JOIN public_search.list_items programs ON r.program_id=programs.list_item_id
+  AND programs.type='program';
 
 DROP VIEW IF EXISTS list_items_snapshot_view CASCADE;
 
@@ -478,7 +485,7 @@ ADD CONSTRAINT fk_snapshot FOREIGN KEY(snapshot_id) REFERENCES snapshots(snapsho
 
         
         `
-    );
+  );
 };
 
 /**
@@ -486,29 +493,29 @@ ADD CONSTRAINT fk_snapshot FOREIGN KEY(snapshot_id) REFERENCES snapshots(snapsho
  * @returns { Promise<void> }
  */
 export const down = async function (knex) {
-    await knex.schema.dropSchemaIfExists("public_search", true);
+  await knex.schema.dropSchemaIfExists("public_search", true);
 
-    await knex.schema.dropTableIfExists("records_snapshots");
+  await knex.schema.dropTableIfExists("records_snapshots");
 
-    await knex.schema.dropTableIfExists("collections_snapshots");
+  await knex.schema.dropTableIfExists("collections_snapshots");
 
-    await knex.schema.dropTableIfExists("featured_records_snapshots");
+  await knex.schema.dropTableIfExists("featured_records_snapshots");
 
-    await knex.schema.dropTableIfExists("config_snapshots");
+  await knex.schema.dropTableIfExists("config_snapshots");
 
-    await knex.schema.dropTableIfExists("public_search.list_items");
+  await knex.schema.dropTableIfExists("public_search.list_items");
 
-    await knex.schema.dropTableIfExists("list_items_snapshots");
+  await knex.schema.dropTableIfExists("list_items_snapshots");
 
-    await knex.schema.dropTableIfExists("records_to_list_items_snapshots");
+  await knex.schema.dropTableIfExists("records_to_list_items_snapshots");
 
-    await knex.schema.dropViewIfExists("public_search.records_view");
+  await knex.schema.dropViewIfExists("public_search.records_view");
 
-    await knex.schema.dropTableIfExists("snapshots", true);
+  await knex.schema.dropTableIfExists("snapshots", true);
 
-    await knex.schema.dropViewIfExists("collections_snapshot_view", true);
+  await knex.schema.dropViewIfExists("collections_snapshot_view", true);
 
-    await knex.schema.dropViewIfExists("list_items_snapshot_view", true);
-    await knex.schema.dropViewIfExists("records_to_list_items_snapshot_view", true);
-    await knex.schema.dropViewIfExists("records_snapshot_view", true);
+  await knex.schema.dropViewIfExists("list_items_snapshot_view", true);
+  await knex.schema.dropViewIfExists("records_to_list_items_snapshot_view", true);
+  await knex.schema.dropViewIfExists("records_snapshot_view", true);
 };

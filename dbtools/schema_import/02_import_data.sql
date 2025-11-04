@@ -60,41 +60,6 @@ INSERT INTO
             )
     );
 
-INSERT INTO
-    list_items (
-        archive_id,
-        item,
-        TYPE
-    ) (
-        SELECT
-            1,
-            (
-                ARRAY_AGG(
-                    publisher
-                    ORDER BY
-                        caps DESC
-                )
-            ) [1],
-            'publisher'
-        FROM
-            (
-                SELECT
-                    publisher,
-                    regexp_count (publisher, '[A-Z]') AS caps
-                FROM
-                    freedom_archives_old.documents
-                UNION
-                SELECT
-                    organization,
-                    regexp_count (organization, '[A-Z]') AS caps
-                FROM
-                    freedom_archives_old.collections
-            ) a
-        WHERE
-            publisher!=''
-        GROUP BY
-            (LOWER(TRIM(publisher)))
-    );
 
 INSERT INTO
     collections (
@@ -133,7 +98,6 @@ INSERT INTO
                         '^[A-z\/]+ (.+)$'
                 )
             ),
-            publisher_lookup.list_item_id,
             internal_notes AS notes,
             thumbnail,
             display_order,
@@ -146,8 +110,6 @@ INSERT INTO
             date_modified
         FROM
             freedom_archives_old.collections a
-            LEFT JOIN list_items publisher_lookup ON a.organization=publisher_lookup.item
-            AND publisher_lookup.type='publisher'
             LEFT JOIN users b ON LOWER(a.creator)=b.username
             LEFT JOIN users c ON LOWER(a.contributor)=c.username
     );
@@ -176,7 +138,6 @@ INSERT INTO
             NULLIF(REGEXP_REPLACE(MONTH, '[^0-9]', '', 'g'), '')::INT,
             NULLIF(REGEXP_REPLACE(DAY, '[^0-9]', '', 'g'), '')::INT,
             year_is_circa,
-            publisher_lookup.list_item_id,
             program_lookup.list_item_id,
             needs_review::bool,
             is_hidden::bool,
@@ -189,8 +150,6 @@ INSERT INTO
             LEFT JOIN users b ON LOWER(a.creator)=b.username
             LEFT JOIN users c ON LOWER(a.contributor)=c.username -- LEFT JOIN list_items call_number_lookup ON a.call_number = call_number_lookup.item AND
             -- call_number_lookup.type = 'call_number'
-            LEFT JOIN list_items publisher_lookup ON a.publisher=publisher_lookup.item
-            AND publisher_lookup.type='publisher'
             LEFT JOIN list_items program_lookup ON a.program=program_lookup.item
             AND program_lookup.type='program'
     );
@@ -264,6 +223,89 @@ INSERT INTO
         WHERE
             is_doc=0
     );
+
+
+DROP TABLE IF EXISTS temp_publishers;
+
+CREATE TEMPORARY TABLE
+  temp_publishers AS
+SELECT
+  TRIM(
+    REGEXP_REPLACE(
+    REGEXP_REPLACE(
+    REGEXP_SPLIT_TO_TABLE(
+      REGEXP_REPLACE(TRIM(publisher), ';$', '', 'g'),
+      '\s?;\s?'
+    ), '\s\s+', ' ', 'g')
+  , '[\\]', '', 'g')
+  ) AS publisher,
+  docid AS id,
+  'record' AS
+TYPE
+FROM
+  freedom_archives_old.documents
+WHERE
+  publisher!=''
+UNION
+SELECT
+  TRIM(
+    REGEXP_REPLACE(
+    REGEXP_REPLACE(
+    REGEXP_SPLIT_TO_TABLE(
+      REGEXP_REPLACE(TRIM(organization), ';$', '', 'g'),
+      '\s?;\s?'
+    ), '\s\s+', ' ', 'g')
+  , '[\\]', '', 'g')
+  ) AS publisher,
+  collection_id,
+  'collection'
+FROM
+  freedom_archives_old.collections
+WHERE
+  organization!='';
+
+UPDATE temp_publishers a
+SET
+  publisher=b.publisher
+FROM
+  (
+    SELECT
+      (
+        ARRAY_AGG(
+          publisher
+          ORDER BY
+            caps DESC
+        )
+      ) [1] AS publisher
+    FROM
+      (
+        SELECT
+          publisher,
+          regexp_count (publisher, '[A-Z]') AS caps
+        FROM
+          temp_publishers
+      )
+    GROUP BY
+      (LOWER(TRIM(publisher)))
+  ) b
+WHERE
+  LOWER(TRIM(a.publisher))=LOWER(TRIM(b.publisher));
+
+insert into list_items (archive_id, item, type) (select distinct 1, publisher, 'publisher' from temp_publishers);
+
+insert into records_to_list_items (list_item_id, record_id)
+select distinct li.list_item_id, a.id
+from temp_publishers a
+join list_items li on a.publisher = li.item and li.type = 'publisher'
+where a.type = 'record';
+
+insert into collections_to_list_items (list_item_id, collection_id)
+select distinct li.list_item_id, a.id
+from temp_publishers a
+join list_items li on a.publisher = li.item and li.type = 'publisher'
+where a.type = 'collection';
+
+drop table temp_publishers;
 
 /* instance_id serial PRIMARY KEY,
 record_id integer NOT NULL REFERENCES records ON DELETE CASCADE,

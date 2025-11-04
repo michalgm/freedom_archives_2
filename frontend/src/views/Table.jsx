@@ -22,7 +22,7 @@ const columns = [
   { field: "collection_name", headerName: "Collection", _skipSelect: true },
   { field: "vol_number" },
   { field: "program", valueGetter: formatItem },
-  { field: "publisher", valueGetter: formatItem },
+  { field: "publishers", valueGetter: formatItems },
   { field: "location" },
   { field: "date_string", headerName: "Date" },
   { field: "notes" },

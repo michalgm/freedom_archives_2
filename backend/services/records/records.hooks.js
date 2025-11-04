@@ -118,7 +118,7 @@ const prepData = async (context) => {
       delete data.date_string;
     }
     // Stash relation data out of data object
-    ["program", "publisher"].forEach((key) => {
+    ["program"].forEach((key) => {
       if (key in data) {
         data[`${key}_id`] = data[key] ? data[key].list_item_id : null;
         delete data[key];
@@ -133,7 +133,7 @@ const prepData = async (context) => {
       data.parent_record_id = data.parent ? data.parent.record_id : null;
       delete data.parent;
     }
-    ["instances", "children", "continuations", "authors", "producers", "keywords", "subjects"].forEach((key) => {
+    ["instances", "children", "continuations", "authors", "producers", "keywords", "subjects", "publishers"].forEach((key) => {
       if (key in data) {
         relation_data[key] = data[key];
         delete data[key];

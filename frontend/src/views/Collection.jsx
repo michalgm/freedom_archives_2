@@ -245,7 +245,7 @@ function CollectionFields() {
         <Field name="needs_review" field_type="checkbox" />
       </FieldRow>
       <FieldRow>
-        <Field field_type="list_item" itemType="publisher" name="publisher" />
+        <Field name="publishers" multiple field_type="list_item" multiple itemType="publisher" create />
         <Field name="date_range" />
       </FieldRow>
       <FieldRow>

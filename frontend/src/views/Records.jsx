@@ -17,7 +17,7 @@ const filter_types = {
   keywords: { input: "listitem", match: "listitem" },
   producers: { input: "listitem", match: "listitem" },
   programs: { input: "listitem", match: "listitem_id" },
-  publishers: { input: "listitem", match: "listitem_id" },
+  publishers: { input: "listitem", match: "listitem" },
   call_numbers_text: { label: "Call Number", input: "text", match: "fuzzy", case: "upper" },
   formats: { input: "listitem", match: "contained" },
   qualitys: { input: "listitem", match: "contained" },

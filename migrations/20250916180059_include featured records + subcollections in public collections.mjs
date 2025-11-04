@@ -59,49 +59,51 @@ ADD PRIMARY KEY(snapshot_id, archive_id, collection_id);
 
 
 CREATE VIEW
-public_search.records_view AS
+  public_search.records_view AS
 SELECT
-r.*,
-    collection_name,
-    JSON_BUILD_OBJECT(
-        'item',
-        programs.item,
-        'id',
-        programs.list_item_id
-    ) AS PROGRAM,
-        JSON_BUILD_OBJECT(
-            'item',
-            publishers.item,
-            'id',
-            publishers.list_item_id
-        ) AS publisher,
-            (
-                SELECT
-            JSON_AGG(
-                    JSON_BUILD_OBJECT('item', item, 'id', list_item_id)
-                )
+  r.*,
+  collection_name,
+  JSON_BUILD_OBJECT(
+    'item',
+    programs.item,
+    'id',
+    programs.list_item_id
+  ) AS PROGRAM,
+  (
+    SELECT
+      JSON_AGG(
+        JSON_BUILD_OBJECT('item', item, 'id', list_item_id)
+      )
+    FROM
+      public_search.list_items
+    WHERE
+      list_item_id=ANY (r.publisher_ids)
+  ) AS publishers,
+  (
+    SELECT
+      JSON_AGG(
+        JSON_BUILD_OBJECT('item', item, 'id', list_item_id)
+      )
+    FROM
+      public_search.list_items
+    WHERE
+      list_item_id=ANY (r.producer_ids)
+  ) AS producers,
+  (
+    SELECT
+      JSON_AGG(
+        JSON_BUILD_OBJECT('item', item, 'id', list_item_id)
+      )
+    FROM
+      public_search.list_items
+    WHERE
+      list_item_id=ANY (r.author_ids)
+  ) AS authors
 FROM
-public_search.list_items
-WHERE
-list_item_id = ANY(r.producer_ids)
-    ) AS producers,
-    (
-        SELECT
-            JSON_AGG(
-            JSON_BUILD_OBJECT('item', item, 'id', list_item_id)
-        )
-FROM
-public_search.list_items
-WHERE
-list_item_id = ANY(r.author_ids)
-    ) AS authors
-FROM
-public_search.records r
-    JOIN public_search.collections USING(collection_id)
-    LEFT JOIN public_search.list_items programs ON r.program_id = programs.list_item_id AND
-programs.type = 'program'
-    LEFT JOIN public_search.list_items publishers ON r.publisher_id = publishers.list_item_id AND
-publishers.type = 'publisher';
+  public_search.records r
+  JOIN public_search.collections USING (collection_id)
+  LEFT JOIN public_search.list_items programs ON r.program_id=programs.list_item_id
+  AND programs.type='program';
 `);
 
   //     await knex.schema.withSchema('public_search').raw(`
