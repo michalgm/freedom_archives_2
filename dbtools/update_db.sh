@@ -29,11 +29,14 @@ else
 fi
 log "### Update local schema"
 
-
 (
   echo "BEGIN;"
   echo "\timing"
   for file in $(ls -1 schema_import/*.sql | sort); do
+    if [[ -z $1 && $file = "schema_import/00_cleanup.sql" ]]; then
+      echo "-- skipping cleanup"
+      continue
+    fi
     echo "-- Processing $file"
     cat "$file"
   done
@@ -44,8 +47,9 @@ log "### Update local schema"
 echo "Run migrate"
 # psql -b -v ON_ERROR_STOP=1 <./update_schema.sql
 # psql -a -v ON_ERROR_STOP=1 <../backend/migrations/02-snapshots.sql
-npm run migrate
-
+yarn run migrate
+cd ../
+node ./backend/scripts/publishSite.js
 psql -b -c "VACUUM ANALYZE;"
 
 # pg_dump -n freedom_archives -O -c --if-exists \
