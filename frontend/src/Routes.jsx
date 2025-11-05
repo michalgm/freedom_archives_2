@@ -8,7 +8,7 @@ import {
   useLocation,
 } from "react-router";
 import { RouterProvider } from "react-router/dom";
-import { hasAccess, getRoutes } from "src/config/routes";
+import { hasAccess, routes } from "src/config/routes";
 import { useAuth } from "src/stores";
 
 const Layout = React.lazy(() => import("./layouts/Layout"));
@@ -106,7 +106,7 @@ function createRouteElement(path, config) {
 const publicRoutes = [];
 const protectedRoutes = [];
 
-getRoutes().forEach(([path, config]) => {
+Object.values(routes).forEach(([path, config]) => {
   const routeElement = createRouteElement(path, config);
   if (routeElement) {
     if (config.public) {

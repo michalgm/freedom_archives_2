@@ -1,6 +1,7 @@
 import { Box, Breadcrumbs as Crumbs, Icon, Typography } from "@mui/material";
 import { startCase } from "lodash-es";
 import { useLocation } from "react-router";
+import { routes } from "src/config/routes";
 import { useAppStore } from "src/stores";
 
 // import { useStateValue } from "../appContext";
@@ -11,22 +12,24 @@ function Breadcrumbs() {
   // const { state } = useStateValue();
   const location = useLocation();
 
-  const parts = location.pathname.split("/");
+  const parts = location.pathname.replace(/^\/admin\//, "").split("/");
 
   const paths = [
+    { link: "/", title: "Freedom Archives Admin" },
     ...parts
       .filter((p) => p !== "new" && !p.match(/^\d+$/))
-      .map((p, index) =>
-        index === 0
-          ? { link: "/", title: "Freedom Archives Admin" }
-          : {
-              link: parts.slice(0, index + 1).join("/"),
-              title: startCase(p),
-            }
+      .map((p, index) => {
+        const link = `${parts.slice(0, index + 1).join("/")}`;
+        return (
+          {
+            link: routes[link] ? link : null,
+            title: startCase(p),
+          })
+      }
       ),
   ];
 
-  if (title && parts.length !== paths.length) {
+  if (title && parts.length + 1 !== paths.length) {
     paths.push({ link: location.pathname, title });
   }
 
@@ -63,10 +66,12 @@ function Breadcrumbs() {
       <Crumbs separator={<Icon>navigate_next</Icon>}>
         {paths.map(({ link, title }) => {
           return (
-            <Typography variant="h6" key={link}>
-              <Link color="inherit" to={`${link}`}>
-                {title}
-              </Link>
+            <Typography variant="h6" key={title}>
+              {link ? (
+                <Link color="inherit" to={`${link}`}>{title}</Link>
+              ) : (
+                title
+              )}
             </Typography>
           );
         })}

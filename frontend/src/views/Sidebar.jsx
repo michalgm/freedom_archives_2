@@ -14,7 +14,7 @@ import {
 } from "@mui/material";
 import { useMemo } from "react";
 import { Link, useLocation } from "react-router";
-import { getSidebarConfig, hasAccess } from "src/config/routes";
+import { sidebarConfig, hasAccess } from "src/config/routes";
 import { useAuth } from "src/stores";
 
 function Sidebar({ ...props }) {
@@ -23,8 +23,6 @@ function Sidebar({ ...props }) {
   } = useAuth();
 
   const sidebarLinks = useMemo(() => {
-    const sidebarConfig = getSidebarConfig();
-
     return Object.entries(sidebarConfig).map(([sectionName, sectionData]) => {
       const { icon: sectionIcon, routes } = sectionData;
 

@@ -86,7 +86,7 @@ export const appConfig = {
         },
       },
       {
-        path: "records/featured",
+        path: "site/featured-records",
         component: "Collection",
         authRole: "staff",
         props: { id: 0, mode: "featured_records" },
@@ -96,7 +96,7 @@ export const appConfig = {
         },
       },
       {
-        path: "collections/featured",
+        path: "site/featured-collections",
         component: "Collection",
         authRole: "staff",
         props: { id: 0, mode: "featured_collections" },
@@ -209,53 +209,31 @@ export function hasAccess(userRole, requiredRole) {
   return userLevel >= requiredLevel;
 }
 
-export function getRoutes() {
-  const routes = [];
+export const sidebarConfig = {};
 
-  Object.values(appConfig).forEach((section) => {
-    (section.routes || []).forEach((routeConfig) => {
-      const { path, ...config } = routeConfig;
-      if (config.component || config.redirect) {
-        routes.push([path, config]);
-      }
-    });
-  });
-
-  return routes;
-}
-
-export function getSidebarConfig() {
-  const sections = {};
-
-  Object.entries(appConfig).forEach(([sectionName, sectionConfig]) => {
-    // Skip hidden routes and sections without icons
-    if (sectionName === "Hidden" || !sectionConfig.icon) {
-      return;
+export const routes = Object.entries(appConfig).reduce((acc, [sectionName, section]) => {
+  const sectionRoutes = [];
+  (section.routes || []).forEach((routeConfig) => {
+    const { path, sidebar, ...config } = routeConfig;
+    if (config.component || config.redirect) {
+      acc[path] = [path, config];
     }
-
-    const sectionRoutes = [];
-
-    (sectionConfig.routes || []).forEach((routeConfig) => {
-      if (routeConfig.sidebar) {
-        const { path, sidebar, authRole } = routeConfig;
-        const { label, icon } = sidebar;
-
-        sectionRoutes.push({
-          label,
-          icon,
-          href: path,
-          authRole,
-        });
-      }
-    });
-
-    if (sectionRoutes.length > 0) {
-      sections[sectionName] = {
-        icon: sectionConfig.icon,
-        routes: sectionRoutes,
-      };
+    if (sidebar) {
+      const { authRole } = config;
+      const { label, icon } = sidebar;
+      sectionRoutes.push({
+        label,
+        icon,
+        href: path,
+        authRole,
+      });
     }
   });
-
-  return sections;
-}
+  if (sectionRoutes.length > 0) {
+    sidebarConfig[sectionName] = {
+      icon: section.icon,
+      routes: sectionRoutes,
+    };
+  }
+  return acc;
+}, {});
