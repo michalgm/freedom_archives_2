@@ -99,7 +99,7 @@ CREATE TABLE
         vol_number TEXT DEFAULT NULL,
         collection_id INTEGER DEFAULT 1000 REFERENCES collections ON DELETE SET DEFAULT,
         parent_record_id INTEGER,
-        primary_instance_id INTEGER,
+        primary_media_id INTEGER,
         "year" INT,
         "month" INT,
         "day" INT,
@@ -117,13 +117,13 @@ CREATE INDEX records_parent_record_id_idx ON records (parent_record_id);
 
 CREATE INDEX records_collection_id_idx ON records (collection_id);
 
-CREATE INDEX records_primary_instance_id_idx ON records (primary_instance_id);
+CREATE INDEX records_primary_media_id_idx ON records (primary_media_id);
 
 CREATE INDEX records_archive_id_idx ON records (archive_id);
 
 CREATE TABLE
-    instances (
-        instance_id serial PRIMARY KEY,
+    media (
+        media_id serial PRIMARY KEY,
         archive_id INTEGER REFERENCES archives ON DELETE CASCADE,
         call_number_id INTEGER REFERENCES list_items ON DELETE SET NULL,
         call_number_suffix TEXT,
@@ -143,17 +143,17 @@ CREATE TABLE
         original_doc_id INTEGER DEFAULT NULL
     );
 
-CREATE INDEX instances_call_number_suffix ON instances (call_number_suffix);
+CREATE INDEX media_call_number_suffix ON media (call_number_suffix);
 
-CREATE INDEX instances_call_number_id ON instances (call_number_id);
+CREATE INDEX media_call_number_id ON media (call_number_id);
 
-CREATE INDEX instances_format ON instances (format_id);
+CREATE INDEX media_format ON media (format_id);
 
-CREATE INDEX instances_quality ON instances (quality_id);
+CREATE INDEX media_quality ON media (quality_id);
 
-CREATE INDEX instances_generation ON instances (generation_id);
+CREATE INDEX media_generation ON media (generation_id);
 
-CREATE INDEX instances_media_type ON instances (media_type);
+CREATE INDEX media_media_type ON media (media_type);
 
 CREATE TABLE
     featured_records (
@@ -181,10 +181,10 @@ CREATE TABLE
     );
 
 CREATE TABLE
-    instances_to_list_items (
+    media_to_list_items (
         list_item_id INTEGER NOT NULL REFERENCES list_items ON DELETE CASCADE,
-        instance_id INTEGER NOT NULL REFERENCES instances ON DELETE CASCADE,
-        PRIMARY KEY (list_item_id, instance_id)
+        media_id INTEGER NOT NULL REFERENCES media ON DELETE CASCADE,
+        PRIMARY KEY (list_item_id, media_id)
     );
 
 CREATE TABLE

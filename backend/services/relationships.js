@@ -44,11 +44,11 @@ export default (function (app) {
       }
     } else if (type === "original") {
       await app
-        .service("api/instances")
+        .service("api/media")
         .patch(null, { record_id: result.docid_1 }, { user, query: { record_id: result.docid_2 } });
-    } else if (type === "instance") {
+    } else if (type === "media") {
       await app
-        .service("api/instances")
+        .service("api/media")
         .patch(null, { record_id: result.docid_2 }, { user, query: { record_id: result.docid_1 } });
     }
     // console.log('####', type, result);

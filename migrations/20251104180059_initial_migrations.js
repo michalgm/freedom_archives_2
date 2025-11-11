@@ -13,7 +13,7 @@ CREATE VIEW
             r.date_modified,
             r.date,
             i.media_type AS media_type,
-            r.primary_instance_format_text AS FORMAT,
+            r.primary_media_format_text AS FORMAT,
             i.url AS url,
             i.thumbnail AS thumbnail,
             i.call_number AS call_number,
@@ -55,7 +55,7 @@ CREATE VIEW
         FROM
             unified_records r
             JOIN collections c USING (collection_id)
-            JOIN instances_view i ON r.primary_instance_id=i.instance_id
+            JOIN media_view i ON r.primary_media_id=i.media_id
         WHERE
             r.is_hidden=FALSE
             AND c.is_hidden=FALSE
@@ -103,8 +103,8 @@ CREATE VIEW
       l.list_item_id,
       r.record_id
     FROM
-      instances i
-      JOIN instances_to_list_items l USING (instance_id)
+      media i
+      JOIN media_to_list_items l USING (media_id)
       JOIN records_snapshot_view r USING (record_id)
   );
 

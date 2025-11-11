@@ -88,7 +88,7 @@ export function ItemCardLayout({
 export function ItemLink({ item, children, setCurrentRecord, ...props }) {
   const url = item.collection_id
     ? `/collections/${item.collection_id}`
-    : item.url || item.primary_instance_url;
+    : item.url || item.primary_media_url;
   const target = item.collection_id ? "_self" : "_blank";
   if (!url) return children;
   const onClick = ['Audio', 'Video'].includes(item.media_type) && setCurrentRecord ? (e) => {
@@ -181,7 +181,7 @@ export function RecordCard({ record, setCurrentRecord, ...props }) {
       item={record}
       type="record"
       expand={true}
-      url={record.url || record.primary_instance_url}
+      url={record.url || record.primary_media_url}
       setCurrentRecord={setCurrentRecord}
       {...props}
     />

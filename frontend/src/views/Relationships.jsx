@@ -41,7 +41,7 @@ function Relationships() {
       desc: "All media of Record 2 will become media of Record 1, and Record 2 will be deleted",
       option: "Record 1 is the original record for record 2",
     },
-    instance: {
+    media: {
       desc: "All media of Record 1 will become media of Record 2, and Record 1 will be deleted",
       option: "Record 2 is the original record for record 1",
     },

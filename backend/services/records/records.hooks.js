@@ -133,7 +133,7 @@ const prepData = async (context) => {
       data.parent_record_id = data.parent ? data.parent.record_id : null;
       delete data.parent;
     }
-    ["instances", "children", "continuations", "authors", "producers", "keywords", "subjects", "publishers"].forEach((key) => {
+    ["media", "children", "continuations", "authors", "producers", "keywords", "subjects", "publishers"].forEach((key) => {
       if (key in data) {
         relation_data[key] = data[key];
         delete data[key];
@@ -163,24 +163,24 @@ const updateRelations = async (context) => {
     context.result = await trx("records").where("record_id", id).select();
   }
   const params = { user, transaction: { trx } };
-  if (relation_data.instances !== undefined) {
-    const instances = await Promise.all(
-      relation_data.instances.map((instance) => {
-        if (instance.delete) {
-          return app.service("api/instances").remove(instance.instance_id, params);
-        } else if (instance.instance_id) {
-          if (instance.url === '') {
-            instance.media_type = '';
+  if (relation_data.media !== undefined) {
+    const media = await Promise.all(
+      relation_data.media.map((media) => {
+        if (media.delete) {
+          return app.service("api/media").remove(media.media_id, params);
+        } else if (media.media_id) {
+          if (media.url === '') {
+            media.media_type = '';
           }
-          return app.service("api/instances").patch(instance.instance_id, instance, params);
+          return app.service("api/media").patch(media.media_id, media, params);
         }
-        delete instance.instance_id;
-        instance.record_id ||= id;
-        return app.service("api/instances").create(instance, params);
+        delete media.media_id;
+        media.record_id ||= id;
+        return app.service("api/media").create(media, params);
       })
     );
-    if (instances.length && !data.primary_instance_id) {
-      await app.service("api/records")._patch(id, { primary_instance_id: instances[0].instance_id }, params);
+    if (media.length && !data.primary_media_id) {
+      await app.service("api/records")._patch(id, { primary_media_id: media[0].media_id }, params);
     }
   }
   if (relation_data.children !== undefined) {

@@ -101,7 +101,7 @@ function QuickSearch() {
               "collection",
               "date_modified",
               "thumbnail",
-              "primary_instance_media_type",
+              "primary_media_media_type",
             ],
           });
         } else {

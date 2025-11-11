@@ -1,9 +1,11 @@
-import _ from 'lodash';
+import { promises } from "fs";
+import lodash from 'lodash';
 
 import app from '../app.js';
 import { updateThumbnail } from '../services/common_hooks/thumbnailer.js';
 
-const { get } = _;
+const fs = { promises }.promises;
+const { get } = lodash;
 
 function printProgress(progress) {
   if (process.stdout.clearLine) {
@@ -15,11 +17,12 @@ function printProgress(progress) {
 
 const types = {
   records: {
-    path: 'instances[0].url',
+    path: 'media[0].url',
     query: {
-      primary_instance_thumbnail: { $ne: "" },
-      $select: ['record_id', 'primary_instance_thumbnail', 'instances'],
-      // primary_instance_media_type: { $in: ['Video', 'Image', 'PDF'] },
+      primary_media_thumbnail: { $ne: "" },
+      $select: ['record_id', 'primary_media_thumbnail', 'media'],
+      // record_id: 39214,
+      // primary_media_media_type: { $in: ['Video', 'Image', 'PDF'] },
     },
   },
   collections: {
@@ -48,9 +51,9 @@ async function updateThumbnailsWithHook(serviceName = 'records') {
         query: {
           $limit: batchSize,
           $skip: offset,
-          ...types[serviceName].query
-          // record_id: 5399
-          // primary_instance_media_type: { $in: ['Video', 'Image', 'PDF'] },
+          ...types[serviceName].query,
+          // record_id: 39214,
+          // primary_media_media_type: { $in: ['Video', 'Image', 'PDF'] },
         },
       });
 
@@ -72,9 +75,9 @@ async function updateThumbnailsWithHook(serviceName = 'records') {
             const idPath = `${serviceName.slice(0, -1)}_id`;
             const id = item[idPath];
             const url = get(item, types[serviceName].path);
-
-            if (!url) {
-              // console.log(`No instance URL for record ID ${id}, skipping...`);
+            const exists = await fs.access(`public/img/thumbnails/${serviceName}/${id}.jpg`).then(() => true).catch(() => false);
+            if (!url || exists) {
+              // console.log(`No media URL for record ID ${id}, skipping...`);
               return { success: true, id };
             }
 
@@ -136,5 +139,5 @@ async function updateThumbnailsWithHook(serviceName = 'records') {
 export { updateThumbnailsWithHook };
 
 // Uncomment to run the hook version instead
-// updateThumbnailsWithHook();
-updateThumbnailsWithHook('collections');
+updateThumbnailsWithHook();
+// updateThumbnailsWithHook('collections');

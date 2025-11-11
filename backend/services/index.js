@@ -1,7 +1,7 @@
 import collections from "./collections.js";
-import instances from "./instances.js";
 import list_items from "./list_items.js";
 import list_items_lookup from "./list_items_lookup.js";
+import media from "./media.js";
 import public_collections from "./public_collections.js";
 import public_records from "./public_records.js";
 import public_settings from "./public_settings.js";
@@ -20,7 +20,7 @@ export default (function (app) {
   app.configure(records);
   app.configure(relationships);
   app.configure(list_items);
-  app.configure(instances);
+  app.configure(media);
   app.configure(collections);
   app.configure(unified_records);
   app.configure(unified_collections);

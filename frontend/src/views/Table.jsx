@@ -69,16 +69,16 @@ const Table = () => {
           $select: [
             ...columns.filter((c) => !c._skipSelect).map((c) => c.field),
             "collection",
-            "instances",
+            "media",
             "record_id",
           ],
         },
       });
       const rows = data.reduce((acc, item) => {
-        const { instances, collection, ...record } = item;
-        instances.map((instance) => {
+        const { media, collection, ...record } = item;
+        media.map((media) => {
           acc.push({
-            ...instance,
+            ...media,
             ...record,
             collection_title: collection.title,
             ...collection,
@@ -103,7 +103,7 @@ const Table = () => {
       apiRef={apiRef}
       rows={rows}
       columns={columns}
-      getRowId={(row) => row.instance_id}
+      getRowId={(row) => row.media_id}
       getRowHeight={() => "auto"}
       loading={loading}
       density="compact"

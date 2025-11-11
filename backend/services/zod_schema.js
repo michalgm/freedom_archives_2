@@ -94,9 +94,9 @@ const common_modification_fields = {
   creator_name: z.string().nullable().optional(),
 };
 
-// --- Instances ---
-const instancesSchema = z.object({
-  instance_id: z.number().nullable().optional(),
+// --- Media ---
+const mediaSchema = z.object({
+  media_id: z.number().nullable().optional(),
   archive_id: z.number().nullable().optional(),
   record_id: z.number(),
   call_number_id: z.number().nullable().optional(),
@@ -129,7 +129,7 @@ const recordsSchema = z.object({
   vol_number: z.string().describe("Volume Number").nullable().optional(),
   collection_id: z.number().nullable().optional(),
   parent_record_id: z.number().nullable().optional(),
-  primary_instance_id: z.number().optional(),
+  primary_media_id: z.number().optional(),
   year: z.number().nullable().optional(),
   month: z.number().nullable().optional(),
   day: z.number().nullable().optional(),
@@ -182,17 +182,17 @@ const recordsSchema = z.object({
     .describe("Date"),
   year_is_circa: z.boolean().default(false).describe("Approximate Date"),
   program: list_itemsSchema.nullable().optional(),
-  instances: z.array(instancesSchema).describe('Media').min(1).default([]),
+  media: z.array(mediaSchema).describe('Media').min(1).default([]),
   has_digital: z.boolean().default(false),
   authors: z.array(list_itemsSchema).nullable().optional(),
   subjects: z.array(list_itemsSchema).nullable().optional(),
   keywords: z.array(list_itemsSchema).nullable().optional(),
   producers: z.array(list_itemsSchema).nullable().optional(),
   publishers: z.array(list_itemsSchema).nullable().optional(),
-  primary_instance_thumbnail: z.string().nullable().optional(),
-  primary_instance_format_id: z.number().nullable().optional(),
-  primary_instance_format_text: z.string().nullable().optional(),
-  primary_instance_media_type: z.string().nullable().optional(),
+  primary_media_thumbnail: z.string().nullable().optional(),
+  primary_media_format_id: z.number().nullable().optional(),
+  primary_media_format_text: z.string().nullable().optional(),
+  primary_media_media_type: z.string().nullable().optional(),
   collection: z.lazy(() => embeddedCollectionSchema),
   children: z
     .array(z.lazy(() => embeddedRecordSchema))
@@ -213,12 +213,12 @@ const recordsSchema = z.object({
   ...common_modification_fields,
 });
 //   .superRefine((data, ctx) => {
-//     const primaryCount = data.instances.filter((i) => i.is_primary).length;
+//     const primaryCount = data.media.filter((i) => i.is_primary).length;
 //     if (primaryCount !== 1) {
 //       ctx.addIssue({
 //         code: z.ZodIssueCode.custom,
-//         message: `Exactly one instance must be marked as primary`,
-//         path: ["instances"],
+//         message: `Exactly one media must be marked as primary`,
+//         path: ["media"],
 //       });
 //     }
 //   });
@@ -229,8 +229,8 @@ const recordItemSchema = recordsSchema.pick({
   title: true,
 });
 
-const instancesDataSchema = instancesSchema.pick({
-  instance_id: true,
+const mediaDataSchema = mediaSchema.pick({
+  media_id: true,
   call_number_item: true,
   call_number_suffix: true,
   generation_item: true,
@@ -263,7 +263,7 @@ const recordsDataSchema = recordsSchema
     date_string: true,
     year_is_circa: true,
     notes: true,
-    primary_instance_id: true,
+    primary_media_id: true,
   })
   .extend({
     parent: recordItemSchema.nullable().optional().describe('Parent Record'),
@@ -274,7 +274,7 @@ const recordsDataSchema = recordsSchema
       .optional(),
     continuations: z.array(recordItemSchema).nullable().optional(),
     collection: z.lazy(() => collectionItemSchema),
-    instances: z.array(instancesDataSchema).describe('Media').min(1, { message: "At least one media item is required" }),
+    media: z.array(mediaDataSchema).describe('Media').min(1, { message: "At least one media item is required" }),
   });
 
 const embeddedRecordSchema = recordsSchema
@@ -283,10 +283,10 @@ const embeddedRecordSchema = recordsSchema
     title: true,
     is_hidden: true,
     parent_record_id: true,
-    primary_instance_thumbnail: true,
-    primary_instance_format_id: true,
-    primary_instance_format_text: true,
-    primary_instance_media_type: true,
+    primary_media_thumbnail: true,
+    primary_media_format_id: true,
+    primary_media_format_text: true,
+    primary_media_media_type: true,
     collection: z.lazy(() => embeddedCollectionSchema),
   })
   .extend({ record_id: z.number(), delete: z.boolean().optional() });
@@ -364,8 +364,8 @@ export default {
   usersDataSchema: usersSchema,
   recordsSchema,
   recordsDataSchema,
-  instancesSchema,
-  instancesDataSchema,
+  mediaSchema,
+  mediaDataSchema,
   collectionsSchema,
   collectionsDataSchema,
   settingsSchema,

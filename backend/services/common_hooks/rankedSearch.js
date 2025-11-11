@@ -59,7 +59,7 @@ function getPositionScore(knex, searchTerm) {
 }
 
 // Compose rank expression based on enabled facets
-function buildRankExpr({ useFulltext, useTrigram, useCallNumbers, useFullTerm, usePosition }, knex, tableName, tsqueryString, searchTerm) {
+function buildRankExpr({ useFulltext, useTrigram, useCallNumbers, useFullTerm, usePosition }, knex, tableName, searchTerm) {
   const parts = [];
   if (useFulltext) parts.push(getFulltextRank());
   if (useTrigram) parts.push(getTrigramRank(knex, searchTerm));
@@ -101,7 +101,7 @@ function getRankSelect(knex, useIdCheck, idField, idValue, rankExpr) {
 //   });
 // };
 
-function buildWhere(qb, { idField, idValue, searchTerm, useIdCheck = true, useFuzzy = true }) {
+function buildWhere(qb, { idField, idValue, fuzzyTerm, useIdCheck = true, useFuzzy = true }) {
   const includeId = useIdCheck && idValue !== null;
   qb.where(function () {
     this.where(function () {
@@ -116,7 +116,7 @@ function buildWhere(qb, { idField, idValue, searchTerm, useIdCheck = true, useFu
         }
         this.whereRaw("fulltext @@ ts_query.query");
         if (useFuzzy && idValue == null) {
-          this.orWhereRaw("search_text %> ?", [searchTerm]);
+          this.orWhereRaw("search_text %> ?", [fuzzyTerm]);
         }
       });
   });
@@ -130,18 +130,19 @@ export const rankedSearch = async (context) => {
   const useFuzzy = !isPublic;
   const language = 'english';
 
-  const searchTerm = (query?.$fullText || context?.params?._rankedSearch || '').toLowerCase().trim();
+  const searchTerm = (query?.$fullText || context?.params?._rankedSearch || '').toLowerCase().trim().replace(/\s+/g, ' ');
   delete query.$fullText;
 
   const params = await context.service.sanitizeQuery(context.params);
   if (!searchTerm) return context;
   context.params._rankedSearch = searchTerm;
+  const fuzzyTerm = searchTerm.replace(/["'()]/g, '');
 
   const knex = context.app.get('postgresqlClient');
   const baseQuery = context.service.createQuery({ ...params, query: params });
 
   const { id: idField, name: tableName } = context.service.getOptions({});
-  const idValue = isNumeric.test(searchTerm) ? parseInt(searchTerm, 10) : null;
+  const idValue = isNumeric.test(fuzzyTerm) ? parseInt(fuzzyTerm, 10) : null;
   const tsqueryString = parser(applyBasicPrefixing(searchTerm));
 
   const rankExpr = buildRankExpr(
@@ -154,14 +155,13 @@ export const rankedSearch = async (context) => {
     },
     knex,
     tableName,
-    tsqueryString,
-    searchTerm
+    fuzzyTerm
   );
 
   let rankedQuery = baseQuery.clone()
     .with('ts_query', knex.raw(`select to_tsquery(?, ?) as query`, [language, tsqueryString]))
     .crossJoin('ts_query');
-
+  console.log({ searchTerm, tsqueryString });
   if (useIdCheck) {
     rankedQuery = rankedQuery
       .with(
@@ -178,10 +178,12 @@ export const rankedSearch = async (context) => {
   }
 
   rankedQuery = rankedQuery
-    .modify(q => buildWhere(q, { idField, idValue, searchTerm, useIdCheck, useFuzzy }))
+    .modify(q => buildWhere(q, { idField, idValue, fuzzyTerm, useIdCheck, useFuzzy }))
     .select(
       getRankSelect(knex, useIdCheck, idField, idValue, rankExpr)
     );
+
+  console.log("Ranked Query:", rankedQuery.toString());
 
 
   context.params.knex = rankedQuery;

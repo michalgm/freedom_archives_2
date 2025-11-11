@@ -1,7 +1,7 @@
-DROP VIEW IF EXISTS instances_view;
+DROP VIEW IF EXISTS media_view;
 
 CREATE VIEW
-    instances_view AS
+    media_view AS
 SELECT
     a.*,
     NULLIF(
@@ -52,14 +52,14 @@ SELECT
     creator.username AS creator_username,
     (primary_record.record_id IS NOT NULL) AS is_primary
 FROM
-    instances a
+    media a
     LEFT JOIN list_items call_number_lookup ON call_number_id=call_number_lookup.list_item_id
     LEFT JOIN list_items format_lookup ON format_id=format_lookup.list_item_id
     LEFT JOIN list_items quality_lookup ON quality_id=quality_lookup.list_item_id
     LEFT JOIN list_items generation_lookup ON generation_id=generation_lookup.list_item_id
     LEFT JOIN users contributor ON a.contributor_user_id=contributor.user_id
     LEFT JOIN users creator ON a.creator_user_id=creator.user_id
-    LEFT JOIN records primary_record ON a.instance_id=primary_record.primary_instance_id;
+    LEFT JOIN records primary_record ON a.media_id=primary_record.primary_media_id;
 
 DROP VIEW IF EXISTS records_list_items_view;
 
@@ -238,19 +238,19 @@ SELECT
                     b.title,
                     'parent_record_id',
                     b.parent_record_id,
-                    'primary_instance_thumbnail',
-                    primary_instance.thumbnail,
-                    'primary_instance_format_id',
-                    primary_instance.format_id,
-                    'primary_instance_format_text',
+                    'primary_media_thumbnail',
+                    primary_media.thumbnail,
+                    'primary_media_format_id',
+                    primary_media.format_id,
+                    'primary_media_format_text',
                     list_items.item,
-                    'primary_instance_media_type',
-                    primary_instance.media_type
+                    'primary_media_media_type',
+                    primary_media.media_type
                 )
             FROM
                 records b
-                LEFT JOIN instances primary_instance ON b.primary_instance_id=primary_instance.instance_id
-                LEFT JOIN list_items ON primary_instance.format_id=list_items.list_item_id
+                LEFT JOIN media primary_media ON b.primary_media_id=primary_media.media_id
+                LEFT JOIN list_items ON primary_media.format_id=list_items.list_item_id
                 AND list_items.type='format'
             WHERE
                 a.collection_id=b.collection_id
@@ -268,16 +268,16 @@ SELECT
                     b.title,
                     'parent_record_id',
                     b.parent_record_id,
-                    'primary_instance_thumbnail',
-                    primary_instance.thumbnail,
-                    'primary_instance_format_id',
-                    primary_instance.format_id,
-                    'primary_instance_format_text',
+                    'primary_media_thumbnail',
+                    primary_media.thumbnail,
+                    'primary_media_format_id',
+                    primary_media.format_id,
+                    'primary_media_format_text',
                     list_items.item,
-                    'primary_instance_media_type',
-                    primary_instance.media_type,
-                    'primary_instance_url',
-                    primary_instance.url,
+                    'primary_media_media_type',
+                    primary_media.media_type,
+                    'primary_media_url',
+                    primary_media.url,
                     'label',
                     f.label,
                     'record_order',
@@ -286,8 +286,8 @@ SELECT
             FROM
                 records b
                 LEFT JOIN featured_records f ON b.record_id=f.record_id
-                LEFT JOIN instances primary_instance ON b.primary_instance_id=primary_instance.instance_id
-                LEFT JOIN list_items ON primary_instance.format_id=list_items.list_item_id
+                LEFT JOIN media primary_media ON b.primary_media_id=primary_media.media_id
+                LEFT JOIN list_items ON primary_media.format_id=list_items.list_item_id
                 AND list_items.type='format'
             WHERE
                 a.collection_id=f.collection_id
@@ -472,10 +472,10 @@ SELECT
     a.record_id,
     a.title,
     a.parent_record_id,
-    primary_instance.thumbnail AS primary_instance_thumbnail,
-    primary_instance.format_id AS primary_instance_format_id,
-    list_items.item AS primary_instance_format_text,
-    primary_instance.media_type AS primary_instance_media_type,
+    primary_media.thumbnail AS primary_media_thumbnail,
+    primary_media.format_id AS primary_media_format_id,
+    list_items.item AS primary_media_format_text,
+    primary_media.media_type AS primary_media_media_type,
     COALESCE(
         (
             SELECT
@@ -489,27 +489,27 @@ SELECT
     ) AS collection
 FROM
     records a
-    LEFT JOIN instances primary_instance ON a.primary_instance_id=primary_instance.instance_id
-    LEFT JOIN list_items ON primary_instance.format_id=list_items.list_item_id
+    LEFT JOIN media primary_media ON a.primary_media_id=primary_media.media_id
+    LEFT JOIN list_items ON primary_media.format_id=list_items.list_item_id
     AND list_items.type='format';
 
 /* FIXME collection */
-DROP VIEW IF EXISTS record_instances_view;
+DROP VIEW IF EXISTS record_media_view;
 
 CREATE VIEW
-    record_instances_view AS
+    record_media_view AS
 SELECT
     record_id,
     BOOL_OR(url!='') AS has_digital,
-    COUNT(*) AS instance_count,
+    COUNT(*) AS media_count,
     ARRAY_TO_JSON(
         ARRAY_AGG(
             ROW_TO_JSON(a)
             ORDER BY
                 a.is_primary DESC,
-                a.instance_id
+                a.media_id
         )
-    ) AS instances,
+    ) AS media,
     ARRAY_AGG(DISTINCT call_number) FILTER (
         WHERE
             call_number IS NOT NULL
@@ -535,7 +535,7 @@ SELECT
             media_type IS NOT NULL
     ) AS media_types
 FROM
-    instances_view a
+    media_view a
 GROUP BY
     record_id;
 
@@ -545,10 +545,10 @@ CREATE VIEW
     records_view AS
 SELECT
     a.*,
-    -- b.primary_instance_thumbnail,
-    -- b.primary_instance_format,
-    -- b.primary_instance_format_text,
-    -- b.primary_instance_media_type,
+    -- b.primary_media_thumbnail,
+    -- b.primary_media_format,
+    -- b.primary_media_format_text,
+    -- b.primary_media_media_type,
     -- b.collection,
     COALESCE(LPAD(a.month::TEXT, 2, '0'), '00')||'/'||COALESCE(LPAD(a.day::TEXT, 2, '0'), '00')||'/'||COALESCE(a.year::TEXT, '0000') AS date_string,
     (
@@ -563,19 +563,19 @@ SELECT
         )
         ELSE NULL
     END AS PROGRAM,
-    COALESCE(instances.instances, '[]') AS instances,
-    instances.has_digital AS has_digital,
-    COALESCE(instances.instance_count, 0) AS instance_count,
+    COALESCE(media.media, '[]') AS media,
+    media.has_digital AS has_digital,
+    COALESCE(media.media_count, 0) AS media_count,
     contributor.firstname||' '||contributor.lastname AS contributor_name,
     contributor.username AS contributor_username,
     creator.firstname||' '||creator.lastname AS creator_name,
     creator.username AS creator_username,
-    instances.call_numbers,
-    instances.call_numbers_text,
-    instances.formats,
-    instances.qualitys,
-    instances.generations,
-    instances.media_types,
+    media.call_numbers,
+    media.call_numbers_text,
+    media.formats,
+    media.qualitys,
+    media.generations,
+    media.media_types,
     COALESCE(authors.items, '[]') AS authors,
     COALESCE(publishers.items, '[]') AS publishers,
     COALESCE(subjects.items, '[]') AS subjects,
@@ -597,7 +597,7 @@ SELECT
     )||SETWEIGHT(
         TO_TSVECTOR(
             'english',
-            COALESCE(instances.call_numbers_text, '')
+            COALESCE(media.call_numbers_text, '')
         ),
         'A'
     )||SETWEIGHT(
@@ -614,14 +614,14 @@ SELECT
         'C'
     ) AS fulltext,
     LOWER(
-        COALESCE(a.title, '')||' '||COALESCE(instances.call_numbers_text, '')||' '||COALESCE(a.description, '')||' '||COALESCE(instances.call_numbers_text, '')||' '||COALESCE(authors.items_text, '')||' '||COALESCE(subjects.items_text, '')||' '||COALESCE(keywords.items_text, '')
+        COALESCE(a.title, '')||' '||COALESCE(media.call_numbers_text, '')||' '||COALESCE(a.description, '')||' '||COALESCE(media.call_numbers_text, '')||' '||COALESCE(authors.items_text, '')||' '||COALESCE(subjects.items_text, '')||' '||COALESCE(keywords.items_text, '')
     ) AS search_text
 FROM
     records a -- left join record_summaries b using (record_id)
     -- left join record_summaries parent on a.parent_record_id = parent.record_id
     LEFT JOIN list_items program_lookup ON a.program_id=program_lookup.list_item_id
-    LEFT JOIN record_instances_view instances USING (record_id)
-    LEFT JOIN instances primary_instance ON a.primary_instance_id=primary_instance.instance_id
+    LEFT JOIN record_media_view media USING (record_id)
+    LEFT JOIN media primary_media ON a.primary_media_id=primary_media.media_id
     LEFT JOIN users contributor ON a.contributor_user_id=contributor.user_id
     LEFT JOIN users creator ON a.creator_user_id=creator.user_id -- left join (select parent_record_id, array_to_json(array_agg(row_to_json(b))) as children from (select parent_record_id, record_id, title from records) b group by parent_record_id) children on children.parent_record_id = a.record_id
     -- left join
@@ -650,7 +650,7 @@ ANALYZE records;
 
 ANALYZE list_items;
 
-ANALYZE instances;
+ANALYZE media;
 
 DROP TABLE IF EXISTS _unified_records CASCADE;
 
@@ -696,10 +696,10 @@ CREATE OR REPLACE VIEW
     unified_records AS
 SELECT
     a.*,
-    b.primary_instance_thumbnail,
-    b.primary_instance_format_id,
-    b.primary_instance_format_text,
-    b.primary_instance_media_type,
+    b.primary_media_thumbnail,
+    b.primary_media_format_id,
+    b.primary_media_format_text,
+    b.primary_media_media_type,
     b.collection,
     children.children,
     siblings.siblings,
@@ -805,7 +805,7 @@ DROP TABLE IF EXISTS parent_lookup;
 -- SELECT DISTINCT
 --     call_number AS VALUE
 -- FROM
---     instances
+--     media
 -- WHERE
 --     call_number!=''
 --     AND call_Number!=' '
@@ -857,7 +857,7 @@ SELECT
     li.description,
     COUNT(DISTINCT r.record_id) AS records_count,
     0 AS collections_count,
-    0 AS instances_count
+    0 AS media_count
 FROM
     list_items li
     LEFT JOIN records_to_list_items r ON li.list_item_id=r.list_item_id
@@ -876,7 +876,7 @@ SELECT
     li.description,
     COUNT(DISTINCT r.record_id) AS records_count,
     COUNT(DISTINCT c.collection_id) AS collections_count,
-    0 AS instances_count
+    0 AS media_count
 FROM
     list_items li
     LEFT JOIN records_to_list_items r ON li.list_item_id=r.list_item_id
@@ -896,7 +896,7 @@ SELECT
     li.description,
     COUNT(DISTINCT r.record_id) AS records_count,
     0,
-    0 AS instances_count
+    0 AS media_count
 FROM
     list_items li
     LEFT JOIN records_to_list_items r ON li.list_item_id=r.list_item_id
@@ -915,7 +915,7 @@ SELECT
     li.description,
     COUNT(DISTINCT r.record_id) AS records_count,
     COUNT(DISTINCT c.collection_id) AS collections_count,
-    0 AS instances_count
+    0 AS media_count
 FROM
     list_items li
     LEFT JOIN records_to_list_items r ON li.list_item_id=r.list_item_id
@@ -935,7 +935,7 @@ SELECT
     li.description,
     COUNT(DISTINCT r.record_id) AS records_count,
     0 AS collections_count,
-    0 AS instances_count
+    0 AS media_count
 FROM
     list_items li
     LEFT JOIN records r ON li.list_item_id=r.program_id
@@ -954,7 +954,7 @@ SELECT
     li.description,
     COUNT(DISTINCT r.record_id) AS records_count,
     COUNT(DISTINCT c.collection_id) AS collections_count,
-    0 AS instances_count
+    0 AS media_count
 FROM
     list_items li
     LEFT JOIN records_to_list_items r ON li.list_item_id=r.list_item_id
@@ -974,10 +974,10 @@ SELECT
     li.description,
     0 AS records_count,
     0 AS collections_count,
-    COUNT(DISTINCT i.instance_id) AS instances_count
+    COUNT(DISTINCT i.media_id) AS media_count
 FROM
     list_items li
-    LEFT JOIN instances i ON li.list_item_id=i.format_id
+    LEFT JOIN media i ON li.list_item_id=i.format_id
 WHERE
     li.type='format'
 GROUP BY
@@ -993,10 +993,10 @@ SELECT
     li.description,
     0 AS records_count,
     0 AS collections_count,
-    COUNT(DISTINCT i.instance_id) AS instances_count
+    COUNT(DISTINCT i.media_id) AS media_count
 FROM
     list_items li
-    LEFT JOIN instances i ON li.list_item_id=i.quality_id
+    LEFT JOIN media i ON li.list_item_id=i.quality_id
 WHERE
     li.type='quality'
 GROUP BY
@@ -1012,10 +1012,10 @@ SELECT
     li.description,
     0 AS records_count,
     0 AS collections_count,
-    COUNT(DISTINCT i.instance_id) AS instances_count
+    COUNT(DISTINCT i.media_id) AS media_count
 FROM
     list_items li
-    LEFT JOIN instances i ON li.list_item_id=i.generation_id
+    LEFT JOIN media i ON li.list_item_id=i.generation_id
 WHERE
     li.type='generation'
 GROUP BY
@@ -1031,11 +1031,11 @@ SELECT
     li.description,
     0 AS records_count,
     COUNT(DISTINCT c.collection_id) AS collections_count,
-    COUNT(DISTINCT i.instance_id) AS instances_count
+    COUNT(DISTINCT i.media_id) AS media_count
 FROM
     list_items li
     LEFT JOIN collections c ON li.list_item_id=c.call_number_id
-    LEFT JOIN instances i ON li.list_item_id=i.call_number_id
+    LEFT JOIN media i ON li.list_item_id=i.call_number_id
 WHERE
     li.type='call_number'
 GROUP BY
@@ -1108,7 +1108,7 @@ SELECT
     fulltext,
     call_numbers,
     ARRAY_TO_STRING(call_numbers, ' ') AS call_number_text,
-    primary_instance_media_type,
+    primary_media_media_type,
     has_digital,
     NULL AS thumbnail
 FROM

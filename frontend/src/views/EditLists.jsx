@@ -25,16 +25,16 @@ import { list_items, list_items_lookup } from "../api";
 import EditableDataTable from "../components/EditableDataTable";
 
 const item_types = {
-  call_number: { description: true, collections: true, instances: true },
-  generation: { description: true, instances: true },
+  call_number: { description: true, collections: true, media: true },
+  generation: { description: true, media: true },
   publisher: { records: true, collections: true },
   program: { records: true },
   author: { records: true },
   producer: { records: true },
   subject: { records: true, collections: true },
   keyword: { records: true, collections: true },
-  format: { description: true, instances: true },
-  quality: { description: true, instances: true },
+  format: { description: true, media: true },
+  quality: { description: true, media: true },
 };
 
 const types = Object.keys(item_types)
@@ -44,7 +44,7 @@ const types = Object.keys(item_types)
 const prepareItem = (item) => {
   const prepared = { ...item };
   delete prepared.records_count;
-  delete prepared.instances_count;
+  delete prepared.media_count;
   delete prepared.collections_count;
   return prepared;
 };
@@ -78,7 +78,7 @@ const columns = [
     editable: true,
   },
   {
-    field: "instances_count",
+    field: "media_count",
     headerName: "Media Count",
     flex: 1,
     type: "number",
@@ -132,7 +132,7 @@ function EditLists() {
           "item",
           "type",
           "description",
-          "instances_count",
+          "media_count",
           "records_count",
           "collections_count",
         ],
@@ -200,7 +200,7 @@ function EditLists() {
             list_item_id: true,
             records_count: Boolean(item_types[type].records),
             collections_count: Boolean(item_types[type].collections),
-            instances_count: Boolean(item_types[type].instances),
+            media_count: Boolean(item_types[type].media),
           }}
           sortModel={order}
           sortingOrder={["desc", "asc"]}
@@ -249,7 +249,7 @@ const MergeItemModal = ({ item, onClose: _onClose, fetchValues }) => {
         <Notifications embedded />
         <Stack spacing={2}>
           <DialogContentText>
-            Merging this {type} will replace all of its instances in the database with the item you choose below.
+            Merging this {type} will replace all of its media in the database with the item you choose below.
           </DialogContentText>
           <FormContainer defaultValues={{}}>
             <Field
@@ -268,11 +268,11 @@ const MergeItemModal = ({ item, onClose: _onClose, fetchValues }) => {
           </FormContainer>
           <Show when={mergeItem}>
             <DialogContentText>
-              Merging will replace all {type} instances of "<b>{item.item}</b>" with "<b>{mergeItem?.item}</b>" across:
+              Merging will replace all {type} media of "<b>{item.item}</b>" with "<b>{mergeItem?.item}</b>" across:
               <Box sx={{ listStyleType: "disc inside", ml: 4 }}>
-                {["records", "collections", "instances"].map((type) => {
+                {["records", "collections", "media"].map((type) => {
                   const count = parseInt(item[`${type}_count`], 10);
-                  const displayType = type === "instances" ? "record media" : type;
+                  const displayType = type === "media" ? "record media" : type;
                   if (count)
                     return (
                       <li key={type}>

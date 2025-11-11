@@ -26,7 +26,7 @@ export default function Thumbnail({ item, src: _src, width = 75, alt = "", type:
   }, []);
   const type = _type || (item?.record_id != null ? "record" : "collection");
   let src = "";
-  const media_type = item?.primary_instance_media_type || item.media_type;
+  const media_type = item?.primary_media_media_type || item.media_type;
 
   let Icon = brokenLink ? BrokenImage : MEDIA_TYPE_ICONS[media_type];
 

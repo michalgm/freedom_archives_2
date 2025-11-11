@@ -4,8 +4,8 @@ import { http, HttpResponse } from "msw";
 export const handlers = [
   http.get("/api/collections", () => {
     return HttpResponse.json([
-      { collection_id: 1, collection_name: "Mock Collection 1" },
-      { collection_id: 2, collection_name: "Mock Collection 2" },
+      { collection_id: 1, title: "Mock Collection 1" },
+      { collection_id: 2, title: "Mock Collection 2" },
     ]);
   }),
 
@@ -15,8 +15,8 @@ export const handlers = [
         {
           record_id: 1,
           title: "Mock Record",
-          primary_instance_thumbnail: "thumbnail.jpg",
-          primary_instance_format_text: "PDF",
+          primary_media_thumbnail: "thumbnail.jpg",
+          primary_media_format_text: "PDF",
         },
       ],
       total: 1,

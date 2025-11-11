@@ -117,7 +117,7 @@ const updateThumbnail = async (context) => {
   const type = fullName.replace('api/', '');
   let url = '';
   if (type === 'records') {
-    url = relation_data?.instances?.[0]?.url;
+    url = relation_data?.media?.[0]?.url;
   } else if (type === 'collections') {
     url = relation_data?.thumbnail;
   }
@@ -163,9 +163,9 @@ const updateThumbnail = async (context) => {
       }
 
       if (method === 'create') {
-        relation_data.instances[0].media_type = media_type;
+        relation_data.media[0].media_type = media_type;
       } else {
-        await context.app.service('api/instances')._patch(relation_data.instances[0].instance_id, { media_type }, params);
+        await context.app.service('api/media')._patch(relation_data.media[0].media_id, { media_type }, params);
       }
     }
   }

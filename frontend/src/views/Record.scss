@@ -4,16 +4,16 @@
   }
 
   .deleted {
-    td:not(.instance-action) {
+    td:not(.media-action) {
       opacity: 0.3;
       background: #eee;
     }
   }
-  .instance {
+  .media {
     & > * {
       border-bottom: unset;
     }
-    // & > *:not(.instance-action) {
+    // & > *:not(.media-action) {
     // }
   }
 }

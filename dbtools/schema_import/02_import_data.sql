@@ -307,7 +307,7 @@ where a.type = 'collection';
 
 drop table temp_publishers;
 
-/* instance_id serial PRIMARY KEY,
+/* media_id serial PRIMARY KEY,
 record_id integer NOT NULL REFERENCES records ON DELETE CASCADE,
 is_primary bool DEFAULT false,
 format TEXT DEFAULT NULL,
@@ -334,7 +334,7 @@ WHERE
     AND track_number_1=track_number_2;
 
 INSERT INTO
-    instances (
+    media (
         record_id,
         archive_id,
         call_number_id,
@@ -397,9 +397,9 @@ FROM
 
 UPDATE records a
 SET
-    primary_instance_id=b.instance_id
+    primary_media_id=b.media_id
 FROM
-    instances b
+    media b
 WHERE
     a.record_id=b.record_id;
 
@@ -419,7 +419,7 @@ WHERE
     );
 
 INSERT INTO
-    instances (
+    media (
         record_id,
         archive_id,
         call_number_id,
@@ -496,13 +496,13 @@ FROM
     LEFT JOIN list_items generation_lookup ON LOWER(a.generation)=LOWER(generation_lookup.item)
     AND generation_lookup.type='generation';
 
--- UPDATE instances
+-- UPDATE media
 -- SET
 --     call_number=NULL
 -- WHERE
 --     call_number=''
 --     OR call_number='null';
--- UPDATE instances
+-- UPDATE media
 -- SET
 --     call_number=REPLACE(call_number, 'JG/', 'JG/LS')
 -- WHERE

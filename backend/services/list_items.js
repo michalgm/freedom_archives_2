@@ -4,10 +4,10 @@ import { KnexService, transaction } from "@feathersjs/knex";
 import { rankedSearch } from "./common_hooks/index.js";
 
 const fk_map = {
-  generation: ['instances'],
-  quality: ['instances'],
-  format: ['instances'],
-  call_number: ['instances', 'collections'],
+  generation: ['media'],
+  quality: ['media'],
+  format: ['media'],
+  call_number: ['media', 'collections'],
   program: ['records'],
   author: ['records_to_list_items'],
   producer: ['records_to_list_items'],

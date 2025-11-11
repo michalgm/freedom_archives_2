@@ -1,24 +1,24 @@
 import { KnexService, transaction } from "@feathersjs/knex";
 
-class Instances extends KnexService {
+class Media extends KnexService {
   constructor(options) {
     super({
       ...options,
-      name: "instances",
+      name: "media",
     });
   }
 }
 export default (function (app) {
   const options = {
-    id: "instance_id",
+    id: "media_id",
     Model: app.get("postgresqlClient"),
     paginate: app.get("paginate"),
     multi: true,
   };
   // Initialize our service with any options it requires
-  app.use("/api/instances", new Instances(options));
+  app.use("/api/media", new Media(options));
   // Get our initialized service so that we can register hooks
-  const service = app.service("api/instances");
+  const service = app.service("api/media");
   const updateView = async (context) => {
     const {
       id,

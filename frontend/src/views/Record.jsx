@@ -50,7 +50,7 @@ import Link from "../components/Link";
 //   // vol_number: null,
 //   // collection_id: null,
 //   // parent_record_id: null,
-//   // primary_instance_id: null,
+//   // primary_media_id: null,
 //   // year: null,
 //   // month: null,
 //   // day: null,
@@ -73,9 +73,9 @@ import Link from "../components/Link";
 //     item: null,
 //     list_item_id: null,
 //   },
-//   instances: [{}],
+//   media: [{}],
 //   // has_digital: true,
-//   // instance_count: null,
+//   // media_count: null,
 //   // contributor_name: null,
 //   // contributor_username: null,
 //   // creator_name: null,
@@ -89,10 +89,10 @@ import Link from "../components/Link";
 //   subjects: [],
 //   keywords: [],
 //   producers: [],
-//   // primary_instance_thumbnail: null,
-//   // primary_instance_format: null,
-//   // primary_instance_format_text: null,
-//   // primary_instance_media_type: null,
+//   // primary_media_thumbnail: null,
+//   // primary_media_format: null,
+//   // primary_media_format_text: null,
+//   // primary_media_media_type: null,
 //   collection: {},
 //   children: [],
 //   siblings: [],
@@ -100,21 +100,21 @@ import Link from "../components/Link";
 //   continuations: [],
 // };
 
-function Instance({ instance = {}, index, actions: { swap, remove, update } }) {
-  const edit = !instance.delete;
+function MediaItem({ media = {}, index, actions: { swap, remove, update } }) {
+  const edit = !media.delete;
 
   return (
-    <React.Fragment key={`${instance.instance_id}-${instance.id}`}>
-      <TableRow className={`instance ${instance.delete ? "deleted" : ""}`} style={{ verticalAlign: "top" }}>
-        <TableCell className="instance-action">
+    <React.Fragment key={`${media.media_id}-${media.id}`}>
+      <TableRow className={`media ${media.delete ? "deleted" : ""}`} style={{ verticalAlign: "top" }}>
+        <TableCell className="media-action">
           <IconButton
             sx={{ mt: 1, py: 1 }}
             onClick={() => {
-              instance.instance_id ? update(index, { ...instance, delete: !instance.delete }) : remove(index);
+              media.media_id ? update(index, { ...media, delete: !media.delete }) : remove(index);
             }}
             size="large"
           >
-            <Icon>{instance.delete ? "restore" : "delete"}</Icon>
+            <Icon>{media.delete ? "restore" : "delete"}</Icon>
           </IconButton>
         </TableCell>
         <TableCell>
@@ -130,7 +130,7 @@ function Instance({ instance = {}, index, actions: { swap, remove, update } }) {
                 itemType="call_number"
                 ro={!edit}
                 label="Class"
-                name={`instances.${index}.call_number_item`}
+                name={`media.${index}.call_number_item`}
                 textFieldProps={{
                   sx: {
                     "& .MuiInputBase-root": {
@@ -146,7 +146,7 @@ function Instance({ instance = {}, index, actions: { swap, remove, update } }) {
               <Field
                 ro={!edit}
                 label="Suffix"
-                name={`instances.${index}.call_number_suffix`}
+                name={`media.${index}.call_number_suffix`}
                 sx={{
                   "& .MuiInputBase-root": {
                     borderRadius: "0px var(--mui-shape-borderRadius) var(--mui-shape-borderRadius) 0px",
@@ -164,7 +164,7 @@ function Instance({ instance = {}, index, actions: { swap, remove, update } }) {
             itemType="generation"
             ro={!edit}
             label="Generation"
-            name={`instances.${index}.generation_item`}
+            name={`media.${index}.generation_item`}
           />
         </TableCell>
         <TableCell>
@@ -175,7 +175,7 @@ function Instance({ instance = {}, index, actions: { swap, remove, update } }) {
             ro={!edit}
             label="Format"
             service="list_items"
-            name={`instances.${index}.format_item`}
+            name={`media.${index}.format_item`}
           />
         </TableCell>
         <TableCell>
@@ -186,7 +186,7 @@ function Instance({ instance = {}, index, actions: { swap, remove, update } }) {
             ro={!edit}
             label="Quality"
             service="list_items"
-            name={`instances.${index}.quality_item`}
+            name={`media.${index}.quality_item`}
           />
         </TableCell>
         <TableCell>
@@ -195,26 +195,26 @@ function Instance({ instance = {}, index, actions: { swap, remove, update } }) {
             type="number"
             inputProps={{ min: 0, style: { width: 40 } }}
             label=" "
-            name={`instances.${index}.no_copies`}
+            name={`media.${index}.no_copies`}
           />
         </TableCell>
       </TableRow>
-      <TableRow className={instance.delete ? "deleted" : ""}>
+      <TableRow className={media.delete ? "deleted" : ""}>
         <TableCell />
         <TableCell>
-          {instance.url && instance.record_id && (
-            <Link href={instance.url} target="_blank" rel="noopener noreferrer">
+          {media.url && media.record_id && (
+            <Link href={media.url} target="_blank" rel="noopener noreferrer">
               <Icon>open_in_new</Icon>
             </Link>
           )}
         </TableCell>
-        <TableCell>{instance.media_type}</TableCell>
+        <TableCell>{media.media_type}</TableCell>
         <TableCell colSpan={5}>
-          <Field ro={!edit} label="URL" name={`instances.${index}.url`} />
+          <Field ro={!edit} label="URL" name={`media.${index}.url`} />
         </TableCell>
         {/* <TableCell colSpan={2}>
       <pre>
-          {JSON.stringify(instance, null, ' ')}
+          {JSON.stringify(media, null, ' ')}
       </pre>
       </TableCell> */}
       </TableRow>
@@ -222,20 +222,20 @@ function Instance({ instance = {}, index, actions: { swap, remove, update } }) {
   );
 }
 
-function Instances({ record }) {
+function Media({ record }) {
   const {
     control,
     formState: { errors },
   } = useFormContext();
 
   const { fields, ...actions } = useFieldArray({
-    name: "instances",
+    name: "media",
     control,
   });
 
   return (
     <>
-      <Table size="small" className="instances" sx={{ mb: 2 }}>
+      <Table size="small" className="media" sx={{ mb: 2 }}>
         <TableHead>
           <TableRow>
             <TableCell style={{ width: 50 }}></TableCell>
@@ -255,12 +255,12 @@ function Instances({ record }) {
               </TableCell>
             </TableRow>
           )}
-          {fields.map((instance, index) => (
-            <Instance key={instance.id} instance={instance} index={index} actions={actions} />
+          {fields.map((media, index) => (
+            <MediaItem key={media.id} media={media} index={index} actions={actions} />
           ))}
         </TableBody>
       </Table>
-      <Box sx={{ color: "error.main" }}>{errors.instances && errors.instances.message}</Box>
+      <Box sx={{ color: "error.main" }}>{errors.media && errors.media.message}</Box>
       <Button
         variant="contained"
         onClick={() => actions.append({ record_id: record.id, no_copies: 1 })}
@@ -346,20 +346,20 @@ function UpdateThumbnailButton() {
 
   const {
     record_id,
-    instances: [instance],
+    media: [media],
   } = getValues();
 
-  const thumbnailAvailable = Boolean(instance?.url);
+  const thumbnailAvailable = Boolean(media?.url);
 
   const addNotification = useAddNotification();
 
   const forceThumbnailUpdate = useCallback(async () => {
-    const { url, instance_id } = instance || {};
-    if (!url || record_id == null || !instance_id) return;
-    const res = await records.patch(record_id, { instances: [{ url, instance_id }] });
+    const { url, media_id } = media || {};
+    if (!url || record_id == null || !media_id) return;
+    const res = await records.patch(record_id, { media: [{ url, media_id }] });
     await reset(res);
     addNotification({ message: "Thumbnail updated" });
-  }, [addNotification, instance, record_id, reset]);
+  }, [addNotification, media, record_id, reset]);
 
   return (
     <Tooltip title={thumbnailAvailable ? "" : "No thumbnail available - first media item must have a URL"}>
@@ -401,7 +401,7 @@ function Record({ id /*  embedded = false */ }) {
           },
           onDelete: () => navigate(`/admin/records`),
           defaultValues: {
-            instances: [{ no_copies: 1 }],
+            media: [{ no_copies: 1 }],
           },
         }}
       >
@@ -483,7 +483,7 @@ function Record({ id /*  embedded = false */ }) {
                     </FieldRow>
                   </GridBlock>
                   <GridBlock title="Media">
-                    <Instances record={record} instances={record.instances || []} />
+                    <Media record={record} media={record.media || []} />
                   </GridBlock>
                   <Grid size={12}>
                     <Divider />
