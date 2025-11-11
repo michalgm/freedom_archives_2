@@ -295,7 +295,7 @@ const collectionsSchema = z.object({
   collection_id: z.number().nullable().optional(),
   archive_id: z.number().nullable().optional(),
   parent_collection_id: z.number().nullable().optional(),
-  collection_name: z.string().min(1),
+  title: z.string().min(1),
   description: z.string().min(1).default(""),
   summary: z.string().nullable().optional(),
   call_number_id: z.number().nullable().optional(),
@@ -318,7 +318,7 @@ const collectionsSchema = z.object({
 
 const embeddedCollectionSchema = collectionsSchema.pick({
   collection_id: true,
-  collection_name: true,
+  title: true,
   call_number: true,
   thumbnail: true,
   display_order: true,
@@ -329,12 +329,12 @@ const embeddedCollectionSchema = collectionsSchema.pick({
 
 const collectionItemSchema = collectionsSchema.pick({
   collection_id: true,
-  collection_name: true,
+  title: true,
 });
 
 const collectionsDataSchema = collectionsSchema
   .pick({
-    collection_name: true,
+    title: true,
     description: true,
     summary: true,
     call_number_suffix: true,

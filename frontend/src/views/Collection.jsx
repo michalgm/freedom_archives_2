@@ -109,7 +109,7 @@ function Collection({ id, mode = "" }) {
         <>
           <Typography component="span" sx={{ display: "block" }} gutterBottom>
             Are you sure you want to delete collection &quot;
-            <b>{collection.collection_name}</b>&quot;?
+            <b>{collection.title}</b>&quot;?
           </Typography>
           <Typography component="span" sx={{ display: "block" }} variant="body2">
             All child records will be moved to the &quot;Uncategorized&quot; collection
@@ -125,11 +125,11 @@ function Collection({ id, mode = "" }) {
         formConfig={{
           service: "collections",
           id: newCollection ? null : id,
-          namePath: "collection_name",
+          namePath: "title",
           onCreate: ({ collection_id }) =>
             navigate(`/admin/collections/${collection_id}`),
           onFetch: (collection) => {
-            setTitle(collection.collection_name || "New Collection");
+            setTitle(collection.title || "New Collection");
             return collection;
           },
           onDelete: () => navigate(`/admin/collections`),
@@ -175,7 +175,7 @@ function CollectionFields() {
       <Stack direction={"row"} spacing={2} sx={{ mt: 2 }}>
         <Grid container spacing={2}>
           <Grid size={12}>
-            <Field name="collection_name" />
+            <Field name="title" />
           </Grid>
           <Grid size={12}>
             <Field name="description" field_type="html" />
@@ -243,7 +243,7 @@ function CollectionFields() {
         <Field name="needs_review" field_type="checkbox" />
       </FieldRow>
       <FieldRow>
-        <Field name="publishers" multiple field_type="list_item" multiple itemType="publisher" create />
+        <Field name="publishers" multiple field_type="list_item" itemType="publisher" create />
         <Field name="date_range" />
       </FieldRow>
       <FieldRow>

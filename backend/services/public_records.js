@@ -73,11 +73,11 @@ const lookupFilters = async (context) => {
         .joinRaw("INNER JOIN filtered_records f ON r.record_id = f.record_id")
         .groupBy("title")
         .havingRaw("COUNT(*) > 1"),
-      Model.select(Model.raw("'collection_id' AS type, collection_name::text, collection_id"))
+      Model.select(Model.raw("'collection_id' AS type, collection_title::text, collection_id"))
         .count()
         .from("public_search.records_view AS r")
         .joinRaw("INNER JOIN filtered_records f ON r.record_id = f.record_id")
-        .groupBy("collection_id", "collection_name"),
+        .groupBy("collection_id", "collection_title"),
       Model.select(Model.raw("'media_type' AS type, media_type::text, 0"))
         .count()
         .from("public_search.records_view AS r")

@@ -116,7 +116,7 @@ export function ItemCard({
   setCurrentRecord,
   ...props
 }) {
-  const title = item.title || item.collection_name || "Untitled";
+  const title = item.title || "Untitled";
   const { details = [], description, summary } = item;
   const text = summary || description || "";
   const textRef = useRef(null);

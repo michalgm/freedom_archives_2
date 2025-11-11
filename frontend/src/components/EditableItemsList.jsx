@@ -331,14 +331,14 @@ export default function RecordItem({ record = {}, description: showDescription, 
     title,
     record_id,
     primary_instance_format_text,
-    collection: { collection_name, collection_id } = {},
+    collection: { title: collection_title, collection_id } = {},
     description,
     call_numbers = [],
   } = record || {};
   const details = [
     {
       type: "Collection",
-      label: collection_name,
+      label: collection_title,
       link: `/admin/collections/${collection_id}`,
     },
     { type: "Format", label: primary_instance_format_text },
@@ -362,7 +362,7 @@ export default function RecordItem({ record = {}, description: showDescription, 
 }
 
 export function CollectionItem({ collection = {}, description: showDescription, itemAction, ...props }) {
-  const { collection_name, collection_id, summary, parent, call_number } = collection;
+  const { title, collection_id, summary, parent, call_number } = collection;
   const details = [
     { type: "ID", label: collection_id },
     { type: "Call Number", label: call_number },
@@ -370,7 +370,7 @@ export function CollectionItem({ collection = {}, description: showDescription, 
   if (parent && parent.collection_id) {
     details.unshift({
       type: "Parent Collection",
-      label: parent.collection_name,
+      label: parent.title,
       link: `/admin/collections/${parent.collection_id}`,
     });
   }
@@ -381,7 +381,7 @@ export function CollectionItem({ collection = {}, description: showDescription, 
     <Item
       id={collection_id}
       item={collection}
-      title={collection_name}
+      title={title}
       description={showDescription && summary}
       details={details}
       {...props}

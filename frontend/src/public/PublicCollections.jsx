@@ -85,7 +85,7 @@ const PublicCollections = () => {
         setLoading(true);
         try {
           const collection = await collectionsService.get(collection_id, {
-            // query: { $select: ["collection_name"] },
+            // query: { $select: ["title"] },
           });
           setCollection(collection);
           setSearch({
@@ -93,7 +93,7 @@ const PublicCollections = () => {
               ...(collection.descendant_collection_ids || []),
               collection.collection_id,
             ],
-            // collection_id: [[collection.collection_name, collection.total_records, collection.collection_id]],
+            // collection_id: [[collection.title, collection.total_records, collection.collection_id]],
           });
         } catch {
           //empty
@@ -144,11 +144,11 @@ const PublicCollections = () => {
                   color="primary.main"
                   to={`/collections/${ancestor.collection_id}`}
                 >
-                  {ancestor.collection_name}
+                  {ancestor.title}
                 </Link>
               ))}
           <Typography color="text.primary" fontWeight={600}>
-            {collection.collection_name}
+            {collection.title}
           </Typography>
         </Breadcrumbs>
         <Stack
@@ -162,7 +162,7 @@ const PublicCollections = () => {
           justifyContent={"space-between"}
         >
           <Typography variant="header" sx={{ mb: 1.5 }}>
-            {collection.collection_name}
+            {collection.title}
           </Typography>
           <Tabs
             value={tab}

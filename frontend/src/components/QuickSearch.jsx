@@ -140,7 +140,7 @@ function QuickSearch() {
           const secondary = (
             <Stack>
               <span>{item.call_numbers}</span>
-              <span>{item.collection.collection_name}</span>
+              <span>{item.collection.title}</span>
               <span>{new Date(item.date_modified).toLocaleString()}</span>
             </Stack>
           );

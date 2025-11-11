@@ -46,7 +46,7 @@ export const usePublicSearch = (
 
       const query = {
         $select: [
-          "collection_name",
+          "collection_title",
           "record_id",
           "title",
           "date",
@@ -100,7 +100,7 @@ export const usePublicSearch = (
         nonDigitizedTotal,
         records: recordsData.map((record) => {
           const keys = [
-            "collection_name",
+            "collection_title",
             "date",
             "producers",
             "publishers",
@@ -129,7 +129,7 @@ export const usePublicSearch = (
             }
             let label = key;
             if (key === "vol_number") label = "Volume";
-            if (key === "collection_name") label = "Collection";
+            if (key === "collection_title") label = "Collection";
             if (value && value.toString().trim()) {
               record.details.push([label, value]);
             }

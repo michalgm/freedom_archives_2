@@ -6,7 +6,7 @@ import { useCallback } from "react";
 import Manage from "../components/Manage";
 
 const filter_types = {
-  collection_name: { input: "text", match: "fuzzy" },
+  title: { input: "text", match: "fuzzy" },
   call_number: { input: "text", match: "fuzzy", case: "upper" },
   description: { input: "text", match: "fuzzy" },
   summary: { input: "text", match: "fuzzy" },
@@ -17,17 +17,17 @@ const filter_types = {
 };
 
 const sort_options = {
-  relevance: { label: "Search Relevance", sort: { rank: -1, display_order: 1, collection_name: 1, date_created: -1 } },
-  collection_name: {
+  relevance: { label: "Search Relevance", sort: { rank: -1, display_order: 1, title: 1, date_created: -1 } },
+  title: {
     label: "Collection Name",
-    sort: { collection_name: 1, display_order: 1, rank: -1, date_created: -1 },
+    sort: { title: 1, display_order: 1, rank: -1, date_created: -1 },
   },
   date_modified: {
     label: "Date Modified",
-    sort: { date_modified: -1, display_order: 1, rank: -1, collection_name: 1 },
+    sort: { date_modified: -1, display_order: 1, rank: -1, title: 1 },
   },
-  date_created: { label: "Date Created", sort: { date_created: -1, display_order: 1, rank: -1, collection_name: 1 } },
-  call_number: { label: "Call Number", sort: { call_number: 1, display_order: 1, rank: -1, collection_name: 1 } },
+  date_created: { label: "Date Created", sort: { date_created: -1, display_order: 1, rank: -1, title: 1 } },
+  call_number: { label: "Call Number", sort: { call_number: 1, display_order: 1, rank: -1, title: 1 } },
 };
 
 function Collections({ embedded, itemAction, filter = {}, excludeIds = [], useStore }) {
@@ -36,7 +36,7 @@ function Collections({ embedded, itemAction, filter = {}, excludeIds = [], useSt
       const { search, hidden, needs_review, sort = "relevance", sort_desc = true } = filter;
       const query = {
         collection_id: { $nin: excludeIds },
-        $select: ["collection_id", "collection_name", "summary", "thumbnail", "parent", "call_number"],
+        $select: ["collection_id", "title", "summary", "thumbnail", "parent", "call_number"],
       };
       if (!hidden) {
         query.is_hidden = false;
@@ -67,7 +67,7 @@ function Collections({ embedded, itemAction, filter = {}, excludeIds = [], useSt
           {collection.thumbnail ? (
             <img
               src={`https://search.freedomarchives.org/${collection.thumbnail}`}
-              alt={`${collection.collection_name} Thumbnail`}
+              alt={`${collection.title} Thumbnail`}
               width={40}
             />
           ) : (
@@ -77,11 +77,11 @@ function Collections({ embedded, itemAction, filter = {}, excludeIds = [], useSt
           )}
         </ListItemAvatar>
         <ListItemText
-          primary={collection.collection_name}
+          primary={collection.title}
           secondary={
             <>
               <Typography variant="subtitle2" gutterBottom>
-                Parent Collection: {collection.parent.collection_name}
+                Parent Collection: {collection.parent.title}
               </Typography>
               <Typography
                 style={{ maxHeight: 100, overflowX: "auto" }}

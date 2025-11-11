@@ -19,7 +19,7 @@ const columns = [
   { field: "producers", valueGetter: formatItems },
   { field: "keywords", valueGetter: formatItems },
   { field: "subjects", valueGetter: formatItems },
-  { field: "collection_name", headerName: "Collection", _skipSelect: true },
+  { field: "collection_title", headerName: "Collection", _skipSelect: true },
   { field: "vol_number" },
   { field: "program", valueGetter: formatItem },
   { field: "publishers", valueGetter: formatItems },
@@ -80,6 +80,7 @@ const Table = () => {
           acc.push({
             ...instance,
             ...record,
+            collection_title: collection.title,
             ...collection,
           });
         });

@@ -9,7 +9,7 @@ const settingsResultResolver = resolve({
     if (settings.featured_collection_id) {
       return await context.app
         .service("api/collections")
-        .get(settings.featured_collection_id, { query: { $select: ["collection_name", "thumbnail", "parent"] } });
+        .get(settings.featured_collection_id, { query: { $select: ["title", "thumbnail", "parent"] } });
     }
     return {};
   }),

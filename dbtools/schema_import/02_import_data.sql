@@ -64,7 +64,7 @@ INSERT INTO
 INSERT INTO
     collections (
         collection_id,
-        collection_name,
+        title,
         display_order,
         archive_id
     )

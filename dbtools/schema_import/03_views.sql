@@ -153,7 +153,7 @@ CREATE VIEW
     collection_summaries AS
 SELECT
     a.collection_id,
-    a.collection_name,
+    a.title,
     a.parent_collection_id,
     a.summary,
     a.description,
@@ -173,7 +173,7 @@ SELECT
                 (
                     SELECT
                         collection_id,
-                        collection_name,
+                        title,
                         thumbnail,
                         parent_collection_id,
                         TRIM(
@@ -297,7 +297,7 @@ SELECT
         )
     ) AS featured_records,
     SETWEIGHT(
-        TO_TSVECTOR('english', COALESCE(a.collection_name, '')),
+        TO_TSVECTOR('english', COALESCE(a.title, '')),
         'A'
     )||SETWEIGHT(
         TO_TSVECTOR(
@@ -324,7 +324,7 @@ SELECT
         'C'
     ) AS fulltext,
     LOWER(
-        COALESCE(a.collection_name, '')||' '||COALESCE(call_numbers.item, '')||' '||COALESCE(a.call_number_suffix, '')||' '||COALESCE(a.summary, '')||' '||COALESCE(a.description_search, '')||' '||COALESCE(keywords.items_text, '')||' '||COALESCE(subjects.items_text, '')
+        COALESCE(a.title, '')||' '||COALESCE(call_numbers.item, '')||' '||COALESCE(a.call_number_suffix, '')||' '||COALESCE(a.summary, '')||' '||COALESCE(a.description_search, '')||' '||COALESCE(keywords.items_text, '')||' '||COALESCE(subjects.items_text, '')
     ) AS search_text
 FROM
     collections a
@@ -362,7 +362,7 @@ CREATE INDEX collections_summary_index ON _unified_collections (summary);
 
 CREATE INDEX collections_description_index ON _unified_collections USING GIN (description_search gin_trgm_ops);
 
-CREATE INDEX collections_collection_name_index ON _unified_collections (collection_name);
+CREATE INDEX collections_title_index ON _unified_collections (title);
 
 CREATE INDEX collections_call_number_index ON _unified_collections (call_number);
 
@@ -433,7 +433,7 @@ FROM
                 -- Start with the current collection's parent
                 SELECT
                     cs.collection_id,
-                    cs.collection_name,
+                    cs.title,
                     cs.parent_collection_id,
                     1 AS level
                 FROM
@@ -444,7 +444,7 @@ FROM
                 -- Recursively find parent's parents
                 SELECT
                     cs.collection_id,
-                    cs.collection_name,
+                    cs.title,
                     cs.parent_collection_id,
                     ac.level + 1
                 FROM
@@ -455,7 +455,7 @@ FROM
             ARRAY_AGG(
                 JSON_BUILD_OBJECT(
                     'collection_id', ancestors_cte.collection_id,
-                    'collection_name', ancestors_cte.collection_name
+                    'title', ancestors_cte.title
                 )
                 ORDER BY ancestors_cte.level DESC  -- Ascending order of parentage (root first)
             ) AS ancestors
@@ -1075,7 +1075,7 @@ UNION
 SELECT
     collection_id AS id,
     collection_id AS collection_id,
-    collection_name,
+    title,
     'collection' AS
 TYPE,
 (
@@ -1117,7 +1117,7 @@ UNION ALL
 SELECT
     'collection' AS result_type,
     collection_id AS id,
-    collection_name AS title,
+    title,
     parent,
     date_modified,
     description,

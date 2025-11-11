@@ -12,7 +12,7 @@ const searchTypes = {
   },
   collections: {
     id: "collection_id",
-    label: "collection_name",
+    label: "title",
     renderOption: (item) => <CollectionItem collection={item} component="div" dense />,
   },
   records: {

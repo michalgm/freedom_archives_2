@@ -62,7 +62,7 @@ CREATE TABLE
         collection_id serial PRIMARY KEY,
         archive_id INTEGER REFERENCES archives ON DELETE CASCADE,
         parent_collection_id INTEGER DEFAULT NULL REFERENCES collections ON DELETE SET NULL,
-        collection_name TEXT DEFAULT NULL,
+        title TEXT DEFAULT NULL,
         description TEXT,
         description_search TEXT,
         summary TEXT DEFAULT NULL,
