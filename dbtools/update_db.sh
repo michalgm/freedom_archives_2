@@ -44,10 +44,14 @@ log "### Update local schema"
 
 ) | psql -b -v ON_ERROR_STOP=1;
 
+pg_dump -d dameat -s -N freedom_archives_old -N public -N fa_test | sed -e "s/dameat/fa_admin/g" > pre_migrate.sql
+
 echo "Run migrate"
 # psql -b -v ON_ERROR_STOP=1 <./update_schema.sql
 # psql -a -v ON_ERROR_STOP=1 <../backend/migrations/02-snapshots.sql
 yarn run migrate
+pg_dump -d dameat -s -N freedom_archives_old -N public -N fa_test | sed -e "s/dameat/fa_admin/g" > post_migrate.sql
+
 cd ../
 node ./backend/scripts/publishSite.js
 psql -b -c "VACUUM ANALYZE;"
