@@ -45,7 +45,7 @@ const usersSchema = z.object({
     .optional(),
   firstname: z.string().nullable().optional(),
   lastname: z.string().nullable().optional(),
-  role: z.enum(["user", "intern", "administrator"]),
+  role: z.enum(["staff", "intern", "administrator"]),
   active: z.boolean().default(true),
   email: z.string().nullable().optional(),
   full_name: z.string().nullable().optional(),
