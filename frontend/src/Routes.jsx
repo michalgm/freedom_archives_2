@@ -1,3 +1,5 @@
+import { Typography } from "@mui/material";
+import { Box } from "@mui/system";
 import React, { Suspense } from "react";
 import {
   Navigate,
@@ -33,10 +35,10 @@ const componentMap = {
   PublicCollections: React.lazy(() => import("./public/PublicCollections")),
 };
 
-function LoginRedirect() {
-  const location = useLocation();
-  return <Navigate to="/admin/login" state={{ referrer: location }} />;
-}
+// function LoginRedirect() {
+//   const location = useLocation();
+//   return <Navigate to="/admin/login" state={{ referrer: location }} />;
+// }
 
 function RequireAuth({ children }) {
   const { isAuthenticated } = useAuth();
@@ -131,7 +133,7 @@ const router = createBrowserRouter(
           element={<PublicCollections />}
         />
         <Route path="" element={<PublicHome />} />
-        <Route path="*" element={<PublicHome />} />
+        <Route path="*" element={<NotFound />} />
       </Route>
       <Route path="/admin" element={<Layout />}>
         {publicRoutes}
@@ -146,11 +148,20 @@ const router = createBrowserRouter(
         >
           {protectedRoutes}
         </Route>
-        <Route path="*" element={<LoginRedirect />} />
+        <Route path="*" element={<NotFound />} />
       </Route>
     </Route>,
   ),
 );
+
+function NotFound() {
+  return (
+    <Box sx={{ p: 4, textAlign: "center" }}>
+      <Typography component="h1" variant="h4" gutterBottom>404 - Not Found</Typography>
+      <Typography variant="body1">The page you are looking for does not exist.</Typography>
+    </Box>
+  );
+}
 
 export default function Router() {
   return <RouterProvider router={router} />;

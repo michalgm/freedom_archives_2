@@ -55,17 +55,17 @@ app.configure(authentication);
 app.configure(services);
 
 app.hooks(appHooks);
-// app.get("*", function (_request, response) {
-//   response.sendFile(path.join(publicPath, "index.html"));
-// });
+expressApp.get("*", (request, response, next) => {
+  if (request.path.startsWith("/api/") || request.path.startsWith("/images/")) {
+    return next();
+  }
+  response.sendFile(path.join(frontendDistPath, "index.html"));
+});
 // Configure a middleware for 404s and the error handler
-app.use(notFound());
+app.use(notFound({ verbose: true }));
 app.use(
   errorHandler({
     logger,
-    html: {
-      404: path.join(frontendDistPath, "index.html"),
-    },
   })
 );
 export default app;
