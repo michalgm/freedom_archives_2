@@ -31,6 +31,9 @@ const validateUser = (context) => {
 };
 const cleanData = (context) => {
   if (context.data) {
+    if (context.data.username) {
+      context.data.username = context.data.username.trim().toLowerCase();
+    }
     ["full_name", "user_search"].forEach((key) => {
       delete context.data[key];
     });
