@@ -39,12 +39,13 @@ export function ItemCardLayout({
         <Box>{media}</Box>
         <Box sx={{ flexGrow: 1 }}>
           <Typography
-            variant="h6"
+            variant="h3"
             sx={{
               fontWeight: "400",
               lineHeight: "unset",
               fontSize: dense ? "1rem" : "1.25rem",
             }}
+            gutterBottom
           >
             {header}
           </Typography>

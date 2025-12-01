@@ -4,6 +4,7 @@ import {
   Box,
   IconButton,
   Paper,
+  Skeleton,
   Stack,
   Tooltip,
   Typography,
@@ -226,6 +227,7 @@ export function Carousel({
   items = [],
   autoAdvanceInterval = 6000,
   width = 250,
+  loading = false,  
   loop = true,
   ...props
 }) {
@@ -255,7 +257,7 @@ export function Carousel({
     };
   }, [emblaApi, setSelectedIndex]);
 
-  if (!items || items.length === 0) {
+  if (!items || items.length === 0 || loading) {
     return (
       <Box
         sx={{
@@ -266,7 +268,7 @@ export function Carousel({
           borderRadius: 1,
         }}
       >
-        No items to display
+        <Skeleton variant="rectangular" width={width} height={width * 0.75} />
       </Box>
     );
   }

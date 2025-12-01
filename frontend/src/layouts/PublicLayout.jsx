@@ -8,9 +8,8 @@ import {
   ThemeProvider,
   Typography,
 } from "@mui/material";
-import { Suspense, useEffect, useState } from "react";
+import { Suspense } from "react";
 import { Outlet } from "react-router";
-import { public_settings } from "src/api";
 import ButtonLink from "src/components/ButtonLink";
 import ErrorBoundary from "src/components/ErrorBoundary";
 import { theme } from "src/theme";
@@ -69,19 +68,6 @@ const headerLinks = [
 ];
 
 const PublicLayout = () => {
-  const [settings, setSettings] = useState({});
-  useEffect(() => {
-    const fetchData = async () => {
-      const res = await public_settings.find({ query: { archive_id: 1 } });
-      const settings = res.reduce((acc, setting) => {
-        acc[setting.setting] = setting.value;
-        return acc;
-      }, {});
-      setSettings(settings);
-    };
-    fetchData();
-  }, []);
-
   return (
     <ThemeProvider theme={getPublicTheme}>
       <Box
@@ -112,27 +98,29 @@ const PublicLayout = () => {
                 textAlign: "center",
               }}
             >
-              <Box id="header_image"
-                sx={{
-                  position: "absolute",
-                  background: `url("/static/images/freedom_archives_header.jpg") no-repeat scroll  #b00000`,
-                  height: "100%",
-                  backgroundSize: "auto 100%",
-                  width: 'calc(100% + 299px)',
-                  top: {
-                    lg: 0,
-                    md: -10,
-                    sm: -10,
-                    xs: -14,
-                  },
-                  left: {
-                    lg: -299,
-                    md: -248,
-                    sm: -223,
-                    xs: -172,
-                  }
-                }}
-              />
+              <a href="https://freedomarchives.org" title="Go to Freedom Archives Home" >
+                <Box id="header_image"
+                  sx={{
+                    position: "absolute",
+                    background: `url("/static/images/freedom_archives_header.jpg") no-repeat scroll  #b00000`,
+                    height: "100%",
+                    backgroundSize: "auto 100%",
+                    width: 'calc(100% + 299px)',
+                    top: {
+                      lg: 0,
+                      md: -10,
+                      sm: -10,
+                      xs: -14,
+                    },
+                    left: {
+                      lg: -299,
+                      md: -248,
+                      sm: -223,
+                      xs: -172,
+                    }
+                  }}
+                />
+              </a>
               <Stack
                 direction={{
                   xs: 'column',
@@ -196,8 +184,8 @@ const PublicLayout = () => {
             }}
           >
             <ErrorBoundary>
-              <Suspense fallback={<div>Loading...</div>}>
-                <Outlet context={settings} />
+              <Suspense fallback={<div></div>}>
+                <Outlet />
               </Suspense>
             </ErrorBoundary>
           </Box>
