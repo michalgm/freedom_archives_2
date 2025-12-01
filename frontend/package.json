@@ -72,7 +72,6 @@
     "use-immer": "^0.11.0",
     "vike": "^0.4.247",
     "vite-plugin-commonjs": "^0.10.4",
-    "vite-plugin-prerender": "^1.0.8",
     "vite-plugin-ssr": "^0.4.142",
     "zod": "^3.25.76",
     "zod-empty": "^1.5.2",
