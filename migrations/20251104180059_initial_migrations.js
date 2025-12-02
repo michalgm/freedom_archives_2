@@ -78,7 +78,6 @@ CREATE VIEW
       c.keywords,
       c.date_range,
       c.ancestors,
-      c.display_order,
       c.children
     FROM
       unified_collections c
@@ -309,9 +308,6 @@ snapshots(
 CREATE INDEX snapshot_archive_idx ON "snapshots"(archive_id, snapshot_id);
 
 ALTER TABLE records_snapshots
-ADD CONSTRAINT fk_snapshot FOREIGN KEY(snapshot_id) REFERENCES snapshots(snapshot_id) ON DELETE CASCADE;
-
-ALTER TABLE collections_snapshots
 ADD CONSTRAINT fk_snapshot FOREIGN KEY(snapshot_id) REFERENCES snapshots(snapshot_id) ON DELETE CASCADE;
 
 ALTER TABLE featured_records_snapshots

@@ -106,8 +106,8 @@ SELECT
   c.keywords,
   c.date_range,
   c.ancestors,
-  c.display_order,
-  c.children
+  c.children,
+  c.display_order
 FROM
   unified_collections c
 WHERE
