@@ -73,14 +73,13 @@ CREATE VIEW
       c.thumbnail,
       c.date_modified,
       c.parent_collection_id,
-      c.search_text,
-      c.fulltext,
-      (
-        SELECT
-          ARRAY_AGG(DISTINCT (VALUE->>'collection_id')::INTEGER)
-        FROM
-          UNNEST(c.children) AS VALUE
-      ) AS collection_ids
+      c.descendant_collection_ids,
+      c.featured_records,
+      c.keywords,
+      c.date_range,
+      c.ancestors,
+      c.display_order,
+      c.children
     FROM
       unified_collections c
     WHERE
@@ -149,44 +148,44 @@ CREATE INDEX records_media_type_idx ON public_search.records(archive_id, media_t
 
 create index records_search_text_idx on public_search.records using GIN (search_text gin_trgm_ops);
 
-CREATE TABLE
-    records_snapshots AS
-SELECT
-1 AS snapshot_id,
-    *
-    FROM
-public_search.records
-LIMIT
-0;
+ CREATE TABLE
+     records_snapshots AS
+ SELECT
+ 1 AS snapshot_id,
+     *
+     FROM
+ public_search.records
+ LIMIT
+ 0;
 
-ALTER TABLE records_snapshots
-ADD PRIMARY KEY(snapshot_id, archive_id, record_id);
+ ALTER TABLE records_snapshots
+ ADD PRIMARY KEY(snapshot_id, archive_id, record_id);
 
-CREATE TABLE
-public_search.collections AS
-SELECT
-    *
-    FROM
-collections_snapshot_view
-LIMIT
-0;
+ CREATE TABLE
+ public_search.collections AS
+ SELECT
+     *
+     FROM
+ collections_snapshot_view
+ LIMIT
+ 0;
 
-ALTER TABLE public_search.collections
-ADD PRIMARY KEY(archive_id, collection_id);
+ ALTER TABLE public_search.collections
+ ADD PRIMARY KEY(archive_id, collection_id);
 
 
-CREATE TABLE
-    collections_snapshots AS
-SELECT
-1 AS snapshot_id,
-    *
-    FROM
-public_search.collections
-LIMIT
-0;
+ CREATE TABLE
+     collections_snapshots AS
+ SELECT
+ 1 AS snapshot_id,
+     *
+     FROM
+ public_search.collections
+ LIMIT
+ 0;
 
-ALTER TABLE collections_snapshots
-ADD PRIMARY KEY(snapshot_id, archive_id, collection_id);
+ ALTER TABLE collections_snapshots
+ ADD PRIMARY KEY(snapshot_id, archive_id, collection_id);
 
 CREATE TABLE
 public_search.featured_records(LIKE featured_records);
@@ -328,79 +327,8 @@ ALTER TABLE records_to_list_items_snapshots
 ADD CONSTRAINT fk_snapshot FOREIGN KEY(snapshot_id) REFERENCES snapshots(snapshot_id) ON DELETE CASCADE;
 
 
-        `
-  );
 
-  await knex.schema.createTable("settings", (table) => {
-    table.integer("archive_id").primary().references("archive_id").inTable("archives");
-    table.jsonb("settings").defaultTo('""');
-    table.primary(["archive_id", "setting"]);
-  });
-
-  await knex("settings").insert({
-    archive_id: 1,
-    settings: JSON.stringify({
-      "featured_collection_id": "14",
-      "site_intro_text": "<b>Welcome to the Freedom Archives' Digital Search Engine.</b><span>The Freedom Archives contains over 12,000 hours of audio and video recordings which date from the late-1960s to the mid-90s and chronicle the progressive history of the Bay Area, the United States, and international movements. We are also in the process of scanning and uploading thousands of historical documents which enrich our media holdings. Our collection includes weekly news, poetry, music programs; in-depth interviews and reports on social and cultural issues; numerous voices from behind prison walls; diverse activists; and pamphlets, journals and other materials from many radical organizations and movements.</span>"
-    })
-  });
-
-
-  await knex.schema.dropViewIfExists('collections_snapshot_view');
-  await knex.schema.raw(`
-CREATE VIEW
-    collections_snapshot_view AS
-SELECT
-    archive_id,
-    collection_id,
-    title,
-    description,
-    summary,
-    thumbnail,
-    date_modified,
-    parent_collection_id,
-    descendant_collection_ids,
-    featured_records,
-    keywords,
-    date_range,
-    ancestors,
-    children
-FROM
-    unified_collections c
-WHERE
-    is_hidden=FALSE
-    AND needs_review=FALSE;
-  `);
-  await knex.schema.withSchema('public_search').dropViewIfExists('records_view');
-  await knex.schema.withSchema('public_search').dropTableIfExists('collections');
-  await knex.schema.raw(`
-CREATE TABLE public_search.collections AS
-SELECT
-    *
-FROM
-    collections_snapshot_view;
-`);
-  await knex.schema.withSchema('public_search').alterTable('collections', (table) => {
-    table.primary(['archive_id', 'collection_id']);
-  });
-  await knex.schema.dropTableIfExists('collections_snapshots');
-  await knex.schema.raw(`
-CREATE TABLE
-    collections_snapshots AS
-    SELECT
-    1 AS snapshot_id,
-    *
-        FROM
-    public_search.collections
-    LIMIT
-    0;
-
-ALTER TABLE collections_snapshots
-ADD PRIMARY KEY(snapshot_id, archive_id, collection_id);
-
-
-
-CREATE VIEW
+ CREATE VIEW
   public_search.records_view AS
 SELECT
   r.*,
@@ -446,8 +374,24 @@ FROM
   JOIN public_search.collections USING (collection_id)
   LEFT JOIN public_search.list_items programs ON r.program_id=programs.list_item_id
   AND programs.type='program';
-`);
 
+
+        `
+  );
+
+  await knex.schema.createTable("settings", (table) => {
+    table.integer("archive_id").primary().references("archive_id").inTable("archives");
+    table.jsonb("settings").defaultTo('""');
+    table.primary(["archive_id", "setting"]);
+  });
+
+  await knex("settings").insert({
+    archive_id: 1,
+    settings: JSON.stringify({
+      "featured_collection_id": "14",
+      "site_intro_text": "<b>Welcome to the Freedom Archives' Digital Search Engine.</b><span>The Freedom Archives contains over 12,000 hours of audio and video recordings which date from the late-1960s to the mid-90s and chronicle the progressive history of the Bay Area, the United States, and international movements. We are also in the process of scanning and uploading thousands of historical documents which enrich our media holdings. Our collection includes weekly news, poetry, music programs; in-depth interviews and reports on social and cultural issues; numerous voices from behind prison walls; diverse activists; and pamphlets, journals and other materials from many radical organizations and movements.</span>"
+    })
+  });
 };
 
 
