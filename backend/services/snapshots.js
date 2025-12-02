@@ -11,19 +11,146 @@ class Snapshots extends KnexService {
     });
   }
 }
+
 const public_tables = {
   records: {
-    deleteQuery: `delete from public_search.records_snapshot where record_id
-    not in (select record_id from records r join collections c using(collection_id) where r.is_hidden = false and c.is_hidden = false and r.needs_review = true)`,
-    selectTarget: "records_snapshot_view",
+    deleteQuery: /* sql */ `
+DELETE FROM public_search.records_snapshot
+WHERE
+  record_id NOT IN (
+    SELECT
+      record_id
+    FROM
+      records r
+      JOIN collections c USING (collection_id)
+    WHERE
+      r.is_hidden=FALSE
+      AND c.is_hidden=FALSE
+      AND r.needs_review=TRUE
+  )`,
+    selectQuery: /* sql */ `
+SELECT
+  r.archive_id,
+  r.record_id,
+  r.title,
+  r.description,
+  r.vol_number,
+  r.has_digital,
+  r.date_modified,
+  r.date,
+  i.media_type AS media_type,
+  r.primary_media_format_text AS FORMAT,
+  i.url AS url,
+  i.thumbnail AS thumbnail,
+  i.call_number AS call_number,
+  r.year,
+  (
+    SELECT
+      ARRAY_AGG(DISTINCT (VALUE->>'list_item_id')::INTEGER)
+    FROM
+      JSONB_ARRAY_ELEMENTS(r.subjects) AS VALUE
+  ) AS subject_ids,
+  (
+    SELECT
+      ARRAY_AGG(DISTINCT (VALUE->>'list_item_id')::INTEGER)
+    FROM
+      JSONB_ARRAY_ELEMENTS(r.authors) AS VALUE
+  ) AS author_ids,
+  (
+    SELECT
+      ARRAY_AGG(DISTINCT (VALUE->>'list_item_id')::INTEGER)
+    FROM
+      JSONB_ARRAY_ELEMENTS(r.keywords) AS VALUE
+  ) AS keyword_ids,
+  (
+    SELECT
+      ARRAY_AGG(DISTINCT (VALUE->>'list_item_id')::INTEGER)
+    FROM
+      JSONB_ARRAY_ELEMENTS(r.producers) AS VALUE
+  ) AS producer_ids,
+  (
+    SELECT
+      ARRAY_AGG(DISTINCT (VALUE->>'list_item_id')::INTEGER)
+    FROM
+      JSONB_ARRAY_ELEMENTS(r.publishers) AS VALUE
+  ) AS publisher_ids,
+  (r.program->>'list_item_id')::INTEGER AS program_id,
+  r.collection_id,
+  r.fulltext,
+  r.search_text
+FROM
+  unified_records r
+  JOIN collections c USING (collection_id)
+  JOIN media_view i ON r.primary_media_id=i.media_id
+WHERE
+  r.is_hidden=FALSE
+  AND c.is_hidden=FALSE
+  AND r.needs_review=FALSE
+  `,
   },
   collections: {
     deleteQuery: `delete from public_search.collections_snapshot where collection_id
     not in (select collection_id from collections c where c.is_hidden = false and c.needs_review = true)`,
+    selectQuery: /* sql */ `
+SELECT
+  c.archive_id,
+  c.collection_id,
+  c.title,
+  c.description,
+  c.summary,
+  c.thumbnail,
+  c.date_modified,
+  c.parent_collection_id,
+  c.descendant_collection_ids,
+  c.featured_records,
+  c.keywords,
+  c.date_range,
+  c.ancestors,
+  c.display_order,
+  c.children
+FROM
+  unified_collections c
+WHERE
+  c.is_hidden=FALSE
+  AND c.needs_review=FALSE
+    `,
     selectTarget: "collections_snapshot_view",
   },
-  list_items: { selectTarget: "list_items_snapshot_view" },
-  records_to_list_items: { selectTarget: "records_to_list_items_snapshot_view" },
+  list_items: {
+    selectQuery: /* sql */ `
+   SELECT DISTINCT
+      li.list_item_id,
+      r.archive_id,
+      li.item,
+      li.fulltext,
+      li.search_text,
+      li.type,
+      li.description
+    FROM
+      records_to_list_items_snapshot_view r
+      JOIN list_items li USING (list_item_id)
+    `,
+  },
+  records_to_list_items: {
+    selectQuery: /* sql */ `
+SELECT
+  r.archive_id,
+  l.list_item_id,
+  r.record_id
+FROM
+  records_snapshot_view r
+  JOIN records_to_list_items l USING (record_id)
+UNION
+SELECT DISTINCT
+  r.archive_id,
+  l.list_item_id,
+  r.record_id
+FROM
+  media i
+  JOIN media_to_list_items l USING (media_id)
+  JOIN records_snapshot_view r USING (record_id)
+    `,
+  },
   featured_records: {},
   config: {},
 };
@@ -65,7 +192,7 @@ const publishSite = async (context) => {
     await trx(target).insert(trx(`public_search.${table}`).select([snapshot_id, "*"]).where({ archive_id }));
     console.timeEnd(`copy ${table}`);
   }
-  for (const [table, { selectTarget }] of Object.entries(public_tables)) {
+  for (const [table, { selectQuery }] of Object.entries(public_tables)) {
     console.time(`delete ${table}`);
     const deleteQuery = trx(`public_search.${table}`).where({ archive_id });
     if (table == "records") {
@@ -94,9 +221,12 @@ const publishSite = async (context) => {
     console.timeEnd(`delete ${table}`);
     console.time(`update ${table}`);
     await trx(`public_search.${table}`).insert(
-      trx(selectTarget || table)
-        .where({ archive_id })
+      trx.fromRaw(selectQuery ? `(${selectQuery})` : table)
         .select()
+        .where({ archive_id })
+      // trx(selectTarget || table)
+      //   .where({ archive_id })
+      //   .select()
     );
     console.timeEnd(`update ${table}`);
   }
@@ -118,6 +248,42 @@ const publishSite = async (context) => {
   }
   await trx("snapshots").where({ snapshot_id }).update(metadata);
   return context;
+};
+
+const cacheConfig = async (context) => {
+
+  const {
+    params: {
+      transaction: { trx },
+    },
+    data: { archive_id },
+  } = context;
+
+  const keywords = (await trx('list_items').select(trx.raw('jsonb_build_array(item, count(*)) as value'))
+    .join('records_to_list_items AS rti', 'list_items.list_item_id', 'rti.list_item_id')
+    .where({ archive_id })
+    .groupBy('item')
+    .orderBy(trx.raw('count(*)'), 'desc')
+    .limit(30))
+    .map(({ value }) => value);
+
+  console.log(trx('unified_collections')
+    .select(
+      trx.raw(`jsonb_path_query_array(array_to_json(children)::jsonb, '$[*] \\? (@.is_hidden == false)') as children`),
+      'featured_records'
+    )
+    .where({ archive_id, collection_id: 0 }).toString());
+
+  const collection = await trx('unified_collections')
+    .select(
+      trx.raw(`jsonb_path_query_array(array_to_json(children)::jsonb, '$[*] \\? (@.is_hidden == false)') as children`),
+      'featured_records'
+    )
+    .where({ archive_id, collection_id: 0 });
+  await trx(`public_search.config`).insert([
+    { archive_id, setting: "topKeywords", value: JSON.stringify(keywords) },
+    { archive_id, setting: "topCollection", value: JSON.stringify(collection[0]) }]
+  );
 };
 
 const analyzeSnapshot = async ({ service }) => {
@@ -150,7 +316,9 @@ export default (function (app) {
       patch: [transaction.start(), restoreSnapshot],
     },
     after: {
-      create: [publishSite, transaction.end(), analyzeSnapshot],
+      create: [
+        publishSite,
+        cacheConfig, transaction.end(), analyzeSnapshot],
       patch: [transaction.end(), analyzeSnapshot],
     },
     error: {
