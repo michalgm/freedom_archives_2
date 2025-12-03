@@ -1,7 +1,10 @@
+SET SCHEMA 'freedom_archives';
 INSERT INTO
     archives
 VALUES
     (DEFAULT, 'The Freedom Archives');
+
+INSERT INTO related_records select * from freedom_archives_old.related_records;
 
 INSERT INTO
     users (
@@ -321,17 +324,17 @@ contributor_user_id integer REFERENCES users,
 date_created timestamp DEFAULT NULL,
 date_modified timestamp DEFAULT NULL,
 original_doc_id integer DEFAULT NULL */
-CREATE TABLE
-    duplicate_relations AS
-SELECT
-    id
-FROM
-    freedom_archives_old.related_records
-WHERE
-    docid_1=docid_2
-    AND title_1=title_2
-    AND description_1=description_2
-    AND track_number_1=track_number_2;
+-- CREATE TABLE
+--     duplicate_relations AS
+-- SELECT
+--     id
+-- FROM
+--     freedom_archives_old.related_records
+-- WHERE
+--     docid_1=docid_2
+--     AND title_1=title_2
+--     AND description_1=description_2
+--     AND track_number_1=track_number_2;
 
 INSERT INTO
     media (
@@ -515,3 +518,7 @@ SELECT
     TO_JSON(VALUE)
 FROM
     freedom_archives_old.config;
+
+INSERT INTO _unified_collections select * from collections_view;
+
+INSERT INTO _unified_records select * from records_view;
