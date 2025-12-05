@@ -130,3 +130,5 @@ config/production.json
 
 dbtools/cruft/*
 .yarn/*
+
+pgschema
