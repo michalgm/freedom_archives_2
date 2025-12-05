@@ -6,7 +6,7 @@ class UnifiedRecords extends KnexService {
   constructor(options) {
     super({
       ...options,
-      name: "unified_records",
+      name: "_unified_records",
       operators: ["$fullText", "$contains"],
       extendedOperators: {
         $overlap: "&&",

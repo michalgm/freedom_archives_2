@@ -4,12 +4,5 @@
   "port": "PORT",
   "authentication": {
     "secret": "SECRET"
-  },
-  "postgresql": {
-    "connection": {
-      "password": "PGPASSWORD",
-      "user": "PGUSER",
-      "database": "PGDATABASE"
-    }
   }
 }

@@ -1,4 +1,5 @@
 SET SCHEMA 'freedom_archives';
+set search_path to freedom_archives, public;
 INSERT INTO
     archives
 VALUES
@@ -519,6 +520,6 @@ SELECT
 FROM
     freedom_archives_old.config;
 
-INSERT INTO _unified_collections select * from collections_view;
-
-INSERT INTO _unified_records select * from records_view;
+INSERT INTO _unified_collections select * from unified_collections;
+  
+INSERT INTO _unified_records select * from unified_records;

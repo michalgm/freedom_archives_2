@@ -4,7 +4,7 @@ BLUE='\033[0;36m'
 RED='\033[0;31m'
 NC='\033[0m' # No Color
 
-source ./read_pg_config.sh default
+source ./read_pg_config.sh local
 
 SOURCE_DB=mysql://claude_search:$(cat .mysql-opts)@127.0.0.1:3307/claude_search
 TARGET_DB=postgresql://$PGUSER@$PGHOST:$PGPORT/$PGDATABASE
@@ -39,20 +39,20 @@ for schema in freedom_archives public_search; do
 done
 
 log "### Update data"
-(
-  echo "BEGIN;"
-  # shellcheck disable=SC2028
-  echo "\timing"
-  for file in schema_import/00_cleanup.sql schema_import/02_import_data.sql; do
-    if [[ -z $1 && $file = "schema_import/00_cleanup.sql" ]]; then
-      echo "-- skipping cleanup"
-      continue
-    fi
+for file in schema_import/00_cleanup.sql schema_import/02_import_data.sql; do
+  if [[ -z $1 && $file = "schema_import/00_cleanup.sql" ]]; then
+    echo "-- skipping cleanup"
+    continue
+  fi
+  (
+    echo "BEGIN;"
+    # shellcheck disable=SC2028
+    echo "\timing"
     echo "-- Processing $file"
     cat "$file"
-  done
-  echo "COMMIT;"
-) | psql -b -v ON_ERROR_STOP=1
+    echo "COMMIT;"
+  ) | psql -b -v ON_ERROR_STOP=1
+done
 
 # pg_dump -d dameat -s -N freedom_archives_old -N public -N fa_test | sed -e "s/dameat/fa_admin/g" > pre_migrate.sql
 

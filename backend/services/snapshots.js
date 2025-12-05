@@ -12,23 +12,9 @@ class Snapshots extends KnexService {
   }
 }
 
-const public_tables = {
-  records: {
-    deleteQuery: /* sql */ `
-DELETE FROM public_search.records_snapshot
-WHERE
-  record_id NOT IN (
-    SELECT
-      record_id
-    FROM
-      records r
-      JOIN collections c USING (collection_id)
-    WHERE
-      r.is_hidden=FALSE
-      AND c.is_hidden=FALSE
-      AND r.needs_review=TRUE
-  )`,
-    selectQuery: /* sql */ `
+
+
+const records_select_query = /* sql */ `
 SELECT
   r.archive_id,
   r.record_id,
@@ -79,14 +65,52 @@ SELECT
   r.fulltext,
   r.search_text
 FROM
-  unified_records r
+  _unified_records r
   JOIN collections c USING (collection_id)
   JOIN media_view i ON r.primary_media_id=i.media_id
 WHERE
   r.is_hidden=FALSE
   AND c.is_hidden=FALSE
   AND r.needs_review=FALSE
-  `,
+  `;
+
+const records_to_list_items_select_query = /* sql */ `
+SELECT
+  r.archive_id,
+  l.list_item_id,
+  r.record_id
+FROM
+  (${records_select_query}) r
+  JOIN records_to_list_items l USING (record_id)
+UNION
+SELECT DISTINCT
+  r.archive_id,
+  l.list_item_id,
+  r.record_id
+FROM
+  media i
+  JOIN media_to_list_items l USING (media_id)
+  JOIN (${records_select_query}) r USING (record_id)
+`;
+
+
+const public_tables = {
+  records: {
+    deleteQuery: /* sql */ `
+DELETE FROM public_search.records_snapshot
+WHERE
+  record_id NOT IN (
+    SELECT
+      record_id
+    FROM
+      records r
+      JOIN collections c USING (collection_id)
+    WHERE
+      r.is_hidden=FALSE
+      AND c.is_hidden=FALSE
+      AND r.needs_review=TRUE
+  )`,
+    selectQuery: records_select_query,
   },
   collections: {
     deleteQuery: `delete from public_search.collections_snapshot where collection_id
@@ -109,12 +133,11 @@ SELECT
   c.children,
   c.display_order
 FROM
-  unified_collections c
+  _unified_collections c
 WHERE
   c.is_hidden=FALSE
   AND c.needs_review=FALSE
     `,
-    selectTarget: "collections_snapshot_view",
   },
   list_items: {
     selectQuery: /* sql */ `
@@ -127,29 +150,12 @@ WHERE
       li.type,
       li.description
     FROM
-      records_to_list_items_snapshot_view r
+      (${records_to_list_items_select_query}) r
       JOIN list_items li USING (list_item_id)
     `,
   },
   records_to_list_items: {
-    selectQuery: /* sql */ `
-SELECT
-  r.archive_id,
-  l.list_item_id,
-  r.record_id
-FROM
-  records_snapshot_view r
-  JOIN records_to_list_items l USING (record_id)
-UNION
-SELECT DISTINCT
-  r.archive_id,
-  l.list_item_id,
-  r.record_id
-FROM
-  media i
-  JOIN media_to_list_items l USING (media_id)
-  JOIN records_snapshot_view r USING (record_id)
-    `,
+    selectQuery: records_to_list_items_select_query,
   },
   featured_records: {},
   config: {},
@@ -267,14 +273,7 @@ const cacheConfig = async (context) => {
     .limit(30))
     .map(({ value }) => value);
 
-  console.log(trx('unified_collections')
-    .select(
-      trx.raw(`jsonb_path_query_array(array_to_json(children)::jsonb, '$[*] \\? (@.is_hidden == false)') as children`),
-      'featured_records'
-    )
-    .where({ archive_id, collection_id: 0 }).toString());
-
-  const collection = await trx('unified_collections')
+  const collection = await trx('_unified_collections')
     .select(
       trx.raw(`jsonb_path_query_array(array_to_json(children)::jsonb, '$[*] \\? (@.is_hidden == false)') as children`),
       'featured_records'
@@ -287,7 +286,7 @@ const cacheConfig = async (context) => {
 };
 
 const analyzeSnapshot = async ({ service }) => {
-  await service.getModel().raw("VACUUM ANALYZE");
+  await service.getModel().raw(`VACUUM ANALYZE ${Object.keys(public_tables).join(', ')}`);
 };
 
 export default (function (app) {

@@ -36,7 +36,7 @@
     ],
     "connection": {
       "host": "127.0.0.1",
-      "password": "1234"
+      "statement_timeout": 10000
     },
     "migrations": {
       "loadExtensions": [

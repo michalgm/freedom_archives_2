@@ -6,7 +6,7 @@ class UnifiedCollections extends KnexService {
   constructor(options) {
     super({
       ...options,
-      name: "unified_collections",
+      name: "_unified_collections",
       operators: ["$fullText"],
       extendedOperators: {
         $overlap: "&&",

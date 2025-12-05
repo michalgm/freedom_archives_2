@@ -64,6 +64,10 @@ CREATE TABLE IF NOT EXISTS _unified_collections (
     featured_records json,
     fulltext tsvector,
     search_text text,
+    parent json,
+    children json[],
+    descendant_collection_ids integer[],
+    ancestors json[],
     CONSTRAINT _unified_collections_pkey PRIMARY KEY (collection_id)
 );
 
@@ -180,6 +184,15 @@ CREATE TABLE IF NOT EXISTS _unified_records (
     publishers_search text[],
     fulltext tsvector,
     search_text text,
+    primary_media_thumbnail TEXT,
+    primary_media_format_id INTEGER,
+    primary_media_format_text TEXT,
+    primary_media_media_type TEXT,
+    collection json,
+    children json[],
+    siblings json[],
+    parent json,
+    continuations json[],
     CONSTRAINT _unified_records_pkey PRIMARY KEY (record_id)
 );
 
@@ -846,80 +859,11 @@ CREATE OR REPLACE VIEW collections_list_items_view AS
     array_to_json(array_agg(row_to_json(( SELECT i.*::record AS i
            FROM ( SELECT a.list_item_id,
                     a.item) i)) ORDER BY a.item))::jsonb AS items,
-    string_agg(a.item, ' '::text ORDER BY a.item) AS items_text,
+    string_agg(a.item, ' ## '::text ORDER BY a.item) AS items_text,
     array_agg(a.item ORDER BY a.item) AS items_search
    FROM list_items a
      JOIN collections_to_list_items b USING (list_item_id)
   GROUP BY b.collection_id, a.type;
-
---
--- Name: collections_view; Type: VIEW; Schema: -; Owner: -
---
-
-CREATE OR REPLACE VIEW collections_view AS
- SELECT a.collection_id,
-    a.archive_id,
-    a.parent_collection_id,
-    a.title,
-    a.description,
-    a.description_search,
-    a.summary,
-    a.call_number_id,
-    a.call_number_suffix,
-    a.notes,
-    a.thumbnail,
-    a.display_order,
-    a.date_range,
-    a.needs_review,
-    a.is_hidden,
-    a.creator_user_id,
-    a.contributor_user_id,
-    a.date_created,
-    a.date_modified,
-    NULLIF(TRIM(BOTH FROM (COALESCE(call_numbers.item, ''::text) || ' '::text) || COALESCE(a.call_number_suffix, ''::text)), ''::text) AS call_number,
-    (contributor.firstname || ' '::text) || contributor.lastname AS contributor_name,
-    contributor.username AS contributor_username,
-    (creator.firstname || ' '::text) || creator.lastname AS creator_name,
-    creator.username AS creator_username,
-        CASE
-            WHEN call_numbers.list_item_id IS NOT NULL THEN jsonb_build_object('item', call_numbers.item, 'list_item_id', call_numbers.list_item_id)
-            ELSE NULL::jsonb
-        END AS call_number_item,
-    COALESCE(publishers.items, '[]'::jsonb) AS publishers,
-    COALESCE(subjects.items, '[]'::jsonb) AS subjects,
-    COALESCE(keywords.items, '[]'::jsonb) AS keywords,
-    subjects.items_text AS subjects_text,
-    keywords.items_text AS keywords_text,
-    publishers.items_text AS publishers_text,
-    subjects.items_search AS subjects_search,
-    keywords.items_search AS keywords_search,
-    publishers.items_search AS publishers_search,
-    array_to_json(ARRAY( SELECT json_build_object('record_id', b.record_id, 'title', b.title, 'parent_record_id', b.parent_record_id, 'primary_media_thumbnail', primary_media.thumbnail, 'primary_media_format_id', primary_media.format_id, 'primary_media_format_text', list_items.item, 'primary_media_media_type', primary_media.media_type) AS json_build_object
-           FROM records b
-             LEFT JOIN media primary_media ON b.primary_media_id = primary_media.media_id
-             LEFT JOIN list_items ON primary_media.format_id = list_items.list_item_id AND list_items.type = 'format'::text
-          WHERE a.collection_id = b.collection_id
-          ORDER BY b.title)) AS child_records,
-    array_to_json(ARRAY( SELECT json_build_object('record_id', b.record_id, 'title', b.title, 'parent_record_id', b.parent_record_id, 'primary_media_thumbnail', primary_media.thumbnail, 'primary_media_format_id', primary_media.format_id, 'primary_media_format_text', list_items.item, 'primary_media_media_type', primary_media.media_type, 'primary_media_url', primary_media.url, 'label', f.label, 'record_order', f.record_order) AS json_build_object
-           FROM records b
-             LEFT JOIN featured_records f ON b.record_id = f.record_id
-             LEFT JOIN media primary_media ON b.primary_media_id = primary_media.media_id
-             LEFT JOIN list_items ON primary_media.format_id = list_items.list_item_id AND list_items.type = 'format'::text
-          WHERE a.collection_id = f.collection_id
-          ORDER BY f.record_order, b.title)) AS featured_records,
-    ((((setweight(to_tsvector('english'::regconfig, COALESCE(a.title, ''::text)), 'A'::"char") || setweight(to_tsvector('english'::regconfig,
-        CASE
-            WHEN call_numbers.item IS NULL THEN ''::text
-            ELSE TRIM(BOTH FROM (call_numbers.item || ' '::text) || COALESCE(a.call_number_suffix, ''::text))
-        END), 'A'::"char")) || setweight(to_tsvector('english'::regconfig, COALESCE(a.summary, ''::text)), 'B'::"char")) || setweight(to_tsvector('english'::regconfig, COALESCE(a.description_search, ''::text)), 'B'::"char")) || setweight(to_tsvector('english'::regconfig, COALESCE(keywords.items_text, ''::text)), 'C'::"char")) || setweight(to_tsvector('english'::regconfig, COALESCE(subjects.items_text, ''::text)), 'C'::"char") AS fulltext,
-    lower((((((((((((COALESCE(a.title, ''::text) || ' '::text) || COALESCE(call_numbers.item, ''::text)) || ' '::text) || COALESCE(a.call_number_suffix, ''::text)) || ' '::text) || COALESCE(a.summary, ''::text)) || ' '::text) || COALESCE(a.description_search, ''::text)) || ' '::text) || COALESCE(keywords.items_text, ''::text)) || ' '::text) || COALESCE(subjects.items_text, ''::text)) AS search_text
-   FROM collections a
-     LEFT JOIN users contributor ON a.contributor_user_id = contributor.user_id
-     LEFT JOIN users creator ON a.creator_user_id = creator.user_id
-     LEFT JOIN collections_list_items_view subjects ON subjects.type = 'subject'::text AND subjects.collection_id = a.collection_id
-     LEFT JOIN collections_list_items_view keywords ON keywords.type = 'keyword'::text AND keywords.collection_id = a.collection_id
-     LEFT JOIN list_items call_numbers ON call_numbers.type = 'call_number'::text AND a.call_number_id = call_numbers.list_item_id
-     LEFT JOIN collections_list_items_view publishers ON publishers.type = 'publisher'::text AND publishers.collection_id = a.collection_id;
 
 --
 -- Name: list_items_lookup; Type: VIEW; Schema: -; Owner: -
@@ -1170,85 +1114,11 @@ CREATE OR REPLACE VIEW records_list_items_view AS
     array_to_json(array_agg(row_to_json(( SELECT i.*::record AS i
            FROM ( SELECT a.list_item_id,
                     a.item) i)) ORDER BY a.item))::jsonb AS items,
-    string_agg(a.item, ' '::text ORDER BY a.item) AS items_text,
+    string_agg(a.item, ' ## '::text ORDER BY a.item) AS items_text,
     array_agg(a.item ORDER BY a.item) AS items_search
    FROM list_items a
      JOIN records_to_list_items b USING (list_item_id)
   GROUP BY b.record_id, a.type;
-
---
--- Name: records_view; Type: VIEW; Schema: -; Owner: -
---
-
-CREATE OR REPLACE VIEW records_view AS
- SELECT a.record_id,
-    a.archive_id,
-    a.title,
-    a.description,
-    a.notes,
-    a.location,
-    a.vol_number,
-    a.collection_id,
-    a.parent_record_id,
-    a.primary_media_id,
-    a.year,
-    a.month,
-    a.day,
-    a.year_is_circa,
-    a.program_id,
-    a.needs_review,
-    a.is_hidden,
-    a.creator_user_id,
-    a.contributor_user_id,
-    a.date_created,
-    a.date_modified,
-    (((COALESCE(lpad(a.month::text, 2, '0'::text), '00'::text) || '/'::text) || COALESCE(lpad(a.day::text, 2, '0'::text), '00'::text)) || '/'::text) || COALESCE(a.year::text, '0000'::text) AS date_string,
-    ((((COALESCE(a.year::text, '1900'::text) || '-'::text) || COALESCE(a.month::text, '01'::text)) || '-'::text) || COALESCE(a.day::text, '01'::text))::date AS date,
-        CASE
-            WHEN program_lookup.list_item_id IS NOT NULL THEN jsonb_build_object('item', program_lookup.item, 'list_item_id', program_lookup.list_item_id)
-            ELSE NULL::jsonb
-        END AS program,
-    COALESCE(media.media, '[]'::json) AS media,
-    media.has_digital,
-    COALESCE(media.media_count, 0::bigint) AS media_count,
-    (contributor.firstname || ' '::text) || contributor.lastname AS contributor_name,
-    contributor.username AS contributor_username,
-    (creator.firstname || ' '::text) || creator.lastname AS creator_name,
-    creator.username AS creator_username,
-    media.call_numbers,
-    media.call_numbers_text,
-    media.formats,
-    media.qualitys,
-    media.generations,
-    media.media_types,
-    COALESCE(authors.items, '[]'::jsonb) AS authors,
-    COALESCE(publishers.items, '[]'::jsonb) AS publishers,
-    COALESCE(subjects.items, '[]'::jsonb) AS subjects,
-    COALESCE(keywords.items, '[]'::jsonb) AS keywords,
-    COALESCE(producers.items, '[]'::jsonb) AS producers,
-    authors.items_text AS authors_text,
-    subjects.items_text AS subjects_text,
-    keywords.items_text AS keywords_text,
-    producers.items_text AS producers_text,
-    publishers.items_text AS publishers_text,
-    authors.items_search AS authors_search,
-    subjects.items_search AS subjects_search,
-    keywords.items_search AS keywords_search,
-    producers.items_search AS producers_search,
-    publishers.items_search AS publishers_search,
-    ((((setweight(to_tsvector('english'::regconfig, COALESCE(a.title, ''::text)), 'A'::"char") || setweight(to_tsvector('english'::regconfig, COALESCE(media.call_numbers_text, ''::text)), 'A'::"char")) || setweight(to_tsvector('english'::regconfig, COALESCE(a.description, ''::text)), 'B'::"char")) || setweight(to_tsvector('english'::regconfig, COALESCE(authors.items_text, ''::text)), 'C'::"char")) || setweight(to_tsvector('english'::regconfig, COALESCE(subjects.items_text, ''::text)), 'C'::"char")) || setweight(to_tsvector('english'::regconfig, COALESCE(keywords.items_text, ''::text)), 'C'::"char") AS fulltext,
-    lower((((((((((((COALESCE(a.title, ''::text) || ' '::text) || COALESCE(media.call_numbers_text, ''::text)) || ' '::text) || COALESCE(a.description, ''::text)) || ' '::text) || COALESCE(media.call_numbers_text, ''::text)) || ' '::text) || COALESCE(authors.items_text, ''::text)) || ' '::text) || COALESCE(subjects.items_text, ''::text)) || ' '::text) || COALESCE(keywords.items_text, ''::text)) AS search_text
-   FROM records a
-     LEFT JOIN list_items program_lookup ON a.program_id = program_lookup.list_item_id
-     LEFT JOIN record_media_view media USING (record_id)
-     LEFT JOIN media primary_media ON a.primary_media_id = primary_media.media_id
-     LEFT JOIN users contributor ON a.contributor_user_id = contributor.user_id
-     LEFT JOIN users creator ON a.creator_user_id = creator.user_id
-     LEFT JOIN records_list_items_view authors ON authors.type = 'author'::text AND authors.record_id = a.record_id
-     LEFT JOIN records_list_items_view subjects ON subjects.type = 'subject'::text AND subjects.record_id = a.record_id
-     LEFT JOIN records_list_items_view keywords ON keywords.type = 'keyword'::text AND keywords.record_id = a.record_id
-     LEFT JOIN records_list_items_view producers ON producers.type = 'producer'::text AND producers.record_id = a.record_id
-     LEFT JOIN records_list_items_view publishers ON publishers.type = 'publisher'::text AND publishers.record_id = a.record_id;
 
 --
 -- Name: unified_collections; Type: VIEW; Schema: -; Owner: -
@@ -1274,25 +1144,59 @@ CREATE OR REPLACE VIEW unified_collections AS
     a.contributor_user_id,
     a.date_created,
     a.date_modified,
-    a.call_number,
-    a.contributor_name,
-    a.contributor_username,
-    a.creator_name,
-    a.creator_username,
-    a.call_number_item,
-    a.publishers,
-    a.subjects,
-    a.keywords,
-    a.subjects_text,
-    a.keywords_text,
-    a.publishers_text,
-    a.subjects_search,
-    a.keywords_search,
-    a.publishers_search,
-    a.child_records,
-    a.featured_records,
-    a.fulltext,
-    a.search_text,
+    NULLIF(TRIM(BOTH FROM (COALESCE(call_numbers.item, ''::text) || ' '::text) || COALESCE(a.call_number_suffix, ''::text)), ''::text) AS call_number,
+    (contributor.firstname || ' '::text) || contributor.lastname AS contributor_name,
+    contributor.username AS contributor_username,
+    (creator.firstname || ' '::text) || creator.lastname AS creator_name,
+    creator.username AS creator_username,
+        CASE
+            WHEN call_numbers.list_item_id IS NOT NULL THEN jsonb_build_object('item', call_numbers.item, 'list_item_id', call_numbers.list_item_id)
+            ELSE NULL::jsonb
+        END AS call_number_item,
+    COALESCE(publishers.items, '[]'::jsonb) AS publishers,
+    COALESCE(subjects.items, '[]'::jsonb) AS subjects,
+    COALESCE(keywords.items, '[]'::jsonb) AS keywords,
+    subjects.items_text AS subjects_text,
+    keywords.items_text AS keywords_text,
+    publishers.items_text AS publishers_text,
+    subjects.items_search AS subjects_search,
+    keywords.items_search AS keywords_search,
+    publishers.items_search AS publishers_search,
+    array_to_json(ARRAY( SELECT json_build_object('record_id', b.record_id, 'title', b.title, 'parent_record_id', b.parent_record_id, 'primary_media_thumbnail', primary_media.thumbnail, 'primary_media_format_id', primary_media.format_id, 'primary_media_format_text', list_items.item, 'primary_media_media_type', primary_media.media_type) AS json_build_object
+           FROM records b
+             LEFT JOIN media primary_media ON b.primary_media_id = primary_media.media_id
+             LEFT JOIN list_items ON primary_media.format_id = list_items.list_item_id AND list_items.type = 'format'::text
+          WHERE a.collection_id = b.collection_id
+          ORDER BY b.title)) AS child_records,
+    array_to_json(ARRAY( SELECT json_build_object('record_id', b.record_id, 'title', b.title, 'parent_record_id', b.parent_record_id, 'primary_media_thumbnail', primary_media.thumbnail, 'primary_media_format_id', primary_media.format_id, 'primary_media_format_text', list_items.item, 'primary_media_media_type', primary_media.media_type, 'primary_media_url', primary_media.url, 'label', f.label, 'record_order', f.record_order) AS json_build_object
+           FROM records b
+             LEFT JOIN featured_records f ON b.record_id = f.record_id
+             LEFT JOIN media primary_media ON b.primary_media_id = primary_media.media_id
+             LEFT JOIN list_items ON primary_media.format_id = list_items.list_item_id AND list_items.type = 'format'::text
+          WHERE a.collection_id = f.collection_id
+          ORDER BY f.record_order, b.title)) AS featured_records,
+    ((((setweight(to_tsvector('english'::regconfig, COALESCE(a.title, ''::text)), 'A'::"char") || setweight(to_tsvector('english'::regconfig,
+        CASE
+            WHEN call_numbers.item IS NULL THEN ''::text
+            ELSE TRIM(BOTH FROM (call_numbers.item || ' '::text) || COALESCE(a.call_number_suffix, ''::text))
+        END), 'A'::"char")) || setweight(to_tsvector('english'::regconfig, COALESCE(a.summary, ''::text)), 'B'::"char")) || setweight(to_tsvector('english'::regconfig, COALESCE(a.description_search, ''::text)), 'B'::"char")) || setweight(to_tsvector('english'::regconfig, COALESCE(keywords.items_text, ''::text)), 'C'::"char")) || setweight(to_tsvector('english'::regconfig, COALESCE(subjects.items_text, ''::text)), 'C'::"char") AS fulltext,
+    lower(
+      regexp_replace(
+        concat_ws(
+          ' ## ',
+          nullif(a.title, ''),                
+          nullif(call_numbers.item, ''),
+          nullif(a.call_number_suffix, ''),
+          nullif(a.summary, ''),
+          nullif(a.description_search, ''),
+          nullif(keywords.items_text, ''),
+          nullif(subjects.items_text, '')
+        ),
+        '\s+',
+        ' ',
+        'g'
+      )
+    ) AS search_text,
     COALESCE(( SELECT row_to_json(p.*) AS row_to_json
            FROM collection_summaries p
           WHERE a.parent_collection_id = p.collection_id), '{}'::json) AS parent,
@@ -1302,8 +1206,14 @@ CREATE OR REPLACE VIEW unified_collections AS
           ORDER BY collection_summaries.display_order) AS children,
     d.descendant_ids AS descendant_collection_ids,
     ancestors.ancestors
-   FROM _unified_collections a
+   FROM collections a
      LEFT JOIN collection_summaries b USING (collection_id)
+        LEFT JOIN users contributor ON a.contributor_user_id = contributor.user_id
+     LEFT JOIN users creator ON a.creator_user_id = creator.user_id
+     LEFT JOIN collections_list_items_view subjects ON subjects.type = 'subject'::text AND subjects.collection_id = a.collection_id
+     LEFT JOIN collections_list_items_view keywords ON keywords.type = 'keyword'::text AND keywords.collection_id = a.collection_id
+     LEFT JOIN list_items call_numbers ON call_numbers.type = 'call_number'::text AND a.call_number_id = call_numbers.list_item_id
+     LEFT JOIN collections_list_items_view publishers ON publishers.type = 'publisher'::text AND publishers.collection_id = a.collection_id
      LEFT JOIN LATERAL ( WITH RECURSIVE d AS (
                  SELECT collections.collection_id
                    FROM collections
@@ -1334,29 +1244,6 @@ CREATE OR REPLACE VIEW unified_collections AS
            FROM ancestors_cte) ancestors ON true;
 
 --
--- Name: collections_snapshot_view; Type: VIEW; Schema: -; Owner: -
---
-
-CREATE OR REPLACE VIEW collections_snapshot_view AS
- SELECT archive_id,
-    collection_id,
-    title,
-    description,
-    summary,
-    thumbnail,
-    date_modified,
-    parent_collection_id,
-    descendant_collection_ids,
-    featured_records,
-    keywords,
-    date_range,
-    ancestors,
-    children,
-    display_order
-   FROM unified_collections c
-  WHERE is_hidden = false AND needs_review = false;
-
---
 -- Name: unified_records; Type: VIEW; Schema: -; Owner: -
 --
 
@@ -1382,39 +1269,57 @@ CREATE OR REPLACE VIEW unified_records AS
     a.contributor_user_id,
     a.date_created,
     a.date_modified,
-    a.date_string,
-    a.date,
-    a.program,
-    a.media,
-    a.has_digital,
-    a.media_count,
-    a.contributor_name,
-    a.contributor_username,
-    a.creator_name,
-    a.creator_username,
-    a.call_numbers,
-    a.call_numbers_text,
-    a.formats,
-    a.qualitys,
-    a.generations,
-    a.media_types,
-    a.authors,
-    a.publishers,
-    a.subjects,
-    a.keywords,
-    a.producers,
-    a.authors_text,
-    a.subjects_text,
-    a.keywords_text,
-    a.producers_text,
-    a.publishers_text,
-    a.authors_search,
-    a.subjects_search,
-    a.keywords_search,
-    a.producers_search,
-    a.publishers_search,
-    a.fulltext,
-    a.search_text,
+     (((COALESCE(lpad(a.month::text, 2, '0'::text), '00'::text) || '/'::text) || COALESCE(lpad(a.day::text, 2, '0'::text), '00'::text)) || '/'::text) || COALESCE(a.year::text, '0000'::text) AS date_string,
+    ((((COALESCE(a.year::text, '1900'::text) || '-'::text) || COALESCE(a.month::text, '01'::text)) || '-'::text) || COALESCE(a.day::text, '01'::text))::date AS date,
+      CASE
+          WHEN program_lookup.list_item_id IS NOT NULL THEN jsonb_build_object('item', program_lookup.item, 'list_item_id', program_lookup.list_item_id)
+          ELSE NULL::jsonb
+      END AS program,
+    COALESCE(media.media, '[]'::json) AS media,
+    media.has_digital,
+    COALESCE(media.media_count, 0::bigint) AS media_count,
+    (contributor.firstname || ' '::text) || contributor.lastname AS contributor_name,
+    contributor.username AS contributor_username,
+    (creator.firstname || ' '::text) || creator.lastname AS creator_name,
+    creator.username AS creator_username,
+    media.call_numbers,
+    media.call_numbers_text,
+    media.formats,
+    media.qualitys,
+    media.generations,
+    media.media_types,
+    COALESCE(authors.items, '[]'::jsonb) AS authors,
+    COALESCE(publishers.items, '[]'::jsonb) AS publishers,
+    COALESCE(subjects.items, '[]'::jsonb) AS subjects,
+    COALESCE(keywords.items, '[]'::jsonb) AS keywords,
+    COALESCE(producers.items, '[]'::jsonb) AS producers,
+    authors.items_text AS authors_text,
+    subjects.items_text AS subjects_text,
+    keywords.items_text AS keywords_text,
+    producers.items_text AS producers_text,
+    publishers.items_text AS publishers_text,
+    authors.items_search AS authors_search,
+    subjects.items_search AS subjects_search,
+    keywords.items_search AS keywords_search,
+    producers.items_search AS producers_search,
+    publishers.items_search AS publishers_search,
+    ((((setweight(to_tsvector('english'::regconfig, COALESCE(a.title, ''::text)), 'A'::"char") || setweight(to_tsvector('english'::regconfig, COALESCE(media.call_numbers_text, ''::text)), 'A'::"char")) || setweight(to_tsvector('english'::regconfig, COALESCE(a.description, ''::text)), 'B'::"char")) || setweight(to_tsvector('english'::regconfig, COALESCE(authors.items_text, ''::text)), 'C'::"char")) || setweight(to_tsvector('english'::regconfig, COALESCE(subjects.items_text, ''::text)), 'C'::"char")) || setweight(to_tsvector('english'::regconfig, COALESCE(keywords.items_text, ''::text)), 'C'::"char") AS fulltext,
+    lower(
+      regexp_replace(
+        concat_ws(
+          ' ## ',
+          nullif(a.title, ''),                
+          nullif(a.description, ''),
+          nullif(media.call_numbers_text, ''),
+          nullif(authors.items_text, ''),
+          nullif(subjects.items_text, ''),
+          nullif(keywords.items_text, '')
+        ),
+        '\s+',
+        ' ',
+        'g'
+      )
+    ) AS search_text,
     b.primary_media_thumbnail,
     b.primary_media_format_id,
     b.primary_media_format_text,
@@ -1424,8 +1329,18 @@ CREATE OR REPLACE VIEW unified_records AS
     siblings.siblings,
     parent.parent,
     continuations.continuations
-   FROM _unified_records a
+   FROM records a
      JOIN record_summaries b USING (record_id)
+     LEFT JOIN list_items program_lookup ON a.program_id = program_lookup.list_item_id
+     LEFT JOIN record_media_view media USING (record_id)
+     LEFT JOIN media primary_media ON a.primary_media_id = primary_media.media_id
+     LEFT JOIN users contributor ON a.contributor_user_id = contributor.user_id
+     LEFT JOIN users creator ON a.creator_user_id = creator.user_id
+     LEFT JOIN records_list_items_view authors ON authors.type = 'author'::text AND authors.record_id = a.record_id
+     LEFT JOIN records_list_items_view subjects ON subjects.type = 'subject'::text AND subjects.record_id = a.record_id
+     LEFT JOIN records_list_items_view keywords ON keywords.type = 'keyword'::text AND keywords.record_id = a.record_id
+     LEFT JOIN records_list_items_view producers ON producers.type = 'producer'::text AND producers.record_id = a.record_id
+     LEFT JOIN records_list_items_view publishers ON publishers.type = 'publisher'::text AND publishers.record_id = a.record_id
      LEFT JOIN record_summaries parent_record ON a.parent_record_id = parent_record.record_id
      LEFT JOIN LATERAL ( SELECT array_agg(row_to_json(record_summaries.*) ORDER BY record_summaries.title) AS children
            FROM record_summaries
@@ -1439,77 +1354,6 @@ CREATE OR REPLACE VIEW unified_records AS
              JOIN record_summaries cr ON rid.rid = cr.record_id
           WHERE a.record_id = ANY (c.continuation_records)) continuations ON true
      CROSS JOIN LATERAL ( SELECT COALESCE(row_to_json(parent_record.*), NULL::json) AS parent) parent;
-
---
--- Name: records_snapshot_view; Type: VIEW; Schema: -; Owner: -
---
-
-CREATE OR REPLACE VIEW records_snapshot_view AS
- SELECT r.archive_id,
-    r.record_id,
-    r.title,
-    r.description,
-    r.vol_number,
-    r.has_digital,
-    r.date_modified,
-    r.date,
-    i.media_type,
-    r.primary_media_format_text AS format,
-    i.url,
-    i.thumbnail,
-    i.call_number,
-    r.year,
-    ( SELECT array_agg(DISTINCT (value.value ->> 'list_item_id'::text)::integer) AS array_agg
-           FROM jsonb_array_elements(r.subjects) value(value)) AS subject_ids,
-    ( SELECT array_agg(DISTINCT (value.value ->> 'list_item_id'::text)::integer) AS array_agg
-           FROM jsonb_array_elements(r.authors) value(value)) AS author_ids,
-    ( SELECT array_agg(DISTINCT (value.value ->> 'list_item_id'::text)::integer) AS array_agg
-           FROM jsonb_array_elements(r.keywords) value(value)) AS keyword_ids,
-    ( SELECT array_agg(DISTINCT (value.value ->> 'list_item_id'::text)::integer) AS array_agg
-           FROM jsonb_array_elements(r.producers) value(value)) AS producer_ids,
-    ( SELECT array_agg(DISTINCT (value.value ->> 'list_item_id'::text)::integer) AS array_agg
-           FROM jsonb_array_elements(r.publishers) value(value)) AS publisher_ids,
-    (r.program ->> 'list_item_id'::text)::integer AS program_id,
-    r.collection_id,
-    r.fulltext,
-    r.search_text
-   FROM unified_records r
-     JOIN collections c USING (collection_id)
-     JOIN media_view i ON r.primary_media_id = i.media_id
-  WHERE r.is_hidden = false AND c.is_hidden = false AND r.needs_review = false;
-
---
--- Name: records_to_list_items_snapshot_view; Type: VIEW; Schema: -; Owner: -
---
-
-CREATE OR REPLACE VIEW records_to_list_items_snapshot_view AS
- SELECT r.archive_id,
-    l.list_item_id,
-    r.record_id
-   FROM records_snapshot_view r
-     JOIN records_to_list_items l USING (record_id)
-UNION
- SELECT DISTINCT r.archive_id,
-    l.list_item_id,
-    r.record_id
-   FROM media i
-     JOIN media_to_list_items l USING (media_id)
-     JOIN records_snapshot_view r USING (record_id);
-
---
--- Name: list_items_snapshot_view; Type: VIEW; Schema: -; Owner: -
---
-
-CREATE OR REPLACE VIEW list_items_snapshot_view AS
- SELECT DISTINCT li.list_item_id,
-    r.archive_id,
-    li.item,
-    li.fulltext,
-    li.search_text,
-    li.type,
-    li.description
-   FROM records_to_list_items_snapshot_view r
-     JOIN list_items li USING (list_item_id);
 
 --
 -- Name: review_changes; Type: VIEW; Schema: -; Owner: -
@@ -1528,7 +1372,7 @@ CREATE OR REPLACE VIEW review_changes AS
     unified_records.needs_review,
     unified_records.contributor_user_id,
     unified_records.contributor_name
-   FROM unified_records
+   FROM _unified_records AS unified_records
   WHERE unified_records.date_modified IS NOT NULL
 UNION
  SELECT unified_collections.collection_id AS id,
@@ -1543,7 +1387,7 @@ UNION
     unified_collections.needs_review,
     unified_collections.contributor_user_id,
     unified_collections.contributor_name
-   FROM unified_collections
+   FROM _unified_collections AS unified_collections 
   WHERE unified_collections.date_modified IS NOT NULL;
 
 --
@@ -1564,7 +1408,7 @@ CREATE OR REPLACE VIEW unified_search_view AS
     unified_records.primary_media_media_type,
     unified_records.has_digital,
     NULL::text AS thumbnail
-   FROM unified_records
+   FROM _unified_records AS unified_records
 UNION ALL
  SELECT 'collection'::text AS result_type,
     unified_collections.collection_id AS id,
@@ -1582,5 +1426,5 @@ UNION ALL
     NULL::text AS primary_media_media_type,
     true AS has_digital,
     unified_collections.thumbnail
-   FROM unified_collections;
+   FROM _unified_collections AS unified_collections;
 

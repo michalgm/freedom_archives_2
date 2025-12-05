@@ -14,16 +14,23 @@ const checkAuth = async (context) => {
   return context;
 };
 export const before = {
-  all: [checkAuth, authRoles],
+  all: [
+    checkAuth,
+    authRoles,
+    // logHook,
+  ],
   find: [allowDisablePagination],
   get: [],
-  create: [transaction.start(), setArchive], //FIXME for new archives/archive users
+  create: [transaction.start(), setArchive], // FIXME for new archives/archive users
   update: [transaction.start()],
   patch: [transaction.start()],
   remove: [transaction.start()],
 };
 export const after = {
-  all: [debugQuery],
+  all: [
+    debugQuery,
+    // logHook,
+  ],
   find: [],
   get: [],
   create: [transaction.end()],
@@ -42,7 +49,7 @@ export const error = {
         console.error(
           `Error in ${context.path} calling ${context.method} method on ${context.id}`,
           context.error.message,
-          context.error.stack
+          context.error.stack,
         );
       }
       return context;

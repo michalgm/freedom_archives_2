@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-ENV=${1:-default}
+ENV=${1:-local}
 
 SCRIPT_DIR="$(cd -- "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 CONFIG_FILE=$SCRIPT_DIR/../config/$ENV.json

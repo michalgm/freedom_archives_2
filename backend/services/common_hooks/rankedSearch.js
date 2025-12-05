@@ -7,6 +7,9 @@ const CALL_NUMBERS_WEIGHT = 500;
 const TRIGRAM_WEIGHT = 100;
 const FULL_TERM_MATCH_BOOST = 200;
 const POSITION_BOOST_WEIGHT = 5;
+const TITLE_MATCH_BOOST = 1500;
+
+const FULLTEXT_NORMALIZATION_CONFIG = 32; // normalize for length and frequency
 
 function applyBasicPrefixing(input) {
   return input
@@ -28,7 +31,7 @@ const isNumeric = /^\d+$/;
 
 
 function getFulltextRank() {
-  return `${FULLTEXT_WEIGHT} * COALESCE(ts_rank_cd(fulltext, ts_query.query, 1), 0)`;
+  return `${FULLTEXT_WEIGHT} * COALESCE(ts_rank_cd(fulltext, ts_query.query, ${FULLTEXT_NORMALIZATION_CONFIG}), 0)`;
 }
 
 function getTrigramRank(knex, searchTerm) {
@@ -38,33 +41,37 @@ function getTrigramRank(knex, searchTerm) {
 function getCallNumbersBoost(knex, tableName, searchTerm) {
   return tableName.match(/(records|collections)/)
     ? knex.raw(
-      `CASE 
-          WHEN ${tableName.match('record') ? `EXISTS( SELECT 1 FROM unnest(call_numbers) AS elem WHERE elem ILIKE ? )` : `call_number ILIKE ?`} THEN ${CALL_NUMBERS_WEIGHT}
-          ELSE 0 
-         END`,
-      [`${searchTerm}%`]
+      `CASE WHEN ${tableName.match('record') ? `EXISTS( SELECT 1 FROM unnest(call_numbers) AS elem WHERE elem LIKE ? )` : `call_number LIKE ?`} THEN ${CALL_NUMBERS_WEIGHT} ELSE 0 END`,
+      [`${searchTerm}%`],
     ).toString()
     : '0';
 }
 
 function getFullTermBoost(knex, searchTerm) {
-  return knex.raw(`CASE WHEN search_text ilike ? THEN ${FULL_TERM_MATCH_BOOST} ELSE 0 END`, [`%${searchTerm}%`]).toString();
+  return knex.raw(`CASE WHEN search_text LIKE ? THEN ${FULL_TERM_MATCH_BOOST} ELSE 0 END`, [`%${searchTerm}%`]).toString();
 }
 
 function getPositionScore(knex, searchTerm) {
   return knex.raw(
     `CASE WHEN position(? in search_text) > 0 THEN ${(POSITION_BOOST_WEIGHT)}::float / position(? in search_text) ELSE 0 END`,
-    [searchTerm, searchTerm]
+    [searchTerm, searchTerm],
   ).toString();
 }
 
-// Compose rank expression based on enabled facets
+function getTitleMatchBoost(knex, searchTerm) {
+  return knex.raw(
+    `CASE WHEN search_text LIKE ? THEN ${(TITLE_MATCH_BOOST)}::float ELSE 0 END`,
+    [`${searchTerm}%`],
+  ).toString();
+}
+
 function buildRankExpr({ useFulltext, useTrigram, useCallNumbers, useFullTerm, usePosition }, knex, tableName, searchTerm) {
   const parts = [];
   if (useFulltext) parts.push(getFulltextRank());
   if (useTrigram) parts.push(getTrigramRank(knex, searchTerm));
   if (useCallNumbers) parts.push(getCallNumbersBoost(knex, tableName, searchTerm));
   if (useFullTerm) parts.push(getFullTermBoost(knex, searchTerm));
+  if (useFullTerm) parts.push(getTitleMatchBoost(knex, searchTerm));
   if (usePosition) parts.push(getPositionScore(knex, searchTerm));
   return parts.length ? parts.join(' + ') : '0';
 }
@@ -76,7 +83,7 @@ function getRankSelect(knex, useIdCheck, idField, idValue, rankExpr) {
         CASE WHEN "${idField}" = ? THEN 1000000
         ELSE (${rankExpr})
         END
-      ) as rank`, [idValue]
+      ) as rank`, [idValue],
     );
   }
   return knex.raw(`(${rankExpr}) as rank`);
@@ -155,7 +162,7 @@ export const rankedSearch = async (context) => {
     },
     knex,
     tableName,
-    fuzzyTerm
+    fuzzyTerm,
   );
 
   let rankedQuery = baseQuery.clone()
@@ -171,8 +178,8 @@ export const rankedSearch = async (context) => {
               SELECT 1 FROM "${tableName}" 
               WHERE "${idField}" = ?
             ) AS exists`,
-          [idValue]
-        ) : knex.raw(`SELECT false AS exists`)
+          [idValue],
+        ) : knex.raw(`SELECT false AS exists`),
       )
       .crossJoin('id_check');
   }
@@ -180,7 +187,7 @@ export const rankedSearch = async (context) => {
   rankedQuery = rankedQuery
     .modify(q => buildWhere(q, { idField, idValue, fuzzyTerm, useIdCheck, useFuzzy }))
     .select(
-      getRankSelect(knex, useIdCheck, idField, idValue, rankExpr)
+      getRankSelect(knex, useIdCheck, idField, idValue, rankExpr),
     );
 
   console.log("Ranked Query:", rankedQuery.toString());

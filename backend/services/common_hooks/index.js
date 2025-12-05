@@ -21,7 +21,7 @@ export const setUser = (context) => {
     method,
     service: { Model },
     params: {
-      user
+      user,
     },
   } = context;
   if (!user) return context;
@@ -108,7 +108,7 @@ export const updateListItemRelations = async (context) => {
           relation_data[type].map(({ list_item_id }) => ({
             list_item_id,
             [`${table}_id`]: id,
-          }))
+          })),
         );
       }
     }
@@ -127,7 +127,7 @@ export const refreshView = async (context) => {
       transaction: { trx },
     },
     service: { fullName },
-    app
+    app,
   } = context;
   const table = fullName.slice(0, -1);
   const id = context.id || result[`${table}_id`];
@@ -142,24 +142,12 @@ export const refreshView = async (context) => {
   }
 
   if (["update", "patch", "create"].includes(method)) {
-    const [current_data = {}] = await trx(`${table}s_view`).where(`${table}_id`, id).select();
-    const encoded = {};
-    Object.keys(current_data).forEach((key) => {
-      if (
-        current_data[key] &&
-        typeof current_data[key] === "object" &&
-        !key.includes("_search") &&
-        !["call_numbers", "formats", "qualitys", "generations", "media_types", "siblings"].includes(key)
-      ) {
-        encoded[key] = JSON.stringify(current_data[key]);
-      } else {
-        encoded[key] = current_data[key];
-        // delete current_data[key]; //FIXME?
-      }
-    });
-    // context.result = current_data;
-    await trx(`_unified_${table}s`).insert(encoded);
-    context.result = (await trx(`unified_${fullName}`).where(`${table}_id`, id).select())?.[0] || {};
+    const res = await trx(`_unified_${table}s`).insert(
+      function () {
+        this.select("*").from(`unified_${table}s`).where(`${table}_id`, id);
+      })
+      .returning('*');
+    context.result = res?.[0] || {};
     return context;
   }
 };
@@ -180,6 +168,10 @@ export const validateArchive = (context) => {
       throw new Error("Archive mismatch");
     }
   });
+};
+
+export const logHook = (context) => {
+  console.log(`HOOK: ${context.path} ${context.method} ${context.type} ${context.id ? `ID:${context.id}` : ""}`);
 };
 
 export const debugQuery = (context) => {

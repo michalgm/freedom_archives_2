@@ -99,7 +99,7 @@ const prepData = async (context) => {
     Object.keys(data).forEach((key) => {
       if (
         ["call_numbers", "formats", "qualitys", "generations", "media_types", "siblings", "relationships"].includes(
-          key
+          key,
         ) ||
         key.match("_search")
       ) {
@@ -177,7 +177,7 @@ const updateRelations = async (context) => {
         delete media.media_id;
         media.record_id ||= id;
         return app.service("api/media").create(media, params);
-      })
+      }),
     );
     if (media.length && !data.primary_media_id) {
       await app.service("api/records")._patch(id, { primary_media_id: media[0].media_id }, params);
@@ -191,7 +191,7 @@ const updateRelations = async (context) => {
         } else if (child.record_id && !child.parent_record_id) {
           return app.service("api/records").patch(child.record_id, { parent_record_id: id }, params);
         }
-      })
+      }),
     );
   }
   if (relation_data.continuations !== undefined) {
