@@ -33,14 +33,14 @@ export const appConfig = {
         path: "",
         redirect: "/admin/records",
       },
-      {
-        path: "search",
-        component: "PublicSearch",
-        sidebar: {
-          label: "Search Records",
-          icon: "",
-        },
-      },
+      // {
+      //   path: "search",
+      //   component: "PublicSearch",
+      //   sidebar: {
+      //     label: "Search Records",
+      //     icon: "",
+      //   },
+      // },
       {
         path: "records",
         component: "Records",
