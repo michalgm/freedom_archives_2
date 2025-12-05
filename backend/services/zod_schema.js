@@ -229,6 +229,8 @@ const recordItemSchema = recordsSchema.pick({
   title: true,
 });
 
+const embeddedRecordItemSchema = recordItemSchema.extend({ delete: z.boolean().optional() });
+
 const mediaDataSchema = mediaSchema.pick({
   media_id: true,
   call_number_item: true,
@@ -332,6 +334,8 @@ const collectionItemSchema = collectionsSchema.pick({
   title: true,
 });
 
+const embeddedCollectionItemSchema = collectionItemSchema.extend({ delete: z.boolean().optional() });
+
 const collectionsDataSchema = collectionsSchema
   .pick({
     title: true,
@@ -350,10 +354,10 @@ const collectionsDataSchema = collectionsSchema
     keywords: true,
   })
   .extend({
-    child_records: z.array(recordItemSchema).nullable().optional(),
-    parent: collectionItemSchema.nullable().optional().describe('Parent Collection'),
-    children: z.array(collectionItemSchema).nullable().optional().describe('Child Collections'),
-    featured_records: z.array(recordItemSchema).nullable().optional(),
+    child_records: z.array(embeddedRecordItemSchema).nullable().optional(),
+    parent: embeddedCollectionItemSchema.nullable().optional().describe('Parent Collection'),
+    children: z.array(embeddedCollectionItemSchema).nullable().optional().describe('Child Collections'),
+    featured_records: z.array(embeddedRecordItemSchema).nullable().optional(),
   });
 
 export default {
