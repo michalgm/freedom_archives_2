@@ -96,6 +96,7 @@ const PublicLayout = () => {
                   xs: 140,
                 },
                 textAlign: "center",
+                overflow: "hidden",
               }}
             >
               <a href="https://freedomarchives.org" title="Go to Freedom Archives Home" >
@@ -117,7 +118,7 @@ const PublicLayout = () => {
                       md: -248,
                       sm: -223,
                       xs: -172,
-                    }
+                    },
                   }}
                 />
               </a>
@@ -134,7 +135,7 @@ const PublicLayout = () => {
                     md: 3,
                     sm: 2,
                     xs: 1,
-                  }
+                  },
                 }}
               >
                 {headerLinks.map((link) => (

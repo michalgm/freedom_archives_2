@@ -21,19 +21,13 @@ import Thumbnail from "src/components/Thumbnail";
 import { ItemStack } from "src/public/ItemCard";
 import Search from "src/public/PublicSearch/PublicSearch";
 
-const scrollToSection = (e, id) => {
-  e.preventDefault();
+const scrollToSection = (id) => {
   const element = document.getElementById(id);
-  if (element) {
-    element.scrollIntoView({
-      behavior: "smooth",
-      block: "start",
-      inline: "nearest",
-    });
-    if (id === 'overview') {
-      document.getElementsByClassName('overview-scrollable')[0].scroll(0, 0);
-    }
-  }
+  element?.scrollIntoView({
+    behavior: "smooth",
+    block: "start",
+    inline: "nearest",
+  });
 };
 
 const DetailsRow = ({ label, value }) => {
@@ -75,10 +69,26 @@ const PublicCollections = () => {
   const [collection, setCollection] = useState(null);
   const [search, setSearch] = useState({});
   const [loading, setLoading] = useState(false);
-  const [tab, setTab] = useState(0);
-  // const [recordsContainerHeight, setRecordsContainerHeight] = useState(400); // fallback value
+  const [tab, setTab] = useState("overview");
+  const [scrollMarginTop, setScrollMarginTop] = useState(121); // default fallback
 
+  const headerRef = useRef(null);
   const containerRef = useRef(null);
+
+  useEffect(() => {
+    if (!headerRef.current) return;
+
+    const resizeObserver = new ResizeObserver((entries) => {
+      for (const entry of entries) {
+        setScrollMarginTop(entry.target.offsetHeight + 16); // header height + spacing
+      }
+    });
+
+    resizeObserver.observe(headerRef.current);
+
+    return () => resizeObserver.disconnect();
+  }, []);
+
   useEffect(() => {
     const fetchCollection = async () => {
       if (collection_id) {
@@ -112,9 +122,10 @@ const PublicCollections = () => {
   const hasChildren = collection.children && collection.children.length !== 0;
   // const hasSidebar = hasFeatured || hasChildren;
   return (
-    <Box sx={{ mb: 1 }} className="collection flex-container">
+    <Box className="collection flex-container" sx={{ mb: 1, overflowX: "unset !important" }} >
       <Box
         id="collection-header"
+        ref={headerRef}
         sx={{
           position: "sticky",
           top: 0,
@@ -166,38 +177,30 @@ const PublicCollections = () => {
           </Typography>
           <Tabs
             value={tab}
-            onChange={(_e, newValue) => setTab(newValue)}
+            onChange={(_e, newValue) => {
+              setTab(newValue)
+              scrollToSection(newValue)
+            }}
             variant="scrollable"
             scrollButtons="auto"
             sx={{
               '& .MuiTab-root': {
                 padding: {
                   sm: "8px 12px",
-                  md: '12px 16px'
-                }
+                  md: '12px 16px',
+                },
               },
             }}
           >
-            <Tab
-              label="Overview"
-              onClick={(e) => scrollToSection(e, "overview")}
+            <Tab label="Overview" value="overview"
             />
             {hasFeatured && (
-              <Tab
-                label="Featured Content"
-                onClick={(e) => scrollToSection(e, "featured")}
-              />
+              <Tab label="Featured Content" value="featured" />
             )}
             {hasChildren && (
-              <Tab
-                label="Subcollections"
-                onClick={(e) => scrollToSection(e, "subcollections")}
-              />
+              <Tab label="Subcollections" value="subcollections" />
             )}
-            <Tab
-              label="Records"
-              onClick={(e) => scrollToSection(e, "records")}
-            />
+            <Tab label="Records" value="records" />
           </Tabs>
         </Stack>
       </Box>
@@ -208,10 +211,11 @@ const PublicCollections = () => {
         sx={{
           flex: "1 1 auto",
           minHeight: 0,
-          overflow: "auto",
         }}
       >
-        <Grid container spacing={2} id="overview">
+        <Grid container spacing={2} id="overview" sx={{
+          scrollMarginTop: scrollMarginTop,
+        }}>
           <Grid size={{ xs: 12, md: hasFeatured ? 7 : 12 }}>
             <Paper
               variant="outlined"
@@ -268,7 +272,7 @@ const PublicCollections = () => {
             </Paper>
           </Grid>
           <Show when={hasFeatured}>
-            <Grid size={{ xs: 12, md: 5 }} id="featured">
+            <Grid size={{ xs: 12, md: 5 }} sx={{ scrollMarginTop }} id="featured">
               <Paper
                 variant="outlined"
                 sx={{ p: 2, flexGrow: 1, height: "fit-content" }}
@@ -284,7 +288,7 @@ const PublicCollections = () => {
           </Show>
         </Grid>
         <Show when={collection.children && collection.children.length !== 0}>
-          <Paper id="subcollections" variant="outlined" sx={{ p: 2 }}>
+          <Paper id="subcollections" variant="outlined" sx={{ p: 2, scrollMarginTop }}>
             <ItemStack
               title="Subcollections"
               type="collection"
@@ -303,7 +307,10 @@ const PublicCollections = () => {
             flexDirection: "column",
             display: "flex",
             flexShrink: 0,
-            height: 'calc(100vh - 38px)',
+            height: 'calc(100vh - 38px - 105px - 16px)', // viewport - margin - header - padding
+            scrollSnapAlign: "start",
+            scrollMarginTop,
+            scrollSnapStop: "always",
           }}
         >
           <Typography variant="header">Records</Typography>
