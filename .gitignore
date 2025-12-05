@@ -110,7 +110,6 @@ $RECYCLE.BIN/
 lib/
 data/
 backend.bak/
-config/local.json
 # public/
 
 dbtools/bak/
@@ -127,6 +126,8 @@ sharp-libvips/sharp-libvips
 frontend/dist/*
 frontend/public/assets/*
 config/production.json
+config/local.json
+config/development.json
 
 dbtools/cruft/*
 .yarn/*

@@ -1,18 +1,18 @@
 #!/bin/bash
 
-ENV=${1:-local}
+ENV=${1:-development}
 if [ -n "$1" ]; then
   ENV=$1
   shift
 else
-  ENV=local
+  ENV=development
 fi
 
 if [ "$ENV" == "p" ] || [ "$ENV" == "prod" ]; then
   ENV="production"
 fi
 
-if [ "$ENV" != "local" ] && [ "$ENV" != "production" ]; then
+if [ "$ENV" != "development" ] && [ "$ENV" != "production" ]; then
   echo "Unknown environment: $ENV"
   exit 1
 fi

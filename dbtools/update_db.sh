@@ -4,7 +4,7 @@ BLUE='\033[0;36m'
 RED='\033[0;31m'
 NC='\033[0m' # No Color
 
-source ./read_pg_config.sh local
+source ./read_pg_config.sh development
 
 SOURCE_DB=mysql://claude_search:$(cat .mysql-opts)@127.0.0.1:3307/claude_search
 TARGET_DB=postgresql://$PGUSER@$PGHOST:$PGPORT/$PGDATABASE

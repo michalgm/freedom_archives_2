@@ -35,7 +35,6 @@
       "freedom_archives"
     ],
     "connection": {
-      "host": "127.0.0.1",
       "statement_timeout": 10000
     },
     "migrations": {
