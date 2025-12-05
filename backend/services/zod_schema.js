@@ -27,7 +27,7 @@ const archivesSchema = z.object({
 });
 
 const list_itemsSchema = z.object({
-  list_item_id: z.number(),
+  list_item_id: z.union([z.number(), z.literal("new")]),
   item: z.string().min(1),
   description: z.string().nullable().optional(),
   merge_target_id: z.number().nullable().optional(),
@@ -148,7 +148,7 @@ const recordsSchema = z.object({
       if (parts.length !== 3) {
         ctx.addIssue({
           code: z.ZodIssueCode.custom,
-          message: "Date must be in MM/DD/YYYY format"
+          message: "Date must be in MM/DD/YYYY format",
         });
         return;
       }
@@ -159,7 +159,7 @@ const recordsSchema = z.object({
       if (month !== 0 && (month < 1 || month > 12)) {
         ctx.addIssue({
           code: z.ZodIssueCode.custom,
-          message: "Month must be 00 (unknown) or 01-12"
+          message: "Month must be 00 (unknown) or 01-12",
         });
       }
 
@@ -167,7 +167,7 @@ const recordsSchema = z.object({
       if (day !== 0 && (day < 1 || day > 31)) {
         ctx.addIssue({
           code: z.ZodIssueCode.custom,
-          message: "Day must be 00 (unknown) or 01-31"
+          message: "Day must be 00 (unknown) or 01-31",
         });
       }
 
@@ -175,7 +175,7 @@ const recordsSchema = z.object({
       if (year != 0 && (year < 1920 || year > 2100)) {
         ctx.addIssue({
           code: z.ZodIssueCode.custom,
-          message: "Year must be between 1920 and 2100"
+          message: "Year must be between 1920 and 2100",
         });
       }
     })

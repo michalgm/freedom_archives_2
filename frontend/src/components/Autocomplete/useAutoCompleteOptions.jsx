@@ -70,7 +70,7 @@ export function useAutocompleteOptions({
           id,
           typeof entry === "object"
             ? { ...entry, hidden: true }
-            : { [idField]: id, [labelField]: String(id), hidden: true }
+            : { [idField]: id, [labelField]: String(id), hidden: true },
         );
       } else {
         const existing = labelMap.current.get(id);
@@ -90,7 +90,7 @@ export function useAutocompleteOptions({
       ensureCurrentValuesPresent();
       applyOptionsFromLabelMap();
     },
-    [idField, ensureCurrentValuesPresent, applyOptionsFromLabelMap]
+    [idField, ensureCurrentValuesPresent, applyOptionsFromLabelMap],
   );
 
   const hydrateInitialValue = useCallback(async () => {
@@ -191,7 +191,7 @@ export function useAutocompleteOptions({
       typeLabel,
       displayError,
       mergeFetchedData,
-    ]
+    ],
   );
 
   const debouncedSearch = useMemo(() => debounce(runSearch, 300), [runSearch]);

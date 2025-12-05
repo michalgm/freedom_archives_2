@@ -54,7 +54,7 @@ const NewListItemForm = ({ label, service, value, createParams, cancel, handleCl
         return `A ${label} named "${item}" already exists`;
       }
     },
-    [label, createParams]
+    [label, createParams],
   );
 
   const handleSubmitWithoutPropagation = (e) => {
@@ -174,7 +174,7 @@ const Autocomplete = ({
         </MenuItem>
       );
     },
-    [getOptionById, customRenderOption, service, idField, typeLabel, labelField]
+    [getOptionById, customRenderOption, service, idField, typeLabel, labelField],
   );
 
   const handleOpen = () => {
@@ -218,7 +218,7 @@ const Autocomplete = ({
       setValue,
       name,
       setOptions,
-    ]
+    ],
   );
 
   const autocompleteProps = {

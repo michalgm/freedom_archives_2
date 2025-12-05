@@ -8,10 +8,13 @@ const requiredRegex = /(Required|must contain at least 1 character|Expected[^,]+
 
 export const parseError = (name, _label) => (error) => {
   if (!error.message) {
-    error.message = Object.values(error)[0]
+    error.message = Object.values(error)[0]?.message || Object.values(error)[0]
+  }
+  if (typeof error.message !== "string") {
+    return `${formatLabel(_label, name)} is not valid : ${JSON.stringify(error)}`;
   }
   const label = formatLabel(_label, name);
-  error.message = error.message.replace(errorRegex, label);
+  error.message = error?.message?.replace(errorRegex, label);
   if (requiredRegex.test(error.message)) {
     return `${label} is required`;
   }
@@ -155,7 +158,7 @@ export const fieldLabels = Object.keys(schemas).reduce((acc, key) => {
       } else {
         return [fullPath, formatLabel(undefined, fullPath)];
       }
-    })
+    }),
   );
   return acc;
 }, {});
