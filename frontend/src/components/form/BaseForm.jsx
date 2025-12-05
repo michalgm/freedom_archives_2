@@ -43,8 +43,8 @@ export const FormErrors = ({ service, embedded = false }) => {
 const BaseForm = ({ children, autoComplete = "off", formConfig, formID, ...props }) => {
   const formManager = useFormManager(formConfig);
   const { formContext, submitForm, shouldBlockNavigation } = formManager;
-  const { errors } = formContext.formState;
-  logger.log("BASE FORM RENDER", errors, formContext.getValues());
+  // const { errors } = formContext.formState;
+  // logger.log("BASE FORM RENDER", errors, formContext.getValues());
 
   const name = formID || formConfig?.service || "form";
 

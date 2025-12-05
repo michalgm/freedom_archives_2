@@ -32,14 +32,14 @@ export function CollectionsList({ collections, ...props }) {
   return <ItemsList type="collection" items={collections} {...props} />;
 }
 
-export function ItemsList({ items = [], type, emptyText, itemAction, link = true, ...props }) {
+export function ItemsList({ items, type, emptyText, itemAction, link = true, ...props }) {
   const ItemTag = type === "record" ? RecordItem : CollectionItem;
   emptyText = emptyText || `No ${startCase(type)}s Found`;
   // logger.log(items);
   return (
     <List>
-      {items.length === 0 && <Typography sx={{ p: 2, textAlign: "center" }}>{emptyText}</Typography>}
-      {items.map((item, index) => (
+      {!items?.length && <Typography sx={{ p: 2, textAlign: "center" }}>{emptyText}</Typography>}
+      {(items || []).map((item, index) => (
         <React.Fragment key={item.id || item[`${type}_id`]}>
           <ItemTag
             itemAction={itemAction ? () => itemAction(index, item) : undefined}
@@ -87,7 +87,7 @@ export function EditableItemsListBase({
   const [showAdd, setShowAdd] = useState(false);
   const { getValues } = useFormContext();
 
-  const items = fields.map((item = {}, index) => {
+  const items = fields.map((item, index) => {
     if (!item) {
       return null;
     }
@@ -95,11 +95,13 @@ export function EditableItemsListBase({
     const actions = [
       <EditableItemsListAction
         key="remove"
-        onClick={() =>
+        onClick={() => {
+          const currentValue = getValues(`${name}.${index}`);
           update(index, {
-            ...item,
-            delete: !item.delete,
+            ...currentValue,
+            delete: !currentValue.delete,
           })
+        }
         }
         // disabled={index === 0}
         icon={item.delete ? "Restore" : "Delete"}
@@ -249,7 +251,7 @@ export function Item({
   id,
   type,
   item,
-  details = [],
+  details,
   title,
   description,
   link,
@@ -300,7 +302,7 @@ export function Item({
           primary={id != null ? title : missingRecordText}
           secondary={
             <>
-              <RecordItemDetails details={details} dense={dense} />
+              <RecordItemDetails details={details || []} dense={dense} />
               {description && (
                 <Typography
                   variant="body2"
@@ -326,7 +328,7 @@ export function Item({
   );
 }
 
-export default function RecordItem({ record = {}, description: showDescription, itemAction, ...props }) {
+export default function RecordItem({ record, description: showDescription, itemAction, ...props }) {
   const {
     title,
     record_id,
@@ -346,11 +348,11 @@ export default function RecordItem({ record = {}, description: showDescription, 
     { type: "Call Numbers", label: call_numbers?.join(", ") },
   ];
   if (itemAction) {
-    props.onClick = () => itemAction(record);
+    props.onClick = () => itemAction(record || {});
   }
   return (
     <Item
-      item={record}
+      item={record || {}}
       id={record_id}
       details={details}
       title={title}
@@ -361,8 +363,8 @@ export default function RecordItem({ record = {}, description: showDescription, 
   );
 }
 
-export function CollectionItem({ collection = {}, description: showDescription, itemAction, ...props }) {
-  const { title, collection_id, summary, parent, call_number } = collection;
+export function CollectionItem({ collection, description: showDescription, itemAction, ...props }) {
+  const { title, collection_id, summary, parent, call_number } = collection || {};
   const details = [
     { type: "ID", label: collection_id },
     { type: "Call Number", label: call_number },
@@ -375,12 +377,12 @@ export function CollectionItem({ collection = {}, description: showDescription, 
     });
   }
   if (itemAction) {
-    props.onClick = () => itemAction(collection);
+    props.onClick = () => itemAction(collection || {});
   }
   return (
     <Item
       id={collection_id}
-      item={collection}
+      item={collection || {}}
       title={title}
       description={showDescription && summary}
       details={details}

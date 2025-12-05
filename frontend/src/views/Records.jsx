@@ -34,7 +34,7 @@ const sort_options = {
   call_number: { label: "Call Number", sort: { call_numbers: 1, rank: -1, title: 1 } },
 };
 
-function Records({ embedded, itemAction, filter = {}, forcedFilter = {}, useStore }) {
+function Records({ embedded, itemAction, filter, forcedFilter, useStore }) {
   const createQuery = useCallback(
     (formFilter) => {
       const {
@@ -59,7 +59,7 @@ function Records({ embedded, itemAction, filter = {}, forcedFilter = {}, useStor
           "primary_media_format_text",
           "call_numbers",
         ],
-        ...forcedFilter,
+        ...(forcedFilter || {}),
       };
       if (!non_digitized) {
         query.has_digital = true;
@@ -91,7 +91,7 @@ function Records({ embedded, itemAction, filter = {}, forcedFilter = {}, useStor
 
   return (
     <Manage
-      defaultFilter={filter}
+      defaultFilter={filter || {}}
       createQuery={createQuery}
       filterTypes={filter_types}
       service="records"

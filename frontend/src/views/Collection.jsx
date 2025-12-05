@@ -87,6 +87,7 @@ function Collection({ id, mode = "" }) {
             type="collections"
             useStore={useSubcollectionsStore}
             reorder
+            excludeIds={[id]}
           />
         )}
         {tab === "records" && (
@@ -267,7 +268,8 @@ function EditList({
   filter,
   reorder,
   useStore,
-  forcedFilter = {},
+  excludeIds: _excludeIds,
+  forcedFilter,
 }) {
   const { control } = useFormContext();
   const { fields, append, move, prepend, update } = useFieldArray({
@@ -278,8 +280,8 @@ function EditList({
   const idField = getServiceID(type);
 
   const excludeIds = useMemo(() => {
-    return fields.map((item) => item[idField]);
-  }, [fields, idField]);
+    return [...(fields.map((item) => item[idField])), ...(_excludeIds || [])];
+  }, [fields, idField, _excludeIds]);
 
   const count = fields.filter((f) => !f.delete).length;
   let label = startCase(_label || property);
@@ -324,7 +326,7 @@ function EditList({
           <ItemsList
             embedded
             forcedFilter={{
-              ...forcedFilter,
+              ...(forcedFilter || {}),
               [idField]: { $nin: excludeIds },
             }}
             itemAction={(_, item) => setTimeout(prepend(item), 0)}
