@@ -30,21 +30,23 @@ const scrollToSection = (id) => {
   });
 };
 
-const DetailsRow = ({ label, value }) => {
+export const DetailsRow = ({ label, value, keyProp = 'list_item_id', valueProp = 'item' }) => {
   if (!value || !value.length) return null;
 
   const displayValue = isArray(value) ? (
-    <Stack spacing={1} useFlexGap direction="row" flexWrap={"wrap"} rowGap={1}>
-      {value.map(({ item, list_item_id }) => (
-        <Chip key={list_item_id} label={item} size="small" variant="outlined" />
-      ))}
-    </Stack>
+    <Stack spacing={1} useFlexGap direction="row" flexWrap={"wrap"} rowGap={1} component={"dd"} sx={{ m: 0 }}>
+      {
+        value.map(({ [valueProp]: item, [keyProp]: key }) => (
+          <Chip key={key} label={item} size="small" variant="outlined" />
+        ))
+      }
+    </Stack >
   ) : (
-    [value]
+    <dd style={{ margin: 0 }}> {value} </dd>
   );
 
   return (
-    <>
+    <Stack component='dl' direction="row" spacing={1} sx={{ mt: 1 }} useFlexGap>
       <Typography
         component="dt"
         variant="caption"
@@ -59,8 +61,8 @@ const DetailsRow = ({ label, value }) => {
       >
         {label}
       </Typography>
-      <Typography component="dd">{displayValue}</Typography>
-    </>
+      {displayValue}
+    </Stack>
   );
 };
 
@@ -221,7 +223,6 @@ const PublicCollections = () => {
               variant="outlined"
               sx={{
                 p: 2,
-                clear: "both",
                 overflow: "auto",
                 height: "fit-content",
               }}
@@ -232,13 +233,15 @@ const PublicCollections = () => {
                   flexDirection: { xs: "column", sm: "row" },
                   minWidth: 0,
                   gap: 2,
+                  flexShrink: 1,
+                  minHeight: 0,
                 }}
               >
-                <Box className='overview-scrollable' sx={{ flex: 1, maxHeight: "50vh", overflow: "auto" }}>
+                <Box className='overview-scrollable' sx={{ flex: 1, overflow: "auto" }}>
                   <Thumbnail
                     item={collection}
                     width={200}
-                    sx={{ float: "left", mr: 1 }}
+                    sx={{ float: "left", mr: 2 }}
                   />
                   <Typography
                     variant="body1"
@@ -246,36 +249,30 @@ const PublicCollections = () => {
                     dangerouslySetInnerHTML={{ __html: collection.description }}
                     sx={{ "& p": { mt: 0, mb: 1 }, textAlign: "justify" }}
                   />
-                  <Typography variant="caption" color="text.secondary">
-                    <Box
-                      component="dl"
-                      sx={{
-                        display: "grid",
-                        gap: 1.5,
-                        mt: 1.5,
-                        gridTemplateColumns: "max-content 1fr",
-                      }}
-                    >
-                      <DetailsRow
-                        label="Date Range"
-                        value={collection.date_range}
-                      />
-
-                      <DetailsRow
-                        label="Keywords"
-                        value={collection.keywords}
-                      />
-                    </Box>
-                  </Typography>
                 </Box>
               </Box>
+              <Typography variant="caption" color="text.secondary">
+                <DetailsRow
+                  label="Date Range"
+                  value={collection.date_range}
+                />
+                <DetailsRow
+                  label="Keywords"
+                  value={collection.keywords}
+                />
+              </Typography>
             </Paper>
           </Grid>
           <Show when={hasFeatured}>
-            <Grid size={{ xs: 12, md: 5 }} sx={{ scrollMarginTop }} id="featured">
+            <Grid size={{ xs: 12, md: 5 }} sx={{
+              scrollMarginTop,
+
+            }} id="featured">
               <Paper
                 variant="outlined"
-                sx={{ p: 2, flexGrow: 1, height: "fit-content" }}
+                sx={{
+                  p: 2, flexGrow: 1, height: "fit-content", maxHeight: "50vh",
+                }}
               >
                 <Typography variant="header" sx={{ mb: 2 }}>
                   Featured Content

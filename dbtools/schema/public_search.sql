@@ -23,13 +23,12 @@ CREATE TABLE IF NOT EXISTS collections (
     summary text,
     thumbnail text,
     date_modified timestamptz,
-    parent_collection_id integer,
     descendant_collection_ids integer[],
     featured_records json,
     keywords jsonb,
     date_range text,
-    ancestors json[],
-    children json[],
+    ancestors jsonb,
+    children jsonb,
     display_order integer,
     CONSTRAINT collections_pkey PRIMARY KEY (archive_id, collection_id)
 );

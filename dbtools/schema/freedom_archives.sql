@@ -67,7 +67,7 @@ CREATE TABLE IF NOT EXISTS _unified_collections (
     parent json,
     children json[],
     descendant_collection_ids integer[],
-    ancestors json[],
+    ancestors jsonb,
     CONSTRAINT _unified_collections_pkey PRIMARY KEY (collection_id)
 );
 
@@ -433,13 +433,12 @@ CREATE TABLE IF NOT EXISTS collections_snapshots (
     summary text,
     thumbnail text,
     date_modified timestamptz,
-    parent_collection_id integer,
     descendant_collection_ids integer[],
     featured_records json,
     keywords jsonb,
     date_range text,
-    ancestors json[],
-    children json[],
+    ancestors jsonb,
+    children json,
     display_order integer,
     CONSTRAINT collections_snapshots_pkey PRIMARY KEY (snapshot_id, archive_id, collection_id),
     CONSTRAINT fk_snapshot FOREIGN KEY (snapshot_id) REFERENCES snapshots (snapshot_id) ON DELETE CASCADE
@@ -1240,7 +1239,7 @@ CREATE OR REPLACE VIEW unified_collections AS
                    FROM collection_summaries cs
                      JOIN ancestors_cte ac ON cs.collection_id = ac.parent_collection_id
                 )
-         SELECT array_agg(json_build_object('collection_id', ancestors_cte.collection_id, 'title', ancestors_cte.title) ORDER BY ancestors_cte.level DESC) AS ancestors
+         SELECT jsonb_agg(jsonb_build_object('collection_id', ancestors_cte.collection_id, 'title', ancestors_cte.title) ORDER BY ancestors_cte.level DESC) AS ancestors
            FROM ancestors_cte) ancestors ON true;
 
 --

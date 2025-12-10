@@ -17,6 +17,7 @@ import { useRef } from "react";
 import { Link } from "react-router";
 import Thumbnail from "src/components/Thumbnail";
 import useExpandableText from "src/hooks/useExpandableText";
+import { DetailsRow } from "src/public/PublicCollections";
 
 import KVChip from "../components/KVChip";
 
@@ -29,7 +30,7 @@ export function ItemCardLayout({
   actions,
   isOverflowing,
   dense = false,
-  item = {},
+  item,
   setCurrentRecord,
   ...cardProps
 }) {
@@ -55,6 +56,7 @@ export function ItemCardLayout({
             </Grid>
           )}
           {body}
+          {item?.extra}
         </Box>
       </Stack>
     </CardContent>
@@ -77,9 +79,9 @@ export function ItemCardLayout({
       ) : (
         content
       )}
-      {isOverflowing && (
+      {item?.actions || isOverflowing && (
         <CardActions sx={{ textAlign: "right", justifyContent: "flex-end" }}>
-          {actions}
+          {item.actions || actions}
         </CardActions>
       )}
     </Card>
@@ -87,6 +89,7 @@ export function ItemCardLayout({
 }
 
 export function ItemLink({ item, children, setCurrentRecord, ...props }) {
+  if (!item) return children;
   const url = item.collection_id
     ? `/collections/${item.collection_id}`
     : item.url || item.primary_media_url;
@@ -110,15 +113,15 @@ export function ItemLink({ item, children, setCurrentRecord, ...props }) {
   );
 }
 export function ItemCard({
-  item = {},
+  item,
   expand = false,
   url,
   dense = false,
   setCurrentRecord,
   ...props
 }) {
-  const title = item.title || "Untitled";
-  const { details = [], description, summary } = item;
+  const title = item?.title || "Untitled";
+  const { details = [], description, summary } = item || {};
   const text = summary || description || "";
   const textRef = useRef(null);
 
@@ -131,6 +134,7 @@ export function ItemCard({
         value={value}
         variant="outlined"
         size="small"
+        sx={{ height: 'auto', whiteSpace: 'wrap', '.MuiChip-label': { whiteSpace: 'wrap' } }}
       // color={key === 'Collection' ? 'primary' : 'default'}
       />
     </Grid>
@@ -168,7 +172,7 @@ export function ItemCard({
         actions,
         isOverflowing,
         dense,
-        item,
+        item: item || {},
         setCurrentRecord,
         ...props,
       }}
@@ -192,7 +196,10 @@ export function RecordCard({ record, setCurrentRecord, ...props }) {
 export function CollectionCard({ collection, ...props }) {
   return (
     <ItemCard
-      item={collection}
+      item={{
+        ...collection,
+        extra: <DetailsRow label="Subcollections" value={collection.children} keyProp="collection_id" valueProp="title" />,
+      }}
       type="collection"
       url={`/collections/${collection.collection_id}`}
       {...props}
@@ -222,7 +229,7 @@ export function ItemStack({
   type,
   loading = false,
   dense = false,
-  items = [],
+  items,
   setCurrentRecord,
   ...props
 }) {
@@ -246,7 +253,7 @@ export function ItemStack({
             <LoadingCard dense={dense} />
           </>
         ) : (
-          items.map((child) =>
+          (items || []).map((child) =>
             type === "record" ? (
               <RecordCard key={child.record_id} record={child} dense={dense} setCurrentRecord={setCurrentRecord} />
             ) : (

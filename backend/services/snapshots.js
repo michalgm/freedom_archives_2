@@ -117,26 +117,69 @@ WHERE
     not in (select collection_id from collections c where c.is_hidden = false and c.needs_review = true)`,
     selectQuery: /* sql */ `
 SELECT
-  c.archive_id,
-  c.collection_id,
-  c.title,
-  c.description,
-  c.summary,
-  c.thumbnail,
-  c.date_modified,
-  c.parent_collection_id,
-  c.descendant_collection_ids,
-  c.featured_records,
-  c.keywords,
-  c.date_range,
-  c.ancestors,
-  c.children,
-  c.display_order
+	a.archive_id,
+	a.collection_id,
+	a.title,
+	a.description,
+	a.summary,
+	a.thumbnail,
+	a.date_modified,
+  a.descendant_collection_ids,
+	a.featured_records,
+	a.keywords,
+	a.date_range,
+	a.ancestors,
+	(
+		SELECT
+			COALESCE(
+				JSONB_AGG(
+					JSONB_BUILD_OBJECT(
+						'title',
+						b.title,
+						'collection_id',
+						b.collection_id,
+						'summary',
+						b.summary,
+						'thumbnail',
+						b.thumbnail,
+						'display_order',
+						b.display_order,
+						'children',
+						(
+							SELECT
+								JSONB_AGG(
+									JSONB_BUILD_OBJECT(
+										'title',
+										c.title,
+										'collection_id',
+										c.collection_id
+									)
+								)
+							FROM
+								_unified_collections c
+							WHERE
+								c.parent_collection_id = b.collection_id
+						)
+					)
+					ORDER BY
+						b.display_order
+				) FILTER (
+					WHERE
+						b.collection_id IS NOT NULL
+				),
+				'[]'::JSONB
+			)
+		FROM
+			_unified_collections b
+		WHERE
+			b.parent_collection_id = a.collection_id
+	) AS children,
+	a.display_order
 FROM
-  _unified_collections c
+	_unified_collections a
 WHERE
-  c.is_hidden=FALSE
-  AND c.needs_review=FALSE
+	a.is_hidden = FALSE
+	AND a.needs_review = FALSE
     `,
   },
   list_items: {
@@ -176,7 +219,7 @@ const restoreSnapshot = async (context) => {
       .then((info) => Object.keys(info).filter((col) => col !== "snapshot_id"));
     await trx(`public_search.${table}`).where({ archive_id }).delete();
     await trx(`public_search.${table}`).insert(
-      trx(`${table}_snapshots`).select(columns).where({ snapshot_id }).select()
+      trx(`${table}_snapshots`).select(columns).where({ snapshot_id }).select(),
     );
   }
   await trx("snapshots").where({ title: LIVE_SNAPSHOT_TITLE, archive_id }).update(data);
@@ -207,12 +250,12 @@ const publishSite = async (context) => {
         trx("records")
           .join("collections", { "records.collection_id": "collections.collection_id" })
           .where({ "records.is_hidden": false, "collections.is_hidden": false, "records.needs_review": true })
-          .select("record_id")
+          .select("record_id"),
       );
     } else if (table === "collections") {
       deleteQuery.whereNotIn(
         "collection_id",
-        trx("collections").where({ is_hidden: false, needs_review: true }).select("collection_id")
+        trx("collections").where({ is_hidden: false, needs_review: true }).select("collection_id"),
       );
     } else if (table === "records_to_list_items") {
       deleteQuery.whereNotIn(
@@ -220,7 +263,7 @@ const publishSite = async (context) => {
         trx("records")
           .join("collections", { "records.collection_id": "collections.collection_id" })
           .where({ "records.is_hidden": false, "collections.is_hidden": false, "records.needs_review": true })
-          .select("record_id")
+          .select("record_id"),
       );
     }
     await deleteQuery.delete();
@@ -229,7 +272,7 @@ const publishSite = async (context) => {
     await trx(`public_search.${table}`).insert(
       trx.fromRaw(selectQuery ? `(${selectQuery})` : table)
         .select()
-        .where({ archive_id })
+        .where({ archive_id }),
       // trx(selectTarget || table)
       //   .where({ archive_id })
       //   .select()
@@ -276,12 +319,12 @@ const cacheConfig = async (context) => {
   const collection = await trx('_unified_collections')
     .select(
       trx.raw(`jsonb_path_query_array(array_to_json(children)::jsonb, '$[*] \\? (@.is_hidden == false)') as children`),
-      'featured_records'
+      'featured_records',
     )
     .where({ archive_id, collection_id: 0 });
   await trx(`public_search.config`).insert([
     { archive_id, setting: "topKeywords", value: JSON.stringify(keywords) },
-    { archive_id, setting: "topCollection", value: JSON.stringify(collection[0]) }]
+    { archive_id, setting: "topCollection", value: JSON.stringify(collection[0]) }],
   );
 };
 
@@ -317,7 +360,9 @@ export default (function (app) {
     after: {
       create: [
         publishSite,
-        cacheConfig, transaction.end(), analyzeSnapshot],
+        cacheConfig,
+        transaction.end(),
+        analyzeSnapshot],
       patch: [transaction.end(), analyzeSnapshot],
     },
     error: {

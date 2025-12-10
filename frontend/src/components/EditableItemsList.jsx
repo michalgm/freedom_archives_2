@@ -115,7 +115,7 @@ export function EditableItemsListBase({
           onClick={() => move(index, index - 1)}
           disabled={index === 0}
           icon="KeyboardArrowUp"
-        />
+        />,
       );
       actions.push(
         <EditableItemsListAction
@@ -123,7 +123,7 @@ export function EditableItemsListBase({
           onClick={() => move(index, index + 1)}
           disabled={index === getValues(name).length - 1}
           icon="KeyboardArrowDown"
-        />
+        />,
       );
     }
     item.action = () => (
