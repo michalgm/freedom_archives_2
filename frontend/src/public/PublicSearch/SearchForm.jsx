@@ -7,13 +7,13 @@ import {
   ListItem,
   ListItemButton,
   ListItemText, Stack,
-  Typography
+  Typography,
 } from "@mui/material";
 import { startCase } from "lodash-es";
 import { useState } from "react";
 import {
   CheckboxElement,
-  SelectElement, useFormContext
+  SelectElement, useFormContext,
 } from "react-hook-form-mui";
 import AutoSubmit from "src/components/AutoSubmit";
 import Form from "src/components/form/Form";
@@ -52,7 +52,7 @@ const FilterItem = ({ value, label, count, type, addFilter, search }) => {
   );
 };
 
-const Filter = ({ type, values = [], addFilter, search }) => {
+const Filter = ({ type, values, addFilter, search }) => {
   const [limit, setlimit] = useState(INITIAL_FILTER_DISPLAY_COUNT);
   return (
     <Box key={type}>
@@ -161,6 +161,7 @@ export function SearchForm({
   focus,
   filtersLoading,
 }) {
+
   return (
     <Form defaultValues={search} onSubmit={doSearch}>
       <AutoSubmit action={doSearch} timeout={300} />

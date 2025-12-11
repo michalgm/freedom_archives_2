@@ -2,7 +2,7 @@ import dayjs from "dayjs";
 import { isEqual, merge, omit } from "lodash-es";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { get } from "react-hook-form";
-import { useSearchParams } from "react-router";
+import { useLocation } from "react-router";
 import { public_records as recordsService } from "src/api";
 import { useImmer } from "use-immer";
 
@@ -13,14 +13,14 @@ export const usePublicSearch = (
   filterTypes,
   pageSize,
 ) => {
-  const [searchParams] = useSearchParams();
+  const location = useLocation();
   const [records, setRecords] = useState({ count: 0, records: [] });
   const [total, setTotal] = useState(0);
   const [offset, setOffset] = useState(0);
   const [loading, setLoading] = useState(true);
   const [recordsLoading, setRecordsLoading] = useState(true);
   const [search, setSearch] = useImmer({
-    fullText: searchParams.get("search") || "",
+    fullText: location.state?.search || "",
     include_non_digitized: false,
     sort: "Relevance",
   });

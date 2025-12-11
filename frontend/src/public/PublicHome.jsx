@@ -9,7 +9,7 @@ import Link from "src/components/Link";
 import { ItemStack } from "src/public/ItemCard";
 import { SearchInput } from "src/public/PublicSearch/SearchInput";
 
-export const WordCloud = ({ data = [], loading }) => {
+export const WordCloud = ({ data, loading }) => {
   let contents = [];
 
   if (loading) {
@@ -93,9 +93,8 @@ const PublicHome = () => {
   const { introText, topCollection: { children: topCollections, featured_records: featuredRecords }, topKeywords } = settings;
 
   const navigate = useNavigate();
-  const onSubmit = (data) => {
-    const query = new URLSearchParams(data).toString();
-    navigate(`/search?${query}`);
+  const onSubmit = ({ search }) => {
+    navigate(`/search`, { state: { search } });
   };
 
   return (
@@ -130,7 +129,7 @@ const PublicHome = () => {
           </Box>
         </Stack>
         <Divider />
-        <Stack spacing={2} sx={{ overflowX: "auto !important", }}
+        <Stack spacing={2} sx={{ overflowX: "auto !important" }}
           divider={<Divider sx={{ borderBottomWidth: { xs: 'thin', md: 0 }, borderRightWidth: { xs: 0, md: 'thin' } }} flexItem />}
           flexDirection={{ sx: 'column', md: 'row' }}
           useFlexGap
