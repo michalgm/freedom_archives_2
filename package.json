@@ -77,18 +77,18 @@
     "sharp": "0.34.2",
     "string-strip-html": "^13.5.0",
     "typescript": "^5.9.3",
-    "winston": "^3.18.3",
+    "winston": "^3.19.0",
     "zod": "^3.25.76"
   },
   "devDependencies": {
     "@babel/eslint-parser": "^7.28.5",
     "@eslint/eslintrc": "^3.3.3",
     "@eslint/js": "^9.39.1",
-    "@eslint/json": "^0.13.2",
+    "@eslint/json": "^0.14.0",
     "@stylistic/eslint-plugin": "^5.6.1",
     "@types/mocha": "^10.0.10",
-    "@typescript-eslint/eslint-plugin": "^8.48.0",
-    "@typescript-eslint/parser": "^8.48.0",
+    "@typescript-eslint/eslint-plugin": "^8.49.0",
+    "@typescript-eslint/parser": "^8.49.0",
     "axios": "^1.13.2",
     "concurrently": "^9.2.1",
     "eslint": "^9.39.1",
@@ -97,7 +97,7 @@
     "mock-knex": "^0.4.13",
     "nodemon": "^3.1.11",
     "sinon": "^19.0.5",
-    "typescript-eslint": "^8.48.0"
+    "typescript-eslint": "^8.49.0"
   },
   "msw": {
     "workerDirectory": [
