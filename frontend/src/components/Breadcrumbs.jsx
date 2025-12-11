@@ -15,7 +15,7 @@ function Breadcrumbs() {
   const parts = location.pathname.replace(/^\/admin\//, "").split("/");
 
   const paths = [
-    { link: "/", title: "Freedom Archives Admin" },
+    { link: "/admin/", title: "Freedom Archives Admin" },
     ...parts
       .filter((p) => p !== "new" && !p.match(/^\d+$/))
       .map((p, index) => {
@@ -25,7 +25,7 @@ function Breadcrumbs() {
             link: routes[link] ? link : null,
             title: startCase(p),
           })
-      }
+      },
       ),
   ];
 

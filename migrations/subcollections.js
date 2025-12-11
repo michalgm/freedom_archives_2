@@ -8,14 +8,19 @@ export const up = async function (knex) {
 DELETE FROM _unified_collections;
 DELETE FROM collections_snapshots;
 
-ALTER TABLE _unified_collections ALTER COLUMN ancestors TYPE jsonb;
-
+ALTER TABLE _unified_collections ALTER COLUMN ancestors TYPE jsonb USING array_to_json(ancestors)::jsonb;
+`);
+  await knex.raw(`
 ALTER TABLE collections_snapshots DROP COLUMN parent_collection_id;
-
-ALTER TABLE collections_snapshots ALTER COLUMN ancestors TYPE jsonb;
-
-ALTER TABLE collections_snapshots ALTER COLUMN children TYPE json;
-
+`);
+  await knex.raw(`
+ALTER TABLE collections_snapshots ALTER COLUMN ancestors TYPE jsonb USING array_to_json(ancestors)::jsonb;
+`);
+  await knex.raw(`
+ALTER TABLE collections_snapshots ALTER COLUMN children TYPE json USING array_to_json(children) ::json;
+`);
+  await knex.raw(`
+DROP VIEW IF EXISTS unified_collections;
 CREATE OR REPLACE VIEW unified_collections AS
  SELECT a.collection_id,
     a.archive_id,
@@ -221,9 +226,9 @@ CREATE OR REPLACE VIEW unified_records AS
   DELETE FROM collections;
 ALTER TABLE collections DROP COLUMN parent_collection_id;
 
-ALTER TABLE collections ALTER COLUMN ancestors TYPE jsonb;
+ALTER TABLE collections ALTER COLUMN ancestors TYPE jsonb USING array_to_json(ancestors)::jsonb;
 
-ALTER TABLE collections ALTER COLUMN children TYPE jsonb;
+ALTER TABLE collections ALTER COLUMN children TYPE jsonb USING array_to_json(children)::jsonb;
     `);
   await knex.raw(`SET LOCAL search_path = 'freedom_archives';`);
 
