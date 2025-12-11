@@ -70,6 +70,7 @@ const fields = [
     field_type: "select",
     returnFullObject: false,
     service: "users",
+    fetchAll: true,
   },
   {
     name: "type",
@@ -117,8 +118,8 @@ const ReviewChangesForm = React.memo(function ({ setFilter, publishDate }) {
           highlightDirty={false}
           label=""
           disabled={getValues("changes_since") === "published"}
-          // size={{ xs: 6 }}
-          // sx={{ width: 1 / 2 }}
+        // size={{ xs: 6 }}
+        // sx={{ width: 1 / 2 }}
         />
       </Grid>
       <Grid size={7}>
@@ -132,10 +133,10 @@ const ReviewChangesForm = React.memo(function ({ setFilter, publishDate }) {
           returnFullObject={false}
           highlightDirty={false}
           disabled={getValues("changes_since") === "published"}
-          // sx={{ width: 2 / 3 }}
-          // size={6}
+        // sx={{ width: 2 / 3 }}
+        // size={6}
 
-          // sx={{ flex: "1 1 auto" }}
+        // sx={{ flex: "1 1 auto" }}
         />
       </Grid>
       <Grid size="auto">
@@ -242,7 +243,7 @@ function ReviewChanges() {
       setPagination((prevPagination) => ({ ...prevPagination, page: pagination.page + 1 }));
       setLoading(false);
     }, [filter, order, pagination.limit, pagination.page, pagination.skip, publishDate]),
-    300
+    300,
   );
 
   const updateReview = useCallback(
@@ -253,7 +254,7 @@ function ReviewChanges() {
       });
       await fetchValues();
     },
-    [fetchValues]
+    [fetchValues],
   );
 
   const columns = useMemo(
@@ -301,7 +302,7 @@ function ReviewChanges() {
         ),
       },
     ],
-    [updateReview]
+    [updateReview],
   );
   useEffect(() => {
     fetchValues();
@@ -324,7 +325,7 @@ function ReviewChanges() {
           setFilter={setFilter}
           // fetchValues={fetchValues}
           publishDate={publishDate}
-          // setPublishDa]}
+        // setPublishDa]}
         />,
       ]}
       noPaper
