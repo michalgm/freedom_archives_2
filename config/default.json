@@ -35,7 +35,7 @@
       "freedom_archives"
     ],
     "connection": {
-      "statement_timeout": 10000
+      "statement_timeout": 15000
     },
     "migrations": {
       "loadExtensions": [
