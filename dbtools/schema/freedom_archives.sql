@@ -1076,11 +1076,12 @@ CREATE OR REPLACE VIEW record_media_view AS
     count(*) AS media_count,
     array_to_json(array_agg(row_to_json(a.*) ORDER BY is_primary DESC, media_id)) AS media,
     array_agg(DISTINCT call_number) FILTER (WHERE call_number IS NOT NULL) AS call_numbers,
-    string_agg(DISTINCT call_number, ' '::text) FILTER (WHERE call_number IS NOT NULL) AS call_numbers_text,
+    string_agg(DISTINCT call_number, ' ## '::text) FILTER (WHERE call_number IS NOT NULL) AS call_numbers_text,
     array_agg(DISTINCT format_id) FILTER (WHERE format_id IS NOT NULL) AS formats,
     array_agg(DISTINCT quality_id) FILTER (WHERE quality_id IS NOT NULL) AS qualitys,
     array_agg(DISTINCT generation_id) FILTER (WHERE generation_id IS NOT NULL) AS generations,
-    array_agg(DISTINCT media_type) FILTER (WHERE media_type IS NOT NULL) AS media_types
+    array_agg(DISTINCT media_type) FILTER (WHERE media_type IS NOT NULL) AS media_types,
+    string_agg(DISTINCT (format_item->'item')::text, ' ## '::text) FILTER (WHERE format_item IS NOT NULL) AS formats_text
    FROM media_view a
   GROUP BY record_id;
 
@@ -1174,11 +1175,18 @@ CREATE OR REPLACE VIEW unified_collections AS
              LEFT JOIN list_items ON primary_media.format_id = list_items.list_item_id AND list_items.type = 'format'::text
           WHERE a.collection_id = f.collection_id
           ORDER BY f.record_order, b.title)) AS featured_records,
-    ((((setweight(to_tsvector('english'::regconfig, COALESCE(a.title, ''::text)), 'A'::"char") || setweight(to_tsvector('english'::regconfig,
+    (
+      setweight(to_tsvector('english'::regconfig, COALESCE(a.title, ''::text)), 'A'::"char") ||
+      setweight(to_tsvector('simple'::regconfig,
         CASE
             WHEN call_numbers.item IS NULL THEN ''::text
             ELSE TRIM(BOTH FROM (call_numbers.item || ' '::text) || COALESCE(a.call_number_suffix, ''::text))
-        END), 'A'::"char")) || setweight(to_tsvector('english'::regconfig, COALESCE(a.summary, ''::text)), 'B'::"char")) || setweight(to_tsvector('english'::regconfig, COALESCE(a.description_search, ''::text)), 'B'::"char")) || setweight(to_tsvector('english'::regconfig, COALESCE(keywords.items_text, ''::text)), 'C'::"char")) || setweight(to_tsvector('english'::regconfig, COALESCE(subjects.items_text, ''::text)), 'C'::"char") AS fulltext,
+        END), 'A'::"char") ||
+      setweight(to_tsvector('english'::regconfig, COALESCE(a.summary, ''::text)), 'B'::"char") ||
+      setweight(to_tsvector('english'::regconfig, COALESCE(a.description_search, ''::text)), 'B'::"char") ||
+      setweight(to_tsvector('english'::regconfig, COALESCE(keywords.items_text, ''::text)), 'C'::"char") ||
+      setweight(to_tsvector('english'::regconfig, COALESCE(subjects.items_text, ''::text)), 'C'::"char") 
+    ) AS fulltext,
     lower(
       regexp_replace(
         concat_ws(
@@ -1302,7 +1310,17 @@ CREATE OR REPLACE VIEW unified_records AS
     keywords.items_search AS keywords_search,
     producers.items_search AS producers_search,
     publishers.items_search AS publishers_search,
-    ((((setweight(to_tsvector('english'::regconfig, COALESCE(a.title, ''::text)), 'A'::"char") || setweight(to_tsvector('english'::regconfig, COALESCE(media.call_numbers_text, ''::text)), 'A'::"char")) || setweight(to_tsvector('english'::regconfig, COALESCE(a.description, ''::text)), 'B'::"char")) || setweight(to_tsvector('english'::regconfig, COALESCE(authors.items_text, ''::text)), 'C'::"char")) || setweight(to_tsvector('english'::regconfig, COALESCE(subjects.items_text, ''::text)), 'C'::"char")) || setweight(to_tsvector('english'::regconfig, COALESCE(keywords.items_text, ''::text)), 'C'::"char") AS fulltext,
+    (
+      setweight(to_tsvector('english'::regconfig, COALESCE(a.title, ''::text)), 'A'::"char") ||
+      setweight(to_tsvector('simple'::regconfig, COALESCE(media.call_numbers_text, ''::text)), 'A'::"char") ||
+      setweight(to_tsvector('english'::regconfig, COALESCE(a.description, ''::text)), 'B'::"char") ||
+      setweight(to_tsvector('simple'::regconfig, COALESCE(authors.items_text, ''::text)), 'C'::"char") || 
+      setweight(to_tsvector('english'::regconfig, COALESCE(subjects.items_text, ''::text)), 'C'::"char") || 
+      setweight(to_tsvector('english'::regconfig, COALESCE(keywords.items_text, ''::text)), 'C'::"char") ||
+      setweight(to_tsvector('simple'::regconfig, COALESCE(producers.items_text, ''::text)), 'C'::"char") || 
+      setweight(to_tsvector('simple'::regconfig, COALESCE(publishers.items_text, ''::text)), 'C'::"char") ||
+      setweight(to_tsvector('english'::regconfig, COALESCE(media.formats_text, ''::text)), 'C'::"char")
+    ) AS fulltext,
     lower(
       regexp_replace(
         concat_ws(
@@ -1312,7 +1330,10 @@ CREATE OR REPLACE VIEW unified_records AS
           nullif(media.call_numbers_text, ''),
           nullif(authors.items_text, ''),
           nullif(subjects.items_text, ''),
-          nullif(keywords.items_text, '')
+          nullif(keywords.items_text, ''),
+          nullif(producers.items_text, ''),
+          nullif(publishers.items_text, ''),
+          nullif(media.formats_text, '')
         ),
         '\s+',
         ' ',
