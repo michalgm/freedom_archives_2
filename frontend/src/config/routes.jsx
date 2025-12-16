@@ -6,7 +6,7 @@ export const routeConfig = {
     routes: [
       {
         path: "collections",
-        component: "./views/Collections.jsx",
+        component: "./views/CollectionsView.jsx",
         sidebar: {
           label: "Manage Collections",
           icon: "",
@@ -21,7 +21,7 @@ export const routeConfig = {
       },
       {
         path: "collections/:id",
-        component: "./views/Collection.jsx",
+        component: "./views/CollectionView.jsx",
       },
     ],
   },
@@ -43,7 +43,7 @@ export const routeConfig = {
       // },
       {
         path: "records",
-        component: "./views/Records.jsx",
+        component: "./views/RecordsView.jsx",
         sidebar: {
           label: "Manage Records",
           icon: "",
@@ -67,7 +67,7 @@ export const routeConfig = {
       },
       {
         path: "records/:id",
-        component: "./views/Record.jsx",
+        component: "./views/RecordView.jsx",
         props: { showForm: true },
       },
     ],
@@ -87,7 +87,7 @@ export const routeConfig = {
       },
       {
         path: "site/featured-records",
-        component: "./views/Collection.jsx",
+        component: "./views/CollectionView.jsx",
         authRole: "staff",
         sidebar: {
           label: "Manage Featured Records",
@@ -96,7 +96,7 @@ export const routeConfig = {
       },
       {
         path: "site/featured-collections",
-        component: "./views/Collection.jsx",
+        component: "./views/CollectionView.jsx",
         authRole: "staff",
         sidebar: {
           label: "Manage Featured Collections",

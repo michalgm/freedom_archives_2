@@ -1,7 +1,7 @@
 import { cloneDeep } from "lodash-es";
 import { useCallback } from "react";
 
-import Manage from "../components/Manage";
+import Manage from "./Manage";
 
 const filter_types = {
   day: { input: "simpleSelect", match: "exact", allowNull: true },
@@ -104,6 +104,4 @@ export function Records({ embedded, itemAction, filter, forcedFilter, useStore }
   );
 }
 
-export default <>
-  <Records/>
-</>;
+export default Records;

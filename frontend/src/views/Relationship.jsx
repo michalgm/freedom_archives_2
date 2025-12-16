@@ -5,8 +5,7 @@ import { relationships } from "../api";
 import { Field } from "../components/form/Field";
 import Form from "../components/form/Form";
 import Link from "../components/Link";
-
-import Record from "./Record";
+import Record from "../components/Record";
 
 function Relationship({ id }) {
   const [relation, setRelation] = useState({});

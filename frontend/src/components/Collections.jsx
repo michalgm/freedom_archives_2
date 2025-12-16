@@ -3,7 +3,7 @@ import { Avatar, ListItemAvatar, ListItemText, Typography } from "@mui/material"
 import { cloneDeep } from "lodash-es";
 import { useCallback } from "react";
 
-import Manage from "../components/Manage";
+import Manage from "./Manage";
 
 const filter_types = {
   title: { input: "text", match: "fuzzy" },
@@ -117,4 +117,4 @@ export function Collections({ embedded, itemAction, filter, forcedFilter, useSto
   );
 }
 
-export default <><Collections/></>;
+export default Collections;

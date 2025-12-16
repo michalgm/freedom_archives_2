@@ -10,11 +10,10 @@ import { useTitle } from "src/stores";
 import { createQueryStore } from "src/stores/index";
 import EditItemView from "src/views/EditItemView";
 
-import { EditableItemsListBase } from "../components/EditableItemsList";
-import FieldRow from "../components/FieldRow";
-import { Field } from "../components/form/Field";
-import {Collections} from "../views/Collections";
-
+import {Collections} from "./Collections";
+import { EditableItemsListBase } from "./EditableItemsList";
+import FieldRow from "./FieldRow";
+import { Field } from "./form/Field";
 import {Records} from "./Records";
 
 const getDefaultTab = (mode, tab = "") => {
@@ -37,7 +36,7 @@ const inferModeFromPath = (pathname) => {
   return "";
 };
 
-function Collection() {
+export function Collection() {
   const location = useLocation();
   const { id: paramId } = useParams();
 

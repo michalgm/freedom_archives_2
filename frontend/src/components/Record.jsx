@@ -32,11 +32,11 @@ import Thumbnail from "src/components/Thumbnail";
 import { useAddNotification, useTitle } from "src/stores";
 import EditItemView from "src/views/EditItemView";
 
-import FieldRow from "../components/FieldRow";
-import { BaseForm } from "../components/form/BaseForm";
-import { Field } from "../components/form/Field";
-import GridBlock from "../components/GridBlock";
-import Link from "../components/Link";
+import FieldRow from "./FieldRow";
+import { BaseForm } from "./form/BaseForm";
+import { Field } from "./form/Field";
+import GridBlock from "./GridBlock";
+import Link from "./Link";
 // import ViewContainer from "../components/ViewContainer";
 
 // const defaultRecord = {
@@ -532,4 +532,4 @@ export function Record({ id /*  embedded = false */ }) {
   );
 }
 
-export default <><Record/></>;
+export default Record;
