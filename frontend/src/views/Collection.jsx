@@ -2,7 +2,7 @@ import { Box, Divider, Grid, Stack, Tab, Tabs, Typography } from "@mui/material"
 import { startCase } from "lodash-es";
 import { useEffect, useMemo, useState } from "react";
 import { useFieldArray, useFormContext } from "react-hook-form";
-import { useNavigate, useParams } from "react-router";
+import { useNavigate, useParams, useLocation } from "react-router";
 import { getServiceID } from "src/api";
 import { BaseForm } from "src/components/form/BaseForm";
 import ViewContainer from "src/components/ViewContainer";
@@ -28,13 +28,24 @@ const getDefaultTab = (mode, tab = "") => {
   return "collection";
 };
 
-function Collection({ id, mode = "" }) {
-  const { id: paramId } = useParams();
-  id ??= paramId;
-  const isFeaturedCollections = id == 0 && mode == "featured_collections";
-  const isFeaturedRecords = id == 0 && mode == "featured_records";
+const inferModeFromPath = (pathname) => {
+  if (pathname.includes("featured-records")) {
+    return "featured_records";
+  } else if (pathname.includes("featured-collections")) {
+    return "featured_collections";
+  }
+  return "";
+};
 
-  const [tab, setTab] = useState(getDefaultTab(mode));
+function Collection() {
+  const location = useLocation();
+  const { id: paramId } = useParams();
+
+  const mode = inferModeFromPath(location.pathname);
+  const id = mode == '' ? paramId : 0; 
+  const defaultTab = getDefaultTab(mode);
+
+  const [tab, setTab] = useState(defaultTab);
 
   const setTitle = useTitle();
   const navigate = useNavigate();
@@ -45,7 +56,7 @@ function Collection({ id, mode = "" }) {
 
   useEffect(() => {
     return () => {
-      [useRecordsStore, useSubcollectionsStore, useFeaturedRecordsStore].forEach((store) => store.destroy?.());
+      [useRecordsStore, useSubcollectionsStore, useFeaturedRecordsStore].forEach(store => store.destroy?.());
     };
   }, [useRecordsStore, useSubcollectionsStore, useFeaturedRecordsStore]);
 
@@ -70,7 +81,7 @@ function Collection({ id, mode = "" }) {
               non_digitized: true,
             }}
             forcedFilter={
-              newCollection || isFeaturedRecords
+              newCollection || mode === "featured_records"
                 ? null
                 : {
                   collection_id: { $in: [...(collection.descendant_collection_ids || []), collection.collection_id] },
@@ -109,8 +120,7 @@ function Collection({ id, mode = "" }) {
       return (
         <>
           <Typography component="span" sx={{ display: "block" }} gutterBottom>
-            Are you sure you want to delete collection &quot;
-            <b>{collection.title}</b>&quot;?
+            Are you sure you want to delete collection &quot; <b>{collection.title}</b> &quot;?
           </Typography>
           <Typography component="span" sx={{ display: "block" }} variant="body2">
             All child records will be moved to the &quot;Uncategorized&quot; collection
@@ -143,13 +153,13 @@ function Collection({ id, mode = "" }) {
               item={collection}
               id={id}
               newItem={newCollection}
-              service={isFeaturedRecords || isFeaturedCollections ? null : "collections"}
+              service={mode === "" ? "collections" : null}
               className="flex-container"
               deleteOptions={deleteOptions}
             >
               {/* <GridBlock title="" spacing={2} className="flex-container"> */}
               <Stack sx={{ height: "100%" }} className="flex-container">
-                {!isFeaturedRecords && !isFeaturedCollections && (
+                {mode === "" && (
                   <Tabs sx={{ flex: "0 0 auto" }} value={tab} onChange={(_, tab) => setTab(tab)}>
                     <Tab label="Edit Collection" value="collection"></Tab>
                     <Tab label="Featured Records" value="featured"></Tab>
@@ -173,7 +183,7 @@ function Collection({ id, mode = "" }) {
 function CollectionFields() {
   return (
     <>
-      <Stack direction={"row"} spacing={2} sx={{ mt: 2 }}>
+      <Stack direction="row" spacing={2} sx={{ mt: 2 }}>
         <Grid container spacing={2}>
           <Grid size={12}>
             <Field name="title" />
@@ -182,24 +192,22 @@ function CollectionFields() {
             <Field name="description" field_type="html" />
           </Grid>
         </Grid>
-        {
-          <Grid
-            container
-            size="auto"
-            className="record-thumbnail"
-            spacing={2}
-            direction={"column"}
-            alignItems={"center"}
-          >
-            <Field
-              field_type="upload"
-              name="thumbnail"
-              label="Thumbnail"
-              width={100}
-              accept={["image/gif", "image/jpeg", "image/png", "image/webp", "image/tiff", "application/pdf"]}
-            />
-          </Grid>
-        }
+        <Grid
+          container
+          size="auto"
+          className="record-thumbnail"
+          spacing={2}
+          direction="column"
+          alignItems="center"
+        >
+          <Field
+            field_type="upload"
+            name="thumbnail"
+            label="Thumbnail"
+            width={100}
+            accept={["image/gif", "image/jpeg", "image/png", "image/webp", "image/tiff", "application/pdf"]}
+          />
+        </Grid>
       </Stack>
       <FieldRow>
         <Grid container spacing={0}>
@@ -208,7 +216,7 @@ function CollectionFields() {
               field_type="list_item"
               itemType="call_number"
               label="Call Number"
-              name={`call_number_item`}
+              name="call_number_item"
               textFieldProps={{
                 sx: {
                   // width: 130,
@@ -224,7 +232,7 @@ function CollectionFields() {
             <Field
               fullWidth={false}
               label="Suffix"
-              name={`call_number_suffix`}
+              name="call_number_suffix"
               sx={{
                 // width: 90,
                 "& .MuiInputBase-root": {
@@ -280,10 +288,10 @@ function EditList({
   const idField = getServiceID(type);
 
   const excludeIds = useMemo(() => {
-    return [...(fields.map((item) => item[idField])), ...(_excludeIds || [])];
+    return [...(fields.map(item => item[idField])), ...(_excludeIds || [])];
   }, [fields, idField, _excludeIds]);
 
-  const count = fields.filter((f) => !f.delete).length;
+  const count = fields.filter(f => !f.delete).length;
   let label = startCase(_label || property);
   if (count === 1) {
     label = label.slice(0, -1);
@@ -292,7 +300,7 @@ function EditList({
   return (
     <Grid className="flex-container" sx={{ backgroundColor: "grey.200", p: 1 }}>
       <Stack
-        direction={"row"}
+        direction="row"
         sx={{ height: "100%" }}
         spacing={1}
         useFlexGap

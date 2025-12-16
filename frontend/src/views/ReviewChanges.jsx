@@ -1,7 +1,7 @@
 import { Box, Button, Divider, Grid, Stack, Typography } from "@mui/material";
 import dayjs from "dayjs";
 import { startCase } from "lodash-es";
-import React, { useCallback, useEffect, useMemo, useState } from "react";
+import React, { lazy, useCallback, useEffect, useMemo, useState } from "react";
 import { useForm } from "react-hook-form-mui";
 import AutoSubmit from "src/components/AutoSubmit";
 import Form from "src/components/form/Form";
@@ -9,9 +9,10 @@ import ViewContainer from "src/components/ViewContainer";
 import { useDebouncedCallback } from "use-debounce";
 
 import { collections, records, review_changes, snapshots } from "../api";
-import EditableDataTable from "../components/EditableDataTable";
 import { Field } from "../components/form/Field";
 import Link from "../components/Link";
+
+const EditableDataTable = lazy(() => import("../components/EditableDataTable"))
 
 const defaultValues = {
   needs_review: true,
@@ -133,8 +134,8 @@ const ReviewChangesForm = React.memo(function ({ setFilter, publishDate }) {
           returnFullObject={false}
           highlightDirty={false}
           disabled={getValues("changes_since") === "published"}
-        // sx={{ width: 2 / 3 }}
-        // size={6}
+          // sx={{ width: 2 / 3 }}
+          // size={6}
 
         // sx={{ flex: "1 1 auto" }}
         />

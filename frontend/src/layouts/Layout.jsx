@@ -105,55 +105,57 @@ export function Logout() {
     app.logout();
   };
 
-  return isAuthenticated ? (
-    <div className="logout">
-      <IconButton
-        aria-controls={open ? "basic-menu" : undefined}
-        aria-haspopup="true"
-        aria-expanded={open ? "true" : undefined}
-        onClick={handleClick}
-        color="inherit"
-        sx={{ backgroundColor: "primary.light", width: 30, height: 30 }}
-      >
-        <AccountCircle />
-      </IconButton>
-      <Menu
-        id="basic-menu"
-        anchorEl={anchorEl}
-        open={open}
-        onClose={handleClose}
-        slotProps={{
-          list: {
-            "aria-labelledby": "basic-button",
-          },
-        }}
-      >
-        <MenuItem sx={{ pointerEvents: "none", color: "text.primary", fontWeight: "bold" }}>{user.full_name}</MenuItem>
-        <Divider />
-        <MenuItem onClick={changePassword}>
-          <ListItemIcon>
-            <Icon>password</Icon>
-          </ListItemIcon>
-          Change Password
-        </MenuItem>
-        <MenuItem onClick={logout}>
-          <ListItemIcon>
-            <Icon>logout</Icon>
-          </ListItemIcon>
-          Logout
-        </MenuItem>
-      </Menu>
-      <ChangePassword open={openChangePassword} handleClose={() => setOpenChangePassword(false)} user={user} />
-    </div>
-  ) : (
-    ""
-  );
+  return isAuthenticated
+    ? (
+      <div className="logout">
+        <IconButton
+          aria-controls={open ? "basic-menu" : undefined}
+          aria-haspopup="true"
+          aria-expanded={open ? "true" : undefined}
+          onClick={handleClick}
+          color="inherit"
+          sx={{ backgroundColor: "primary.light", width: 30, height: 30 }}
+        >
+          <AccountCircle />
+        </IconButton>
+        <Menu
+          id="basic-menu"
+          anchorEl={anchorEl}
+          open={open}
+          onClose={handleClose}
+          slotProps={{
+            list: {
+              "aria-labelledby": "basic-button",
+            },
+          }}
+        >
+          <MenuItem sx={{ pointerEvents: "none", color: "text.primary", fontWeight: "bold" }}>{user.full_name}</MenuItem>
+          <Divider />
+          <MenuItem onClick={changePassword}>
+            <ListItemIcon>
+              <Icon>password</Icon>
+            </ListItemIcon>
+              Change Password
+          </MenuItem>
+          <MenuItem onClick={logout}>
+            <ListItemIcon>
+              <Icon>logout</Icon>
+            </ListItemIcon>
+              Logout
+          </MenuItem>
+        </Menu>
+        <ChangePassword open={openChangePassword} handleClose={() => setOpenChangePassword(false)} user={user} />
+      </div>
+    )
+    : (
+      ""
+    );
 }
 
 function NavBar() {
   const { isAuthenticated } = useAuth();
   return (
-    <AppBar color="primary" position="fixed" elevation={0} sx={{ zIndex: (theme) => theme.zIndex.drawer + 1 }}>
+    <AppBar color="primary" position="fixed" elevation={0} sx={{ zIndex: theme => theme.zIndex.drawer + 1 }}>
       <Toolbar className="topnav" variant="dense" sx={{ gap: 1 }}>
         <Breadcrumbs />
         {isAuthenticated && <QuickSearch />}
@@ -164,14 +166,14 @@ function NavBar() {
 }
 
 export function Main() {
-  const loading = useAppStore((state) => state.loading);
+  const loading = useAppStore(state => state.loading);
 
   const loadingStyle = loading
     ? {
       opacity: 0.6,
     }
     : {};
-  logger.log("Main RENDER", location);
+  // logger.log("Main RENDER", location);
 
   return (
     <Container

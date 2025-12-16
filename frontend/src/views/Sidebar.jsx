@@ -69,9 +69,9 @@ function SidebarItem({ label, /* icon, */ href }) {
   // logger.log(location)?
   const pattern = new RegExp(`^/admin/${href}(?:/\\d+)?/?$`);
 
-  const current =
-    Boolean(pattern.test(location.pathname) && href) ||
-    (location.pathname === "/admin/" && href === "/records");
+  const current
+    = Boolean(pattern.test(location.pathname) && href)
+      || (location.pathname === "/admin/" && href === "/records");
 
   // logger.log({ label, href, pathname, current });
   return (
@@ -86,7 +86,7 @@ function ListItemLink(props) {
     <ListItemButton
       disabled={!props.href}
       component={props.href ? Link : "div"}
-      to={props.href}
+      to={`/admin/${props.href}`}
       {...props}
     />
   );

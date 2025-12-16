@@ -1,5 +1,4 @@
 import { Box, Divider, Paper, Skeleton, Stack, Typography } from "@mui/material";
-import { useEffect, useState } from "react";
 import { useNavigate } from "react-router";
 import { TagCloud } from "react-tagcloud";
 import { public_settings } from "src/api";
@@ -37,7 +36,8 @@ export const WordCloud = ({ data, loading }) => {
         renderer={(tag, size) => (
           <Link
             key={tag.value}
-            to={`/search?search=${encodeURIComponent(tag.value)}`}
+            to={`/search`}
+            state={{ search: tag.value }}
             style={{
               fontSize: size,
               margin: "0px 3px",
@@ -74,22 +74,33 @@ export const WordCloud = ({ data, loading }) => {
   );
 };
 
-const PublicHome = () => {
-  const [settings, setSettings] = useState({ introText: "", topCollection: { children: [], featured_records: [] }, topKeywords: [] });
-  const [loading, setLoading] = useState(true);
-  useEffect(() => {
-    const fetchData = async () => {
-      const res = await public_settings.find({ query: { archive_id: 1 } });
-      const settings = res.reduce((acc, setting) => {
-        acc[setting.setting] = setting.value;
-        return acc;
-      }, {});
-      // await new Promise(resolve => setTimeout(resolve, 10000));
-      setSettings(settings);
-      setLoading(false);
-    };
-    fetchData();
-  }, []);
+// eslint-disable-next-line react-refresh/only-export-components
+export async function loader() {
+  const res = await public_settings.find({ query: { archive_id: 1 } });
+  const settings = res.reduce((acc, setting) => {
+    acc[setting.setting] = setting.value;
+    return acc;
+  }, {});
+  return { settings };
+}
+
+const PublicHome = ({ loaderData: { settings } }) => {
+  const loading = false;
+  // const [settings, setSettings] = useState({ introText: "", topCollection: { children: [], featured_records: [] }, topKeywords: [] });
+  // const [loading, setLoading] = useState(true);
+  // useEffect(() => {
+  //   const fetchData = async () => {
+  //     const res = await public_settings.find({ query: { archive_id: 1 } });
+  //     const settings = res.reduce((acc, setting) => {
+  //       acc[setting.setting] = setting.value;
+  //       return acc;
+  //     }, {});
+  //     // await new Promise(resolve => setTimeout(resolve, 10000));
+  //     setSettings(settings);
+  //     setLoading(false);
+  //   };
+  //   fetchData();
+  // }, []);
   const { introText, topCollection: { children: topCollections, featured_records: featuredRecords }, topKeywords } = settings;
 
   const navigate = useNavigate();
@@ -120,7 +131,7 @@ const PublicHome = () => {
       <Stack spacing={2}>
         <Stack>
           <Typography variant="header" gutterBottom>
-            Search the Archives
+            Search the BUGASS Archives
           </Typography>
           <Box className="flex-scroller">
             <Form defaultValues={{ search: "" }} onSuccess={onSubmit}>
@@ -129,12 +140,14 @@ const PublicHome = () => {
           </Box>
         </Stack>
         <Divider />
-        <Stack spacing={2} sx={{ overflowX: "auto !important" }}
+        <Stack
+          spacing={2}
+          sx={{ overflowX: "auto !important" }}
           divider={<Divider sx={{ borderBottomWidth: { xs: 'thin', md: 0 }, borderRightWidth: { xs: 0, md: 'thin' } }} flexItem />}
           flexDirection={{ sx: 'column', md: 'row' }}
           useFlexGap
         >
-          <Box sx={{ width: { xs: "100%", md: "60%" }, height: { xs: "50vh", md: "auto" } }} >
+          <Box sx={{ width: { xs: "100%", md: "60%" }, height: { xs: "50vh", md: "auto" } }}>
             <ItemStack
               title="Browse by Collection"
               type="collection"

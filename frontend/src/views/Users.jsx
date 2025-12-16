@@ -12,14 +12,15 @@ import {
   Typography,
 } from "@mui/material";
 import { startCase } from "lodash-es";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { lazy, useCallback, useEffect, useMemo, useState } from "react";
 import { useAuth } from "src/stores";
 import { checkUnique } from "src/utils";
 
 import { users as usersService } from "../api";
-import EditableDataTable from "../components/EditableDataTable";
 
 import ChangePassword from "./ChangePassword";
+
+const EditableDataTable = lazy(() => import("../components/EditableDataTable"))
 
 export default function Users() {
   const [users, setUsers] = useState([]);
@@ -126,12 +127,12 @@ export default function Users() {
         col.disableColumnMenu = true;
         return col;
       }),
-    []
+    [],
   );
 
   const extraActions = useMemo(
     () => [["Change Password", PasswordIcon, (user) => setEditPassword({ open: true, user })]],
-    []
+    [],
   );
 
   const defaultValues = {

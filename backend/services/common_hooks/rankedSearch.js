@@ -168,7 +168,7 @@ export const rankedSearch = async (context) => {
   let rankedQuery = baseQuery.clone()
     .with('ts_query', knex.raw(`select to_tsquery(?, ?) as query`, [language, tsqueryString]))
     .crossJoin('ts_query');
-  console.log({ searchTerm, tsqueryString });
+
   if (useIdCheck) {
     rankedQuery = rankedQuery
       .with(
@@ -190,7 +190,7 @@ export const rankedSearch = async (context) => {
       getRankSelect(knex, useIdCheck, idField, idValue, rankExpr),
     );
 
-  console.log("Ranked Query:", rankedQuery.toString());
+  // console.log("Ranked Query:", rankedQuery.toString());
 
 
   context.params.knex = rankedQuery;

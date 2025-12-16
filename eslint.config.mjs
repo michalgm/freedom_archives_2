@@ -39,6 +39,7 @@ const eslintConfig = [
       '@stylistic': stylistic,
     },
     rules: {
+      "indent": ["error", 2],
       '@stylistic/quotes': 'off',
       '@stylistic/semi': 'off',
       '@stylistic/array-element-newline': ['warn', 'consistent'],

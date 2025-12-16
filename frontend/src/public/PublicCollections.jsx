@@ -12,14 +12,14 @@ import {
 } from "@mui/material";
 import { isArray } from "lodash-es";
 import { useEffect, useRef, useState } from "react";
-import { useParams } from "react-router";
+import { useLoaderData } from "react-router";
 import { public_collections as collectionsService } from "src/api";
 import Carousel from "src/components/Carousel";
 import Link from "src/components/Link";
 import Show from "src/components/Show";
 import Thumbnail from "src/components/Thumbnail";
 import { ItemStack } from "src/public/ItemCard";
-import Search from "src/public/PublicSearch/PublicSearch";
+import { Search } from "src/public/PublicSearch/PublicSearch";
 
 const scrollToSection = (id) => {
   const element = document.getElementById(id);
@@ -30,23 +30,55 @@ const scrollToSection = (id) => {
   });
 };
 
+async function fetchCollection({ params }) {
+  const { collection_id } = params;
+
+  if (!collection_id) {
+    return { collection: null };
+  }
+
+  const collection = await collectionsService.get(collection_id);
+
+  return {
+    collection,
+    search: {
+      collection_id: [
+        ...(collection.descendant_collection_ids || []),
+        collection.collection_id,
+      ],
+    },
+  };
+}
+
+
+// eslint-disable-next-line react-refresh/only-export-components
+export function loader({ params }) {
+  return fetchCollection({ params });
+}
+
 export const DetailsRow = ({ label, value, keyProp = 'list_item_id', valueProp = 'item' }) => {
   if (!value || !value.length) return null;
 
-  const displayValue = isArray(value) ? (
-    <Stack spacing={1} useFlexGap direction="row" flexWrap={"wrap"} rowGap={1} component={"dd"} sx={{ m: 0 }}>
-      {
-        value.map(({ [valueProp]: item, [keyProp]: key }) => (
-          <Chip key={key} label={item} size="small" variant="outlined" />
-        ))
-      }
-    </Stack >
-  ) : (
-    <dd style={{ margin: 0 }}> {value} </dd>
-  );
+  const displayValue = isArray(value)
+    ? (
+      <Stack spacing={1} useFlexGap direction="row" flexWrap="wrap" rowGap={1} component="dd" sx={{ m: 0 }}>
+        {
+          value.map(({ [valueProp]: item, [keyProp]: key }) => (
+            <Chip key={key} label={item} size="small" variant="outlined" />
+          ))
+        }
+      </Stack>
+    )
+    : (
+      <dd style={{ margin: 0 }}>
+        {' '}
+        {value}
+        {' '}
+      </dd>
+    );
 
   return (
-    <Stack component='dl' direction="row" spacing={1} sx={{ mt: 1 }} useFlexGap>
+    <Stack component="dl" direction="row" spacing={1} sx={{ mt: 1 }} useFlexGap>
       <Typography
         component="dt"
         variant="caption"
@@ -67,10 +99,9 @@ export const DetailsRow = ({ label, value, keyProp = 'list_item_id', valueProp =
 };
 
 const PublicCollections = () => {
-  const { collection_id } = useParams();
-  const [collection, setCollection] = useState(null);
-  const [search, setSearch] = useState({});
-  const [loading, setLoading] = useState(false);
+  const { collection, search } = useLoaderData();
+  // const [search, setSearch] = useState(initialSearch);
+  // const [loading, setLoading] = useState(false);
   const [tab, setTab] = useState("overview");
   const [scrollMarginTop, setScrollMarginTop] = useState(121); // default fallback
 
@@ -91,40 +122,40 @@ const PublicCollections = () => {
     return () => resizeObserver.disconnect();
   }, []);
 
-  useEffect(() => {
-    const fetchCollection = async () => {
-      if (collection_id) {
-        setLoading(true);
-        try {
-          const collection = await collectionsService.get(collection_id, {
-            // query: { $select: ["title"] },
-          });
-          setCollection(collection);
-          setSearch({
-            collection_id: [
-              ...(collection.descendant_collection_ids || []),
-              collection.collection_id,
-            ],
-            // collection_id: [[collection.title, collection.total_records, collection.collection_id]],
-          });
-        } catch {
-          //empty
-        }
-        setLoading(false);
-      }
-    };
-    fetchCollection();
-  }, [collection_id, setSearch]);
+  // useEffect(() => {
+  //   const fetchCollection = async () => {
+  //     if (collection_id) {
+  //       setLoading(true);
+  //       try {
+  //         const collection = await collectionsService.get(collection_id, {
+  //           // query: { $select: ["title"] },
+  //         });
+  //         setCollection(collection);
+  //         setSearch({
+  //           collection_id: [
+  //             ...(collection.descendant_collection_ids || []),
+  //             collection.collection_id,
+  //           ],
+  //           // collection_id: [[collection.title, collection.total_records, collection.collection_id]],
+  //         });
+  //       } catch {
+  //         // empty
+  //       }
+  //       setLoading(false);
+  //     }
+  //   };
+  //   fetchCollection();
+  // }, [collection_id, setSearch]);
 
-  if (!collection) {
+  if (!collection || !collection.collection_id) {
     return null;
   }
-  const hasFeatured =
-    collection.featured_records && collection.featured_records.length !== 0;
+  const hasFeatured
+    = collection.featured_records && collection.featured_records.length !== 0;
   const hasChildren = collection.children && collection.children.length !== 0;
   // const hasSidebar = hasFeatured || hasChildren;
   return (
-    <Box className="collection flex-container" sx={{ mb: 1, overflowX: "unset !important" }} >
+    <Box className="collection flex-container" sx={{ mb: 1, overflowX: "unset !important" }}>
       <Box
         id="collection-header"
         ref={headerRef}
@@ -148,10 +179,10 @@ const PublicCollections = () => {
           <Link color="primary.main" to="/">
             Search Home
           </Link>
-          {collection.ancestors &&
-            collection.ancestors
+          {collection.ancestors
+            && collection.ancestors
               .filter(({ collection_id }) => collection_id !== 0)
-              .map((ancestor) => (
+              .map(ancestor => (
                 <Link
                   key={ancestor.collection_id}
                   color="primary.main"
@@ -172,7 +203,7 @@ const PublicCollections = () => {
           flexWrap="wrap"
           spacing={1}
           sx={{ mb: 1 }}
-          justifyContent={"space-between"}
+          justifyContent="space-between"
         >
           <Typography variant="header" sx={{ mb: 1.5 }}>
             {collection.title}
@@ -194,7 +225,9 @@ const PublicCollections = () => {
               },
             }}
           >
-            <Tab label="Overview" value="overview"
+            <Tab
+              label="Overview"
+              value="overview"
             />
             {hasFeatured && (
               <Tab label="Featured Content" value="featured" />
@@ -215,9 +248,14 @@ const PublicCollections = () => {
           minHeight: 0,
         }}
       >
-        <Grid container spacing={2} id="overview" sx={{
-          scrollMarginTop: scrollMarginTop,
-        }}>
+        <Grid
+          container
+          spacing={2}
+          id="overview"
+          sx={{
+            scrollMarginTop: scrollMarginTop,
+          }}
+        >
           <Grid size={{ xs: 12, md: hasFeatured ? 7 : 12 }}>
             <Paper
               variant="outlined"
@@ -237,7 +275,7 @@ const PublicCollections = () => {
                   minHeight: 0,
                 }}
               >
-                <Box className='overview-scrollable' sx={{ flex: 1, overflow: "auto" }}>
+                <Box className="overview-scrollable" sx={{ flex: 1, overflow: "auto" }}>
                   <Thumbnail
                     item={collection}
                     width={200}
@@ -245,9 +283,9 @@ const PublicCollections = () => {
                   />
                   <Typography
                     variant="body1"
-                    component={"div"}
+                    component="div"
                     dangerouslySetInnerHTML={{ __html: collection.description }}
-                    sx={{ "& p": { mt: 0, mb: 1 }, textAlign: "justify" }}
+                    sx={{ "& p": { mt: 0, mb: 1 }, "textAlign": "justify" }}
                   />
                 </Box>
               </Box>
@@ -264,10 +302,14 @@ const PublicCollections = () => {
             </Paper>
           </Grid>
           <Show when={hasFeatured}>
-            <Grid size={{ xs: 12, md: 5 }} sx={{
-              scrollMarginTop,
+            <Grid
+              size={{ xs: 12, md: 5 }}
+              sx={{
+                scrollMarginTop,
 
-            }} id="featured">
+              }}
+              id="featured"
+            >
               <Paper
                 variant="outlined"
                 sx={{
@@ -289,7 +331,7 @@ const PublicCollections = () => {
             <ItemStack
               title="Subcollections"
               type="collection"
-              loading={loading}
+              // loading={loading}
               items={collection.children}
               dense={true}
               sx={{ maxHeight: 400, overflow: "auto" }}
@@ -305,9 +347,9 @@ const PublicCollections = () => {
             display: "flex",
             flexShrink: 0,
             height: 'calc(100vh - 38px - 105px - 16px)', // viewport - margin - header - padding
-            scrollSnapAlign: "start",
+            // scrollSnapAlign: "start",
             scrollMarginTop,
-            scrollSnapStop: "always",
+            // scrollSnapStop: "always",
           }}
         >
           <Typography variant="header">Records</Typography>
@@ -315,8 +357,8 @@ const PublicCollections = () => {
             <Search
               searchFilters={search}
               focus={false}
-              key={collection_id}
-              loading={loading}
+              key={collection?.collection_id}
+              // loading={loading}
             />
           </Box>
         </Paper>

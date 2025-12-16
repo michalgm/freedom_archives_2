@@ -41,7 +41,7 @@ const FilterItem = ({ value, label, count, type, addFilter, search }) => {
           },
         }}
         primary={label || "???"}
-      ></ListItemText>
+      />
       <Chip
         size="small"
         variant="outlined"
@@ -90,7 +90,6 @@ const Filter = ({ type, values, addFilter, search }) => {
   );
 };
 
-
 export const SearchFilters = ({
   search,
   filters,
@@ -103,7 +102,7 @@ export const SearchFilters = ({
   return (
     <Box
       // p={1}
-      sx={{ backgroundColor: (theme) => theme.palette.background.paper }}
+      sx={{ backgroundColor: theme => theme.palette.background.paper }}
       className="flex-container"
     >
       <Grid
@@ -129,11 +128,11 @@ export const SearchFilters = ({
           divider={<Divider orientation="horizontal" flexItem />}
           sx={{
             mt: 1,
-            backgroundColor: (theme) => theme.palette.background.paper,
+            backgroundColor: theme => theme.palette.background.paper,
           }}
         >
           {FILTER_TYPES.filter(
-            (type) => filters[type] && filters[type].length > 0,
+            type => filters[type] && filters[type].length > 0,
           ).map((type) => {
             return (
               <Filter
@@ -161,7 +160,6 @@ export function SearchForm({
   focus,
   filtersLoading,
 }) {
-
   return (
     <Form defaultValues={search} onSubmit={doSearch}>
       <AutoSubmit action={doSearch} timeout={300} />
@@ -179,7 +177,7 @@ export function SearchForm({
           <SelectElement
             name="sort"
             label="Sort by"
-            options={Object.keys(SORT_OPTIONS).map((id) => ({ id, label: id }))}
+            options={Object.keys(SORT_OPTIONS).map(id => ({ id, label: id }))}
             size="small"
             fullWidth
           />
@@ -187,7 +185,7 @@ export function SearchForm({
         <Grid size={3}>
           <CheckboxElement
             name="include_non_digitized"
-            label={`Include non-digitized records`}
+            label="Include non-digitized records"
             field_type="checkbox"
             // sx={{ "& .MuiFormControlLabel-label": { fontSize: "0.875rem" } }}
             // slotProps={{ label: { size: "small" } }}
@@ -224,31 +222,34 @@ function SearchResults({
   return (
     <Box sx={{ width: "100%" }}>
       <Divider sx={{ my: 1 }} orientation="horizontal" flexItem />
-      {total === 0 ? (
-        <Typography variant="body2" color="text.secondary" sx={{ p: 2 }}>
-          No records found.
-          {nonDigitizedTotal > 0 && (
-            <Typography variant="body2" color="text.secondary">
-              Hiding {nonDigitizedTotal} non-digitized records.
-              <Button
-                size="small"
-                onClick={() => setValue("include_non_digitized", true)}
-              >
-                Show All
-              </Button>
-            </Typography>
-          )}
-        </Typography>
-      ) : (
-        <PaginationFooter
-          offset={offset}
-          total={total}
-          page_size={PAGE_SIZE}
-          setOffset={setOffset}
-          size="small"
-          loading={loading}
-        />
-      )}
+      {total === 0
+        ? (
+          <Typography variant="body2" color="text.secondary" sx={{ p: 2 }}>
+              No records found.
+            {nonDigitizedTotal > 0 && (
+              <>
+                <br/>
+                Hiding {nonDigitizedTotal} non-digitized records.
+                <Button
+                  size="small"
+                  onClick={() => setValue("include_non_digitized", true)}
+                >
+                    Show All
+                </Button>
+              </>
+            )}
+          </Typography>
+        )
+        : (
+          <PaginationFooter
+            offset={offset}
+            total={total}
+            page_size={PAGE_SIZE}
+            setOffset={setOffset}
+            size="small"
+            loading={loading}
+          />
+        )}
     </Box>
   );
 }

@@ -24,34 +24,39 @@ interface AppState {
     removeNotificationsOnNavigate: () => void;
 }
 
+const checkHasError = (notifications: Notification[]) => {
+  return notifications.some(n => n.severity === 'error');
+}
+
 // Store for UI state (not persisted)
 const useAppStore = create<AppState>((set) => ({
-    loading: false,
-    title: "",
-    notifications: [],
-    hooks_initialized: false,
-    hasError: false,
+  loading: false,
+  title: "",
+  notifications: [],
+  hooks_initialized: false,
+  hasError: false,
 
-    setLoading: (loading) => set({ loading }),
-    setTitle: (title) => set({ title }),
-    initializeHooks: () => set({ hooks_initialized: true }),
+  setLoading: (loading) => set({ loading }),
+  setTitle: (title) => set({ title }),
+  initializeHooks: () => set({ hooks_initialized: true }),
 
-    addNotification: (notification: Notification) => set((state) => {
-        const id = notification.id || (Math.random() + 1).toString(36).substring(7);
-        const notifications = [...state.notifications, { 'severity': 'success', ...notification, id } as Notification]
-        const hasError = notifications.some(n => n.severity === 'error');
-        return { notifications: notifications, hasError: hasError }
-    }),
+  addNotification: (notification: Notification) => set((state) => {
+    const id = notification.id || (Math.random() + 1).toString(36).substring(7);
+    const notifications = [...state.notifications, { 'severity': 'success', ...notification, id } as Notification]
+    const hasError = checkHasError(notifications);
+    return { notifications: notifications, hasError: hasError }
+  }),
 
-    removeNotification: (id) => set((state) => {
-        const notifications = state.notifications.filter(notification => notification.id !== id)
-        const hasError = notifications.some(n => n.severity === 'error');
-        return { notifications: notifications, hasError: hasError }
-    }),
-    removeNotificationsOnNavigate: () => set((state) => {
-        const notifications = state.notifications.filter(notification => notification.keepOnNavigate || notification.severity === 'success');
-        return { notifications: notifications }
-    })
+  removeNotification: (id) => set((state) => {
+    const notifications = state.notifications.filter(notification => notification.id !== id)
+    const hasError = notifications.some(n => n.severity === 'error');
+    return { notifications: notifications, hasError: hasError }
+  }),
+  removeNotificationsOnNavigate: () => set((state) => {
+    const notifications = state.notifications.filter(notification => notification.keepOnNavigate || notification.severity === 'success');
+    const hasError = checkHasError(notifications);
+    return { notifications, hasError };
+  }),
 }));
 
 export default useAppStore;

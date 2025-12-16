@@ -19,7 +19,7 @@ const MEDIA_TYPE_BADGES = {
   Video: OndemandVideo,
 };
 
-export default function Thumbnail({ item, src: _src, width = 75, alt = "", type: _type, sx = {}, ...props }) {
+export default function Thumbnail({ item, src: _src, width = 75, alt = "", type: _type, sx, ...props }) {
   const [brokenLink, setBrokenLink] = useState(false);
   const onError = useCallback((_e) => {
     setBrokenLink(true);
@@ -55,7 +55,7 @@ export default function Thumbnail({ item, src: _src, width = 75, alt = "", type:
     return (
       <Avatar
         style={{ width, height: width, border: "1px solid rgba(0, 0, 0, 0.1)" }}
-        sx={{ bgcolor, ...sx }}
+        sx={{ bgcolor, ...(sx || {}) }}
         variant="rounded"
         {...props}
       >
@@ -66,7 +66,14 @@ export default function Thumbnail({ item, src: _src, width = 75, alt = "", type:
   const Badge = MEDIA_TYPE_BADGES[media_type];
 
   return (
-    <Box sx={{ width, minWidth: width, display: "inline-flex", position: "relative", ...sx }} {...props}>
+    <Box sx={{
+      width,
+      minWidth: width,
+      display: "inline-flex",
+      position: "relative",
+      border: '1px solid rgba(0, 0, 0, 0.1)',
+      ...(sx || {}),
+    }} {...props}>
       {Badge && (
         <Box
           sx={{

@@ -68,7 +68,7 @@ export function ItemCardLayout({
       sx={{
         flexShrink: 0,
         border: dense ? "none" : "inhertit",
-        scrollSnapAlign: "start",
+        // scrollSnapAlign: "start",
       }}
       {...cardProps}
     >
@@ -104,7 +104,7 @@ export function ItemLink({ item, children, setCurrentRecord, ...props }) {
       to={url}
       style={{ textDecoration: "none", color: "inherit" }}
       target={target}
-      preventScrollReset={true}
+      // preventScrollReset={true}
       onClick={onClick}
       {...props}
     >
@@ -242,7 +242,7 @@ export function ItemStack({
         spacing={dense ? 0 : 2}
         className="flex-scroller"
         sx={{
-          scrollSnapType: "y mandatory",
+          // scrollSnapType: "y mandatory",
         }}
         divider={dense ? <Divider /> : null}
       >

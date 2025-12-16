@@ -1,6 +1,7 @@
 import configuration from "@feathersjs/configuration";
 import feathersExpress, { errorHandler, json, notFound, rest, urlencoded } from "@feathersjs/express";
 import { feathers } from "@feathersjs/feathers";
+import { createRequestHandler } from "@react-router/express";
 import compress from "compression";
 import cors from "cors";
 import express from 'express';
@@ -29,22 +30,26 @@ const app = feathersExpress(feathers(), expressApp);
 app.configure(configuration());
 // Set up Plugins and providers
 const publicPath = path.resolve(__dirname, app.get("public")); // Adjust relative path as necessary
-const frontendDistPath = path.resolve(__dirname, '../frontend/dist');
+const frontendDistPath = path.resolve(__dirname, '../frontend/build');
+const clientDistPath = path.resolve(frontendDistPath, 'client');
+const serverDistPath = path.resolve(frontendDistPath, 'server');
+
 // Load app configuration
 // Enable security, CORS, compression, favicon and body parsing
 app.use(
   helmet({
     contentSecurityPolicy: false,
-  })
+  }),
 );
+
 app.use(cors());
 app.use(compress());
 app.use(json({ limit: "13mb" }));
 app.use(urlencoded({ extended: true }));
 app.configure(rest());
-app.use(favicon(path.join(frontendDistPath, "favicon.ico")));
+app.use(favicon(path.join(clientDistPath, "favicon.ico")));
 // Host the public folder
-app.use("/", express.static(frontendDistPath));
+app.use("/", express.static(clientDistPath));
 app.use("/images/thumbnails", thumbnailProxy(app, publicPath));
 // Configure a middleware for 404s and the error handler
 app.configure(knex);
@@ -55,17 +60,23 @@ app.configure(authentication);
 app.configure(services);
 
 app.hooks(appHooks);
-expressApp.get("*", (request, response, next) => {
+expressApp.get("*", async (request, response, next) => {
   if (request.path.startsWith("/api/") || request.path.startsWith("/images/")) {
     return next();
   }
-  response.sendFile(path.join(frontendDistPath, "index.html"));
+  const serverBuild = await import(path.join(serverDistPath, "index.js"));
+  createRequestHandler({
+    build: serverBuild,
+  })(request, response, next);
+  // console.log('serving ', path.join(frontendDistPath, "__spa-fallback.html"));
+  // response.sendFile(path.join(frontendDistPath, "__spa-fallback.html"));
+  // response.sendFile(path.join(frontendDistPath, "index.html"));
 });
 // Configure a middleware for 404s and the error handler
 app.use(notFound({ verbose: true }));
 app.use(
   errorHandler({
     logger,
-  })
+  }),
 );
 export default app;

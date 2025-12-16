@@ -24,7 +24,7 @@ describe('rankedSearch hook', () => {
         $contains: "@>",
         $contained_by: "<@",
         $fulltext: "@@",
-      }
+      },
     });
 
     // Install mock-knex tracker
@@ -44,20 +44,20 @@ describe('rankedSearch hook', () => {
     context = {
       path: 'api/records',
       app: {
-        get: sinon.stub().withArgs('postgresqlClient').returns(db)
+        get: sinon.stub().withArgs('postgresqlClient').returns(db),
       },
       service: {
         fullName: 'records',
         getOptions: sinon.stub().returns({ id: 'record_id', name: 'records' }),
         createQuery: sinon.stub().returns(baseQuery),
-        sanitizeQuery: sinon.stub().resolvesArg(0)
+        sanitizeQuery: sinon.stub().resolvesArg(0),
       },
       params: {
         query: {
           $fullText: 'test query',
-          otherParam: 'value'
-        }
-      }
+          otherParam: 'value',
+        },
+      },
     };
 
     // Stub console.log to prevent noise in test output
@@ -132,10 +132,9 @@ describe('rankedSearch hook', () => {
     context.params.query.$fullText = '"exact phrase" partial:* operator&term';
 
     await rankedSearch(context);
-
     // Verify the query string contains the properly formatted terms
     const queryString = context.params.knex.toString();
-    expect(queryString).to.include('"exact phrase"');
+    expect(queryString).to.include('"exact<->phrase"');
     expect(queryString).to.include('partial:*');
     expect(queryString).to.include('operator&term');
   });

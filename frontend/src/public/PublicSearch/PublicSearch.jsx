@@ -12,11 +12,13 @@ import { usePublicSearch } from "src/public/PublicSearch/usePublicSearch";
 
 const DEFAULT_SEARCH_FILTERS = {};
 
-function Search({
-  searchFilters = DEFAULT_SEARCH_FILTERS,
-  focus = true,
-  loading: initialLoading,
-}) {
+export function Search(params) {
+  const {
+    searchFilters = DEFAULT_SEARCH_FILTERS,
+    focus = true,
+    loading: initialLoading,
+  } = params;
+
   const {
     search,
     records,
@@ -66,24 +68,22 @@ function Search({
         <Box sx={{ flexGrow: 1 }} className="flex-container">
           <Box
             sx={{
-              backgroundColor: (theme) => theme.palette.background.paper,
+              backgroundColor: theme => theme.palette.background.paper,
               mb: 1,
             }}
           >
-            {
-              <SearchForm
-                search={search}
-                doSearch={doSearch}
-                records={records}
-                loading={recordsLoading}
-                filtersLoading={loading}
-                offset={offset}
-                total={total}
-                setOffset={setOffset}
-                nonDigitizedTotal={records.nonDigitizedTotal}
-                focus={focus}
-              />
-            }
+            <SearchForm
+              search={search}
+              doSearch={doSearch}
+              records={records}
+              loading={recordsLoading}
+              filtersLoading={loading}
+              offset={offset}
+              total={total}
+              setOffset={setOffset}
+              nonDigitizedTotal={records.nonDigitizedTotal}
+              focus={focus}
+            />
           </Box>
 
           <Grid className="flex-container">
@@ -105,4 +105,6 @@ function Search({
     </Box>
   );
 }
-export default React.memo(Search);
+export default function SearchPage() {
+  return <Search />;
+}

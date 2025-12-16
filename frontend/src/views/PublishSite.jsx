@@ -2,14 +2,16 @@ import { Publish, Restore } from "@mui/icons-material";
 import { Button, DialogContentText, Paper, Stack, Typography } from "@mui/material";
 import { startCase } from "lodash-es";
 import { useConfirm } from "material-ui-confirm";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useState, lazy } from "react";
 import ButtonsHeader from "src/components/form/ButtonsHeader";
 import { Section } from "src/components/ViewContainer";
 import { useAddNotification } from "src/stores";
 
 import { snapshots as snapshotsService } from "../api";
 // import { useAddNotification } from "../appContext";
-import { EditableDataTable } from "../components/EditableDataTable";
+// import { EditableDataTable } from "../components/EditableDataTable";
+
+const EditableDataTable = lazy(() => import("../components/EditableDataTable"))
 
 const PublishSite = () => {
   const [snapshots, setSnapshots] = useState([]);
@@ -22,10 +24,10 @@ const PublishSite = () => {
       snapshots.map((snapshot) => {
         snapshot.date_published = new Date(snapshot.date_published);
         snapshot.max_date = new Date(
-          Math.max(new Date(snapshot.max_record_date), new Date(snapshot.max_collection_date))
+          Math.max(new Date(snapshot.max_record_date), new Date(snapshot.max_collection_date)),
         );
         return snapshot;
-      })
+      }),
     );
   }, []);
 
@@ -68,14 +70,14 @@ const PublishSite = () => {
       await confirm({
         title: `Restore snapshot "${startCase(title)}"?`,
         description: `This will replace the current live site with the records and collections from ${new Date(
-          date_published
+          date_published,
         ).toLocaleString()}`,
       });
       await snapshotsService.patch(snapshot_id, {});
       addNotification({ message: `Snapshot restored to live site!` });
       fetchSnapshots();
     },
-    [addNotification, confirm, fetchSnapshots]
+    [addNotification, confirm, fetchSnapshots],
   );
   const buttons = useMemo(
     () => [
@@ -86,7 +88,7 @@ const PublishSite = () => {
         onClick: publishChanges,
       },
     ],
-    [publishChanges]
+    [publishChanges],
   );
 
   const columns = useMemo(
@@ -118,7 +120,7 @@ const PublishSite = () => {
           ),
       },
     ],
-    [restoreSnapshot]
+    [restoreSnapshot],
   );
 
   useEffect(() => {

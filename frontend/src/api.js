@@ -17,9 +17,19 @@ class MyFetchClient extends FetchClient {
   }
 }
 
-const restClient = rest();
+const apiOrigin
+  = import.meta.env.SSR
+    ? (typeof process !== "undefined" ? (process.env.VITE_API_ORIGIN || process.env.API_ORIGIN) : undefined)
+    || "http://localhost:3030"
+    : undefined;
 
-app.configure(restClient.fetch(window.fetch.bind(window), MyFetchClient));
+const restClient = rest(apiOrigin);
+
+const fetchImplementation = typeof window !== 'undefined'
+  ? window.fetch.bind(window)
+  : fetch; // Use global fetch in Node.js
+
+app.configure(restClient.fetch(fetchImplementation, MyFetchClient));
 app.configure(auth({ path: "/api/authentication" }));
 
 export const records = app.service("/api/records");
@@ -49,7 +59,7 @@ export const settings = app.service("/api/settings");
 
 export const unified_search = app.service("/api/unified_search");
 
-export const getServiceID = (service) => `${service.replace(/s$/, "")}_id`;
+export const getServiceID = service => `${service.replace(/s$/, "")}_id`;
 
 export const authenticate = async (username, password) => {
   return app

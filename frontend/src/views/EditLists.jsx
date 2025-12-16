@@ -13,7 +13,7 @@ import {
   Tabs,
 } from "@mui/material";
 import { startCase } from "lodash-es";
-import { useCallback, useEffect, useState } from "react";
+import { lazy, useCallback, useEffect, useState } from "react";
 import { FormContainer } from "react-hook-form-mui";
 import { Field } from "src/components/form/Field";
 import Notifications from "src/components/Notifications";
@@ -22,7 +22,8 @@ import { useAddNotification } from "src/stores";
 import { checkUnique } from "src/utils";
 
 import { list_items, list_items_lookup } from "../api";
-import EditableDataTable from "../components/EditableDataTable";
+
+const EditableDataTable = lazy(() => import("../components/EditableDataTable"))
 
 const item_types = {
   call_number: { description: true, collections: true, media: true },
@@ -63,7 +64,7 @@ const columns = [
           type: type,
           list_item_id: { $ne: params.row.list_item_id },
         },
-        params.props.value
+        params.props.value,
       );
       const result = {
         ...params.props,

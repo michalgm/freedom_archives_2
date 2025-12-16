@@ -1,5 +1,5 @@
 import { ArrowDownward, ArrowUpward, Close, Search } from "@mui/icons-material";
-import { Box, Button, Grid, Icon, IconButton, InputAdornment, Paper, Stack, Tooltip } from "@mui/material";
+import { Box, Button, Grid, Icon, IconButton, InputAdornment, LinearProgress, Paper, Stack, Tooltip } from "@mui/material";
 import { isEqual, merge, startCase } from "lodash-es";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { FormProvider, useFieldArray, useForm } from "react-hook-form-mui";
@@ -25,7 +25,7 @@ function Filter({ index, remove, filterTypes, filter, update }) {
       Object.keys(filterTypes)
         .sort()
         .map((key) => ({ label: filterTypes[key].label || startCase(key), id: key })),
-    [filterTypes]
+    [filterTypes],
   );
 
   const valueFieldProps = {
@@ -139,7 +139,7 @@ const FilterBar = ({
         setSearch({ offset: 0 });
       }
     },
-    [filter, setFilter, setSearch]
+    [filter, setFilter, setSearch],
   );
 
   const reset = useCallback(() => {
@@ -351,7 +351,7 @@ const StatefulManage = ({ useStore: _useStore, ...props }) => {
 };
 
 const ManageBase = ({
-  defaultFilter = {},
+  defaultFilter,
   filterTypes,
   createQuery,
   searchHelperText = "",
@@ -359,7 +359,7 @@ const ManageBase = ({
   embedded,
   itemAction,
   useStore,
-  sortOptions = {},
+  sortOptions,
 }) => {
   const [items, setItems] = useState([]);
   const [digitizedTotal, setDigitizedTotal] = useState(0);
@@ -391,22 +391,22 @@ const ManageBase = ({
               value = value.toUpperCase();
             }
             switch (filter.match) {
-              case "contained":
-                query[field] = {
-                  $contains: [value.list_item_id || value.value || value],
-                };
-                break;
-              case "fuzzy":
-                query[field] = { $ilike: `%${value.replace(/ /g, "%")}%` };
-                break;
-              case "listitem":
-                query[`${field}_search`] = { $contains: [value.item] };
-                break;
-              case "listitem_id":
-                query[`${field.replace(/s$/, "")}_id`] = value.list_item_id;
-                break;
-              default:
-                query[field] = value;
+            case "contained":
+              query[field] = {
+                $contains: [value.list_item_id || value.value || value],
+              };
+              break;
+            case "fuzzy":
+              query[field] = { $ilike: `%${value.replace(/ /g, "%")}%` };
+              break;
+            case "listitem":
+              query[`${field}_search`] = { $contains: [value.item] };
+              break;
+            case "listitem_id":
+              query[`${field.replace(/s$/, "")}_id`] = value.list_item_id;
+              break;
+            default:
+              query[field] = value;
             }
           }
         });
@@ -415,14 +415,14 @@ const ManageBase = ({
         (service === "records" ? records : collections).find({ noLoading, query }),
         service === "records"
           ? records.find({
-              noLoading,
-              query: {
-                ...query,
-                has_digital: true,
-                $select: [`record_id`],
-                $limit: 1,
-              },
-            })
+            noLoading,
+            query: {
+              ...query,
+              has_digital: true,
+              $select: [`record_id`],
+              $limit: 1,
+            },
+          })
           : {},
       ]);
       setItems(data);
@@ -439,7 +439,7 @@ const ManageBase = ({
       }
       setLoading(false);
     },
-    [createQuery, embedded, filterTypes, setSearch]
+    [createQuery, embedded, filterTypes, setSearch],
   );
 
   useEffect(() => {
@@ -471,16 +471,16 @@ const ManageBase = ({
           setFilter={setFilter}
           setSearch={setSearch}
           filterTypes={filterTypes}
-          defaultFilter={defaultFilter}
+          defaultFilter={defaultFilter||{}}
           searchHelperText={searchHelperText}
           embedded={embedded}
-          sortOptions={sortOptions}
+          sortOptions={sortOptions || {}}
         />,
       ]}
     >
       <>
         {loading ? (
-          "Loading..."
+          <LinearProgress />
         ) : (
           <ItemsList description items={items} itemAction={itemAction} type={service.replace(/s$/, "")} link={link} />
         )}

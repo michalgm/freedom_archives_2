@@ -35,9 +35,9 @@ const xSmallInputStyles = {
     padding: "6px 8px",
   },
   "& .MuiInputBase-input.MuiSelect-select, & .MuiInputBase-input.MuiAutocomplete-input":
-    {
-      padding: "2.5px 4px 2.5px 8px",
-    },
+  {
+    padding: "2.5px 4px 2.5px 8px",
+  },
   "& .MuiInputBase-adornedStart": { paddingLeft: "8px" },
   "& .MuiInputBase-inputAdornedStart": { paddingLeft: 0 },
   "& .MuiInputBase-adornedEnd": { paddingRight: "8px" },
@@ -57,10 +57,19 @@ const xSmallInputStyles = {
   },
 };
 
-export const theme = createTheme({
+const baseTheme = createTheme();
+export const theme = createTheme(baseTheme, {
   // colorSchemes: {
   //   dark: true,
   // },
+  palette: {
+    publicPrimary: baseTheme.palette.augmentColor({
+      color: {
+        main: "#920000",
+      },
+      name: "publicPrimary",
+    }),
+  },
   cssVariables: true,
   typography: {
     h1: { fontSize: "2.5rem" },
@@ -235,3 +244,10 @@ export const theme = createTheme({
     },
   },
 });
+
+// theme.palette.publicPrimary = theme.palette.augmentColor({
+//   color: {
+//     main: "#920000",
+//   },
+//   name: "publicPrimary",
+// });

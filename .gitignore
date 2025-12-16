@@ -128,7 +128,7 @@ frontend/public/assets/*
 config/production.json
 config/local.json
 config/development.json
-
+.react-router/
 dbtools/cruft/*
 .yarn/*
 

@@ -63,6 +63,7 @@
     "@feathersjs/schema": "^5.0.37",
     "@feathersjs/typebox": "^5.0.37",
     "@img/sharp-libvips-linux-x64": "https://raw.githubusercontent.com/michalgm/freedom_archives_2/master/sharp-libvips/img-sharp-libvips-linux-x64-1.1.0.tgz",
+    "@react-router/express": "^7.10.1",
     "compression": "^1.8.1",
     "cors": "^2.8.5",
     "eslint-plugin-react-hooks": "^7.0.1",

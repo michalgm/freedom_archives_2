@@ -1,5 +1,5 @@
+import { reactRouter } from "@react-router/dev/vite";
 import { storybookTest } from '@storybook/addon-vitest/vitest-plugin';
-import react from "@vitejs/plugin-react";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { defineConfig } from "vite";
@@ -7,8 +7,8 @@ import commonjs from "vite-plugin-commonjs";
 import viteTsconfigPaths from "vite-tsconfig-paths";
 import { defineProject } from "vitest/config";
 
-const dirname =
-  typeof __dirname !== 'undefined' ? __dirname : path.dirname(fileURLToPath(import.meta.url));
+const dirname
+  = typeof __dirname !== 'undefined' ? __dirname : path.dirname(fileURLToPath(import.meta.url));
 
 export default defineConfig(({ mode }) => ({
   // depending on your application, base can also be "/"
@@ -18,10 +18,11 @@ export default defineConfig(({ mode }) => ({
     __WDYR_ENABLED__: mode === 'development',
   },
   build: {
-    sourcemap: true,
+    sourcemap: mode === "development",
   },
   plugins: [
-    react(),
+    // react(),
+    reactRouter(),
     // {
     //   name: "mui-icons-transformer",
     //   transform(code, id) {
@@ -53,7 +54,7 @@ export default defineConfig(({ mode }) => ({
     // Use `workspace` field in Vitest < 3.2
     projects: [
       defineProject({
-        extends: true,
+        // extends: true,
         plugins: [
           storybookTest({
             // The location of your Storybook config, main.js|ts

@@ -1,12 +1,12 @@
 export const ROLE_HIERARCHY = ["intern", "staff", "administrator"];
 
-export const appConfig = {
-  Collections: {
+export const routeConfig = {
+  "Collections": {
     icon: "library_books",
     routes: [
       {
         path: "collections",
-        component: "Collections",
+        component: "./views/Collections.jsx",
         sidebar: {
           label: "Manage Collections",
           icon: "",
@@ -21,18 +21,18 @@ export const appConfig = {
       },
       {
         path: "collections/:id",
-        component: "Collection",
+        component: "./views/Collection.jsx",
       },
     ],
   },
 
-  Records: {
+  "Records": {
     icon: "description",
     routes: [
-      {
-        path: "",
-        redirect: "/admin/records",
-      },
+      // {
+      //   path: "",
+      //   redirect: "/admin/records",
+      // },
       // {
       //   path: "search",
       //   component: "PublicSearch",
@@ -43,7 +43,7 @@ export const appConfig = {
       // },
       {
         path: "records",
-        component: "Records",
+        component: "./views/Records.jsx",
         sidebar: {
           label: "Manage Records",
           icon: "",
@@ -58,7 +58,7 @@ export const appConfig = {
       },
       {
         path: "records/table",
-        component: "Table",
+        component: "./views/RecordsTable/RecordsTableView.jsx",
         authRole: "staff",
         sidebar: {
           label: "Table View",
@@ -67,7 +67,7 @@ export const appConfig = {
       },
       {
         path: "records/:id",
-        component: "Record",
+        component: "./views/Record.jsx",
         props: { showForm: true },
       },
     ],
@@ -78,7 +78,7 @@ export const appConfig = {
     routes: [
       {
         path: "site/settings",
-        component: "SiteSettings",
+        component: "./views/SiteSettings.jsx",
         authRole: "staff",
         sidebar: {
           label: "Site Settings",
@@ -87,9 +87,8 @@ export const appConfig = {
       },
       {
         path: "site/featured-records",
-        component: "Collection",
+        component: "./views/Collection.jsx",
         authRole: "staff",
-        props: { id: 0, mode: "featured_records" },
         sidebar: {
           label: "Manage Featured Records",
           icon: "",
@@ -97,9 +96,8 @@ export const appConfig = {
       },
       {
         path: "site/featured-collections",
-        component: "Collection",
+        component: "./views/Collection.jsx",
         authRole: "staff",
-        props: { id: 0, mode: "featured_collections" },
         sidebar: {
           label: "Manage Featured Collections",
           icon: "",
@@ -107,7 +105,7 @@ export const appConfig = {
       },
       {
         path: "site/edit-list-values",
-        component: "EditLists",
+        component: "./views/EditLists.jsx",
         authRole: "staff",
         sidebar: {
           label: "Edit List Values",
@@ -132,7 +130,7 @@ export const appConfig = {
       },
       {
         path: "site/review-changes",
-        component: "ReviewChanges",
+        component: "./views/ReviewChanges.jsx",
         authRole: "administrator",
         sidebar: {
           label: "Review Changes",
@@ -142,12 +140,12 @@ export const appConfig = {
     ],
   },
 
-  Admin: {
+  "Admin": {
     icon: "admin_panel_settings",
     routes: [
       {
-        path: "relationships",
-        component: "Relationships",
+        path: "admin/relationships/:skip?",
+        component: "./views/Relationships.jsx",
         authRole: "administrator",
         sidebar: {
           label: "Update Unknown Relationships",
@@ -156,7 +154,7 @@ export const appConfig = {
       },
       {
         path: "admin/users",
-        component: "Users",
+        component: "./views/Users.jsx",
         authRole: "staff",
         sidebar: {
           label: "Manage Users",
@@ -165,39 +163,13 @@ export const appConfig = {
       },
       {
         path: "admin/publish-site",
-        component: "PublishSite",
+        component: "./views/PublishSite.jsx",
         authRole: "administrator",
         sidebar: {
           label: "Publish/Restore Live Site",
           icon: "",
         },
       },
-      {
-        path: "relationships/:skip",
-        component: "Relationships",
-        authRole: "administrator",
-      },
-    ],
-  },
-
-  // Routes that don't appear in navigation
-  Hidden: {
-    routes: [
-      {
-        path: "login",
-        component: "Login",
-        public: true,
-      },
-      {
-        path: "forbidden",
-        component: "Forbidden",
-        public: true,
-      },
-      // {
-      //   path: "search",
-      //   component: "Search",
-      //   public: true,
-      // },
     ],
   },
 };
@@ -206,12 +178,13 @@ export function hasAccess(userRole, requiredRole) {
   if (!requiredRole) return true;
   const userLevel = ROLE_HIERARCHY.indexOf(userRole);
   const requiredLevel = ROLE_HIERARCHY.indexOf(requiredRole);
+  // console.log({userRole, requiredRole, userLevel, requiredLevel}) 
   return userLevel >= requiredLevel;
 }
 
 export const sidebarConfig = {};
 
-export const routes = Object.entries(appConfig).reduce((acc, [sectionName, section]) => {
+export const routes = Object.entries(routeConfig).reduce((acc, [sectionName, section]) => {
   const sectionRoutes = [];
   (section.routes || []).forEach((routeConfig) => {
     const { path, sidebar, ...config } = routeConfig;
@@ -237,3 +210,8 @@ export const routes = Object.entries(appConfig).reduce((acc, [sectionName, secti
   }
   return acc;
 }, {});
+
+export function currentRouteConfig(matches = []) {
+  const route = matches.at(-1);
+  return routes[route?.id]?.[1]
+}

@@ -99,8 +99,9 @@ const PublicLayout = () => {
                 overflow: "hidden",
               }}
             >
-              <a href="https://freedomarchives.org" title="Go to Freedom Archives Home" >
-                <Box id="header_image"
+              <a href="https://freedomarchives.org" title="Go to Freedom Archives Home">
+                <Box
+                  id="header_image"
                   sx={{
                     position: "absolute",
                     background: `url("/static/images/freedom_archives_header.jpg") no-repeat scroll  #b00000`,
@@ -138,7 +139,7 @@ const PublicLayout = () => {
                   },
                 }}
               >
-                {headerLinks.map((link) => (
+                {headerLinks.map(link => (
                   <ButtonLink
                     key={link.title}
                     size="small"
@@ -153,7 +154,7 @@ const PublicLayout = () => {
               </Stack>
             </Box>
           </Container>
-        </Box >
+        </Box>
 
         <Container
           id="main_content"
@@ -168,7 +169,8 @@ const PublicLayout = () => {
             display: "flex",
             flexDirection: "column",
             scrollSnapAlign: "start",
-            scrollSnapStop: "always", // Add this
+            scrollSnapType: "y proximity",
+            // scrollSnapStop: "always", // Add this
             scrollMarginTop: 8,
             // height: "calc(100dvh - 16px)",
             zIndex: 10,
@@ -223,12 +225,13 @@ const PublicLayout = () => {
                 DONATE
               </Button>
             </Box>
-            <Typography variant="caption" id="contact" component={"div"}>
+            <Typography variant="caption" id="contact" component="div">
               <b>The Freedom Archives</b>
               <br />
               1615 Hopkins Street, Berkeley, CA 94707
               <br />
-              Phone: (415) 863-9977 &bull; E-mail:{" "}
+              Phone: (415) 863-9977 &bull; E-mail:
+              {" "}
               <Link href="mailto:info@freedomarchives.org">
                 info [at] freedomarchives [dot] org
               </Link>

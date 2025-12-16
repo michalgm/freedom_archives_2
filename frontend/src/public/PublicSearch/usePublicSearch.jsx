@@ -180,7 +180,7 @@ export const usePublicSearch = (
       setSearch((search) => {
         let newFilter = [...(search[type] || [])];
         if (newFilter.includes(value)) {
-          newFilter = newFilter.filter((v) => v !== value);
+          newFilter = newFilter.filter(v => v !== value);
         } else {
           newFilter.push(value);
         }
@@ -195,7 +195,7 @@ export const usePublicSearch = (
     filterTypes.forEach((type) => {
       newFilters[type] = [];
     });
-    setSearch((search) => ({ ...search, ...newFilters }));
+    setSearch(search => ({ ...search, ...newFilters }));
   }, [setSearch, filterTypes]);
 
   return {

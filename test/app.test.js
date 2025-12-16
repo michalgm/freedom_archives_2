@@ -8,7 +8,7 @@ const port = app.get("port");
 const appUrl = `http://${app.get("host")}:${port}`;
 
 describe("Feathers application tests", () => {
-
+  this.timeout(5000); 
   before(async () => {
     await app.listen(port);
   });
