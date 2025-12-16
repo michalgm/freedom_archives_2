@@ -30,7 +30,9 @@ const sort_options = {
   call_number: { label: "Call Number", sort: { call_number: 1, display_order: 1, rank: -1, title: 1 } },
 };
 
-function Collections({ embedded, itemAction, filter, forcedFilter, useStore }) {
+
+export function Collections({ embedded, itemAction, filter, forcedFilter, useStore }) {
+
   const createQuery = useCallback(
     (filter) => {
       const { search, hidden, needs_review, sort = "relevance", sort_desc = true } = filter;
@@ -57,7 +59,7 @@ function Collections({ embedded, itemAction, filter, forcedFilter, useStore }) {
       }
       return query;
     },
-    [forcedFilter]
+    [forcedFilter],
   );
 
   const renderItem = (collection) => {
@@ -99,7 +101,6 @@ function Collections({ embedded, itemAction, filter, forcedFilter, useStore }) {
       </>
     );
   };
-
   return (
     <Manage
       renderItem={renderItem}
@@ -116,4 +117,4 @@ function Collections({ embedded, itemAction, filter, forcedFilter, useStore }) {
   );
 }
 
-export default Collections;
+export default <><Collections/></>;

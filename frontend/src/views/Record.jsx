@@ -100,7 +100,11 @@ import Link from "../components/Link";
 //   continuations: [],
 // };
 
-function MediaItem({ media = {}, index, actions: { swap, remove, update } }) {
+function MediaItem({ media, index, actions }) {
+  const { swap, remove, update } = (actions || {});
+  if (!media) {
+    return null;
+  }
   const edit = !media.delete;
 
   return (
@@ -272,7 +276,7 @@ function Media({ record }) {
   );
 }
 
-function Relationships({ id, relationships = [] }) {
+function Relationships({ id, relationships}) {
   return (
     <Table size="small">
       <TableHead>
@@ -288,14 +292,14 @@ function Relationships({ id, relationships = [] }) {
         </TableRow>
       </TableHead>
       <TableBody>
-        {relationships.length === 0 && (
+        {(relationships || []).length === 0 && (
           <TableRow>
             <TableCell align="center" colSpan={15}>
               No Related Records
             </TableCell>
           </TableRow>
         )}
-        {relationships.map((relation, index) => {
+        {(relationships || []).map((relation, index) => {
           const side = relation.docid_1 === id ? 2 : 1;
 
           const doc_id = relation[`docid_${side}`];
@@ -377,7 +381,7 @@ function UpdateThumbnailButton() {
   );
 }
 
-function Record({ id /*  embedded = false */ }) {
+export function Record({ id /*  embedded = false */ }) {
   const { id: paramId } = useParams();
   id ??= paramId;
   const navigate = useNavigate();
@@ -528,4 +532,4 @@ function Record({ id /*  embedded = false */ }) {
   );
 }
 
-export default Record;
+export default <><Record/></>;

@@ -34,7 +34,7 @@ const sort_options = {
   call_number: { label: "Call Number", sort: { call_numbers: 1, rank: -1, title: 1 } },
 };
 
-function Records({ embedded, itemAction, filter, forcedFilter, useStore }) {
+export function Records({ embedded, itemAction, filter, forcedFilter, useStore }) {
   const createQuery = useCallback(
     (formFilter) => {
       const {
@@ -86,7 +86,7 @@ function Records({ embedded, itemAction, filter, forcedFilter, useStore }) {
       }
       return query;
     },
-    [forcedFilter]
+    [forcedFilter],
   );
 
   return (
@@ -104,4 +104,6 @@ function Records({ embedded, itemAction, filter, forcedFilter, useStore }) {
   );
 }
 
-export default Records;
+export default <>
+  <Records/>
+</>;
