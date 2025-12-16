@@ -7,8 +7,8 @@
   "type": "module",
   "main": "index.js",
   "scripts": {
-    "start": "yarn vite dev",
-    "build": "yarn vite build && mkdir -p public/img/thumbnails",
+    "start": "yarn react-router dev",
+    "build": "yarn react-router build && mkdir -p public/img/thumbnails",
     "preview": "yarn vite preview",
     "publish": "yarn run build && scp -Crp dist/* freedomarc:work/freedom_archives_2/frontend/build/",
     "storybook": "yarn storybook dev -p 6006 --no-open",

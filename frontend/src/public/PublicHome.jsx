@@ -131,7 +131,7 @@ const PublicHome = ({ loaderData: { settings } }) => {
       <Stack spacing={2}>
         <Stack>
           <Typography variant="header" gutterBottom>
-            Search the BUGASS Archives
+            Search the Archives
           </Typography>
           <Box className="flex-scroller">
             <Form defaultValues={{ search: "" }} onSuccess={onSubmit}>

@@ -2,6 +2,7 @@
   "hostname": "HOSTNAME",
   "host": "HOST",
   "port": "PORT",
+  "API_ORIGIN": "API_ORIGIN",
   "authentication": {
     "secret": "SECRET"
   }
