@@ -12,7 +12,11 @@ class Snapshots extends KnexService {
   }
 }
 
-
+const collections_filter = /* sql */ `
+  COALESCE(ARRAY_LENGTH(c.descendant_collection_ids, 1), 0)+COALESCE(JSON_ARRAY_LENGTH(c.child_records), 0)!=0
+  AND c.is_hidden=FALSE
+  AND c.needs_review=FALSE
+`;
 
 const records_select_query = /* sql */ `
 SELECT
@@ -66,12 +70,12 @@ SELECT
   r.search_text
 FROM
   _unified_records r
-  JOIN collections c USING (collection_id)
+  JOIN _unified_collections c USING (collection_id)
   JOIN media_view i ON r.primary_media_id=i.media_id
 WHERE
   r.is_hidden=FALSE
-  AND c.is_hidden=FALSE
   AND r.needs_review=FALSE
+  AND ${collections_filter}
   `;
 
 const records_to_list_items_select_query = /* sql */ `
@@ -104,11 +108,11 @@ WHERE
       record_id
     FROM
       records r
-      JOIN collections c USING (collection_id)
+      JOIN _unified_collections c USING (collection_id)
     WHERE
       r.is_hidden=FALSE
-      AND c.is_hidden=FALSE
       AND r.needs_review=TRUE
+      AND ${collections_filter}
   )`,
     selectQuery: records_select_query,
   },
@@ -117,18 +121,18 @@ WHERE
     not in (select collection_id from collections c where c.is_hidden = false and c.needs_review = true)`,
     selectQuery: /* sql */ `
 SELECT
-	a.archive_id,
-	a.collection_id,
-	a.title,
-	a.description,
-	a.summary,
-	a.thumbnail,
-	a.date_modified,
-  a.descendant_collection_ids,
-	a.featured_records,
-	a.keywords,
-	a.date_range,
-	a.ancestors,
+	c.archive_id,
+	c.collection_id,
+	c.title,
+	c.description,
+	c.summary,
+	c.thumbnail,
+	c.date_modified,
+  c.descendant_collection_ids,
+	c.featured_records,
+	c.keywords,
+	c.date_range,
+	c.ancestors,
 	(
 		SELECT
 			COALESCE(
@@ -172,14 +176,13 @@ SELECT
 		FROM
 			_unified_collections b
 		WHERE
-			b.parent_collection_id = a.collection_id
+			b.parent_collection_id = c.collection_id
 	) AS children,
-	a.display_order
+	c.display_order
 FROM
-	_unified_collections a
+	_unified_collections c
 WHERE
-	a.is_hidden = FALSE
-	AND a.needs_review = FALSE
+	${collections_filter}
     `,
   },
   list_items: {
