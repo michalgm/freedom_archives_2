@@ -74,7 +74,7 @@ const PublicLayout = () => {
         sx={{
           display: "grid",
           gridTemplateRows: "auto minmax(0, 1fr) auto",
-          scrollSnapAlign: "start",
+          // scrollSnapAlign: "start",
         }}
         className="App"
       >
@@ -168,7 +168,7 @@ const PublicLayout = () => {
             minHeight: 0,
             display: "flex",
             flexDirection: "column",
-            scrollSnapAlign: "start",
+            // scrollSnapAlign: "start",
             scrollSnapType: "y proximity",
             // scrollSnapStop: "always", // Add this
             scrollMarginTop: 8,
@@ -201,7 +201,7 @@ const PublicLayout = () => {
             mt: 2,
             mb: 2,
             flex: "0 0 auto",
-            scrollSnapAlign: "end",
+            // scrollSnapAlign: "end",
             scrollMarginBlockEnd: 16,
           }}
         >
