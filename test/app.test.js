@@ -7,8 +7,8 @@ import app from "../backend/app.js";
 const port = app.get("port");
 const appUrl = `http://${app.get("host")}:${port}`;
 
-describe("Feathers application tests", () => {
-  this.timeout(5000); 
+describe("Feathers application tests", function () {
+  this.timeout(5000);
   before(async () => {
     await app.listen(port);
   });

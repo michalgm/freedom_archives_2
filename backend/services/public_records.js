@@ -1,4 +1,5 @@
 import { KnexService } from "@feathersjs/knex";
+import { cloneDeep } from "lodash-es";
 
 import { sanitizeParams } from "../utils/index.js";
 
@@ -98,7 +99,7 @@ const lookupFilters = async (context) => {
       Model.raw(`
       type AS type, 
       jsonb_agg(jsonb_build_array(item, count, list_item_id) ORDER BY count DESC) AS values
-    `)
+    `),
     )
     .from("aggregated_data")
     .groupBy("type");
@@ -112,22 +113,25 @@ const lookupFilters = async (context) => {
 };
 
 const getNonDigitizedTotal = async (context) => {
-  const { query, provider } = await sanitizeParams(context);
-  const params = { ...context.params, query };
+  const { provider, query: { has_digital } } = context.params;
+  const noFilterContext = cloneDeep(context);
+  noFilterContext.params.query.has_digital = false;
 
-  if (provider && query.has_digital) {
+  if (provider && has_digital) {
+    const updatedContext = await rankedSearch(noFilterContext);
     console.time("nonDigitized");
-    params.query.has_digital = false;
-    const updatedQuery = (context.params.knex || context.service.createQuery(params)).clone();
 
-    updatedQuery
-      .clearSelect()
-      .clearOrder()
+    const res = await updatedContext.params.knex
+      .clone()
+      .clear('select')
+      .clear('order')
       .clear('limit')
-      .count("record_id");
+      .where('has_digital', false)
+      .count("record_id")
+      .first();
 
-    const res = await updatedQuery.first();
     console.timeEnd("nonDigitized");
+
     return res.count;
   }
 };

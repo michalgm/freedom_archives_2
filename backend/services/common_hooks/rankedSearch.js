@@ -140,13 +140,13 @@ export const rankedSearch = async (context) => {
   const searchTerm = (query?.$fullText || context?.params?._rankedSearch || '').toLowerCase().trim().replace(/\s+/g, ' ');
   delete query.$fullText;
 
-  const params = await context.service.sanitizeQuery(context.params);
+  const queryParams = await context.service.sanitizeQuery({ ...context.params, query });
   if (!searchTerm) return context;
   context.params._rankedSearch = searchTerm;
   const fuzzyTerm = searchTerm.replace(/["'()]/g, '');
 
   const knex = context.app.get('postgresqlClient');
-  const baseQuery = context.service.createQuery({ ...params, query: params });
+  const baseQuery = context.service.createQuery({ ...context.params, query: queryParams });
 
   const { id: idField, name: tableName } = context.service.getOptions({});
   const idValue = isNumeric.test(fuzzyTerm) ? parseInt(fuzzyTerm, 10) : null;
