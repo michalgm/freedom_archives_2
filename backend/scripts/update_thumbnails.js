@@ -31,7 +31,7 @@ const types = {
       thumbnail: { $ne: "" },
       $select: ['collection_id', 'thumbnail'],
     },
-  }
+  },
 };
 
 /**
@@ -92,8 +92,8 @@ async function updateThumbnailsWithHook(serviceName = 'records') {
                 relation_data: item,
                 params: {
                   user: { user_id: 1, archive_id: 1 },
-                  transaction: { trx } // Share the same transaction
-                }
+                  transaction: { trx }, // Share the same transaction
+                },
               };
               // console.log(context);
 

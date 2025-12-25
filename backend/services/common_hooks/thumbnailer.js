@@ -177,5 +177,5 @@ export {
   writeThumbnailsFromUrl,
   writeThumbnails,
   writeThumbnailsFromDataUrl,
-  updateThumbnail
+  updateThumbnail,
 };

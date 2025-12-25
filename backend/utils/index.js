@@ -11,10 +11,10 @@ export { generateRandomString };
 export const sanitizeParams = async (context) => {
   return {
     ...context.params,
-    query: await context.service.sanitizeQuery(context.params)
+    query: await context.service.sanitizeQuery(context.params),
   };
 };
 
 export default {
-  generateRandomString
+  generateRandomString,
 };

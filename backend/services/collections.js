@@ -63,10 +63,10 @@ export default (function (app) {
               .patch(
                 child.collection_id,
                 { parent_collection_id: id, display_order: index++ },
-                { user, transaction: { trx } }
+                { user, transaction: { trx } },
               );
           }
-        })
+        }),
       );
     }
     if (relation_data.child_records !== undefined) {
@@ -81,7 +81,7 @@ export default (function (app) {
               .service("api/records")
               .patch(child.record_id, { collection_id: id }, { user, transaction: { trx } });
           }
-        })
+        }),
       );
     }
     if (relation_data.featured_records !== undefined) {
@@ -100,7 +100,7 @@ export default (function (app) {
           }
           return acc;
         },
-        { deleteIds: [], updateRecords: [] }
+        { deleteIds: [], updateRecords: [] },
       );
       if (deleteIds.length) {
         await trx.from("featured_records").where("collection_id", id).whereIn("record_id", deleteIds).delete();
@@ -125,7 +125,7 @@ export default (function (app) {
     await Promise.all(
       children.map(({ record_id }) => {
         return app.service("api/records").patch(record_id, { collection_id: 1000 }, { user, transaction });
-      })
+      }),
     );
     const childCollections = await app.service("api/collections").find({
       query: { $select: ["collection_id"], parent_collection_id: id },
@@ -136,7 +136,7 @@ export default (function (app) {
         return app
           .service("api/collections")
           .patch(collection_id, { parent_collection_id: 0 }, { user, transaction });
-      })
+      }),
     );
     return context;
   };
@@ -186,7 +186,7 @@ export default (function (app) {
       all: [prepData],
       get: [fetchUnified],
       find: [fetchUnified],
-      create: [setUser,],
+      create: [setUser],
       patch: [setUser, updateListItemRelations, updateRelations],
       remove: [setUser, updateChildren],
     },

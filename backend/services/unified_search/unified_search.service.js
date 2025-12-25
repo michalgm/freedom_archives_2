@@ -27,7 +27,7 @@ export default function (app) {
   const hooks = {
     before: {
       find: [rankedSearch],
-    }
+    },
   };
 
   service.hooks(hooks);

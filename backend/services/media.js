@@ -49,7 +49,7 @@ export default (function (app) {
     }
 
     ["contributor_name", "contributor_username", "creator_name", "creator_username", "is_primary", "delete"].forEach(
-      (key) => delete data[key]
+      (key) => delete data[key],
     );
     return context;
   };

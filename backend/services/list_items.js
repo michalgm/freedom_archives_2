@@ -60,7 +60,7 @@ export default (function (app) {
           .update({
             [field]: merge_target_id,
           });
-      })
+      }),
     );
     await transaction.trx("list_items").where("list_item_id", id).delete();
     context.result = await service._get(merge_target_id, { transaction });
@@ -73,7 +73,7 @@ export default (function (app) {
       params: {
         transaction: { trx },
       },
-      service
+      service,
     } = context;
     const item = await service._get(id);
     const type = item.type;
@@ -87,7 +87,7 @@ export default (function (app) {
           .where(field, id)
           .select([idField])).map((res) => res[idField]);
         return [baseTable, ids];
-      })
+      }),
     );
     return context;
   };
@@ -111,9 +111,9 @@ export default (function (app) {
           ids.map((id) => {
             const data = { date_modified: new Date() };
             return app.service(`api/${table}`).patch(id, data, { transaction });
-          })
+          }),
         );
-      })
+      }),
     );
     return context;
   };
