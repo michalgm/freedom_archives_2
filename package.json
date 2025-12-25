@@ -63,7 +63,7 @@
     "@feathersjs/schema": "^5.0.37",
     "@feathersjs/typebox": "^5.0.37",
     "@img/sharp-libvips-linux-x64": "https://raw.githubusercontent.com/michalgm/freedom_archives_2/master/sharp-libvips/img-sharp-libvips-linux-x64-1.1.0.tgz",
-    "@react-router/express": "^7.10.1",
+    "@react-router/express": "^7.11.0",
     "compression": "^1.8.1",
     "cors": "^2.8.5",
     "eslint-plugin-react-hooks": "^7.0.1",
@@ -84,21 +84,23 @@
   "devDependencies": {
     "@babel/eslint-parser": "^7.28.5",
     "@eslint/eslintrc": "^3.3.3",
-    "@eslint/js": "^9.39.1",
+    "@eslint/js": "^9.39.2",
     "@eslint/json": "^0.14.0",
     "@stylistic/eslint-plugin": "^5.6.1",
     "@types/mocha": "^10.0.10",
-    "@typescript-eslint/eslint-plugin": "^8.49.0",
-    "@typescript-eslint/parser": "^8.49.0",
+    "@typescript-eslint/eslint-plugin": "^8.50.1",
+    "@typescript-eslint/parser": "^8.50.1",
     "axios": "^1.13.2",
+    "baseline-browser-mapping": "^2.9.11",
+    "browserslist": "^4.28.1",
     "concurrently": "^9.2.1",
-    "eslint": "^9.39.1",
+    "eslint": "^9.39.2",
     "globals": "^16.5.0",
     "mocha": "^11.7.5",
     "mock-knex": "^0.4.13",
     "nodemon": "^3.1.11",
     "sinon": "^19.0.5",
-    "typescript-eslint": "^8.49.0"
+    "typescript-eslint": "^8.50.1"
   },
   "msw": {
     "workerDirectory": [
@@ -107,6 +109,9 @@
   },
   "overrides": {
     "@img/sharp-libvips-linux-x64": "https://raw.githubusercontent.com/michalgm/freedom_archives_2/master/sharp-libvips/img-sharp-libvips-linux-x64-1.1.0.tgz"
+  },
+  "resolutions": {
+    "browserslist": "^4.28.1"
   },
   "packageManager": "yarn@4.10.3+sha512.c38cafb5c7bb273f3926d04e55e1d8c9dfa7d9c3ea1f36a4868fa028b9e5f72298f0b7f401ad5eb921749eb012eb1c3bb74bf7503df3ee43fd600d14a018266f"
 }
