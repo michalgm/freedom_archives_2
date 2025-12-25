@@ -7,12 +7,13 @@ import useFormManagerContext from "src/components/form/FormManagerContext";
 // Base FormButton component that accepts handlers from context wrappers
 
 const STATICFORMCONTEXT = { formState: {} };
+const emptyObject = {};
 export const FormButton = ({
   label,
   onClick,
   type,
   formName,
-  deleteOptions = {},
+  deleteOptions = emptyObject,
   icon,
   deleteHandler,
   saveHandler,

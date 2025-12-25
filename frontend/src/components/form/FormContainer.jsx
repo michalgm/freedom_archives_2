@@ -34,6 +34,9 @@ function fieldsToColumns(fields, schema, columnCount = 2) {
   return { columns, fullSpan };
 }
 
+const emptyObject = {};
+const defaultTransformInput = (input) => input;
+
 const FormContainer = ({
   fields,
   displayConfig,
@@ -42,7 +45,7 @@ const FormContainer = ({
   updateMutation,
   deleteMutation = false,
   fetchQuery,
-  transformInput = (input) => input,
+  transformInput = defaultTransformInput,
   onCreate,
   onDelete,
   onUpdate,
@@ -52,8 +55,8 @@ const FormContainer = ({
   autoComplete = "off",
   highlightDirty = true,
   layout,
-  deleteOptions = {},
-  fieldProps = {},
+  deleteOptions = emptyObject,
+  fieldProps = emptyObject,
 }) => {
   const smallLayout = useContainerWidth(860);
   const schema = get(fieldSchema, displayConfig?.type?.toLowerCase(), {});

@@ -4,6 +4,8 @@ import ButtonsHeader from "src/components/form/ButtonsHeader";
 import useFormManagerContext from "src/components/form/FormManagerContext";
 import Show from "src/components/Show";
 
+const emptyArray = [];
+const emptyObject = {};
 export const Section = ({ header, elements, service, embedded, ...props }) => {
   if (!elements.length) return null;
   const justifyContent = elements.length === 1 ? "center" : "space-between";
@@ -28,10 +30,10 @@ function ViewContainer({
   buttons,
   embedded,
   noPaper = false,
-  footerElements = [],
-  headerElements = [],
+  footerElements = emptyArray,
+  headerElements = emptyArray,
   service,
-  containerProps = {},
+  containerProps = emptyObject,
 }) {
   const { isLoading } = useFormManagerContext();
 

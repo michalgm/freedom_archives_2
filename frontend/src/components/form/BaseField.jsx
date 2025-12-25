@@ -81,6 +81,8 @@ const transformOptions = (options) => {
   });
 };
 
+const emptyObject = {};
+
 const AutocompleteWrapper = ({
   name,
   value,
@@ -94,7 +96,7 @@ const AutocompleteWrapper = ({
   searchParams: rawSearchParams,
   createParams: rawCreateParams,
   service: rawService,
-  autocompleteProps = {},
+  autocompleteProps = emptyObject,
   ...restProps
 }) => {
   const service = field_type === "list_item" ? "list_items" : rawService;

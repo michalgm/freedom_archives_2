@@ -15,6 +15,8 @@ import { useController, useFormContext } from "react-hook-form";
 import Show from "src/components/Show";
 import Thumbnail from "src/components/Thumbnail";
 
+const DEFAULT_ACCEPT = ["image/*"];
+
 const FileUploadDisplay = ({ item, value, isUploading, accept, handleInputChange, name, width }) => {
   return (
     <Stack spacing={1} sx={{ p: 1, alignItems: "center", width: "100%" }}>
@@ -68,11 +70,12 @@ const parseMimes = (accept) => {
     .join(", ");
 };
 
+
 const FileUpload = ({
   name,
   control,
   label,
-  accept = ["image/*"],
+  accept = DEFAULT_ACCEPT,
   maxSizeMB = 10,
   width,
   textFieldProps: { helperText: _helpText, ...textFieldProps },

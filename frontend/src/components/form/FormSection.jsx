@@ -12,9 +12,11 @@ import {
 } from '@mui/material'
 import { useFormContext } from 'react-hook-form-mui'
 
+const emptyArray = []
+
 const FormSection = ({
   title,
-  sectionActions = [],
+  sectionActions = emptyArray,
   children,
   small = false,
   sticky = true,
