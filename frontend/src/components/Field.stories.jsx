@@ -37,7 +37,7 @@ export default {
               mediaTypeField: { id: "PDF", label: "PDF" },
               autocomplete: { id: "option1", label: "Option 1" },
             }}
-            onSubmit={() => {}}
+            onSubmit={() => { }}
           >
             <Story />
             <Button type="submit">Submit</Button>
@@ -186,7 +186,7 @@ export const FieldWithError = (args) => {
   const CustomField = (props) => {
     const context = {
       errors: { textField: "This field has an error" },
-      setFieldValue: () => {},
+      setFieldValue: () => { },
     };
 
     return <Field error={true} required {...props} context={context} />;

@@ -42,23 +42,26 @@ function RenderInputCell(props) {
   );
 }
 
+const emptyFunction = () => { }; 
+const emptyArray = [];
+const emptyObject = {};
 export const EditableDataTable = ({
   rows,
   columns,
   loading,
-  extraActions = [],
-  onUpdate = () => {},
-  onNew = () => {},
-  defaultValues = {},
+  extraActions = emptyArray,
+  onUpdate = emptyFunction,
+  onNew = emptyFunction,
+  defaultValues = emptyObject,
   idField = "id",
   model,
   itemType,
   getItemName,
   autosizeColumns = false,
   readonly = false,
-  headerControls = [],
+  headerControls = emptyArray,
   disableDelete = false,
-  sx = {},
+  sx = emptyObject,
   ...props
 }) => {
   const [editRow, setEditRow] = useState(null);
@@ -84,7 +87,7 @@ export const EditableDataTable = ({
       delete newRow.delete;
       setEditRow(null);
     },
-    [idField, localRows]
+    [idField, localRows],
   );
 
   const validateRow = useCallback(
@@ -100,7 +103,7 @@ export const EditableDataTable = ({
         }
         return { ...props, error };
       },
-    [model]
+    [model],
   );
 
   const processRowUpdate = useCallback(
@@ -138,14 +141,14 @@ export const EditableDataTable = ({
       resetEdit(newRow);
       return newRow;
     },
-    [getItemName, idField, resetEdit, confirm, itemType, addNotification, onUpdate, model, onNew]
+    [getItemName, idField, resetEdit, confirm, itemType, addNotification, onUpdate, model, onNew],
   );
 
   const deleteRow = useCallback(
     (row) => {
       processRowUpdate({ ...row, delete: true }, row);
     },
-    [processRowUpdate]
+    [processRowUpdate],
   );
 
   const updateRow = useCallback(
@@ -160,7 +163,7 @@ export const EditableDataTable = ({
         }
       }
     },
-    [apiRef, resetEdit, fieldToFocus]
+    [apiRef, resetEdit, fieldToFocus],
   );
 
   const addItem = useCallback(() => {
@@ -179,7 +182,7 @@ export const EditableDataTable = ({
     (row) => {
       return row[idField];
     },
-    [idField]
+    [idField],
   );
 
   const tableColumns = useMemo(() => {
@@ -187,14 +190,14 @@ export const EditableDataTable = ({
       const isInEditMode = id === editRow;
       const icons = isInEditMode
         ? [
-            ["Save", SaveIcon, () => updateRow(id, "save")],
-            ["Cancel", CancelIcon, () => updateRow(id, "cancel")],
-          ]
+          ["Save", SaveIcon, () => updateRow(id, "save")],
+          ["Cancel", CancelIcon, () => updateRow(id, "cancel")],
+        ]
         : [
-            ["Edit", EditIcon, () => updateRow(id)],
-            ...extraActions.map(([label, Icon, action]) => [label, Icon, () => action(row, apiRef, id, setEditRow)]),
-            disableDelete ? null : ["Delete", DeleteIcon, () => deleteRow(row)],
-          ];
+          ["Edit", EditIcon, () => updateRow(id)],
+          ...extraActions.map(([label, Icon, action]) => [label, Icon, () => action(row, apiRef, id, setEditRow)]),
+          disableDelete ? null : ["Delete", DeleteIcon, () => deleteRow(row)],
+        ];
 
       const actions = icons
         .filter((i) => i)
@@ -325,10 +328,10 @@ export const EditableDataTable = ({
             },
           },
         },
-        sx
+        sx,
       ),
     }),
-    [sx]
+    [sx],
   );
 
   return (

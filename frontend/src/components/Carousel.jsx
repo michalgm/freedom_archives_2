@@ -223,8 +223,9 @@ const useCarouselControls = (autoAdvanceInterval) => {
   };
 };
 
+const emptyItems = [];
 export function Carousel({
-  items = [],
+  items = emptyItems,
   autoAdvanceInterval = 6000,
   width = 250,
   loading = false,  
@@ -257,7 +258,7 @@ export function Carousel({
     };
   }, [emblaApi, setSelectedIndex]);
 
-  if (!items || items.length === 0 || loading) {
+  if (items.length === 0 || loading) {
     return (
       <Box
         sx={{
