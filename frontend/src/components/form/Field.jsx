@@ -88,7 +88,7 @@ const Field = ({
       }
       setValue(name, value);
     },
-    [context, setValue, name, _onChange, toNumber]
+    [context, setValue, name, _onChange, toNumber],
   );
   // logger.log(highlightDirty, formState.dirtyFields, formState.errors);
   return (

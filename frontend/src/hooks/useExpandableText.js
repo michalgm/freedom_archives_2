@@ -85,7 +85,7 @@ function useExpandableText({ textRef, expand = false, maxLines = DEFAULT_MAX_LIN
       WebkitLineClamp: maxLines,
       WebkitBoxOrient: "vertical",
       maxHeight: `calc(${maxLines} * 1lh)`,
-    } : {})
+    } : {}),
   }
 
   return { isOverflowing, isExpanded, setIsExpanded, maxHeight, styles };

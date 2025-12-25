@@ -70,7 +70,7 @@ function QuickSearch() {
         setLoading(false);
       }
     }, []),
-    300
+    300,
   );
 
   const resetSearch = useCallback(() => {
@@ -109,7 +109,7 @@ function QuickSearch() {
         }
       }
     },
-    [performSearch]
+    [performSearch],
   );
 
   return (

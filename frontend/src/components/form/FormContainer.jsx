@@ -21,7 +21,7 @@ function fieldsToColumns(fields, schema, columnCount = 2) {
       }
       return acc;
     },
-    { nonFullSpan: [], fullSpan: [] }
+    { nonFullSpan: [], fullSpan: [] },
   );
 
   const columns = [];

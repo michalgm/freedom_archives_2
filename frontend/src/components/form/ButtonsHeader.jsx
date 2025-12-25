@@ -42,7 +42,7 @@ export const FormButton = ({
         setLoading(false);
       }
     },
-    [type, onClick, deleteHandler, saveHandler, handleSubmit, deleteOptions]
+    [type, onClick, deleteHandler, saveHandler, handleSubmit, deleteOptions],
   );
 
   if (type === "link") {

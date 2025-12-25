@@ -88,7 +88,7 @@ const DateStringMask = React.forwardRef(function DateStringMask(props, ref) {
         handleFocus(event);
       }
     },
-    [handleFocus]
+    [handleFocus],
   );
 
   return (

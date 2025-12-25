@@ -567,38 +567,38 @@ export const BaseField = ({
   };
 
   switch (field_type) {
-    case "checkbox":
-      return renderCheckbox();
-    case "checkbox_group":
-      return renderCheckboxGroup();
-    case "radio":
-      return renderRadio();
-    case "radio_group":
-      return renderRadioGroup();
-    case "switch":
-      return renderSwitch();
-    case "date-time":
-    case "date":
-      return renderDatePicker();
-    case "richtext":
-    case "html":
-      return renderRichTextField();
-    case "list_item":
-    case "select":
-    case "autocomplete":
-      return renderAutocomplete();
-    case "simpleSelect":
-      return renderSimpleSelect();
-    case "togglebutton":
-      return renderToggleButton();
-    case "editableItem":
-      return renderEditableItem();
-    case "datestring":
-      return renderDateString();
-    case "upload":
-      return renderFileUpload();
-    case "textarea":
-    default:
-      return renderTextField();
+  case "checkbox":
+    return renderCheckbox();
+  case "checkbox_group":
+    return renderCheckboxGroup();
+  case "radio":
+    return renderRadio();
+  case "radio_group":
+    return renderRadioGroup();
+  case "switch":
+    return renderSwitch();
+  case "date-time":
+  case "date":
+    return renderDatePicker();
+  case "richtext":
+  case "html":
+    return renderRichTextField();
+  case "list_item":
+  case "select":
+  case "autocomplete":
+    return renderAutocomplete();
+  case "simpleSelect":
+    return renderSimpleSelect();
+  case "togglebutton":
+    return renderToggleButton();
+  case "editableItem":
+    return renderEditableItem();
+  case "datestring":
+    return renderDateString();
+  case "upload":
+    return renderFileUpload();
+  case "textarea":
+  default:
+    return renderTextField();
   }
 };

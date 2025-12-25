@@ -120,7 +120,7 @@ const FileUpload = ({
         setIsUploading(false);
       }
     },
-    [maxSize, accept, maxSizeMB, onChange]
+    [maxSize, accept, maxSizeMB, onChange],
   );
 
   const handleInputChange = (event) => {
@@ -155,7 +155,7 @@ const FileUpload = ({
         handleFileChange(event.dataTransfer.files[0]);
       }
     },
-    [handleFileChange]
+    [handleFileChange],
   );
 
   return (

@@ -29,13 +29,13 @@ function Notifications({ embedded = false }) {
   const sx = embedded
     ? { mb: 2, mt: 0 }
     : {
-        position: "absolute",
-        top: 8,
-        zIndex: 10000000,
-        left: 24,
-        right: 24,
-        pointerEvents: "none",
-      };
+      position: "absolute",
+      top: 8,
+      zIndex: 10000000,
+      left: 24,
+      right: 24,
+      pointerEvents: "none",
+    };
   return (
     <Stack className="notifications" direction="column" spacing={2} sx={sx}>
       {notifications.map(({ id, severity, message }, index) => (

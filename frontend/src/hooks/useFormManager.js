@@ -73,7 +73,7 @@ function useFormManager({
       setLoading((l) => ({ ...l, fetch: false }));
       return result;
     },
-    [service]
+    [service],
   );
 
   const processData = useCallback(
@@ -88,7 +88,7 @@ function useFormManager({
       // logger.log({ result, init, data, transformedData });
       return data;
     },
-    [onFetch, service]
+    [onFetch, service],
   );
 
   const formConfig = useMemo(
@@ -129,7 +129,7 @@ function useFormManager({
       },
       ...formContextProps,
     }),
-    [formContextProps, id, service, inputDefaultValues, fetchEntity, processData]
+    [formContextProps, id, service, inputDefaultValues, fetchEntity, processData],
   );
 
   const context = useForm(formConfig);
@@ -158,7 +158,7 @@ function useFormManager({
       created: formData?.date_created && dayjs(formData.date_created),
       updated: formData?.date_updated && dayjs(formData.date_updated),
     }),
-    [formData?.date_created, formData?.date_updated]
+    [formData?.date_created, formData?.date_updated],
   );
 
   // Move all the existing form management functions here
@@ -186,7 +186,7 @@ function useFormManager({
       await waitForReset;
       return values;
     },
-    [reset, processData, formState.isDirty]
+    [reset, processData, formState.isDirty],
   );
 
   const notifyAction = useCallback(
@@ -200,7 +200,7 @@ function useFormManager({
         message,
       });
     },
-    [serviceDisplayName, getDisplayName, addNotification, service]
+    [serviceDisplayName, getDisplayName, addNotification, service],
   );
 
   const updateEntity = useCallback(
@@ -219,7 +219,7 @@ function useFormManager({
       }
       setLoading((l) => ({ ...l, update: false }));
     },
-    [service, notifyAction, resetForm, onUpdate, displayError, serviceDisplayName]
+    [service, notifyAction, resetForm, onUpdate, displayError, serviceDisplayName],
   );
 
   const createEntity = useCallback(
@@ -236,7 +236,7 @@ function useFormManager({
       }
       setLoading((l) => ({ ...l, create: false }));
     },
-    [service, notifyAction, resetForm, onCreate, displayError, serviceDisplayName]
+    [service, notifyAction, resetForm, onCreate, displayError, serviceDisplayName],
   );
 
   const deleteEntity = useCallback(
@@ -253,7 +253,7 @@ function useFormManager({
       }
       setLoading((l) => ({ ...l, delete: false }));
     },
-    [service, notifyAction, resetForm, onDelete, displayError, serviceDisplayName]
+    [service, notifyAction, resetForm, onDelete, displayError, serviceDisplayName],
   );
 
   useEffect(() => {
@@ -297,7 +297,7 @@ function useFormManager({
         return false;
       }
     },
-    [confirm, deleteEntity, getDisplayName, entityData, id, serviceDisplayName]
+    [confirm, deleteEntity, getDisplayName, entityData, id, serviceDisplayName],
   );
 
   const onSave = useCallback(
@@ -333,8 +333,8 @@ function useFormManager({
                 React.createElement("b", null, contributor_name),
                 " on ",
                 React.createElement("b", null, currentTime?.format("LLLL")),
-                " after you began editing. Please refresh the page to view the latest version and manually reapply your changes."
-              )
+                " after you began editing. Please refresh the page to view the latest version and manually reapply your changes.",
+              ),
             );
             return false;
           }
@@ -356,7 +356,7 @@ function useFormManager({
       transformInput,
       retrieveTime,
       skipUpdatedCheck,
-    ]
+    ],
   );
 
   const submitForm = useCallback(() => {

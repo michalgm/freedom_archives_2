@@ -50,7 +50,7 @@ const SiteSettings = () => {
                     {
                       shouldValidate: true,
                       shouldDirty: true,
-                    }
+                    },
                   );
                 }}
               />

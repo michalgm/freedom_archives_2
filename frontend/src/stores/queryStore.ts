@@ -86,11 +86,11 @@ const initialSearchData: SearchData = {
     search: "",
     filters: [],
     sort: 'relevance',
-    sort_desc: false
+    sort_desc: false,
   },
   total: 0,
   offset: 0,
-  query: {}
+  query: {},
 };
 
 export const initialSearch = {
@@ -100,8 +100,8 @@ export const initialSearch = {
       filter: {
         ...initialSearchData.filter,
         non_digitized: false,
-        collection_id: null
-      }
+        collection_id: null,
+      },
     },
     search_index: 0,
   } as SearchState<RecordSearchData>,
@@ -188,5 +188,5 @@ const useCollectionsQueryStore = createQueryStore('collections', true);
 
 export const queryStores = {
   records: useRecordsQueryStore,
-  collections: useCollectionsQueryStore
+  collections: useCollectionsQueryStore,
 }

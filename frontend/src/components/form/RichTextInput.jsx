@@ -100,38 +100,38 @@ const RichTextInput = (props) => {
           merge(
             label
               ? {
-                  "&& .MuiTiptap-FieldContainer-notchedOutline": {
-                    borderColor: error ? "error.main" : `${color}.main`,
+                "&& .MuiTiptap-FieldContainer-notchedOutline": {
+                  borderColor: error ? "error.main" : `${color}.main`,
+                },
+                "& .MuiTiptap-FieldContainer-root": {
+                  backgroundColor: color ? `rgba(var(--mui-palette-${color}-lightChannel) / 0.1)` : undefined,
+                  "&::before": {
+                    content: '""',
+                    position: "absolute",
+                    top: "0px",
+                    left: "8px",
+                    right: 0,
+                    height: "10px",
+                    backgroundColor: "background.paper",
+                    width: `${labelWidth + 12}px`,
+                    zIndex: 5,
+                    borderRadius: "0 0 2px 2px",
+                    border: "none",
+                    borderColor: "action.disabled",
+                    borderTop: "none",
+                    ...theme.applyStyles("dark", {
+                      backgroundColor: "#2e2e2e",
+                      border: "1px solid",
+                    }),
                   },
-                  "& .MuiTiptap-FieldContainer-root": {
-                    backgroundColor: color ? `rgba(var(--mui-palette-${color}-lightChannel) / 0.1)` : undefined,
-                    "&::before": {
-                      content: '""',
-                      position: "absolute",
-                      top: "0px",
-                      left: "8px",
-                      right: 0,
-                      height: "10px",
-                      backgroundColor: "background.paper",
-                      width: `${labelWidth + 12}px`,
-                      zIndex: 5,
-                      borderRadius: "0 0 2px 2px",
-                      border: "none",
-                      borderColor: "action.disabled",
-                      borderTop: "none",
-                      ...theme.applyStyles("dark", {
-                        backgroundColor: "#2e2e2e",
-                        border: "1px solid",
-                      }),
-                    },
-                    "[data-theme='light'] &::before": {
-                      border: "none",
-                      backgroundColor: "white",
-                    },
+                  "[data-theme='light'] &::before": {
+                    border: "none",
+                    backgroundColor: "white",
                   },
-                }
+                },
+              }
               : {},
-            sx
+            sx,
           )
         }
       >

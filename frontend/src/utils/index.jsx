@@ -33,7 +33,7 @@ export const asyncDebounce = (fn, wait) => {
 export const convertSvgToDataUrl = (Icon, color = "white") => {
   return `url('data:image/svg+xml,${renderToStaticMarkup(<Icon style={{ fill: color }} />).replace(
     "<svg ",
-    '<svg xmlns="http://www.w3.org/2000/svg" '
+    '<svg xmlns="http://www.w3.org/2000/svg" ',
   )}')`;
 };
 
