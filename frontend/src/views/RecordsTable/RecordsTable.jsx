@@ -1,7 +1,8 @@
-import { Link } from "@mui/material";
+import { Button, Link } from "@mui/material";
+import { Box } from "@mui/system";
 import { DataGrid, useGridApiRef } from "@mui/x-data-grid";
 import { startCase } from "lodash-es";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { services } from "src/api";
 
 // $docs = fetchRows("Select d.docid as 'Document Id', d.Call_Number, c.collection_name as Collection, Title, Authors,
@@ -19,7 +20,7 @@ const columns = [
   { field: "producers", valueGetter: formatItems },
   { field: "keywords", valueGetter: formatItems },
   { field: "subjects", valueGetter: formatItems },
-  { field: "collection_title", headerName: "Collection", _skipSelect: true },
+  { field: "collection_title", headerName: "Collection" },
   { field: "vol_number" },
   { field: "program", valueGetter: formatItem },
   { field: "publishers", valueGetter: formatItems },
@@ -36,6 +37,7 @@ const columns = [
   {
     field: "url",
     _skipSelect: true,
+    headerName: "URL",
     renderCell: (params) => {
       if (!params.value) return null;
       return (
@@ -59,59 +61,72 @@ const Table = () => {
   const apiRef = useGridApiRef();
   const [rows, setRows] = useState([]);
   const [loading, setLoading] = useState(false);
-  useEffect(() => {
-    const fetchData = async () => {
-      setLoading(true);
-      const data = await services["records"].find({
-        query: {
-          $sort: { title: 1 },
-          $disable_pagination: true,
-          $select: [
-            ...columns.filter((c) => !c._skipSelect).map((c) => c.field),
-            "collection",
-            "media",
-            "record_id",
-          ],
-        },
+
+
+  const fetchData = useCallback(async () => {
+    setLoading(true);
+    const data = await services["records"].find({
+      query: {
+        $sort: { title: 1 },
+        $disable_pagination: true,
+        // $limit: 10,
+        $select: [
+          ...columns.filter((c) => !c._skipSelect).map((c) => c.field),
+          "media",
+          "record_id",
+        ],
+      },
+    });
+    const rows = data.reduce((acc, item) => {
+      const { media, ...record } = item;
+      media.map((media) => {
+        const {call_number, generation_item, format_item, quality_item, no_copies, media_type, media_id, url} = media;
+        acc.push({
+          ...record,
+          call_number,
+          generation_item,
+          format_item,
+          quality_item,
+          no_copies,
+          media_type,
+          url,
+          media_id,
+        });
       });
-      const rows = data.reduce((acc, item) => {
-        const { media, collection, ...record } = item;
-        media.map((media) => {
-          acc.push({
-            ...media,
-            ...record,
-            collection_title: collection.title,
-            ...collection,
-          });
-        });
-        return acc;
-      }, []);
-      setRows(rows);
-      setTimeout(() => {
-        apiRef.current?.autosizeColumns({
-          includeHeaders: true,
-          includeOutliers: true,
-        });
-      }, 1);
-      setLoading(false);
-    };
-    fetchData();
+      return acc;
+    }, []);
+    setRows(rows);
+    setTimeout(() => {
+      apiRef.current?.autosizeColumns({
+        includeHeaders: true,
+        includeOutliers: true,
+      });
+    }, 1);
+    setLoading(false);
   }, [apiRef]);
 
+  useEffect(() => {
+    
+    fetchData();
+  }, [fetchData,apiRef]);
+
   return (
-    <DataGrid
-      apiRef={apiRef}
-      rows={rows}
-      columns={columns}
-      getRowId={(row) => row.media_id}
-      getRowHeight={() => "auto"}
-      loading={loading}
-      density="compact"
-      showCellVerticalBorder
-      showToolbar
-      autosizeOnMount
-      getRowClassName={(params) => (params.indexRelativeToCurrentPage % 2 === 0 ? "even" : "odd")}
-    />
+    <Box sx={{ display: "flex", flexDirection: "column", maxHeight: "100%"}}>
+      <DataGrid
+        apiRef={apiRef}
+        rows={rows}
+        columns={columns}
+        getRowId={(row) => row.media_id}
+        getRowHeight={() => "auto"}
+        loading={loading}
+        density="compact"
+        showCellVerticalBorder
+        showToolbar
+        // autosizeOnMount
+        getRowClassName={(params) => (params.indexRelativeToCurrentPage % 2 === 0 ? "even" : "odd")}
+      />
+      <Button onClick={() => fetchData()}>Reload Data</Button>
+    </Box>
   );
 };
 
