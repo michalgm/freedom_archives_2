@@ -39,7 +39,7 @@ function getTrigramRank(knex, searchTerm) {
 }
 
 function getCallNumbersBoost(knex, tableName, searchTerm) {
-  return tableName.match(/(records|collections)/)
+  return tableName.match(/(records|collections)/) && tableName !== 'duplicate_records'
     ? knex.raw(
       `CASE WHEN ${tableName.match('record') ? `EXISTS( SELECT 1 FROM unnest(call_numbers) AS elem WHERE elem LIKE ? )` : `call_number LIKE ?`} THEN ${CALL_NUMBERS_WEIGHT} ELSE 0 END`,
       [`${searchTerm}%`],
@@ -141,13 +141,16 @@ export const rankedSearch = async (context) => {
   delete query.$fullText;
 
   const queryParams = await context.service.sanitizeQuery({ ...context.params, query });
-  if (!searchTerm) return context;
   context.params._rankedSearch = searchTerm;
-  const fuzzyTerm = searchTerm.replace(/["'()]/g, '');
 
-  const knex = context.app.get('postgresqlClient');
   const baseQuery = context.service.createQuery({ ...context.params, query: queryParams });
+  if (!searchTerm) {
+    context.params.knex = baseQuery;
+    return context;
+  }
 
+  const fuzzyTerm = searchTerm.replace(/["'()]/g, '');
+  const knex = context.app.get('postgresqlClient');
   const { id: idField, name: tableName } = context.service.getOptions({});
   const idValue = isNumeric.test(fuzzyTerm) ? parseInt(fuzzyTerm, 10) : null;
   const tsqueryString = parser(applyBasicPrefixing(searchTerm));
