@@ -22,7 +22,8 @@ const types = {
       primary_media_thumbnail: { $ne: "" },
       $select: ['record_id', 'primary_media_thumbnail', 'media'],
       // record_id: 39214,
-      // primary_media_media_type: { $in: ['Video', 'Image', 'PDF'] },
+      $sort: { 'record_id': -1 },
+      primary_media_media_type: { $in: ['Video', 'Image', 'PDF'] },
     },
   },
   collections: {
@@ -43,7 +44,7 @@ async function updateThumbnailsWithHook(serviceName = 'records') {
   const concurrency = 3; // Conservative concurrency for hook processing
   let offset = 0;
   let totalUpdated = 0;
-  let total = 0;
+  let total = null;
 
   try {
     while (true) {
@@ -58,7 +59,9 @@ async function updateThumbnailsWithHook(serviceName = 'records') {
       });
 
       console.log(`Processing batch: ${offset} to ${offset + items.length} of ${totalItems}`);
-      total = totalItems;
+      if (total === null) {
+        total = totalItems;
+      }
       if (items.length === 0) break;
 
       // Create one transaction for the entire batch
