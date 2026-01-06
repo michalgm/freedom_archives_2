@@ -1,13 +1,17 @@
 import { ArrowBack, Block, Merge, Save } from '@mui/icons-material';
 import { Button, Typography } from '@mui/material';
 import { Box } from '@mui/system';
+import { useConfirm } from 'material-ui-confirm';
 import React, { useEffect } from 'react';
-import { records } from 'src/api';
+import { useNavigate } from 'react-router';
+import { duplicate_records, records } from 'src/api';
 import CompareForm from 'src/components/CompareForm';
 import { BaseForm } from 'src/components/form/BaseForm';
+import { getDefaultValuesFromSchema } from 'src/components/form/schemaUtils';
 import ViewContainer from 'src/components/ViewContainer';
 import { recordSelectFields } from "src/config/constants";
-import { useTitle } from 'src/stores';
+import validators from 'src/hooks/validators';
+import { useAddNotification, useTitle } from 'src/stores';
 import { EditItemFooter } from 'src/views/EditItemView';
 
 
@@ -48,6 +52,13 @@ const itemLink = (item = '') => {
 const CompareRecords = ({ id1, id2 }) => {
   const [record2, setRecord2] = React.useState({});
   const setTitle = useTitle()
+  const navigate = useNavigate();
+  const addNotification = useAddNotification();
+  const [loadingIgnore, setLoadingIgnore] = React.useState(false);
+  const [loadingMerge, setLoadingMerge] = React.useState(false);
+  const [loadingSave, setLoadingSave] = React.useState(false);
+  const confirm = useConfirm()
+
   useEffect(() => {
     const fetchData = async () => {
       const record2 = await records.get(id2, { query: { $select: recordSelectFields } });
@@ -84,7 +95,7 @@ const CompareRecords = ({ id1, id2 }) => {
           // fetchQuery: { $select: recordSelectFields },
           // onCreate: ({ record_id }) => navigate(`/admin/records/${record_id}`),
           onFetch: (record) => {
-            setTitle(record.title || "New Record");
+            setTitle(record?.title || "New Record");
             return record;
           },
           // onDelete: () => navigate(`/admin/records`),
@@ -93,22 +104,61 @@ const CompareRecords = ({ id1, id2 }) => {
           // },
         }}
       >
-        {({ formData }) => {
+        {({ formData, submitForm, formContext, reset }) => {
           return (
             <ViewContainer service='records' noPaper
               buttons={[
                 {
                   label: 'Save Record', type: 'submit', color: 'primary',
                   icon: <Save />,
+                  loading: loadingSave,
+                  onClick: async () => {
+                    setLoadingSave(true);
+                    try {
+                      await submitForm();
+                      // addNotification({ message: 'Record saved successfully' });
+                    } finally {
+                      setLoadingSave(false);
+                    }
+                  },
                 },
                 {
                   label: 'Merge Records',
                   icon: <Merge />,
+                  loading: loadingMerge,
+                  onClick: async () => {
+                    setLoadingMerge(true);
+                    try {
+                      const { values } = await validators[`recordsValidator`](formContext.getValues(), formContext, {});
+
+                      const cleaned = getDefaultValuesFromSchema('records', values);
+                      const { confirmed } = await confirm({ description: 'Are you sure you want to merge these duplicate records? This will update the current (left) record with any modified values, and delete the compared (right) record. This action cannot be undone.' })
+                      if (confirmed) {
+                        const res = await duplicate_records.patch(`${id1}|${id2}`, cleaned);
+                        await reset(res);
+                        addNotification({ message: 'Records merged successfully' });
+                        // navigate('/admin/site/find-duplicates');
+                      }
+                    } finally {
+                      setLoadingMerge(false);
+                    }
+                  },
                 },
                 {
                   label: 'Mark as not duplicates',
                   icon: <Block />,
                   variant: "outlined",
+                  onClick: async () => {
+                    setLoadingIgnore(true);
+                    const { confirmed } = await confirm({ description: 'Are you sure you want to ignore these records from future duplicate searches?' })
+                    if (confirmed) {
+                      await duplicate_records.remove(`${id1}|${id2}`);
+                      addNotification({ message: 'Duplicate record ignored' });
+                      navigate('/admin/site/find-duplicates');
+                    }
+                    setLoadingIgnore(false);
+                  },
+                  loading: loadingIgnore,
                 },
               ]}
               footerElements={EditItemFooter({
