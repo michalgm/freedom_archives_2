@@ -43,7 +43,7 @@
     "start": "yarn concurrently -k \"yarn run dev\" \"cd ./frontend; yarn run start\"",
     "start:prod": "node backend/",
     "mocha": "NODE_ENV=test mocha test/ --ignore '**/helpers/**' --recursive --parallel --exit",
-    "test": "NODE_ENV=test yarn run migrate && yarn run mocha",
+    "test": "NODE_ENV=test yarn run mocha",
     "bundle:client": "yarn pack --pack-destination ./public",
     "migrate": "yarn knex migrate:latest",
     "migrate:prod": "NODE_ENV=production yarn knex migrate:latest",

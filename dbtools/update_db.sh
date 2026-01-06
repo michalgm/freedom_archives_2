@@ -40,7 +40,7 @@ done
 
 log "### Update data"
 for file in schema_import/00_cleanup.sql schema_import/02_import_data.sql; do
-  if [[ -z $1 && $file = "schema_import/00_cleanup.sql" ]]; then
+  if [[ -z $1 && $file == "schema_import/00_cleanup.sql" ]]; then
     echo "-- skipping cleanup"
     continue
   fi

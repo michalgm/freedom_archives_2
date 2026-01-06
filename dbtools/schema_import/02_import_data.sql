@@ -145,11 +145,11 @@ INSERT INTO
             program_lookup.list_item_id,
             needs_review::bool,
             is_hidden::bool,
-            NULL,
             b.user_id AS creator_user_id,
             c.user_id AS contributor_user_id,
             date_created,
-            date_modified
+            date_modified,
+            NULL
         FROM
             freedom_archives_old.documents a
             LEFT JOIN users b ON LOWER(a.creator)=b.username

@@ -18,7 +18,10 @@ if [ "$ACTION" = "dump" ]; then
   done
 elif [ "$ACTION" = "create" ]; then
   source ./read_pg_config.sh "$TARGET_ENV"
-  MIGRATION_NAME="${3:-"migration"}"
+  MIGRATION_NAME="${3}"
+  if [ -z "$MIGRATION_NAME" ]; then
+    MIGRATION_NAME="$(date +%Y%m%d%H%M%S)-migration"
+  fi
   # MIGRATION_NAME="$(date +%Y%m%d%H%M%S)-${2:-"migration"}"
 
   echo "
