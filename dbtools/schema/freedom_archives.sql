@@ -1352,8 +1352,8 @@ CREATE OR REPLACE VIEW unified_records AS
     siblings.siblings,
     parent.parent,
     continuations.continuations,
-    b.collection->>'title' AS collection_title,
-    a.fact_number
+    a.fact_number,
+    b.collection->>'title' AS collection_title
    FROM records a
      JOIN record_summaries b USING (record_id)
      LEFT JOIN list_items program_lookup ON a.program_id = program_lookup.list_item_id
