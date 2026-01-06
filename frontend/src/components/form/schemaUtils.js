@@ -33,7 +33,7 @@ export function isEmptyValue(value) {
   );
 }
 
-function removeNulls(value) {
+export function removeNulls(value) {
   let cleanedValue = value;
   if (isArray(value)) {
     cleanedValue = reject(map(value, removeNulls), isEmptyValue);
@@ -43,10 +43,9 @@ function removeNulls(value) {
   return isEmptyValue(cleanedValue) ? undefined : cleanedValue;
 }
 
-export const getDefaultValuesFromSchema = (schemaName, userDefaults = {}) => {
+export const getDefaultValuesFromSchema = (schemaName, userDefaults = {}, keepNulls = false) => {
   const schema = schemas[`${schemaName}DataSchema`];
   if (!schema) return userDefaults;
-
   // Function to extract only explicit defaults
   const extractExplicitDefaults = (zodSchema) => {
     if (!zodSchema || !zodSchema._def) return undefined;
@@ -85,15 +84,26 @@ export const getDefaultValuesFromSchema = (schemaName, userDefaults = {}) => {
       return extractExplicitDefaults(zodSchema._def.innerType);
     }
 
+    if (zodSchema._def.typeName === "ZodArray") {
+      // console.log("array default", zodSchema._def);
+      return [];
+    }
+
+    if (zodSchema._def.typeName === "ZodString") {
+      return "";
+    }
+
+    //  if (zodSchema._def.typeName === "ZodNumber") {
+    // console.log("no default for", zodSchema._def.description, zodSchema._def.typeName, zodSchema._def.innerType);
     return undefined;
   };
 
   // Extract defaults and merge with user defaults
   const schemaDefaults = extractExplicitDefaults(schema) || {};
-  const mergedDefaults = merge(schemaDefaults, userDefaults);
+  const mergedDefaults = merge({}, schemaDefaults, userDefaults);
   const cleanedDefaults = removeNulls(mergedDefaults);
-  // logger.log({ mergedDefaults, cleanedDefaults });
-  return cleanedDefaults;
+  // logger.log({ mergedDefaults, cleanedDefaults, keepNulls });
+  return keepNulls ? mergedDefaults : cleanedDefaults;
 };
 
 const getShape = (schema) => schema?.shape || schema?._def?.schema?.shape || {};

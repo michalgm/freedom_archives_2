@@ -68,7 +68,7 @@ interface SearchState<T extends SearchData> {
   search_index: number;
 }
 
-export type SearchType = "records" | "collections";
+export type SearchType = "records" | "collections" | "duplicate_records";
 
 interface Actions<T extends SearchData> {
   // Actions
@@ -106,6 +106,12 @@ export const initialSearch = {
     search_index: 0,
   } as SearchState<RecordSearchData>,
   collections: {
+    search: {
+      ...initialSearchData,
+    },
+    search_index: 0,
+  } as SearchState<SearchData>,
+  duplicate_records: {
     search: {
       ...initialSearchData,
     },
@@ -185,8 +191,10 @@ export const createQueryStore = <T extends SearchData>(type: SearchType, persist
 
 const useRecordsQueryStore = createQueryStore('records', true);
 const useCollectionsQueryStore = createQueryStore('collections', true);
+const useDuplicateRecordsQueryStore = createQueryStore('duplicate_records', true);
 
 export const queryStores = {
   records: useRecordsQueryStore,
   collections: useCollectionsQueryStore,
+  duplicate_records: useDuplicateRecordsQueryStore,
 }

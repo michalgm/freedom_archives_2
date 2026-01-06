@@ -45,20 +45,22 @@ const getChangedFields = (input, dirtyFields) => {
     return acc;
   }, {});
 };
+const defaultTransformInput = (input) => input;
 
 function useFormManager({
   namePath = "name",
   service,
-  transformInput = (input) => input,
+  transformInput = defaultTransformInput,
   onFetch,
   id,
   skipUpdatedCheck,
   onUpdate,
   onDelete,
   onCreate,
-  formContextProps = {},
+  formContextProps,
   skipDirtyCheck,
   defaultValues: inputDefaultValues = {},
+  fetchOptions,
 } = {}) {
   const [entityData, setEntityData] = useState({});
   const [loading, setLoading] = useState({ init: true, delete: false, update: false, create: false, fetch: false });
@@ -69,17 +71,17 @@ function useFormManager({
   const fetchEntity = useCallback(
     async (id) => {
       setLoading((l) => ({ ...l, fetch: true }));
-      const result = await services[service].get(id);
+      const result = await services[service].get(id, (fetchOptions || {}));
       setLoading((l) => ({ ...l, fetch: false }));
       return result;
     },
-    [service],
+    [service, fetchOptions],
   );
 
   const processData = useCallback(
     async (result, init = false) => {
-      logger.log("RESULT", result, init);
       const result_data = isEmpty(result) ? result : getDefaultValuesFromSchema(service, result);
+      logger.log("RESULT", result, init, result_data);
       setEntityData(result_data);
       const data = onFetch ? await onFetch(result_data) : result_data;
       setFormData(data);
@@ -127,7 +129,7 @@ function useFormManager({
         // }
         return valdationResult;
       },
-      ...formContextProps,
+      ...(formContextProps || {}),
     }),
     [formContextProps, id, service, inputDefaultValues, fetchEntity, processData],
   );

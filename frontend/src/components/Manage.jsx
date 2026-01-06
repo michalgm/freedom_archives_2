@@ -1,5 +1,16 @@
 import { ArrowDownward, ArrowUpward, Close, Search } from "@mui/icons-material";
-import { Box, Button, Grid, Icon, IconButton, InputAdornment, LinearProgress, Paper, Stack, Tooltip } from "@mui/material";
+import {
+  Box,
+  Button,
+  Grid,
+  Icon,
+  IconButton,
+  InputAdornment,
+  LinearProgress,
+  Paper,
+  Stack,
+  Tooltip,
+} from "@mui/material";
 import { isEqual, merge, startCase } from "lodash-es";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { FormProvider, useFieldArray, useForm } from "react-hook-form-mui";
@@ -158,7 +169,7 @@ const FilterBar = ({
         flexWrap={"nowrap"}
         alignContent={"flex-start"}
         alignItems={"flex-start"}
-        // justifyContent={"space-between"}
+      // justifyContent={"space-between"}
       >
         <Grid container flex="1 1 fit-content" spacing={1}>
           <Grid container flex="1 1 fit-content" rowSpacing={1}>
@@ -391,22 +402,22 @@ const ManageBase = ({
               value = value.toUpperCase();
             }
             switch (filter.match) {
-            case "contained":
-              query[field] = {
-                $contains: [value.list_item_id || value.value || value],
-              };
-              break;
-            case "fuzzy":
-              query[field] = { $ilike: `%${value.replace(/ /g, "%")}%` };
-              break;
-            case "listitem":
-              query[`${field}_search`] = { $contains: [value.item] };
-              break;
-            case "listitem_id":
-              query[`${field.replace(/s$/, "")}_id`] = value.list_item_id;
-              break;
-            default:
-              query[field] = value;
+              case "contained":
+                query[field] = {
+                  $contains: [value.list_item_id || value.value || value],
+                };
+                break;
+              case "fuzzy":
+                query[field] = { $ilike: `%${value.replace(/ /g, "%")}%` };
+                break;
+              case "listitem":
+                query[`${field}_search`] = { $contains: [value.item] };
+                break;
+              case "listitem_id":
+                query[`${field.replace(/s$/, "")}_id`] = value.list_item_id;
+                break;
+              default:
+                query[field] = value;
             }
           }
         });
@@ -471,7 +482,7 @@ const ManageBase = ({
           setFilter={setFilter}
           setSearch={setSearch}
           filterTypes={filterTypes}
-          defaultFilter={defaultFilter||{}}
+          defaultFilter={defaultFilter || {}}
           searchHelperText={searchHelperText}
           embedded={embedded}
           sortOptions={sortOptions || {}}

@@ -26,9 +26,9 @@ function Sidebar({ ...props }) {
     return Object.entries(sidebarConfig).map(([sectionName, sectionData]) => {
       const { icon: sectionIcon, routes } = sectionData;
 
-      const links = routes.reduce((acc, { label, href, icon, authRole }) => {
+      const links = routes.reduce((acc, { label, sidebarPath, icon, authRole }) => {
         if (hasAccess(role, authRole)) {
-          acc.push(<SidebarItem key={label} label={label} href={href} icon={icon} />);
+          acc.push(<SidebarItem key={label} label={label} href={sidebarPath} icon={icon} />);
         }
         return acc;
       }, []);

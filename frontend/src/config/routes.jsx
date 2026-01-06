@@ -121,9 +121,11 @@ export const routeConfig = {
         },
       },
       {
-        // path: "find-duplicates",
+        path: "site/find-duplicates/:id1?/:id2?",
+        component: "./views/FindDuplicateRecords.jsx",
         authRole: "staff",
         sidebar: {
+          sidebarPath: "site/find-duplicates",
           label: "Find Duplicate Records",
           icon: "",
         },
@@ -193,12 +195,13 @@ export const routes = Object.entries(routeConfig).reduce((acc, [sectionName, sec
     }
     if (sidebar) {
       const { authRole } = config;
-      const { label, icon } = sidebar;
+      const { label, icon, sidebarPath } = sidebar;
       sectionRoutes.push({
         label,
         icon,
         href: path,
         authRole,
+        sidebarPath: sidebarPath || path,
       });
     }
   });

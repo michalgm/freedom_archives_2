@@ -1,4 +1,5 @@
-import { createTheme } from "@mui/material/styles";
+import { createTheme, extendTheme } from "@mui/material/styles";
+import { startCase } from "lodash-es";
 
 const xSmallFontSize = "0.7rem";
 const xSmallPadding = "2px 3px";
@@ -58,7 +59,11 @@ const xSmallInputStyles = {
 };
 
 const baseTheme = createTheme();
-export const theme = createTheme(baseTheme, {
+
+export const theme = extendTheme(baseTheme, {
+  cssVariables: {
+    colorSchemeSelector: 'class',
+  },
   // colorSchemes: {
   //   dark: true,
   // },
@@ -70,7 +75,7 @@ export const theme = createTheme(baseTheme, {
       name: "publicPrimary",
     }),
   },
-  cssVariables: true,
+  // cssVariables: true,
   typography: {
     h1: { fontSize: "2.5rem" },
     h2: { fontSize: "2.2rem" },
@@ -193,54 +198,86 @@ export const theme = createTheme(baseTheme, {
           style: xSmallInputStyles,
         },
       ],
+
       styleOverrides: {
         root: {
-          "& .MuiFormLabel-colorSuccess": {
-            color: "var(--mui-palette-success-main)", // Success color for default state
-          },
-          "&:has(.MuiCheckbox-colorSuccess).MuiFormControl-root": {
-            width: "100%",
-            outline: "1px solid var(--mui-palette-success-main)",
-            borderRadius: "2px",
-            backgroundColor:
-              "rgba(var(--mui-palette-success-lightChannel) / 0.1) !important",
-          },
-          "& .MuiCheckbox-colorSuccess": {
-            color: "var(--mui-palette-success-main)", // Success color for default state
-          },
-          "& .MuiInputBase-colorSuccess": {
-            "&": {
-              backgroundColor:
-                "rgba(var(--mui-palette-success-lightChannel) / 0.1) !important",
-            },
-            "& .MuiOutlinedInput-notchedOutline": {
-              borderColor: "var(--mui-palette-success-main)", // Success color for default state
-            },
-          },
-          "& .MuiFormLabel-colorWarning": {
-            color: "var(--mui-palette-warning-main)", // Success color for default state
-          },
-          "&:has(.MuiCheckbox-colorWarning).MuiFormControl-root": {
-            width: "100%",
-            outline: "1px solid var(--mui-palette-warning-main)",
-            borderRadius: "2px",
-            backgroundColor:
-              "rgba(var(--mui-palette-warning-lightChannel) / 0.1) !important",
-          },
-          "& .MuiCheckbox-colorWarning": {
-            color: "var(--mui-palette-warning-main)", // Success color for default state
-          },
-          "& .MuiInputBase-colorWarning": {
-            "&": {
-              backgroundColor:
-                "rgba(var(--mui-palette-warning-lightChannel) / 0.1) !important",
-            },
-            "& .MuiOutlinedInput-notchedOutline": {
-              borderColor: "var(--mui-palette-warning-main)", // Success color for default state
-            },
-          },
+          ...['success', 'warning', 'info', 'error'].reduce((acc, color) => {
+            const colorName = `color${startCase(color)}`
+            const style = {
+              [`& .MuiFormLabel-${colorName}`]: {
+                color: `var(--mui-palette-${color}-main)`,
+              },
+              [`&:has(.MuiCheckbox-${colorName}).MuiFormControl-root`]: {
+                width: '100%',
+                outline: `1px solid var(--mui-palette-${color}-main)`,
+                borderRadius: '2px',
+                backgroundColor: `rgba(var(--mui-palette-${color}-lightChannel) / 0.1) !important`,
+              },
+              [`& .MuiCheckbox-${colorName}`]: {
+                color: `var(--mui-palette-${color}-main)`,
+              },
+              [`& .MuiInputBase-${colorName}`]: {
+                '&': {
+                  backgroundColor: `rgba(var(--mui-palette-${color}-lightChannel) / 0.1) !important`,
+                },
+                '& .MuiOutlinedInput-notchedOutline': {
+                  borderColor: `var(--mui-palette-${color}-main)`,
+                },
+              },
+            }
+
+            return { ...acc, ...style }
+          }, {}),
         },
       },
+      // styleOverrides: {
+      //   root: {
+      //     "& .MuiFormLabel-colorSuccess": {
+      //       color: "var(--mui-palette-success-main)", // Success color for default state
+      //     },
+      //     "&:has(.MuiCheckbox-colorSuccess).MuiFormControl-root": {
+      //       width: "100%",
+      //       outline: "1px solid var(--mui-palette-success-main)",
+      //       borderRadius: "2px",
+      //       backgroundColor:
+      //         "rgba(var(--mui-palette-success-lightChannel) / 0.1) !important",
+      //     },
+      //     "& .MuiCheckbox-colorSuccess": {
+      //       color: "var(--mui-palette-success-main)", // Success color for default state
+      //     },
+      //     "& .MuiInputBase-colorSuccess": {
+      //       "&": {
+      //         backgroundColor:
+      //           "rgba(var(--mui-palette-success-lightChannel) / 0.1) !important",
+      //       },
+      //       "& .MuiOutlinedInput-notchedOutline": {
+      //         borderColor: "var(--mui-palette-success-main)", // Success color for default state
+      //       },
+      //     },
+      //     "& .MuiFormLabel-colorWarning": {
+      //       color: "var(--mui-palette-warning-main)", // Success color for default state
+      //     },
+      //     "&:has(.MuiCheckbox-colorWarning).MuiFormControl-root": {
+      //       width: "100%",
+      //       outline: "1px solid var(--mui-palette-warning-main)",
+      //       borderRadius: "2px",
+      //       backgroundColor:
+      //         "rgba(var(--mui-palette-warning-lightChannel) / 0.1) !important",
+      //     },
+      //     "& .MuiCheckbox-colorWarning": {
+      //       color: "var(--mui-palette-warning-main)", // Success color for default state
+      //     },
+      //     "& .MuiInputBase-colorWarning": {
+      //       "&": {
+      //         backgroundColor:
+      //           "rgba(var(--mui-palette-warning-lightChannel) / 0.1) !important",
+      //       },
+      //       "& .MuiOutlinedInput-notchedOutline": {
+      //         borderColor: "var(--mui-palette-warning-main)", // Success color for default state
+      //       },
+      //     },
+      //   },
+      // },
     },
   },
 });

@@ -1,4 +1,4 @@
-import { Button, Dialog, DialogActions, DialogContent, DialogTitle, Grid, MenuItem } from "@mui/material";
+import { Button, Dialog, DialogActions, DialogContent, DialogTitle, Grid, MenuItem, Tooltip } from "@mui/material";
 import { memo, useCallback, useMemo, useState } from "react";
 import { AutocompleteElement, FormProvider, useForm, useFormContext } from "react-hook-form-mui";
 import { useAutocompleteOptions } from "src/components/Autocomplete/useAutoCompleteOptions";
@@ -10,6 +10,19 @@ import { Field } from "../form/Field";
 import searchTypes from "./searchTypes"; // Move it out of main file
 
 const emptyArray = [];
+
+
+const Wrapper = ({ showTooltip, currentValue, labelField, getOptionById, children }) => {
+  if (!showTooltip) return <>{children}</>;
+  const currentOption = getOptionById(currentValue) || currentValue;
+  return (
+    <Tooltip title={currentOption && currentOption[labelField]} arrow>
+      <span>
+        {children}
+      </span>
+    </Tooltip>
+  );
+}
 
 export const NewListItemDialog = ({ label, service, handleClose, value, createParams }) => {
   // const [listItem, setListItem] = useState({});
@@ -119,6 +132,7 @@ const Autocomplete = ({
   returnFullObject = true,
   excludeIds = emptyArray,
   disableClearable = false,
+  showTooltip = false,
   inputRef,
   ...props
 }) => {
@@ -266,45 +280,47 @@ const Autocomplete = ({
 
   return (
     <>
-      <AutocompleteElement
-        name={name}
-        label={label}
-        options={options}
-        textFieldProps={textFieldProps}
-        autocompleteProps={autocompleteProps}
-        helperText={helperText}
-        loading={loading}
-        {...props}
-        transform={{
-          input: (value) => {
-            let returnValue = value ?? null;
-            if (props.multiple) {
-              returnValue = Array.isArray(value) ? value : emptyArray;
-            }
+      <Wrapper showTooltip={showTooltip} currentValue={currentValue} labelField={labelField} getOptionById={getOptionById}>
+        <AutocompleteElement
+          name={name}
+          label={label}
+          options={options}
+          textFieldProps={textFieldProps}
+          autocompleteProps={autocompleteProps}
+          helperText={helperText}
+          loading={loading}
+          {...props}
+          transform={{
+            input: (value) => {
+              let returnValue = value ?? null;
+              if (props.multiple) {
+                returnValue = Array.isArray(value) ? value : emptyArray;
+              }
 
-            return returnValue;
-          },
-          output: (_, value) => {
-            if (!props.multiple) {
-              const option = getOptionById(value) ?? value;
+              return returnValue;
+            },
+            output: (_, value) => {
+              if (!props.multiple) {
+                const option = getOptionById(value) ?? value;
+                if (option?.[idField] === "new") {
+                  setCustomValue(option.searchTerm);
+                  return {};
+                }
+                return value;
+              }
+              if (!Array.isArray(value)) return emptyArray;
+              const lastItem = value[value.length - 1];
+              const option = getOptionById(lastItem) ?? lastItem;
+
               if (option?.[idField] === "new") {
                 setCustomValue(option.searchTerm);
-                return {};
+                return value.slice(0, -1);
               }
               return value;
-            }
-            if (!Array.isArray(value)) return emptyArray;
-            const lastItem = value[value.length - 1];
-            const option = getOptionById(lastItem) ?? lastItem;
-
-            if (option?.[idField] === "new") {
-              setCustomValue(option.searchTerm);
-              return value.slice(0, -1);
-            }
-            return value;
-          },
-        }}
-      />
+            },
+          }}
+        />
+      </Wrapper>
       <NewListItemDialog
         handleClose={(result) => {
           setCustomValue(null);

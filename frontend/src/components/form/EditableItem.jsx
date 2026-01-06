@@ -6,7 +6,7 @@ import RecordItem, { CollectionItem } from "src/components/EditableItemsList";
 import { Field } from "src/components/form/Field";
 import { parseError } from "src/components/form/schemaUtils";
 
-export function EditableItem({ service, name, link = true, label, ...props }) {
+export function EditableItem({ service, name, link = true, label, color, ...props }) {
   const { value } = props;
   const inputRef = useRef(null);
   // logger.log(name, props);
@@ -58,7 +58,7 @@ export function EditableItem({ service, name, link = true, label, ...props }) {
     const missingText = name === "parent" ? `Parent ${startCase(itemName)}` : "Collection";
 
     return (
-      <FormControl variant="outlined" fullWidth size="small" margin="dense" error={hasError}>
+      <FormControl variant="outlined" fullWidth size="small" margin="dense" error={hasError} color={color}>
         <InputLabel sx={{ backgroundColor: "#fff" }} shrink>
           {startCase(label)}
         </InputLabel>
@@ -71,6 +71,7 @@ export function EditableItem({ service, name, link = true, label, ...props }) {
             borderColor: hasError ? "error.main" : "grey.400",
             color: hasError ? "error.main" : "inherit",
             padding: 0,
+            backgroundColor: `rgba(var(--mui-palette-${color}-lightChannel) / 0.1) !important`,
           }}
         >
           <ItemTag

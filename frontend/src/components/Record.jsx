@@ -29,6 +29,7 @@ import { EditableItemsList, RecordsList } from "src/components/EditableItemsList
 import useFormManagerContext from "src/components/form/FormManagerContext";
 import Show from "src/components/Show";
 import Thumbnail from "src/components/Thumbnail";
+import { recordSelectFields } from "src/config/constants";
 import { useAddNotification, useTitle } from "src/stores";
 import EditItemView from "src/views/EditItemView";
 
@@ -110,9 +111,9 @@ function MediaItem({ media, index, actions }) {
   return (
     <React.Fragment key={`${media.media_id}-${media.id}`}>
       <TableRow className={`media ${media.delete ? "deleted" : ""}`} style={{ verticalAlign: "top" }}>
-        <TableCell className="media-action">
+        <TableCell className="media-action" sx={{ verticalAlign: "middle" }}>
           <IconButton
-            sx={{ mt: 1, py: 1 }}
+            sx={{ p: 1 }}
             onClick={() => {
               media.media_id ? update(index, { ...media, delete: !media.delete }) : remove(index);
             }}
@@ -121,8 +122,8 @@ function MediaItem({ media, index, actions }) {
             <Icon>{media.delete ? "restore" : "delete"}</Icon>
           </IconButton>
         </TableCell>
-        <TableCell>
-          <IconButton onClick={() => swap(index, 0)} size="large" sx={{ mt: 1, py: 1 }}>
+        <TableCell sx={{ verticalAlign: "middle", textAlign: "center" }}>
+          <IconButton onClick={() => swap(index, 0)} size="large" sx={{ p: 1 }}>
             {index === 0 ? <RadioButtonCheckedOutlined /> : <RadioButtonUncheckedOutlined />}
           </IconButton>
         </TableCell>
@@ -144,6 +145,7 @@ function MediaItem({ media, index, actions }) {
                 }}
                 fetchAll
                 fullWidth
+                showTooltip
               />
             </Grid>
             <Grid size={4.5}>
@@ -169,6 +171,7 @@ function MediaItem({ media, index, actions }) {
             ro={!edit}
             label="Generation"
             name={`media.${index}.generation_item`}
+            showTooltip
           />
         </TableCell>
         <TableCell>
@@ -180,6 +183,7 @@ function MediaItem({ media, index, actions }) {
             label="Format"
             service="list_items"
             name={`media.${index}.format_item`}
+            showTooltip
           />
         </TableCell>
         <TableCell>
@@ -191,6 +195,7 @@ function MediaItem({ media, index, actions }) {
             label="Quality"
             service="list_items"
             name={`media.${index}.quality_item`}
+            showTooltip
           />
         </TableCell>
         <TableCell>
@@ -226,7 +231,7 @@ function MediaItem({ media, index, actions }) {
   );
 }
 
-function Media({ record }) {
+export function Media({ record }) {
   const {
     control,
     formState: { errors },
@@ -239,7 +244,7 @@ function Media({ record }) {
 
   return (
     <>
-      <Table size="small" className="media" sx={{ mb: 2 }}>
+      <Table size="small" className="media" sx={{ mb: 2, "td, th": { px: 1 } }} dense>
         <TableHead>
           <TableRow>
             <TableCell style={{ width: 50 }}></TableCell>
@@ -276,7 +281,7 @@ function Media({ record }) {
   );
 }
 
-function Relationships({ id, relationships}) {
+function Relationships({ id, relationships }) {
   return (
     <Table size="small">
       <TableHead>
@@ -407,6 +412,11 @@ export function Record({ id /*  embedded = false */ }) {
           defaultValues: {
             media: [{ no_copies: 1 }],
           },
+          fetchOptions: {
+            query: {
+              $select: recordSelectFields,
+            },
+          },
         }}
       >
         {(manager) => {
@@ -481,6 +491,9 @@ export function Record({ id /*  embedded = false */ }) {
                           <Field name="year_is_circa" label="Approximate date" field_type="checkbox" />
                         </Grid>
                       </Grid>
+                    </FieldRow>
+                    <FieldRow>
+                      <Field name="fact_number" />
                     </FieldRow>
                     <FieldRow>
                       <Field name="notes" multiline rows={4} />

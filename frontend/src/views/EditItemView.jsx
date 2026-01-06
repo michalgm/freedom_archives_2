@@ -7,7 +7,7 @@ import ButtonLink from "src/components/ButtonLink";
 import ViewContainer from "src/components/ViewContainer";
 import { queryStores } from "src/stores/";
 
-const RenderTime = ({ item, type }) => {
+export const RenderTime = ({ item, type }) => {
   if (isEmpty(item)) return null;
   return (
     <Typography variant="caption">
@@ -17,14 +17,14 @@ const RenderTime = ({ item, type }) => {
   );
 };
 
-const NeighborLink = ({ type, service, neighbors, setSearchIndex, search_index }) => {
+export const NeighborLink = ({ type, service, neighbors, setSearchIndex, search_index, itemLink }) => {
   const offset = type === "prev" ? -1 : 1;
   if (service) {
     return (
       <Grid size="grow" component={Box} textAlign={type === "prev" ? "left" : "right"} style={{ flex: "0 0 auto" }}>
         <ButtonLink
           disabled={!neighbors[type]}
-          to={`/admin/${service}/${neighbors[type]}`}
+          to={itemLink ? itemLink(neighbors[type]) : `/admin/${service}/${neighbors[type]}`}
           onClick={() => setSearchIndex(search_index + offset)}
           startIcon={type === "prev" && <Icon>arrow_backward</Icon>}
           endIcon={type !== "prev" && <Icon>arrow_forward</Icon>}
@@ -36,7 +36,7 @@ const NeighborLink = ({ type, service, neighbors, setSearchIndex, search_index }
   }
 };
 
-const EditItemFooter = ({ service, item }) => {
+export const EditItemFooter = ({ service, item, itemLink, hideMeta }) => {
   const [neighbors, setNeighbors] = useState({ prev: null, next: null });
   const useStore = queryStores[service];
   const setSearchIndex = useStore((s) => s.setSearchIndex);
@@ -64,16 +64,22 @@ const EditItemFooter = ({ service, item }) => {
     };
     updateNeighbors();
   }, [search_index, query, service, id]);
+  if (hideMeta) {
+    return [
+      <NeighborLink key="prev" type="prev" {...{ service, neighbors, setSearchIndex, search_index, itemLink }} />,
+      <NeighborLink key="next" type="next" {...{ service, neighbors, setSearchIndex, search_index, itemLink }} />,
+    ];
+  }
 
   return [
-    <NeighborLink key="prev" type="prev" {...{ service, neighbors, setSearchIndex, search_index }} />,
+    <NeighborLink key="prev" type="prev" {...{ service, neighbors, setSearchIndex, search_index, itemLink }} />,
     <Grid key="created" size="grow" style={{ textAlign: "center" }}>
       <RenderTime item={item} type="created" />
     </Grid>,
     <Grid key="modified" size="grow" style={{ textAlign: "center" }}>
       <RenderTime item={item} type="modified" />
     </Grid>,
-    <NeighborLink key="next" type="next" {...{ service, neighbors, setSearchIndex, search_index }} />,
+    <NeighborLink key="next" type="next" {...{ service, neighbors, setSearchIndex, search_index, itemLink }} />,
   ];
 };
 
