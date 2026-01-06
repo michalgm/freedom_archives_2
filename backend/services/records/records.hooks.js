@@ -109,7 +109,7 @@ const prepData = async (context) => {
     if ("date_string" in data) {
       let parts = ["month", "day", "year"];
       data.date_string?.split("/").forEach((part, index) => {
-        if (["00", "MM", "DD", "YYYY"].includes(part)) {
+        if (["00", "0000", "MM", "DD", "YYYY"].includes(part)) {
           data[parts[index]] = null;
         } else {
           data[parts[index]] = part;
@@ -172,7 +172,7 @@ const updateRelations = async (context) => {
           if (media.url === '') {
             media.media_type = '';
           }
-          return app.service("api/media").patch(media.media_id, media, params);
+          return app.service("api/media").patch(media.media_id, { record_id: id, ...media }, params);
         }
         delete media.media_id;
         media.record_id ||= id;
