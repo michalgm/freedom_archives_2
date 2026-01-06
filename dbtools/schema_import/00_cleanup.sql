@@ -63,6 +63,32 @@ WHERE
 
 UPDATE freedom_archives_old.documents
 SET
+    title=REGEXP_REPLACE(title, ' +\[CD\]', '')
+WHERE
+    title~' +\[CD\]';
+
+UPDATE freedom_archives_old.documents
+SET
+    description=REPLACE(description, '\n', E'\n')
+WHERE
+    description LIKE '%\\n%';
+
+UPDATE freedom_archives_old.documents
+SET
+    description=REGEXP_REPLACE(description, '\\([''""])', '\1', 'g')
+WHERE
+    description~'\\[''""]';
+
+UPDATE freedom_archives_old.documents
+SET
+    title=TRIM(REGEXP_REPLACE(title, '\s\s+', ' ', 'g'));
+
+UPDATE freedom_archives_old.documents
+SET
+    description=TRIM(REGEXP_REPLACE(description, '\s\s+', ' ', 'g'));
+    
+UPDATE freedom_archives_old.documents
+SET
     MONTH=CASE LOWER(MONTH)
         WHEN 'ja' THEN '1'
         WHEN 'fe' THEN '2'

@@ -145,6 +145,7 @@ INSERT INTO
             program_lookup.list_item_id,
             needs_review::bool,
             is_hidden::bool,
+            NULL,
             b.user_id AS creator_user_id,
             c.user_id AS contributor_user_id,
             date_created,
@@ -158,6 +159,18 @@ INSERT INTO
             AND program_lookup.type='program'
     );
 
+UPDATE records a
+SET
+    fact_number=regexp_substr (notes, '(FACT_[A-Z0-9_]+)'),
+    notes=TRIM(
+        REPLACE(
+            notes,
+            regexp_substr (notes, '(FACT_[A-Z0-9_]+)'),
+            ''
+        )
+    )
+WHERE
+    notes~'FACT_[A-Z0-9_]+';
 INSERT INTO
     featured_records (
         SELECT
