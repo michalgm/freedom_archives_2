@@ -147,7 +147,6 @@ CREATE TABLE IF NOT EXISTS _unified_records (
     program_id integer,
     needs_review boolean,
     is_hidden boolean,
-    fact_number text,
     creator_user_id integer,
     contributor_user_id integer,
     date_created timestamptz,
@@ -194,6 +193,7 @@ CREATE TABLE IF NOT EXISTS _unified_records (
     siblings json[],
     parent json,
     continuations json[],
+    fact_number text,
     collection_title text,
     CONSTRAINT _unified_records_pkey PRIMARY KEY (record_id)
 );
@@ -674,11 +674,11 @@ CREATE TABLE IF NOT EXISTS records (
     program_id integer,
     needs_review boolean DEFAULT false,
     is_hidden boolean DEFAULT false,
-    fact_number text,
     creator_user_id integer,
     contributor_user_id integer,
     date_created timestamptz,
     date_modified timestamptz,
+    fact_number text,
     CONSTRAINT records_pkey PRIMARY KEY (record_id),
     CONSTRAINT records_archive_id_fkey FOREIGN KEY (archive_id) REFERENCES archives (archive_id) ON DELETE CASCADE,
     CONSTRAINT records_collection_id_fkey FOREIGN KEY (collection_id) REFERENCES collections (collection_id) ON DELETE SET DEFAULT,
@@ -1275,7 +1275,6 @@ CREATE OR REPLACE VIEW unified_records AS
     a.program_id,
     a.needs_review,
     a.is_hidden,
-    a.fact_number,
     a.creator_user_id,
     a.contributor_user_id,
     a.date_created,
@@ -1353,7 +1352,8 @@ CREATE OR REPLACE VIEW unified_records AS
     siblings.siblings,
     parent.parent,
     continuations.continuations,
-    b.collection->>'title' AS collection_title
+    b.collection->>'title' AS collection_title,
+    a.fact_number
    FROM records a
      JOIN record_summaries b USING (record_id)
      LEFT JOIN list_items program_lookup ON a.program_id = program_lookup.list_item_id
