@@ -136,6 +136,10 @@ const recordsSchema = z.object({
   program_id: z.number().nullable().optional(),
   needs_review: z.boolean().default(false),
   is_hidden: z.boolean().default(false),
+  fact_number: z.string()
+    .regex(/^FACT_[0-9]{4,6}_[A-Z0-9_]+$/, { message: "Fact number must be in format 'FACT_XXXX_XXXX'" })
+    .nullable()
+    .optional(),
   date_string: z
     .string()
     .regex(/\d{2}\/\d{2}\/\d{4}/)
@@ -266,6 +270,7 @@ const recordsDataSchema = recordsSchema
     year_is_circa: true,
     notes: true,
     primary_media_id: true,
+    fact_number: true,
   })
   .extend({
     parent: recordItemSchema.nullable().optional().describe('Parent Record'),
