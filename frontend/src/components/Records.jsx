@@ -23,6 +23,7 @@ const filter_types = {
   qualitys: { input: "listitem", match: "contained" },
   generations: { input: "listitem", match: "contained" },
   media_types: { input: "simpleSelect", match: "contained" },
+  notes: { input: "text", match: "fuzzy" },
   is_hidden: { input: "checkbox", match: "exact", label: "Hidden" },
 };
 
