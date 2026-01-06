@@ -493,7 +493,7 @@ export function Record({ id /*  embedded = false */ }) {
                       </Grid>
                     </FieldRow>
                     <FieldRow>
-                      <Field name="fact_number" />
+                      <Field name="fact_number" label="Cloud Backup Reference ID (FACT)" />
                     </FieldRow>
                     <FieldRow>
                       <Field name="notes" multiline rows={4} />
