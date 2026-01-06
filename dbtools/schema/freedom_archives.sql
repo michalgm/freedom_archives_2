@@ -147,6 +147,7 @@ CREATE TABLE IF NOT EXISTS _unified_records (
     program_id integer,
     needs_review boolean,
     is_hidden boolean,
+    fact_number text,
     creator_user_id integer,
     contributor_user_id integer,
     date_created timestamptz,
@@ -193,6 +194,7 @@ CREATE TABLE IF NOT EXISTS _unified_records (
     siblings json[],
     parent json,
     continuations json[],
+    collection_title text,
     CONSTRAINT _unified_records_pkey PRIMARY KEY (record_id)
 );
 
@@ -672,6 +674,7 @@ CREATE TABLE IF NOT EXISTS records (
     program_id integer,
     needs_review boolean DEFAULT false,
     is_hidden boolean DEFAULT false,
+    fact_number text,
     creator_user_id integer,
     contributor_user_id integer,
     date_created timestamptz,
@@ -1272,6 +1275,7 @@ CREATE OR REPLACE VIEW unified_records AS
     a.program_id,
     a.needs_review,
     a.is_hidden,
+    a.fact_number,
     a.creator_user_id,
     a.contributor_user_id,
     a.date_created,
@@ -1348,7 +1352,8 @@ CREATE OR REPLACE VIEW unified_records AS
     children.children,
     siblings.siblings,
     parent.parent,
-    continuations.continuations
+    continuations.continuations,
+    b.collection->>'title' AS collection_title
    FROM records a
      JOIN record_summaries b USING (record_id)
      LEFT JOIN list_items program_lookup ON a.program_id = program_lookup.list_item_id
@@ -1447,4 +1452,128 @@ UNION ALL
     true AS has_digital,
     unified_collections.thumbnail
    FROM _unified_collections AS unified_collections;
+
+
+CREATE TABLE
+  freedom_archives.duplicate_records_ignore (
+    record_id_1 INTEGER,
+    record_id_2 INTEGER,
+    CONSTRAINT duplicate_records_ignore_pkey PRIMARY KEY (record_id_1, record_id_2),
+    CONSTRAINT duplicate_records_ignore_record_1_fkey FOREIGN KEY (record_id_1) REFERENCES freedom_archives.records (record_id) ON DELETE CASCADE,
+    CONSTRAINT duplicate_records_ignore_record_2_fkey FOREIGN KEY (record_id_2) REFERENCES freedom_archives.records (record_id) ON DELETE CASCADE
+  );
+
+CREATE VIEW
+  freedom_archives.duplicate_records AS
+SELECT
+  a.record_id||'|'||b.record_id AS duplicate_record_id,
+  a.record_id AS record_id_1,
+  b.record_id AS record_id_2,
+  a.title AS title_1,
+  b.title AS title_2,
+  a.collection_title AS collection_1,
+  b.collection_title AS collection_2,
+  ROUND(
+    (
+      similarity (
+        JSONB_BUILD_OBJECT(
+          'title',
+          a.title,
+          'description',
+          a.description,
+          'authors',
+          a.authors_text,
+          'producers',
+          a.producers_text,
+          'keywords',
+          a.keywords_text,
+          'subjects',
+          a.subjects_text,
+          'collection',
+          a.collection_title,
+          'vol_number',
+          a.vol_number,
+          'program',
+          a.program,
+          'publishers',
+          a.publishers_text,
+          'location',
+          a.location,
+          'date',
+          a.date_string,
+          'fact_number',
+          a.fact_number,
+          'notes',
+          a.notes
+        )::TEXT,
+        JSONB_BUILD_OBJECT(
+          'title',
+          b.title,
+          'description',
+          b.description,
+          'authors',
+          b.authors_text,
+          'producers',
+          b.producers_text,
+          'keywords',
+          b.keywords_text,
+          'subjects',
+          b.subjects_text,
+          'collection',
+          b.collection_title,
+          'vol_number',
+          b.vol_number,
+          'program',
+          b.program,
+          'publishers',
+          b.publishers_text,
+          'location',
+          b.location,
+          'date',
+          b.date_string,
+          'fact_number',
+          b.fact_number,
+          'notes',
+          b.notes
+        )::TEXT
+      )
+    )::NUMERIC,
+    3
+  ) AS relevance,
+  a.fulltext||b.fulltext AS fulltext,
+  a.call_numbers AS call_numbers_1,
+  b.call_numbers AS call_numbers_2,
+  a.search_text||b.search_text AS search_text,
+  EXISTS (
+    SELECT
+      1
+    FROM
+      freedom_archives.duplicate_records_ignore dri
+    WHERE
+      (dri.record_id_1=a.record_id
+      AND dri.record_id_2=b.record_id) OR
+      (dri.record_id_1=b.record_id
+      AND dri.record_id_2=a.record_id)
+  ) AS is_ignored
+FROM
+  _unified_records a
+  JOIN _unified_records b ON a.title=b.title
+  AND a.date=b.date
+  AND a.record_id<b.record_id;
+
+-- CREATE INDEX IF NOT EXISTS duplicate_records_relevance_idx
+
+
+
+-- CREATE INDEX IF NOT EXISTS duplicate_records_similarity_idx 
+--   ON duplicate_records (similarity_score DESC);
+
+--   CREATE INDEX IF NOT EXISTS duplicate_records_id_1_idx 
+--   ON duplicate_records (id_1);
+
+-- CREATE INDEX IF NOT EXISTS duplicate_records_id_2_idx 
+--   ON duplicate_records (id_2);
+
+-- CREATE INDEX IF NOT EXISTS duplicate_records_title_similarity_idx 
+--   ON duplicate_records (title_1, similarity_score DESC);
 

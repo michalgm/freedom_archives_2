@@ -75,6 +75,7 @@ function DuplicateRecords() {
         'call_numbers_2',
         'relevance',
       ],
+      is_ignored: false,
     };
 
     query.$sort = cloneDeep(sort_options[sort].sort);
