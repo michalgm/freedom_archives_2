@@ -25,6 +25,7 @@ const filter_types = {
   media_types: { input: "simpleSelect", match: "contained" },
   notes: { input: "text", match: "fuzzy" },
   is_hidden: { input: "checkbox", match: "exact", label: "Hidden" },
+  fact_number: { input: "text", match: "fuzzy" },
 };
 
 const sort_options = {
