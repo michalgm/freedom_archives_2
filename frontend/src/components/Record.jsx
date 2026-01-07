@@ -244,7 +244,7 @@ export function Media({ record }) {
 
   return (
     <>
-      <Table size="small" className="media" sx={{ mb: 2, "td, th": { px: 1 } }} dense>
+      <Table size="small" className="media" sx={{ mb: 2, "td, th": { px: 1 } }}>
         <TableHead>
           <TableRow>
             <TableCell style={{ width: 50 }}></TableCell>
