@@ -15,7 +15,7 @@ describe('Ranked Search Integration Tests', () => {
     await app.get('postgresqlClient').destroy();
   });
 
-  it('should return results with exact matches ranked higher', async () => {
+  it('should return results with exact matches ranked higher', { timeout: 10000 }, async () => {
     // Test exact match ranking
     const exactMatchTerm = 'freedom';
     const result = await service.find({
@@ -40,7 +40,7 @@ describe('Ranked Search Integration Tests', () => {
         expect(result.data[0].rank).toBeGreaterThan(result.data[result.data.length - 1].rank);
       }
     }
-  }, { timeout: 10000 });
+  });
 
   it('should handle prefix matching correctly', async () => {
     // Test prefix matching (e.g., "free" should match "freedom")
@@ -109,7 +109,7 @@ describe('Ranked Search Integration Tests', () => {
     expect(hasSimilarMatches).toBe(true);
   });
 
-  it('should respect field weighting in search results', async () => {
+  it('should respect field weighting in search results', { timeout: 5000 }, async () => {
     // Test if title matches are ranked higher than description matches
     const searchTerm = 'revolution';
     const result = await service.find({
@@ -135,7 +135,7 @@ describe('Ranked Search Integration Tests', () => {
       const avgDescRank = descriptionOnlyMatches.reduce((sum, r) => sum + r.rank, 0) / descriptionOnlyMatches.length;
       expect(avgTitleRank).toBeGreaterThan(avgDescRank);
     }
-  }, { timeout: 5000 });
+  });
 
   it('should handle different languages correctly', async () => {
     // Test with a non-English language parameter

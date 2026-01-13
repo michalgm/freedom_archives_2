@@ -15,7 +15,7 @@ describe("Feathers application tests", () => {
     await app.teardown();
   }, { timeout: 10000 });
 
-  it("starts and shows the index page", async () => {
+  it("starts and shows the index page", { timeout: 10000 }, async () => {
     try {
       const { data } = await axios.get(appUrl);
       // If we get valid HTML, check for the expected content
@@ -30,7 +30,7 @@ describe("Feathers application tests", () => {
       // Just verify the app is listening
       expect(error.code).not.toBe('ECONNREFUSED');
     }
-  }, { timeout: 10000 });
+  });
 
   // it("shows a 404 JSON error", async () => {
   //   try {
