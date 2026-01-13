@@ -10,7 +10,7 @@ export default (function (app) {
       $contained_by: "<@",
       $fulltext: "@@",
     },
-    // debug: true,
+    debug: false,
   });
   app.set("postgresqlClient", db);
 });

@@ -32,4 +32,5 @@ export const recordSelectFields = [
   "date_modified",
   "creator_name",
   "contributor_name",
+  "relationships",
 ];

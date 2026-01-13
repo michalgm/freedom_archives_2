@@ -282,17 +282,18 @@ export function Media({ record }) {
 }
 
 function Relationships({ id, relationships }) {
+  console.log("Relationships RENDER", relationships);
   return (
     <Table size="small">
       <TableHead>
         <TableRow>
           <TableCell>Number</TableCell>
           <TableCell>Title</TableCell>
-          <TableCell>Generation</TableCell>
+          {/* <TableCell>Generation</TableCell>
           <TableCell>Call No.</TableCell>
-          <TableCell>Format</TableCell>
+          <TableCell>Format</TableCell> */}
           <TableCell>Track</TableCell>
-          <TableCell>Type</TableCell>
+          {/* <TableCell>Type</TableCell> */}
           <TableCell>Link</TableCell>
         </TableRow>
       </TableHead>
@@ -310,18 +311,19 @@ function Relationships({ id, relationships }) {
           const doc_id = relation[`docid_${side}`];
           return (
             <React.Fragment
-              key={`${relation.docid_1}_${relation.docid_2}_${relation.track_number_1}_${relation.track_number_2}`}
+              key={relation.id}
+              // key={`${relation.docid_1}_${relation.docid_2}_${relation.track_number_1}_${relation.track_number_2}`}
             >
               <TableRow>
                 <TableCell rowSpan={2}>{index + 1}</TableCell>
                 <TableCell>
                   <Link to={`/admin/record/${doc_id}`}> {relation[`title_${side}`]} </Link>
                 </TableCell>
-                <TableCell>{relation[`generation_${side}`]}</TableCell>
-                <TableCell>{relation[`call_number_${side}`]}</TableCell>
-                <TableCell>{relation[`format_${side}`]}</TableCell>
+                {/* <TableCell>{relation[`generation_${side}`]}</TableCell> */}
+                {/* <TableCell>{relation[`call_number_${side}`]}</TableCell> */}
+                {/* <TableCell>{relation[`format_${side}`]}</TableCell> */}
                 <TableCell>{relation[`track_number_${side}`]}</TableCell>
-                <TableCell>{relation.type}</TableCell>
+                {/* <TableCell>{relation.type}</TableCell> */}
                 <TableCell>
                   <Link to={`/relationship/${relation.id}`}>View</Link>
                 </TableCell>
@@ -386,6 +388,12 @@ function UpdateThumbnailButton() {
   );
 }
 
+const fetchOptions = {
+  query: {
+    $select: recordSelectFields,
+  },
+};
+
 export function Record({ id /*  embedded = false */ }) {
   const { id: paramId } = useParams();
   id ??= paramId;
@@ -393,9 +401,31 @@ export function Record({ id /*  embedded = false */ }) {
   const newRecord = id === "new";
 
   const setTitle = useTitle();
+  const onCreate = useCallback(
+    ({ record_id }) => {
+      navigate(`/admin/records/${record_id}`);
+    }, [navigate],
+  )
+
+  const onFetch = useCallback(
+    (record) => {
+      setTitle(record.title || "New Record");
+      if (!record.media || record.media.length === 0) {
+        record.media = [{ no_copies: 1 }];
+      }
+      return record;
+    },
+    [setTitle],
+  );
+
+  const onDelete = useCallback(
+    () => {
+      navigate(`/admin/records`);
+    },
+    [navigate],
+  );
 
   logger.log("Record RENDER");
-
   return (
     <Box className="record scroll-container">
       <BaseForm
@@ -403,20 +433,10 @@ export function Record({ id /*  embedded = false */ }) {
           service: "records",
           id: newRecord ? null : id,
           namePath: "title",
-          onCreate: ({ record_id }) => navigate(`/admin/records/${record_id}`),
-          onFetch: (record) => {
-            setTitle(record.title || "New Record");
-            return record;
-          },
-          onDelete: () => navigate(`/admin/records`),
-          defaultValues: {
-            media: [{ no_copies: 1 }],
-          },
-          fetchOptions: {
-            query: {
-              $select: recordSelectFields,
-            },
-          },
+          onCreate,
+          onFetch,
+          onDelete,
+          fetchOptions,
         }}
       >
         {(manager) => {

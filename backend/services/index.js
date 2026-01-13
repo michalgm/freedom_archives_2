@@ -1,4 +1,5 @@
 import collections from "./collections.js";
+import data_cleanup from "./data_cleanup.js";
 import duplicate_records from "./duplicate_records.js";
 import list_items from "./list_items.js";
 import list_items_lookup from "./list_items_lookup.js";
@@ -34,4 +35,5 @@ export default (function (app) {
   app.configure(public_settings);
   app.configure(public_collections);
   app.configure(duplicate_records);
+  app.configure(data_cleanup);
 });

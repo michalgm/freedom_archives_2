@@ -113,6 +113,15 @@ export const routeConfig = {
         },
       },
       {
+        path: "site/data-cleanup",
+        component: "./views/DataCleanup.jsx",
+        authRole: "staff",
+        sidebar: {
+          label: "Data Cleanup",
+          icon: "",
+        },
+      },
+      {
         // path: "export-collections",
         authRole: "staff",
         sidebar: {
