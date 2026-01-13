@@ -71,7 +71,6 @@
     "helmet": "^8.1.0",
     "knex": "^3.1.0",
     "node-addon-api": "^8.5.0",
-    "node-gyp": "^11.5.0",
     "pg": "^8.16.3",
     "pg-tsquery": "^8.4.2",
     "serve-favicon": "^2.5.1",
@@ -89,18 +88,18 @@
     "@stylistic/eslint-plugin": "^5.7.0",
     "@typescript-eslint/eslint-plugin": "^8.53.0",
     "@typescript-eslint/parser": "^8.53.0",
-    "@vitest/ui": "^2.1.8",
+    "@vitest/ui": "^4.0.17",
     "axios": "^1.13.2",
     "baseline-browser-mapping": "^2.9.14",
     "browserslist": "^4.28.1",
     "concurrently": "^9.2.1",
     "eslint": "^9.39.2",
-    "globals": "^16.5.0",
+    "globals": "^17.0.0",
     "mock-knex": "^0.4.13",
     "nodemon": "^3.1.11",
     "sinon": "^19.0.5",
     "typescript-eslint": "^8.53.0",
-    "vitest": "^2.1.8"
+    "vitest": "^4.0.17"
   },
   "msw": {
     "workerDirectory": [
