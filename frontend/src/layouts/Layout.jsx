@@ -31,12 +31,13 @@ const DRAWERWIDTH = 256;
 
 export default function Layout() {
   const { isAuthenticated } = useAuth();
-  const style = isAuthenticated
+  const style = React.useMemo(() => isAuthenticated
     ? {}
     : {
       marginLeft: 0,
       width: "100%",
-    };
+    }, [isAuthenticated]);
+
   logger.log("Layout RENDER");
   return (
     <Box className="App" sx={{ backgroundColor: "#efefef", height: "100vh", display: "flex", flexDirection: "column" }}>
