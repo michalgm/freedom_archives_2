@@ -48,6 +48,16 @@ app.use(json({ limit: "13mb" }));
 app.use(urlencoded({ extended: true }));
 app.configure(rest());
 app.use(favicon(path.join(clientDistPath, "favicon.ico")));
+
+// Sitemap and robots.txt routes
+expressApp.get('/robots.txt', (req, res) => {
+  res.type('text/plain').sendFile(path.join(publicPath, 'robots.txt'));
+});
+
+expressApp.get('/sitemap.xml', (req, res) => {
+  res.type('application/xml').sendFile(path.join(publicPath, 'sitemap.xml'));
+});
+
 // Host the public folder
 app.use("/", express.static(clientDistPath));
 app.use("/images/thumbnails", thumbnailProxy(app, publicPath));

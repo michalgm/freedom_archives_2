@@ -1,6 +1,7 @@
 import { isEqual, pickBy } from "lodash-es";
 import { useEffect, useRef } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
+import { stripHtml } from "string-strip-html";
 
 import { services } from "../api";
 
@@ -83,6 +84,39 @@ export const checkUnique = async (service, query) => {
 export const diffShallow = (obj1, obj2) => {
   return pickBy(obj1, (val, key) => Object.prototype.hasOwnProperty.call(obj2, key) && !isEqual(val, obj2[key]));
 };
+
+
+export const setMetaTags = ({ data, title: _title, description: _description, date_modified, image, keywords: _keywords }) => {
+  const { location, matches } = data;
+  const { baseUrl } = matches.find((m) => m.id === "root")?.data || {};
+  const url = `${baseUrl}${location.pathname}`;
+  const title = [_title, 'Freedom Archives Search'].filter(Boolean).join(' - ');
+  let description = stripHtml(_description || "").result.trim()
+  if (description.length > 160) {
+    description = description.slice(0, 157) + '...';
+  }
+  const keywords = _keywords ? (Array.isArray(_keywords) ? _keywords.map(k => k.item).join(', ') : _keywords) : null;
+
+  const meta = [
+    { title },
+    description ? { name: "description", content: description } : null,
+    { rel: "canonical", href: url },
+    { property: "og:title", content: title },
+    description ? { property: "og:description", content: description } : null,
+    { property: "og:type", content: "website" },
+    { property: "og:url", content: url },
+    image ? { property: "og:image", content: image } : null,
+    image ? { name: "twitter:card", content: "summary_large_image" } : null,
+    image ? { name: "twitter:image", content: image } : null,
+    { name: "twitter:title", content: title },
+    description ? { name: "twitter:description", content: description } : null,
+    date_modified ? { property: "article:modified_time", content: date_modified } : null,
+    keywords ? { name: "keywords", content: keywords } : null,
+
+  ].filter(Boolean);
+  // console.log("meta tags", meta);
+  return meta;
+}
 
 // export function DebugProps({ name, ...props }) {
 //   const propsArray = Object.entries(props).map(([key, value]) => ({ key, value }));

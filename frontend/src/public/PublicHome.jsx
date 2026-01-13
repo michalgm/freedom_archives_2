@@ -7,6 +7,7 @@ import Form from "src/components/form/Form";
 import Link from "src/components/Link";
 import { ItemStack } from "src/public/ItemCard";
 import { SearchInput } from "src/public/PublicSearch/SearchInput";
+import { setMetaTags } from "src/utils";
 
 export const WordCloud = ({ data, loading }) => {
   let contents = [];
@@ -82,6 +83,13 @@ export async function loader() {
     return acc;
   }, {});
   return { settings };
+}
+// eslint-disable-next-line react-refresh/only-export-components
+export function meta(data) {
+  const description = data?.data?.settings?.introText
+  const title = "Home";
+  const image = "/logo512.png";
+  return setMetaTags({ data, title, description, image });
 }
 
 const PublicHome = ({ loaderData: { settings } }) => {

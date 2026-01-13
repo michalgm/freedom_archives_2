@@ -1,6 +1,12 @@
 import { KnexService, transaction } from "@feathersjs/knex";
+import path from "path";
+import { fileURLToPath } from "url";
 
 import { setArchive } from "./common_hooks/index.js";
+import { generateAndSaveSitemap } from "./sitemap.js";
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 const LIVE_SNAPSHOT_TITLE = "Public Data";
 class Snapshots extends KnexService {
@@ -335,6 +341,12 @@ const analyzeSnapshot = async ({ service }) => {
   await service.getModel().raw(`VACUUM ANALYZE ${Object.keys(public_tables).join(', ')}`);
 };
 
+const writeSitemap = async (context) => {
+  const publicPath = path.resolve(__dirname, "..", context.app.get("public"));
+  await generateAndSaveSitemap(context.app, { publicPath });
+  return context;
+};
+
 export default (function (app) {
   const options = {
     id: "snapshot_id",
@@ -365,8 +377,9 @@ export default (function (app) {
         publishSite,
         cacheConfig,
         transaction.end(),
-        analyzeSnapshot],
-      patch: [transaction.end(), analyzeSnapshot],
+        analyzeSnapshot,
+        writeSitemap],
+      patch: [transaction.end(), analyzeSnapshot, writeSitemap],
     },
     error: {
       create: [transaction.rollback()],

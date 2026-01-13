@@ -20,6 +20,7 @@ import Show from "src/components/Show";
 import Thumbnail from "src/components/Thumbnail";
 import { ItemStack } from "src/public/ItemCard";
 import { Search } from "src/public/PublicSearch/PublicSearch";
+import { setMetaTags } from "src/utils";
 
 const scrollToSection = (id) => {
   const element = document.getElementById(id);
@@ -56,6 +57,15 @@ export function loader({ params }) {
   return fetchCollection({ params });
 }
 
+// eslint-disable-next-line react-refresh/only-export-components
+export function meta(data) {
+  if (!data?.data?.collection) {
+    return [{ name: "robots", content: "noindex" }];
+  }
+  const { title, summary, description, thumbnail, date_modified, keywords } = data.data.collection;
+
+  return setMetaTags({ data, title, description: summary || description, date_modified, image: thumbnail, keywords });
+}
 export const DetailsRow = ({ label, value, keyProp = 'list_item_id', valueProp = 'item' }) => {
   if (!value || !value.length) return null;
 

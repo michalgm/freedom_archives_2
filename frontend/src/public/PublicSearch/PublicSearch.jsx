@@ -9,9 +9,17 @@ import {
 import PlayerModal from "src/public/PublicSearch/PlayerModal";
 import { SearchFilters, SearchForm } from "src/public/PublicSearch/SearchForm";
 import { usePublicSearch } from "src/public/PublicSearch/usePublicSearch";
+import { setMetaTags } from "src/utils";
 
 const DEFAULT_SEARCH_FILTERS = {};
 
+// eslint-disable-next-line react-refresh/only-export-components
+export function meta(data) {
+  const description = 'Search the Freedom Archives';
+  const title = "Search";
+  const image = "/logo512.png";
+  return setMetaTags({ data, title, description, image });
+}
 export function Search(params) {
   const {
     searchFilters = DEFAULT_SEARCH_FILTERS,

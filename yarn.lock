@@ -4501,6 +4501,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@types/node@npm:^24.9.2":
+  version: 24.10.8
+  resolution: "@types/node@npm:24.10.8"
+  dependencies:
+    undici-types: "npm:~7.16.0"
+  checksum: 10c0/aed2ac8c4a87be5c710f65ccfc57a272829dd00d0f6a687375323b348c55c92a6e7ff3b9d3ec596b1cc09ba2d080ce71b2ec9a67c14d12e04b02b67b14e81a74
+  languageName: node
+  linkType: hard
+
 "@types/parse-json@npm:^4.0.0":
   version: 4.0.2
   resolution: "@types/parse-json@npm:4.0.2"
@@ -4578,6 +4587,15 @@ __metadata:
   version: 1.20.6
   resolution: "@types/resolve@npm:1.20.6"
   checksum: 10c0/a9b0549d816ff2c353077365d865a33655a141d066d0f5a3ba6fd4b28bc2f4188a510079f7c1f715b3e7af505a27374adce2a5140a3ece2a059aab3d6e1a4244
+  languageName: node
+  linkType: hard
+
+"@types/sax@npm:^1.2.1":
+  version: 1.2.7
+  resolution: "@types/sax@npm:1.2.7"
+  dependencies:
+    "@types/node": "npm:*"
+  checksum: 10c0/d077a761a0753b079bf8279b3993948030ca86ed9125437b9b29c1de40db9b2deb7fddc369f014b58861d450e8b8cc75f163aa29dc8cea81952efbfd859168cf
   languageName: node
   linkType: hard
 
@@ -5245,7 +5263,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"arg@npm:^5.0.1":
+"arg@npm:^5.0.0, arg@npm:^5.0.1":
   version: 5.0.2
   resolution: "arg@npm:5.0.2"
   checksum: 10c0/ccaf86f4e05d342af6666c569f844bec426595c567d32a8289715087825c2ca7edd8a3d204e4d2fb2aa4602e09a57d0c13ea8c9eea75aac3dbb4af5514e6800e
@@ -8070,6 +8088,7 @@ __metadata:
     serve-favicon: "npm:^2.5.1"
     sharp: "npm:0.34.2"
     sinon: "npm:^19.0.5"
+    sitemap: "npm:^9.0.0"
     string-strip-html: "npm:^13.5.0"
     typescript: "npm:^5.9.3"
     typescript-eslint: "npm:^8.53.0"
@@ -12317,6 +12336,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"sax@npm:^1.4.1":
+  version: 1.4.4
+  resolution: "sax@npm:1.4.4"
+  checksum: 10c0/acb642f2de02ad6ae157cbf91fb026acea80cdf92e88c0aec2aa350c7db3479f62a7365c34a58e3b70a72ce11fa856a02c38cfd27f49e83c18c9c7e1d52aee55
+  languageName: node
+  linkType: hard
+
 "scheduler@npm:^0.26.0":
   version: 0.26.0
   resolution: "scheduler@npm:0.26.0"
@@ -12710,6 +12736,20 @@ __metadata:
   version: 1.0.5
   resolution: "sisteransi@npm:1.0.5"
   checksum: 10c0/230ac975cca485b7f6fe2b96a711aa62a6a26ead3e6fb8ba17c5a00d61b8bed0d7adc21f5626b70d7c33c62ff4e63933017a6462942c719d1980bb0b1207ad46
+  languageName: node
+  linkType: hard
+
+"sitemap@npm:^9.0.0":
+  version: 9.0.0
+  resolution: "sitemap@npm:9.0.0"
+  dependencies:
+    "@types/node": "npm:^24.9.2"
+    "@types/sax": "npm:^1.2.1"
+    arg: "npm:^5.0.0"
+    sax: "npm:^1.4.1"
+  bin:
+    sitemap: dist/esm/cli.js
+  checksum: 10c0/970c51f88185268676aa2e242de0155fa0a3fd915e56987fdbe51f44bf8d5246f2c4b05cf290e57ab5505820e081ce471e1a5a38572944f724ace705c61bf675
   languageName: node
   linkType: hard
 
@@ -13584,6 +13624,13 @@ __metadata:
   version: 7.13.0
   resolution: "undici-types@npm:7.13.0"
   checksum: 10c0/44bbb0935425291351bfd8039571f017295b5d6dc5727045d0a4fea8c6ffe73a6703b48ce010f9cb539b9041a75b463f8cfe1e7309cab7486452505fb0d66151
+  languageName: node
+  linkType: hard
+
+"undici-types@npm:~7.16.0":
+  version: 7.16.0
+  resolution: "undici-types@npm:7.16.0"
+  checksum: 10c0/3033e2f2b5c9f1504bdc5934646cb54e37ecaca0f9249c983f7b1fc2e87c6d18399ebb05dc7fd5419e02b2e915f734d872a65da2e3eeed1813951c427d33cc9a
   languageName: node
   linkType: hard
 

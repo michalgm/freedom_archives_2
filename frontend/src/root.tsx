@@ -32,6 +32,12 @@ declare module '@mui/material/LinearProgress' {
   }
 }
 
+// eslint-disable-next-line react-refresh/only-export-components
+export function loader({ request }) {
+  const url = new URL(request.url);
+  return { baseUrl: `${url.protocol}//${url.host}` };
+}
+
 export function Layout({ children }: { children: ReactNode }) {
   return (
     <html lang="en">
@@ -40,12 +46,7 @@ export function Layout({ children }: { children: ReactNode }) {
         <link rel="icon" href="/favicon.ico" />
         <meta name="viewport" content="minimum-scale=1, initial-scale=1, width=device-width, shrink-to-fit=no" />
         <meta name="theme-color" content="#000000" />
-        <meta
-          name="description"
-          content="The Freedom Archives contains over 10,000 hours of audio and video tapes. These recordings date from the late-60s to the mid-90s and chronicle the progressive history of the Bay Area, the United States, and international solidarity movements."
-        />
         <meta name="emotion-insertion-point" content="" />
-        {/* Roboto font - MUI default */}
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" />
         <link
@@ -59,7 +60,6 @@ export function Layout({ children }: { children: ReactNode }) {
         />
         <Meta />
         <Links />
-        <title>Freedom Archives Search</title>
       </head>
       <body>
         <noscript>You need to enable JavaScript to run this app.</noscript>

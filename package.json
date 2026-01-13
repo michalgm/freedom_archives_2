@@ -75,6 +75,7 @@
     "pg-tsquery": "^8.4.2",
     "serve-favicon": "^2.5.1",
     "sharp": "0.34.2",
+    "sitemap": "^9.0.0",
     "string-strip-html": "^13.5.0",
     "typescript": "^5.9.3",
     "winston": "^3.19.0",
