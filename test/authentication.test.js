@@ -1,21 +1,21 @@
-import assert from "assert";
 import sinon from 'sinon';
+import { describe, it, beforeAll, afterAll, beforeEach, expect, assert } from 'vitest';
 
 import app from "../backend/app.js";
 
 let sandbox;
 
 describe("authentication", () => {
-  before(async () => {
+  beforeAll(async () => {
     sandbox = sinon.createSandbox();
   });
 
-  after(() => {
+  afterAll(() => {
     sandbox.restore();
   });
 
   it("registered the authentication service", () => {
-    assert.ok(app.service("api/authentication"));
+    expect(app.service("api/authentication")).toBeDefined();
   });
 
   describe("local strategy", () => {

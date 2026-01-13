@@ -15,6 +15,13 @@
     //   "@mui/icons-material/*": ["../node_modules/@mui/icons-material/esm/*"]
     // }
   },
-  "include": ["src/**/*", "vite-env.d.ts", "vite.config.ts", "react-router.config.ts", ".storybook/**/*"],
+  "include": [
+    "src/**/*",
+    "vite-env.d.ts",
+    "vite.config.ts",
+    "react-router.config.ts",
+    ".storybook/**/*",
+    "../backend/schema/schemaUtils.js"
+  ],
   "exclude": ["node_modules", "dist", "build", "coverage", "storybook-static", "public", ".react-router"]
 }

@@ -39,6 +39,7 @@ const eslintConfig = [
       '@stylistic': stylistic,
     },
     rules: {
+      'no-console': ['warn', { allow: ['warn', 'error'] }],
       "indent": ["error", 2, { "SwitchCase": 1 }],
       '@stylistic/quotes': 'off',
       '@stylistic/semi': 'off',

@@ -48,7 +48,7 @@ const Field = ({
   serviceName,
   ...props
 }) => {
-  const { _service } = useFormManagerContext();
+  const { service: _service } = useFormManagerContext();
 
   const service = _service || serviceName;
   const context = useFormContext();

@@ -203,7 +203,6 @@ function MediaItem({ media, index, actions }) {
             ro={!edit}
             type="number"
             inputProps={{ min: 0, style: { width: 40 } }}
-            label=" "
             name={`media.${index}.no_copies`}
           />
         </TableCell>
@@ -282,7 +281,6 @@ export function Media({ record }) {
 }
 
 function Relationships({ id, relationships }) {
-  console.log("Relationships RENDER", relationships);
   return (
     <Table size="small">
       <TableHead>

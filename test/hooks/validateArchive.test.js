@@ -1,4 +1,5 @@
-import assert from "assert";
+import { describe, it, beforeEach, afterEach } from 'vitest';
+import { expect } from 'vitest';
 import sinon from "sinon";
 
 import { validateArchive } from "../../backend/services/common_hooks/index.js";
@@ -26,7 +27,7 @@ describe("validateArchive hook", () => {
     };
 
     const result = validateArchive(context);
-    assert.strictEqual(result, undefined);
+    expect(result).toBeUndefined();
   });
 
   it("should do nothing when archive_ids match", () => {
@@ -40,7 +41,7 @@ describe("validateArchive hook", () => {
     };
 
     const result = validateArchive(context);
-    assert.strictEqual(result, undefined);
+    expect(result).toBeUndefined();
   });
 
   it("should throw error when query archive_id does not match user archive_id", () => {
@@ -53,9 +54,9 @@ describe("validateArchive hook", () => {
       method: "find",
     };
 
-    assert.throws(() => {
+    expect(() => {
       validateArchive(context);
-    }, /Archive mismatch/);
+    }).toThrow(/Archive mismatch/);
   });
 
   it("should throw error when data archive_id does not match user archive_id", () => {
@@ -68,9 +69,9 @@ describe("validateArchive hook", () => {
       method: "create",
     };
 
-    assert.throws(() => {
+    expect(() => {
       validateArchive(context);
-    }, /Archive mismatch/);
+    }).toThrow(/Archive mismatch/);
   });
 
   it("should handle missing query and data", () => {
@@ -82,6 +83,6 @@ describe("validateArchive hook", () => {
     };
 
     const result = validateArchive(context);
-    assert.strictEqual(result, undefined);
+    expect(result).toBeUndefined();
   });
 });
