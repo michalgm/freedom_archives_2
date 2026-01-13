@@ -195,6 +195,7 @@ CREATE TABLE IF NOT EXISTS _unified_records (
     continuations json[],
     fact_number text,
     collection_title text,
+    relationships jsonb,
     CONSTRAINT _unified_records_pkey PRIMARY KEY (record_id)
 );
 
@@ -370,22 +371,6 @@ CREATE INDEX IF NOT EXISTS list_items_search_text_idx ON list_items (search_text
 --
 
 CREATE UNIQUE INDEX IF NOT EXISTS list_items_type_idx ON list_items (type, item, archive_id);
-
---
--- Name: related_records; Type: TABLE; Schema: -; Owner: -
---
-
-CREATE TABLE IF NOT EXISTS related_records (
-    id integer,
-    docid_1 integer,
-    docid_2 integer,
-    title_1 text,
-    description_1 text,
-    track_number_1 integer,
-    title_2 text,
-    description_2 text,
-    track_number_2 integer
-);
 
 --
 -- Name: settings; Type: TABLE; Schema: -; Owner: -
@@ -1254,6 +1239,30 @@ CREATE OR REPLACE VIEW unified_collections AS
            FROM ancestors_cte) ancestors ON true;
 
 --
+-- Name: related_records; Type: TABLE; Schema: -; Owner: -
+--
+
+CREATE TABLE IF NOT EXISTS related_records (
+    id integer,
+    docid_1 integer,
+    docid_2 integer,
+    title_1 text,
+    description_1 text,
+    track_number_1 integer,
+    title_2 text,
+    description_2 text,
+    track_number_2 integer,
+    record_id_1 integer,
+    record_id_2 integer,
+    CONSTRAINT related_records_record_id_1_fkey FOREIGN KEY (record_id_1) REFERENCES freedom_archives.records (record_id) ON DELETE CASCADE,
+    CONSTRAINT related_records_record_id_2_fkey FOREIGN KEY (record_id_2) REFERENCES freedom_archives.records (record_id) ON DELETE CASCADE,
+    CONSTRAINT related_records_pkey PRIMARY KEY (id)
+
+);
+
+CREATE INDEX IF NOT EXISTS related_records_record_id_1_idx ON related_records (record_id_1);
+CREATE INDEX IF NOT EXISTS related_records_record_id_2_idx ON related_records (record_id_2);
+--
 -- Name: unified_records; Type: VIEW; Schema: -; Owner: -
 --
 
@@ -1353,7 +1362,8 @@ CREATE OR REPLACE VIEW unified_records AS
     parent.parent,
     continuations.continuations,
     a.fact_number,
-    b.collection->>'title' AS collection_title
+    b.collection->>'title' AS collection_title,
+    relationships.relationships AS relationships
    FROM records a
      JOIN record_summaries b USING (record_id)
      LEFT JOIN list_items program_lookup ON a.program_id = program_lookup.list_item_id
@@ -1367,6 +1377,11 @@ CREATE OR REPLACE VIEW unified_records AS
      LEFT JOIN records_list_items_view producers ON producers.type = 'producer'::text AND producers.record_id = a.record_id
      LEFT JOIN records_list_items_view publishers ON publishers.type = 'publisher'::text AND publishers.record_id = a.record_id
      LEFT JOIN record_summaries parent_record ON a.parent_record_id = parent_record.record_id
+    LEFT JOIN LATERAL (
+      SELECT jsonb_agg(to_jsonb(rr.*)) AS relationships
+      FROM related_records rr
+      WHERE rr.record_id_1 = a.record_id OR (rr.record_id_2 = a.record_id AND rr.record_id_1 <> a.record_id)
+    ) relationships ON true
      LEFT JOIN LATERAL ( SELECT array_agg(row_to_json(record_summaries.*) ORDER BY record_summaries.title) AS children
            FROM record_summaries
           WHERE record_summaries.parent_record_id = a.record_id) children ON true
