@@ -80,20 +80,6 @@ export const checkUnique = async (service, query) => {
   return res.total !== 0;
 };
 
-export const getOrdinal = (n) => {
-  let ord = "th";
-
-  if (n % 10 == 1 && n % 100 != 11) {
-    ord = "st";
-  } else if (n % 10 == 2 && n % 100 != 12) {
-    ord = "nd";
-  } else if (n % 10 == 3 && n % 100 != 13) {
-    ord = "rd";
-  }
-
-  return `${n}${ord}`;
-};
-
 export const diffShallow = (obj1, obj2) => {
   return pickBy(obj1, (val, key) => Object.prototype.hasOwnProperty.call(obj2, key) && !isEqual(val, obj2[key]));
 };

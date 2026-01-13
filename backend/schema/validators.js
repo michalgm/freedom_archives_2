@@ -1,6 +1,6 @@
 import { BadRequest } from "@feathersjs/errors";
 
-import zodSchemas from "./services/zod_schema.js";
+import zodSchemas from "./zod_schema.js";
 
 // Create a Zod validator adapter for Feathers
 const createZodValidator = (schema) => {
@@ -32,8 +32,9 @@ export const validateWithZod = (validator) => {
       const { error, value } = validator(data);
 
       if (error) {
-        // Format Zod errors for client consumption
-        const formattedErrors = error.errors.map((err) => ({
+        // Format Zod v4 errors for client consumption - use .issues property
+        const errors = error.issues || error.errors || [];
+        const formattedErrors = errors.map((err) => ({
           path: err.path.join("."),
           message: err.message,
         }));

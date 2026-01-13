@@ -4,7 +4,7 @@ const z = zod;
 
 const callNumberSuffixSchema = z.union([
   z.string().regex(/^[\d.]{1,5}([A-Z]| +R[\d])?$/, {
-    message: "Call number suffix must be in format '123' or '123A' or '123 R1'",
+    error: "Call number suffix must be in format '123' or '123A' or '123 R1'",
   }),
   z.literal(""),
   z.null(),
@@ -39,8 +39,8 @@ const usersSchema = z.object({
   username: z.string(),
   password: z
     .string()
-    .min(8, { message: "Password must be at least 8 characters" })
-    .regex(/[^A-Za-z0-9]/, { message: "Password must contain at least one special character" })
+    .min(8, { error: "Password must be at least 8 characters" })
+    .regex(/[^A-Za-z0-9]/, { error: "Password must contain at least one special character" })
     .nullable()
     .optional(),
   firstname: z.string().nullable().optional(),
@@ -57,7 +57,7 @@ const usersSchema = z.object({
 //         ctx.addIssue({
 //           path: ["password"],
 //           code: z.ZodIssueCode.too_small,
-//           message: "Password must be at least 8 characters",
+//           error: "Password must be at least 8 characters",
 //           minimum: 8,
 //           type: "string",
 //           inclusive: true,
@@ -68,7 +68,7 @@ const usersSchema = z.object({
 //         ctx.addIssue({
 //           path: ["password"],
 //           code: z.ZodIssueCode.custom,
-//           message: "Password cannot be the same as username",
+//           error: "Password cannot be the same as username",
 //         });
 //       }
 
@@ -76,7 +76,7 @@ const usersSchema = z.object({
 //         ctx.addIssue({
 //           path: ["password"],
 //           code: z.ZodIssueCode.custom,
-//           message: "Password must contain at least one special character",
+//           error: "Password must contain at least one special character",
 //         });
 //       }
 //     }
@@ -84,8 +84,8 @@ const usersSchema = z.object({
 // );
 
 const common_modification_fields = {
-  date_created: z.string().datetime().nullable().optional(),
-  date_modified: z.string().datetime().nullable().optional(),
+  date_created: z.iso.datetime().nullable().optional(),
+  date_modified: z.iso.datetime().nullable().optional(),
   contributor_user_id: z.number().nullable().optional(),
   contributor_username: z.string().nullable().optional(),
   contributor_name: z.string().nullable().optional(),
@@ -102,10 +102,14 @@ const mediaSchema = z.object({
   call_number_id: z.number().nullable().optional(),
   call_number_suffix: callNumberSuffixSchema,
   format_id: z.number().nullable().optional(),
-  no_copies: z.number().min(1).nullable().optional().describe("Copies Count"),
+  no_copies: z.number().min(1).nullable().optional().default(1).describe("Copies Count"),
   quality_id: z.number().nullable().optional(),
   generation_id: z.number().nullable().optional(),
-  url: z.union([z.string().url({ message: "Must be a valid URL" }), z.literal(""), z.null()]).nullable().optional(),
+  url: z.union([z.url({
+    protocol: /^https?$/,
+    hostname: z.regexes.domain,
+    error: "Must be a valid URL",
+  }), z.literal(""), z.null()]).nullable().optional(),
   // url: z.string().url().nullable(),
   thumbnail: z.string().nullable().optional(),
   media_type: z.enum(["Audio", "Webpage", "Image", "Video", "PDF"]),
@@ -137,7 +141,7 @@ const recordsSchema = z.object({
   needs_review: z.boolean().default(false),
   is_hidden: z.boolean().default(false),
   fact_number: z.string()
-    .regex(/^FACT_[0-9]{4,6}_[A-Z0-9_]+$/, { message: "Fact number must be in format 'FACT_XXXX_XXXX'" })
+    .regex(/^FACT_[0-9]{4,6}_[A-Z0-9_]+$/, { error: "Fact number must be in format 'FACT_XXXX_XXXX'" })
     .nullable()
     .optional(),
   date_string: z
@@ -151,8 +155,8 @@ const recordsSchema = z.object({
       const parts = val.split('/');
       if (parts.length !== 3) {
         ctx.addIssue({
-          code: z.ZodIssueCode.custom,
-          message: "Date must be in MM/DD/YYYY format",
+          code: "custom",
+          error: "Date must be in MM/DD/YYYY format",
         });
         return;
       }
@@ -162,31 +166,31 @@ const recordsSchema = z.object({
       // Validate month
       if (month !== 0 && (month < 1 || month > 12)) {
         ctx.addIssue({
-          code: z.ZodIssueCode.custom,
-          message: "Month must be 00 (unknown) or 01-12",
+          code: "custom",
+          error: "Month must be 00 (unknown) or 01-12",
         });
       }
 
       // Validate day
       if (day !== 0 && (day < 1 || day > 31)) {
         ctx.addIssue({
-          code: z.ZodIssueCode.custom,
-          message: "Day must be 00 (unknown) or 01-31",
+          code: "custom",
+          error: "Day must be 00 (unknown) or 01-31",
         });
       }
 
       // Validate year
       if (year != 0 && (year < 1920 || year > 2100)) {
         ctx.addIssue({
-          code: z.ZodIssueCode.custom,
-          message: "Year must be between 1920 and 2100",
+          code: "custom",
+          error: "Year must be between 1920 and 2100",
         });
       }
     })
     .describe("Date"),
   year_is_circa: z.boolean().default(false).describe("Approximate Date"),
   program: list_itemsSchema.nullable().optional(),
-  media: z.array(mediaSchema).describe('Media').min(1).default([]),
+  media: z.array(mediaSchema).describe('Media').min(1),
   has_digital: z.boolean().default(false),
   authors: z.array(list_itemsSchema).nullable().optional(),
   subjects: z.array(list_itemsSchema).nullable().optional(),
@@ -221,7 +225,7 @@ const recordsSchema = z.object({
 //     if (primaryCount !== 1) {
 //       ctx.addIssue({
 //         code: z.ZodIssueCode.custom,
-//         message: `Exactly one media must be marked as primary`,
+//         error: `Exactly one media must be marked as primary`,
 //         path: ["media"],
 //       });
 //     }
@@ -247,7 +251,7 @@ const mediaDataSchema = mediaSchema.pick({
 }).refine((data) => {
   return !data.call_number_item || data.call_number_suffix;
 }, {
-  message: "Required if call number class is provided",
+  error: "Required if call number class is provided",
   path: ["call_number_suffix"],
 });
 
@@ -281,7 +285,8 @@ const recordsDataSchema = recordsSchema
       .optional(),
     continuations: z.array(recordItemSchema).nullable().optional(),
     collection: z.lazy(() => collectionItemSchema),
-    media: z.array(mediaDataSchema).describe('Media').min(1, { message: "At least one media item is required" }),
+    media: z.array(mediaDataSchema).describe('Media').min(1, { error: "At least one media item is required" }),
+    // .default([mediaDataSchema.parse({})]),
   });
 
 const embeddedRecordSchema = recordsSchema
@@ -364,6 +369,9 @@ const collectionsDataSchema = collectionsSchema
     children: z.array(embeddedCollectionItemSchema).nullable().optional().describe('Child Collections'),
     featured_records: z.array(embeddedRecordItemSchema).nullable().optional(),
   });
+
+// console.log('SCHEMA!', getDefaults(recordsDataSchema));
+// console.log('SCHEMA!', mediaDataSchema.safeParse({}));
 
 export default {
   archivesSchema,

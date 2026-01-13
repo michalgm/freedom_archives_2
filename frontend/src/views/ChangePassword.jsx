@@ -72,8 +72,8 @@ function ChangePassword({ open, user: { user_id, username }, handleClose }) {
         return true;
       },
       {
-        message: "Password cannot be the same as username",
         path: ["password1"],
+        message: "Password cannot be the same as username",
       },
     )
     .refine(
@@ -84,8 +84,8 @@ function ChangePassword({ open, user: { user_id, username }, handleClose }) {
         return true;
       },
       {
-        message: "Passwords do not match",
         path: ["password2"],
+        message: "Passwords do not match",
       },
     );
 
