@@ -8,7 +8,7 @@ else
   ENV=development
 fi
 
-if [ "$ENV" == "p" ] || [ "$ENV" == "prod" ]; then
+if [ "$ENV" == "p" ] || [ "$ENV" == "prod" ] || [ "$ENV" == "sync" ]; then
   ENV="production"
 fi
 
