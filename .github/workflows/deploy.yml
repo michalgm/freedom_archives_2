@@ -2,12 +2,14 @@ name: Deploy Production
 
 on:
   push:
-    tags:
-      - 'v*'  # Triggers on tags like v1.0, v20.15.10
+    branches: ['main']  # Build on every push to main
+    tags: ['v*']        # Build AND Deploy on tags
+
   workflow_dispatch:
 
 jobs:
-  deploy:
+  build:
+    name: Build & Package
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Code
@@ -18,10 +20,13 @@ jobs:
         with:
           node-version: '20'
           cache: 'yarn'
-          cache-dependency-path: '**/yarn.lock'
+          # Cache settings for Yarn Berry
+          cache-dependency-path: 'yarn.lock'
 
-      - name: Install Frontend Dependencies
-        working-directory: ./frontend
+      - name: Enable Corepack
+        run: corepack enable
+
+      - name: Install Dependencies
         run: yarn install
 
       - name: Build Frontend
@@ -40,67 +45,107 @@ jobs:
           cp -r frontend/build package_dist/frontend/build
           cp frontend/package.json package_dist/frontend/
 
-          # Clean package.json
-          cat package_dist/package.json | jq 'del(.workspaces)' > package_dist/package_clean.json
+          # Clean package.json (remove workspaces)
+          # Use tmp file to handle jq redirection safely
+          jq 'del(.workspaces)' package_dist/package.json > package_dist/package_clean.json
           mv package_dist/package_clean.json package_dist/package.json
           
-          # Tarball
+          # Create tarball
           tar -czf release.tar.gz -C package_dist .
 
-      # - name: Copy to Server
-      #   uses: appleboy/scp-action@master
-      #   with:
-      #     host: ${{ secrets.SSH_HOST }}
-      #     username: ${{ secrets.SSH_VARIABLE }}
-      #     key: ${{ secrets.SSH_KEY }}
-      #     source: "release.tar.gz"
-      #     target: "~/release.tar.gz"
+      - name: Upload Build Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: release-package
+          path: release.tar.gz
+          retention-days: 1
 
-      # - name: Execute Remote Deployment
-      #   uses: appleboy/ssh-action@master
-      #   with:
-      #     host: ${{ secrets.SSH_HOST }}
-      #     username: ${{ secrets.SSH_USER }}
-      #     key: ${{ secrets.SSH_KEY }}
-      #     script: |
-      #         set -e
-      #         # Config
-      #         DEPLOY_BASE="deployments"
-      #         TIMESTAMP=$(date +%Y%m%d%H%M%S)
-      #         REMOTE_DEST="$DEPLOY_BASE/$TIMESTAMP"
-      #         LINK_NAME="work/freedom_archives_2"
+  deploy:
+    name: Deploy to Server
+    needs: build
+    if: startsWith(github.ref, 'refs/tags/v') # Only run if it's a tag
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download Build Artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: release-package
+          path: .
+
+      - name: Copy to Server
+        uses: appleboy/scp-action@master
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USER }}
+          key: ${{ secrets.SSH_KEY }}
+          source: "release.tar.gz"
+          target: "~/release.tar.gz"
+
+      - name: Execute Remote Deployment
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USER }}
+          key: ${{ secrets.SSH_KEY }}
+          script: |
+              set -e
               
-      #         echo "🚀 Creating release directory: ~/$REMOTE_DEST"
-      #         mkdir -p "$REMOTE_DEST"
+              # Configuration
+              DEPLOY_BASE="deployments"
+              TIMESTAMP=$(date +%Y%m%d%H%M%S)
+              REMOTE_DEST="$DEPLOY_BASE/$TIMESTAMP"
+              LINK_NAME="work/freedom_archives_2"
+              
+              echo "🚀 Creating release directory: ~/$REMOTE_DEST"
+              mkdir -p "$REMOTE_DEST"
 
-      #         echo "📦 Extracting release..."
-      #         tar -xzf ~/release.tar.gz -C "$REMOTE_DEST"
-      #         rm ~/release.tar.gz
+              echo "📦 Extracting release..."
+              tar -xzf ~/release.tar.gz -C "$REMOTE_DEST"
+              rm ~/release.tar.gz
 
-      #         echo "🔗 Copying configs..."
-      #         cp -a "$LINK_NAME/config/*" "$REMOTE_DEST/config/" || true
-      #         cp -a "$LINK_NAME/.env*" "$REMOTE_DEST/" || true
+              echo "🔗 Copying configs (Production & Local)..."
+              # Ideally, use proper secrets management, but copying previous config is the current strategy
+              if [ -d "$LINK_NAME/config" ]; then
+                  cp "$LINK_NAME/config/production.json" "$REMOTE_DEST/config/" || echo "⚠️ production.json not found"
+                  cp "$LINK_NAME/config/local.json" "$REMOTE_DEST/config/" || echo "⚠️ local.json not found"
+              fi
+              
+              if [ -f "$LINK_NAME/.env" ]; then
+                  cp "$LINK_NAME/.env" "$REMOTE_DEST/.env" || echo "⚠️ .env not found"
+              fi
 
-      #         echo "🖼️  Linking Thumbnails..."
-      #         RESOURCE_DIR="$HOME/shared_resources"
-      #         mkdir -p "$RESOURCE_DIR/thumbnails"
-      #         # Ensure target dir exists
-      #         mkdir -p "$REMOTE_DEST/public/img"
-      #         rm -rf "$REMOTE_DEST/public/img/thumbnails"
-      #         ln -sfn "$RESOURCE_DIR/thumbnails" "$REMOTE_DEST/public/img/thumbnails"
+              echo "🖼️  Linking persistent thumbnails..."
+              RESOURCE_DIR="$HOME/shared_resources"
+              mkdir -p "$RESOURCE_DIR/thumbnails"
+              
+              # Sync existing if first time (safety check)
+              if [ -d "$LINK_NAME/public/img/thumbnails" ] && [ ! -L "$LINK_NAME/public/img/thumbnails" ]; then
+                   echo "  Syncing existing thumbnails (first run migration)..."
+                   rsync -a "$LINK_NAME/public/img/thumbnails/" "$RESOURCE_DIR/thumbnails/"
+              fi
 
-      #         echo "📦 Installing backend..."
-      #         cd "$REMOTE_DEST"
-      #         # Assuming activate.sh is needed, modify path as needed
-      #         # source ../../activate.sh 
-      #         yarn install --production
+              mkdir -p "$REMOTE_DEST/public/img"
+              rm -rf "$REMOTE_DEST/public/img/thumbnails"
+              ln -sfn "$RESOURCE_DIR/thumbnails" "$REMOTE_DEST/public/img/thumbnails"
 
-      #         echo "🔄 Migrating..."
-      #         NODE_ENV=production yarn run migrate
+              echo "📦 Installing backend dependencies..."
+              cd "$REMOTE_DEST"
+              # Source NVM or similar if needed for remote env. 
+              # Assuming 'yarn' is in path or activate.sh setup is correct on server.
+              # source ~/.bashrc || true 
+              
+              yarn install --production
 
-      #         echo "🔗 Enabling..."
-      #         cd ~
-      #         ln -sfn "$HOME/$REMOTE_DEST" "$LINK_NAME"
+              echo "🔄 Running Migrations..."
+              # Ensure NODE_ENV is explicitly set
+              NODE_ENV=production yarn run migrate
 
-      #         echo "🔄 Restarting..."
-      #         /usr/sbin/cloudlinux-selector restart --interpreter nodejs --app-root "$LINK_NAME" --json
+              echo "🔗 Switching Live Link..."
+              cd ~
+              ln -sfn "$HOME/$REMOTE_DEST" "$LINK_NAME"
+
+              echo "🔄 Restarting Node Service..."
+              # CloudLinux Node.js restart command
+              /usr/sbin/cloudlinux-selector restart --interpreter nodejs --app-root "$LINK_NAME" --json
+
+              echo "✅ Deployment Success!"
