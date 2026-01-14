@@ -19,6 +19,9 @@ export default defineConfig(({ mode }) => ({
   },
   build: {
     sourcemap: mode === "development",
+    rollupOptions: {
+      maxParallelFileOps: 2,
+    }
   },
   plugins: [
     // react(),
