@@ -14,6 +14,9 @@ jobs:
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
+  
+      - name: Enable Corepack
+        run: corepack enable
 
       - name: Setup Node.js
         uses: actions/setup-node@v6
@@ -22,9 +25,6 @@ jobs:
           cache: 'yarn'
           # Cache settings for Yarn Berry
           cache-dependency-path: 'yarn.lock'
-
-      - name: Enable Corepack
-        run: corepack enable
 
       - name: Install Dependencies
         run: yarn install
