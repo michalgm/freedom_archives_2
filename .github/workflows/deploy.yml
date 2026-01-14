@@ -1,0 +1,106 @@
+name: Deploy Production
+
+on:
+  push:
+    tags:
+      - 'v*'  # Triggers on tags like v1.0, v20.15.10
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'yarn'
+          cache-dependency-path: '**/yarn.lock'
+
+      - name: Install Frontend Dependencies
+        working-directory: ./frontend
+        run: yarn install
+
+      - name: Build Frontend
+        working-directory: ./frontend
+        run: yarn run build
+
+      - name: Prepare Release Package
+        run: |
+          mkdir -p package_dist
+          
+          # Copy backend files (excluding large/ignored folders)
+          rsync -av --exclude '.git' --exclude 'node_modules' --exclude 'frontend' --exclude 'logs' --exclude 'db_backup' . package_dist/
+          
+          # Add frontend build
+          mkdir -p package_dist/frontend
+          cp -r frontend/build package_dist/frontend/build
+          cp frontend/package.json package_dist/frontend/
+
+          # Clean package.json
+          cat package_dist/package.json | jq 'del(.workspaces)' > package_dist/package_clean.json
+          mv package_dist/package_clean.json package_dist/package.json
+          
+          # Tarball
+          tar -czf release.tar.gz -C package_dist .
+
+      # - name: Copy to Server
+      #   uses: appleboy/scp-action@master
+      #   with:
+      #     host: ${{ secrets.SSH_HOST }}
+      #     username: ${{ secrets.SSH_VARIABLE }}
+      #     key: ${{ secrets.SSH_KEY }}
+      #     source: "release.tar.gz"
+      #     target: "~/release.tar.gz"
+
+      # - name: Execute Remote Deployment
+      #   uses: appleboy/ssh-action@master
+      #   with:
+      #     host: ${{ secrets.SSH_HOST }}
+      #     username: ${{ secrets.SSH_USER }}
+      #     key: ${{ secrets.SSH_KEY }}
+      #     script: |
+      #         set -e
+      #         # Config
+      #         DEPLOY_BASE="deployments"
+      #         TIMESTAMP=$(date +%Y%m%d%H%M%S)
+      #         REMOTE_DEST="$DEPLOY_BASE/$TIMESTAMP"
+      #         LINK_NAME="work/freedom_archives_2"
+              
+      #         echo "🚀 Creating release directory: ~/$REMOTE_DEST"
+      #         mkdir -p "$REMOTE_DEST"
+
+      #         echo "📦 Extracting release..."
+      #         tar -xzf ~/release.tar.gz -C "$REMOTE_DEST"
+      #         rm ~/release.tar.gz
+
+      #         echo "🔗 Copying configs..."
+      #         cp -a "$LINK_NAME/config/*" "$REMOTE_DEST/config/" || true
+      #         cp -a "$LINK_NAME/.env*" "$REMOTE_DEST/" || true
+
+      #         echo "🖼️  Linking Thumbnails..."
+      #         RESOURCE_DIR="$HOME/shared_resources"
+      #         mkdir -p "$RESOURCE_DIR/thumbnails"
+      #         # Ensure target dir exists
+      #         mkdir -p "$REMOTE_DEST/public/img"
+      #         rm -rf "$REMOTE_DEST/public/img/thumbnails"
+      #         ln -sfn "$RESOURCE_DIR/thumbnails" "$REMOTE_DEST/public/img/thumbnails"
+
+      #         echo "📦 Installing backend..."
+      #         cd "$REMOTE_DEST"
+      #         # Assuming activate.sh is needed, modify path as needed
+      #         # source ../../activate.sh 
+      #         yarn install --production
+
+      #         echo "🔄 Migrating..."
+      #         NODE_ENV=production yarn run migrate
+
+      #         echo "🔗 Enabling..."
+      #         cd ~
+      #         ln -sfn "$HOME/$REMOTE_DEST" "$LINK_NAME"
+
+      #         echo "🔄 Restarting..."
+      #         /usr/sbin/cloudlinux-selector restart --interpreter nodejs --app-root "$LINK_NAME" --json
