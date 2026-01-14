@@ -27,7 +27,7 @@ jobs:
           cache-dependency-path: 'yarn.lock'
 
       - name: Focus frontend workspace
-        run: yarn workspaces focus frontend --all
+        run: yarn workspaces focus frontend
 
       - name: Install Frontend Dependencies
         working-directory: ./frontend
