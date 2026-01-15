@@ -35,29 +35,20 @@ jobs:
 
       - name: Prepare Release Package
         run: |
+          # Package ONLY the frontend build
           mkdir -p package_dist
           
-          # Copy backend files (excluding large/ignored folders)
-          rsync -av --exclude '.git' --exclude 'node_modules' --exclude 'frontend' --exclude 'logs' --exclude 'db_backup' . package_dist/
+          # Copy the actual build output (dist directory from React Router)
+          cp -r frontend/dist package_dist/build
           
-          # Add frontend build
-          mkdir -p package_dist/frontend
-          cp -r frontend/build package_dist/frontend/build
-          cp frontend/package.json package_dist/frontend/
-
-          # Clean package.json (remove workspaces)
-          # Use tmp file to handle jq redirection safely
-          jq 'del(.workspaces)' package_dist/package.json > package_dist/package_clean.json
-          mv package_dist/package_clean.json package_dist/package.json
-          
-          # Create tarball
-          tar -czf release.tar.gz -C package_dist .
+          # Create tarball with just the frontend build
+          tar -czf frontend-build.tar.gz -C package_dist .
 
       - name: Upload Build Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: release-package
-          path: release.tar.gz
+          name: frontend-build
+          path: frontend-build.tar.gz
           retention-days: 1
 
   deploy:
@@ -69,7 +60,7 @@ jobs:
       - name: Download Build Artifact
         uses: actions/download-artifact@v4
         with:
-          name: release-package
+          name: frontend-build
           path: .
 
       - name: Copy to Server
@@ -78,8 +69,8 @@ jobs:
           host: ${{ secrets.SSH_HOST }}
           username: ${{ secrets.SSH_USER }}
           key: ${{ secrets.SSH_KEY }}
-          source: "release.tar.gz"
-          target: "~/release.tar.gz"
+          source: "frontend-build.tar.gz"
+          target: "~/frontend-build.tar.gz"
 
       - name: Execute Remote Deployment
         uses: appleboy/ssh-action@master
@@ -91,61 +82,44 @@ jobs:
               set -e
               
               # Configuration
-              DEPLOY_BASE="deployments"
-              TIMESTAMP=$(date +%Y%m%d%H%M%S)
-              REMOTE_DEST="$DEPLOY_BASE/$TIMESTAMP"
-              LINK_NAME="work/freedom_archives_2"
+              APP_DIR="work/freedom_archives_2"
+              FRONTEND_BUILD_DIR="$APP_DIR/frontend/build"
               
-              echo "🚀 Creating release directory: ~/$REMOTE_DEST"
-              mkdir -p "$REMOTE_DEST"
-
-              echo "📦 Extracting release..."
-              tar -xzf ~/release.tar.gz -C "$REMOTE_DEST"
-              rm ~/release.tar.gz
-
-              echo "🔗 Copying configs (Production & Local)..."
-              # Ideally, use proper secrets management, but copying previous config is the current strategy
-              if [ -d "$LINK_NAME/config" ]; then
-                  cp "$LINK_NAME/config/production.json" "$REMOTE_DEST/config/" || echo "⚠️ production.json not found"
-                  cp "$LINK_NAME/config/local.json" "$REMOTE_DEST/config/" || echo "⚠️ local.json not found"
-              fi
+              echo "🔄 Updating backend code from git..."
+              cd "$APP_DIR"
+              git pull origin main
               
-              if [ -f "$LINK_NAME/.env" ]; then
-                  cp "$LINK_NAME/.env" "$REMOTE_DEST/.env" || echo "⚠️ .env not found"
-              fi
+              echo "📦 Installing/updating backend dependencies..."
+              yarn install --production
+              
+              echo "🔄 Running Migrations..."
+              NODE_ENV=production yarn run migrate
+              
+              echo "📦 Extracting frontend build..."
+              cd ~
+              rm -rf "$FRONTEND_BUILD_DIR"
+              mkdir -p "$FRONTEND_BUILD_DIR"
+              tar -xzf ~/frontend-build.tar.gz -C "$FRONTEND_BUILD_DIR"
+              rm ~/frontend-build.tar.gz
 
-              echo "🖼️  Linking persistent thumbnails..."
+              echo "🖼️  Ensuring thumbnails directory exists..."
               RESOURCE_DIR="$HOME/shared_resources"
               mkdir -p "$RESOURCE_DIR/thumbnails"
               
-              # Sync existing if first time (safety check)
-              if [ -d "$LINK_NAME/public/img/thumbnails" ] && [ ! -L "$LINK_NAME/public/img/thumbnails" ]; then
-                   echo "  Syncing existing thumbnails (first run migration)..."
-                   rsync -a "$LINK_NAME/public/img/thumbnails/" "$RESOURCE_DIR/thumbnails/"
+              # Create symlink if it doesn't exist
+              if [ ! -L "$APP_DIR/public/img/thumbnails" ]; then
+                  echo "  Creating thumbnails symlink..."
+                  mkdir -p "$APP_DIR/public/img"
+                  # Backup any existing thumbnails first
+                  if [ -d "$APP_DIR/public/img/thumbnails" ]; then
+                      rsync -a "$APP_DIR/public/img/thumbnails/" "$RESOURCE_DIR/thumbnails/"
+                      rm -rf "$APP_DIR/public/img/thumbnails"
+                  fi
+                  ln -sfn "$RESOURCE_DIR/thumbnails" "$APP_DIR/public/img/thumbnails"
               fi
-
-              mkdir -p "$REMOTE_DEST/public/img"
-              rm -rf "$REMOTE_DEST/public/img/thumbnails"
-              ln -sfn "$RESOURCE_DIR/thumbnails" "$REMOTE_DEST/public/img/thumbnails"
-
-              echo "📦 Installing backend dependencies..."
-              cd "$REMOTE_DEST"
-              # Source NVM or similar if needed for remote env. 
-              # Assuming 'yarn' is in path or activate.sh setup is correct on server.
-              # source ~/.bashrc || true 
-              
-              yarn install --production
-
-              echo "🔄 Running Migrations..."
-              # Ensure NODE_ENV is explicitly set
-              NODE_ENV=production yarn run migrate
-
-              echo "🔗 Switching Live Link..."
-              cd ~
-              ln -sfn "$HOME/$REMOTE_DEST" "$LINK_NAME"
 
               echo "🔄 Restarting Node Service..."
               # CloudLinux Node.js restart command
-              /usr/sbin/cloudlinux-selector restart --interpreter nodejs --app-root "$LINK_NAME" --json
+              /usr/sbin/cloudlinux-selector restart --interpreter nodejs --app-root "$APP_DIR" --json
 
               echo "✅ Deployment Success!"
