@@ -180,23 +180,6 @@ jobs:
               echo "🔄 Running Migrations..."
               NODE_ENV=production yarn run migrate
 
-              echo "🧹 Cleaning up old frontend releases..."
-              if [ -d "$DEPLOYMENTS_DIR" ]; then
-                RELEASES=$(find "$DEPLOYMENTS_DIR" -maxdepth 1 -mindepth 1 -type d -name 'v*' -printf '%f\n' 2>/dev/null | sort -V || true)
-                TOTAL=$(printf "%s\n" "$RELEASES" | sed '/^$/d' | wc -l | tr -d ' ')
-                if [ "${TOTAL:-0}" -gt "$KEEP_RELEASES" ]; then
-                  DELETE_COUNT=$((TOTAL - KEEP_RELEASES))
-                  printf "%s\n" "$RELEASES" | sed '/^$/d' | head -n "$DELETE_COUNT" | while read -r rel; do
-                    [ -z "$rel" ] && continue
-                    [ "$rel" = "$TAG_NAME" ] && continue
-                    echo "  removing $DEPLOYMENTS_DIR/$rel"
-                    rm -rf "$DEPLOYMENTS_DIR/$rel"
-                  done
-                else
-                  echo "  nothing to clean (have $TOTAL, keeping $KEEP_RELEASES)"
-                fi
-              fi
-
               # echo "🖼️  Ensuring thumbnails directory exists..."
               # RESOURCE_DIR="$HOME/shared_resources"
               # mkdir -p "$RESOURCE_DIR/thumbnails"
@@ -216,5 +199,22 @@ jobs:
               echo "🔄 Restarting Node Service..."
               # CloudLinux Node.js restart command
               /usr/sbin/cloudlinux-selector restart --interpreter nodejs --app-root "$APP_DIR" --json
+
+              echo "🧹 Cleaning up old frontend releases..."
+              if [ -d "$DEPLOYMENTS_DIR" ]; then
+                RELEASES=$(find "$DEPLOYMENTS_DIR" -maxdepth 1 -mindepth 1 -type d -name 'v*' -printf '%f\n' 2>/dev/null | sort -V || true)
+                TOTAL=$(printf "%s\n" "$RELEASES" | sed '/^$/d' | wc -l | tr -d ' ')
+                if [ "${TOTAL:-0}" -gt "$KEEP_RELEASES" ]; then
+                  DELETE_COUNT=$((TOTAL - KEEP_RELEASES))
+                  printf "%s\n" "$RELEASES" | sed '/^$/d' | head -n "$DELETE_COUNT" | while read -r rel; do
+                    [ -z "$rel" ] && continue
+                    [ "$rel" = "$TAG_NAME" ] && continue
+                    echo "  removing $DEPLOYMENTS_DIR/$rel"
+                    rm -rf "$DEPLOYMENTS_DIR/$rel"
+                  done
+                else
+                  echo "  nothing to clean (have $TOTAL, keeping $KEEP_RELEASES)"
+                fi
+              fi
 
               echo "✅ Deployment Success!"
