@@ -1,8 +1,11 @@
 name: Deploy Production
 
+permissions:
+  contents: write
+
 on:
   push:
-    branches: ['main']  # Build on every push to main
+    # branches: ['main']  # Build on every push to main
     tags: ['v*']        # Build AND Deploy on tags
 
   workflow_dispatch:
@@ -51,29 +54,14 @@ jobs:
           path: frontend-build.tar.gz
           retention-days: 1
 
-      - name: Create GitHub Release (tag)
+      - name: Publish GitHub Release Asset (tag)
         if: startsWith(github.ref, 'refs/tags/v')
-        id: create_release
-        uses: actions/create-release@v1
+        uses: softprops/action-gh-release@v2
         with:
           tag_name: ${{ github.ref_name }}
-          release_name: ${{ github.ref_name }}
-          body: "Automated release from workflow run ${{ github.run_id }}"
-          draft: false
-          prerelease: false
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Upload Release Asset (frontend build)
-        if: startsWith(github.ref, 'refs/tags/v')
-        uses: actions/upload-release-asset@v1
-        with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: frontend-build.tar.gz
-          asset_name: frontend-build.tar.gz
-          asset_content_type: application/gzip
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          name: ${{ github.ref_name }}
+          files: |
+            frontend-build.tar.gz
 
   deploy:
     name: Deploy to Server
