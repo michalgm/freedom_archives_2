@@ -129,15 +129,18 @@ jobs:
           export FRONTEND_RELEASE_DIR="${DEPLOYMENTS_DIR}/${TAG_NAME}"
           echo "DEPLOYMENTS_DIR=$DEPLOYMENTS_DIR" >> $GITHUB_ENV
           echo "FRONTEND_RELEASE_DIR=$FRONTEND_RELEASE_DIR" >> $GITHUB_ENV
-
-          rm -rf "$FRONTEND_RELEASE_DIR"
-          mkdir -p "$FRONTEND_RELEASE_DIR"
-
+      
       - name: Download Build Artifact
         uses: actions/download-artifact@v4
         with:
           name: frontend-build
           path: .
+
+      - name: Prepare Frontend Release Directory
+        envs: FRONTEND_RELEASE_DIR
+        script: |
+          rm -rf "$FRONTEND_RELEASE_DIR"
+          mkdir -p "$FRONTEND_RELEASE_DIR"
 
       - name: Copy to Server
         uses: appleboy/scp-action@master
@@ -158,15 +161,23 @@ jobs:
           key: ${{ secrets.SSH_KEY }}
           port: ${{ secrets.SSH_PORT }}
 
+          # Explicitly pass runner env vars to the remote shell.
+          # Without this, variables like APP_DIR will be empty on the server.
+          envs: APP_DIR,DEPLOYMENTS_DIR,TAG_NAME,FRONTEND_RELEASE_DIR
+
           script: |
               set -e
               
               # Configuration
+              echo "APP_DIR=$APP_DIR"
+              echo "DEPLOYMENTS_DIR=$DEPLOYMENTS_DIR"
+              echo "TAG_NAME=$TAG_NAME"
+              echo "FRONTEND_RELEASE_DIR=$FRONTEND_RELEASE_DIR"
+
               PUBLIC_DIST_LINK="$APP_DIR/public_dist"
               KEEP_RELEASES="${{ github.event.inputs.keep_releases || '10' }}"
 
               echo "🚀 Starting Deployment Process..."
-              echo APP DIR ${APP_DIR}
 
               echo "🔄 Updating backend code from git..."
               cd "$APP_DIR"
