@@ -39,7 +39,7 @@ jobs:
           mkdir -p package_dist
           
           # Copy the actual build output (dist directory from React Router)
-          cp -r frontend/dist package_dist/build
+          cp -r frontend/build package_dist/build
           
           # Create tarball with just the frontend build
           tar -czf frontend-build.tar.gz -C package_dist .
