@@ -9,7 +9,7 @@ export default [
     index("./public/PublicHome.jsx"),
     route("collections/:collection_id", "./public/PublicCollections.jsx"),
     route("search", "./public/PublicSearch/PublicSearch.jsx"),
-    route("*?", "./views/NotFound.jsx"),
+    route("*", "./views/NotFound.jsx"),
   ]),
   route("/admin", "./layouts/Layout.jsx", [
     // Public admin routes (login, forbidden)

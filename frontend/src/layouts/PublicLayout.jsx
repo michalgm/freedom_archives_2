@@ -9,9 +9,9 @@ import {
   Typography,
 } from "@mui/material";
 import { Suspense } from "react";
-import { Outlet } from "react-router";
+import { isRouteErrorResponse, Outlet, useRouteError } from "react-router";
 import ButtonLink from "src/components/ButtonLink";
-import ErrorBoundary from "src/components/ErrorBoundary";
+import ErrorBoundaryComp, { ErrorFallback } from "src/components/ErrorBoundary";
 import { theme } from "src/theme";
 import "./PublicLayout.scss";
 
@@ -67,7 +67,7 @@ const headerLinks = [
   { title: "Freedom Archives Home", href: "https://freedomarchives.org" },
 ];
 
-const PublicLayout = () => {
+const PublicShell = ({ children }) => {
   return (
     <ThemeProvider theme={getPublicTheme}>
       <Box
@@ -186,11 +186,7 @@ const PublicLayout = () => {
               flex: "1 1 auto",
             }}
           >
-            <ErrorBoundary>
-              <Suspense fallback={<div></div>}>
-                <Outlet />
-              </Suspense>
-            </ErrorBoundary>
+            {children}
           </Box>
           {/* </Box> */}
         </Container>
@@ -243,4 +239,36 @@ const PublicLayout = () => {
   );
 };
 
+
+const PublicLayout = () => {
+  return (
+    <PublicShell>
+      <ErrorBoundaryComp>
+        <Suspense fallback={<div />}>
+          <Outlet />
+        </Suspense>
+      </ErrorBoundaryComp>
+    </PublicShell>
+  );
+};
+export function ErrorBoundary() {
+  const err = useRouteError();
+
+  // RouteErrorResponse from loader/action
+  if (isRouteErrorResponse(err)) {
+    // Make a real Error object for your view (optional)
+    const e = new Error(typeof err.data === "string" ? err.data : err.statusText || "Route error");
+    e.name = `HTTP ${err.status}`;
+
+    return <PublicShell>
+      <ErrorFallback title="Something went wrong" error={e} />
+    </PublicShell>
+  }
+
+  // Unknown error shape
+  const e = err instanceof Error ? err : new Error(String(err));
+  return <PublicShell>
+    <ErrorFallback title="Something went wrong" error={e} />
+  </PublicShell>
+}
 export default PublicLayout;

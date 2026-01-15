@@ -1,5 +1,5 @@
 import configuration from "@feathersjs/configuration";
-import feathersExpress, { errorHandler, json, notFound, rest, urlencoded } from "@feathersjs/express";
+import feathersExpress, { errorHandler, json, rest, urlencoded } from "@feathersjs/express";
 import { feathers } from "@feathersjs/feathers";
 import { createRequestHandler } from "@react-router/express";
 import compress from "compression";
@@ -59,7 +59,7 @@ expressApp.get('/sitemap.xml', (req, res) => {
 });
 
 // Host the public folder
-app.use("/", express.static(clientDistPath));
+app.use("/", express.static(clientDistPath, { index: false }));
 app.use("/images/thumbnails", thumbnailProxy(app, publicPath));
 // Configure a middleware for 404s and the error handler
 app.configure(knex);
@@ -72,20 +72,27 @@ app.configure(services);
 app.hooks(appHooks);
 // Express 5 / path-to-regexp v6 doesn't accept "*" as a path pattern.
 // Use a regex catch-all instead.
-expressApp.get(/.*/, async (request, response, next) => {
+
+expressApp.all(/.*/, async (request, response, next) => {
   if (request.path.startsWith("/api/") || request.path.startsWith("/images/")) {
     return next();
   }
-  const serverBuild = await import(path.join(serverDistPath, "index.js"));
-  createRequestHandler({
-    build: serverBuild,
-  })(request, response, next);
+
+  try {
+    const serverBuild = await import(path.join(serverDistPath, "index.js"));
+    return createRequestHandler({ build: serverBuild })(request, response, next);
+  } catch (err) {
+    return next(err);
+  }
+  // const serverBuild = await import(path.join(serverDistPath, "index.js"));
+  // createRequestHandler({
+  //   build: serverBuild,
+  // })(request, response, next);
   // console.log('serving ', path.join(frontendDistPath, "__spa-fallback.html"));
   // response.sendFile(path.join(frontendDistPath, "__spa-fallback.html"));
   // response.sendFile(path.join(frontendDistPath, "index.html"));
 });
 // Configure a middleware for 404s and the error handler
-app.use(notFound({ verbose: true }));
 app.use(
   errorHandler({
     logger,
