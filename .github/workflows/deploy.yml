@@ -38,14 +38,10 @@ jobs:
 
       - name: Prepare Release Package
         run: |
-          # Package ONLY the frontend build
-          mkdir -p package_dist
-          
-          # Copy the actual build output (dist directory from React Router)
-          cp -r frontend/build package_dist/build
-          
-          # Create tarball with just the frontend build
-          tar -czf frontend-build.tar.gz -C package_dist .
+          # Package ONLY the frontend build.
+          # Important: tar the *contents* of frontend/build so extraction doesn't add extra nesting.
+          test -d frontend/build
+          tar -czf frontend-build.tar.gz -C frontend/build .
 
       - name: Upload Build Artifact
         uses: actions/upload-artifact@v4
@@ -95,8 +91,14 @@ jobs:
               
               # Configuration
               APP_DIR="work/freedom_archives_2"
-              FRONTEND_BUILD_DIR="$APP_DIR/frontend/build"
-              
+              DEPLOYMENTS_DIR="$APP_DIR/deployments"
+              TAG_NAME="${{ github.ref_name }}"
+              FRONTEND_RELEASE_DIR="$DEPLOYMENTS_DIR/$TAG_NAME"
+              PUBLIC_DIST_LINK="$APP_DIR/public_dist"
+              KEEP_RELEASES=${KEEP_RELEASES:-10}
+
+              echo "🚀 Starting Deployment Process..."
+
               echo "🔄 Updating backend code from git..."
               cd "$APP_DIR"
               git pull origin main
@@ -107,28 +109,48 @@ jobs:
               echo "🔄 Running Migrations..."
               NODE_ENV=production yarn run migrate
               
-              echo "📦 Extracting frontend build..."
-              cd ~
-              rm -rf "$FRONTEND_BUILD_DIR"
-              mkdir -p "$FRONTEND_BUILD_DIR"
-              tar -xzf ~/frontend-build.tar.gz -C "$FRONTEND_BUILD_DIR"
+              echo "📦 Extracting frontend build into: $FRONTEND_RELEASE_DIR"
+              mkdir -p "$DEPLOYMENTS_DIR"
+              rm -rf "$FRONTEND_RELEASE_DIR"
+              mkdir -p "$FRONTEND_RELEASE_DIR"
+              tar -xzf ~/frontend-build.tar.gz -C "$FRONTEND_RELEASE_DIR"
               rm ~/frontend-build.tar.gz
 
-              echo "🖼️  Ensuring thumbnails directory exists..."
-              RESOURCE_DIR="$HOME/shared_resources"
-              mkdir -p "$RESOURCE_DIR/thumbnails"
-              
-              # Create symlink if it doesn't exist
-              if [ ! -L "$APP_DIR/public/img/thumbnails" ]; then
-                  echo "  Creating thumbnails symlink..."
-                  mkdir -p "$APP_DIR/public/img"
-                  # Backup any existing thumbnails first
-                  if [ -d "$APP_DIR/public/img/thumbnails" ]; then
-                      rsync -a "$APP_DIR/public/img/thumbnails/" "$RESOURCE_DIR/thumbnails/"
-                      rm -rf "$APP_DIR/public/img/thumbnails"
-                  fi
-                  ln -sfn "$RESOURCE_DIR/thumbnails" "$APP_DIR/public/img/thumbnails"
+              echo "🔗 Updating public_dist symlink: $PUBLIC_DIST_LINK -> $FRONTEND_RELEASE_DIR"
+              ln -sfn "$FRONTEND_RELEASE_DIR" "$PUBLIC_DIST_LINK"
+
+              echo "🧹 Cleaning up old frontend releases..."
+              if [ -d "$DEPLOYMENTS_DIR" ]; then
+                RELEASES=$(find "$DEPLOYMENTS_DIR" -maxdepth 1 -mindepth 1 -type d -name 'v*' -printf '%f\n' 2>/dev/null | sort -V || true)
+                TOTAL=$(printf "%s\n" "$RELEASES" | sed '/^$/d' | wc -l | tr -d ' ')
+                if [ "${TOTAL:-0}" -gt "$KEEP_RELEASES" ]; then
+                  DELETE_COUNT=$((TOTAL - KEEP_RELEASES))
+                  printf "%s\n" "$RELEASES" | sed '/^$/d' | head -n "$DELETE_COUNT" | while read -r rel; do
+                    [ -z "$rel" ] && continue
+                    [ "$rel" = "$TAG_NAME" ] && continue
+                    echo "  removing $DEPLOYMENTS_DIR/$rel"
+                    rm -rf "$DEPLOYMENTS_DIR/$rel"
+                  done
+                else
+                  echo "  nothing to clean (have $TOTAL, keeping $KEEP_RELEASES)"
+                fi
               fi
+
+              # echo "🖼️  Ensuring thumbnails directory exists..."
+              # RESOURCE_DIR="$HOME/shared_resources"
+              # mkdir -p "$RESOURCE_DIR/thumbnails"
+              
+              # # Create symlink if it doesn't exist
+              # if [ ! -L "$APP_DIR/public/img/thumbnails" ]; then
+              #     echo "  Creating thumbnails symlink..."
+              #     mkdir -p "$APP_DIR/public/img"
+              #     # Backup any existing thumbnails first
+              #     if [ -d "$APP_DIR/public/img/thumbnails" ]; then
+              #         rsync -a "$APP_DIR/public/img/thumbnails/" "$RESOURCE_DIR/thumbnails/"
+              #         rm -rf "$APP_DIR/public/img/thumbnails"
+              #     fi
+              #     ln -sfn "$RESOURCE_DIR/thumbnails" "$APP_DIR/public/img/thumbnails"
+              # fi
 
               echo "🔄 Restarting Node Service..."
               # CloudLinux Node.js restart command
