@@ -1,6 +1,5 @@
-import { describe, it, beforeEach, afterEach } from 'vitest';
-import { expect } from 'vitest';
 import sinon from "sinon";
+import { describe, it, beforeEach, afterEach, expect } from 'vitest';
 
 import { validateArchive } from "../../backend/services/common_hooks/index.js";
 
