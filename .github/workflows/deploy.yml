@@ -100,6 +100,7 @@ jobs:
           echo "tag=$TAG" >> "$GITHUB_OUTPUT"
 
       - name: Download frontend-build.tar.gz from Release
+        if: github.event_name == 'workflow_dispatch'
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
@@ -108,6 +109,7 @@ jobs:
           ls -lh frontend-build.tar.gz
 
       - name: Upload Release Asset as Workflow Artifact
+        if: github.event_name == 'workflow_dispatch'
         uses: actions/upload-artifact@v4
         with:
           name: frontend-build
