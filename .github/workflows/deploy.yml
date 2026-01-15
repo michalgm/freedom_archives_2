@@ -142,7 +142,7 @@ jobs:
           key: ${{ secrets.SSH_KEY }}
           port: ${{ secrets.SSH_PORT }}
           source: "frontend-build.tar.gz"
-          target: "${FRONTEND_RELEASE_DIR}"
+          target: ${{ env.FRONTEND_RELEASE_DIR }}
 
       - name: Execute Remote Deployment
         uses: appleboy/ssh-action@master
