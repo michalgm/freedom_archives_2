@@ -74,7 +74,7 @@ export default defineConfig(({ mode }) => ({
           browser: {
             enabled: true,
             // Make sure to install Playwright
-            provider: 'playwright',
+            // provider: 'playwright',
             headless: true,
             instances: [{ browser: 'chromium' }],
           },
