@@ -30,7 +30,7 @@ const app = feathersExpress(feathers(), expressApp);
 app.configure(configuration());
 // Set up Plugins and providers
 const publicPath = path.resolve(__dirname, app.get("public")); // Adjust relative path as necessary
-const frontendDistPath = path.resolve(__dirname, '../frontend/build');
+const frontendDistPath = path.resolve(__dirname, '../public_dist/');
 const clientDistPath = path.resolve(frontendDistPath, 'client');
 const serverDistPath = path.resolve(frontendDistPath, 'server');
 
@@ -70,7 +70,9 @@ app.configure(authentication);
 app.configure(services);
 
 app.hooks(appHooks);
-expressApp.get("*", async (request, response, next) => {
+// Express 5 / path-to-regexp v6 doesn't accept "*" as a path pattern.
+// Use a regex catch-all instead.
+expressApp.get(/.*/, async (request, response, next) => {
   if (request.path.startsWith("/api/") || request.path.startsWith("/images/")) {
     return next();
   }

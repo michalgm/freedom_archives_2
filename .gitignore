@@ -133,3 +133,4 @@ dbtools/cruft/*
 .yarn/*
 
 pgschema
+public_dist
