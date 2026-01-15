@@ -57,14 +57,14 @@ jobs:
           # Package ONLY the frontend build.
           # Important: tar the *contents* of frontend/build so extraction doesn't add extra nesting.
           test -d frontend/build
-          tar -czf frontend-build.tar.gz -C frontend/build .
+          tar -czf freedom-archives-frontend-build.tar.gz -C frontend/build .
 
       - name: Upload Build Artifact
         if: startsWith(github.ref, 'refs/tags/v')
         uses: actions/upload-artifact@v4
         with:
-          name: frontend-build
-          path: frontend-build.tar.gz
+          name: freedom-archives-frontend-build
+          path: freedom-archives-frontend-build.tar.gz
           retention-days: 1
 
       - name: Publish GitHub Release Asset (tag)
@@ -74,7 +74,7 @@ jobs:
           tag_name: ${{ github.ref_name }}
           name: ${{ github.ref_name }}
           files: |
-            frontend-build.tar.gz
+            freedom-archives-frontend-build.tar.gz
 
   fetch_release:
     name: Fetch Release Asset
@@ -99,21 +99,21 @@ jobs:
           echo "Resolved tag: $TAG"
           echo "tag=$TAG" >> "$GITHUB_OUTPUT"
 
-      - name: Download frontend-build.tar.gz from Release
+      - name: Download freedom-archives-frontend-build.tar.gz from Release
         if: github.event_name == 'workflow_dispatch'
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
           set -euo pipefail
-          gh release download "${{ steps.resolve.outputs.tag }}" --repo "${GITHUB_REPOSITORY}" --pattern "frontend-build.tar.gz"
-          ls -lh frontend-build.tar.gz
+          gh release download "${{ steps.resolve.outputs.tag }}" --repo "${GITHUB_REPOSITORY}" --pattern "freedom-archives-frontend-build.tar.gz"
+          ls -lh freedom-archives-frontend-build.tar.gz
 
       - name: Upload Release Asset as Workflow Artifact
         if: github.event_name == 'workflow_dispatch'
         uses: actions/upload-artifact@v4
         with:
-          name: frontend-build
-          path: frontend-build.tar.gz
+          name: freedom-archives-frontend-build
+          path: freedom-archives-frontend-build.tar.gz
           retention-days: 1
 
   deploy:
@@ -135,7 +135,7 @@ jobs:
       - name: Download Build Artifact
         uses: actions/download-artifact@v4
         with:
-          name: frontend-build
+          name: freedom-archives-frontend-build
           path: .
 
       - name: Copy to Server
@@ -145,7 +145,7 @@ jobs:
           username: ${{ secrets.SSH_USER }}
           key: ${{ secrets.SSH_KEY }}
           port: ${{ secrets.SSH_PORT }}
-          source: "frontend-build.tar.gz"
+          source: "freedom-archives-frontend-build.tar.gz"
           target: ${{ env.FRONTEND_RELEASE_DIR }}
       
 
@@ -176,8 +176,8 @@ jobs:
               yarn install
               
               echo "📦 Extracting frontend build into: $FRONTEND_RELEASE_DIR"
-              tar -xzf ${FRONTEND_RELEASE_DIR}/frontend-build.tar.gz -C "$FRONTEND_RELEASE_DIR"
-              rm ${FRONTEND_RELEASE_DIR}/frontend-build.tar.gz
+              tar -xzf ${FRONTEND_RELEASE_DIR}/freedom-archives-frontend-build.tar.gz -C "$FRONTEND_RELEASE_DIR"
+              rm ${FRONTEND_RELEASE_DIR}/freedom-archives-frontend-build.tar.gz
 
               echo "🔗 Updating public_dist symlink: $PUBLIC_DIST_LINK -> $FRONTEND_RELEASE_DIR"
               rm "$PUBLIC_DIST_LINK"
