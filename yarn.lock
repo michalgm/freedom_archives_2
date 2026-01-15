@@ -8186,6 +8186,7 @@ __metadata:
     react-tagcloud: "npm:^2.3.3"
     sass: "npm:^1.97.2"
     storybook: "npm:^9.1.17"
+    string-strip-html: "npm:^13.5.0"
     typescript: "npm:^5.9.3"
     use-debounce: "npm:^10.1.0"
     use-deep-compare-effect: "npm:^1.8.1"
