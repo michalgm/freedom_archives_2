@@ -125,9 +125,13 @@ jobs:
     steps:
       - name: Compute deploy paths
         run: |
-          echo "DEPLOYMENTS_DIR=${APP_DIR}/deployments" >> $GITHUB_ENV
-          echo "FRONTEND_RELEASE_DIR=${APP_DIR}/deployments/${TAG_NAME}" >> $GITHUB_ENV
-          mkdir -p "${APP_DIR}/deployments/${TAG_NAME}"
+          export DEPLOYMENTS_DIR="${APP_DIR}/deployments"
+          export FRONTEND_RELEASE_DIR="${DEPLOYMENTS_DIR}/${TAG_NAME}"
+          echo "DEPLOYMENTS_DIR=$DEPLOYMENTS_DIR" >> $GITHUB_ENV
+          echo "FRONTEND_RELEASE_DIR=$FRONTEND_RELEASE_DIR" >> $GITHUB_ENV
+
+          rm -rf "$FRONTEND_RELEASE_DIR"
+          mkdir -p "$FRONTEND_RELEASE_DIR"
 
       - name: Download Build Artifact
         uses: actions/download-artifact@v4
@@ -144,6 +148,7 @@ jobs:
           port: ${{ secrets.SSH_PORT }}
           source: "frontend-build.tar.gz"
           target: ${{ env.FRONTEND_RELEASE_DIR }}
+      
 
       - name: Execute Remote Deployment
         uses: appleboy/ssh-action@master
