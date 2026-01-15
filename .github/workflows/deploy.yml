@@ -165,7 +165,7 @@ jobs:
               echo "📦 Installing/updating backend dependencies (skip frontend workspace)..."
               # Yarn Berry: focus only the backend workspace for production installs.
               # This avoids installing the frontend workspace dependencies on the server.
-              yarn workspaces focus freedom-archives-database
+              yarn install
               
               echo "🔄 Running Migrations..."
               NODE_ENV=production yarn run migrate
