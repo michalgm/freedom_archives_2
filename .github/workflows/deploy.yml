@@ -120,11 +120,14 @@ jobs:
     runs-on: ubuntu-latest
     env:
       APP_DIR: work/freedom_archives_2
-      DEPLOYMENTS_DIR: ${{ env.APP_DIR }}/deployments
       TAG_NAME: "${{ needs.fetch_release.outputs.tag }}"
-      FRONTEND_RELEASE_DIR: "${{ env.DEPLOYMENTS_DIR }}/${{ env.TAG_NAME }}"
 
     steps:
+      - name: Compute deploy paths
+        run: |
+          echo "DEPLOYMENTS_DIR=${APP_DIR}/deployments" >> $GITHUB_ENV
+          echo "FRONTEND_RELEASE_DIR=${APP_DIR}/deployments/${TAG_NAME}" >> $GITHUB_ENV
+
       - name: Download Build Artifact
         uses: actions/download-artifact@v4
         with:
