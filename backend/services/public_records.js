@@ -49,7 +49,7 @@ const lookupFilters = async (context) => {
   if (!params.provider) {
     return;
   }
-  console.time("filters");
+  // console.time("filters");
   const baseQuery = params.knex || context.service.createQuery(params);
   const recordsQuery = baseQuery.clone().clearSelect().clearOrder().from("public_search.records").select("record_id");
   // const aggregatedDataQuery = baseQuery.clone().clearSelect().clearOrder().select().unionAll([
@@ -105,7 +105,7 @@ const lookupFilters = async (context) => {
     .groupBy("type");
 
   const filters = await query;
-  console.timeEnd("filters");
+  // console.timeEnd("filters");
   return filters.reduce((acc, { type, values }) => {
     acc[type] = values;
     return acc;
@@ -119,7 +119,7 @@ const getNonDigitizedTotal = async (context) => {
 
   if (provider && has_digital) {
     const updatedContext = await rankedSearch(noFilterContext);
-    console.time("nonDigitized");
+    // console.time("nonDigitized");
 
     const res = await updatedContext.params.knex
       .clone()
@@ -130,7 +130,7 @@ const getNonDigitizedTotal = async (context) => {
       .count("record_id")
       .first();
 
-    console.timeEnd("nonDigitized");
+    // console.timeEnd("nonDigitized");
 
     return res.count;
   }
@@ -145,10 +145,10 @@ const searchRecords = async (context) => {
     lookupFilters(context),
     getNonDigitizedTotal(context),
   ].map(async (p, index) => {
-    console.time(`promise${index}`);
+    // console.time(`promise${index}`);
     const res = await p;
 
-    console.timeEnd(`promise${index}`);;
+    // console.timeEnd(`promise${index}`);;
     return res;
   }));
   context.result = {

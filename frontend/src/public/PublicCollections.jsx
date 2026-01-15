@@ -12,7 +12,7 @@ import {
 } from "@mui/material";
 import { isArray } from "lodash-es";
 import { useEffect, useRef, useState } from "react";
-import { useLoaderData } from "react-router";
+import { isRouteErrorResponse, useLoaderData, useRouteError } from "react-router";
 import { public_collections as collectionsService, public_records as recordsService } from "src/api";
 import Carousel from "src/components/Carousel";
 import Link from "src/components/Link";
@@ -22,6 +22,7 @@ import { ItemStack } from "src/public/ItemCard";
 import { PAGE_SIZE } from "src/public/PublicSearch/constants";
 import { Search } from "src/public/PublicSearch/PublicSearch";
 import { setMetaTags } from "src/utils";
+import { NotFoundPage } from "src/views/NotFound";
 
 const scrollToSection = (id) => {
   const element = document.getElementById(id);
@@ -87,8 +88,28 @@ async function fetchCollection({ params }) {
 
 
 // eslint-disable-next-line react-refresh/only-export-components
-export function loader({ params }) {
-  return fetchCollection({ params });
+export async function loader({ params }) {
+  try {
+    return await fetchCollection({ params });
+  } catch (err) {
+    // Feathers services throw a FeathersError-like object for missing records.
+    // Convert it into a real 404 Response so React Router can render a 404 boundary.
+    if (err?.code === 404 || err?.name === "NotFound" || err?.className === "not-found") {
+      throw new Response("Not Found", { status: 404 });
+    }
+    throw err;
+  }
+}
+
+export function ErrorBoundary() {
+  const err = useRouteError();
+  if (isRouteErrorResponse(err) && err.status === 404) {
+    return <NotFoundPage />;
+  }
+  if (err?.code === 404 || err?.name === "NotFound" || err?.className === "not-found") {
+    return <NotFoundPage />;
+  }
+  throw err;
 }
 
 // eslint-disable-next-line react-refresh/only-export-components

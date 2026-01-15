@@ -1,7 +1,7 @@
 {
   "name": "freedom-archives-database",
   "description": "Freedom Archives database backend",
-  "version": "0.0.10",
+  "version": "0.0.12",
   "homepage": "",
   "private": true,
   "main": "backend",
@@ -73,6 +73,7 @@
     "helmet": "^8.1.0",
     "isbot": "^5.1.32",
     "knex": "^3.1.0",
+    "morgan": "^1.10.1",
     "node-addon-api": "^8.5.0",
     "pg": "^8.16.3",
     "pg-tsquery": "^8.4.2",

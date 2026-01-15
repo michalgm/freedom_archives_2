@@ -245,13 +245,13 @@ const publishSite = async (context) => {
   } = context;
   const { archive_id } = data;
   for (const table of Object.keys(public_tables)) {
-    console.time(`copy ${table}`);
+    // console.time(`copy ${table}`);
     const target = `${table}_snapshots`;
     await trx(target).insert(trx(`public_search.${table}`).select([snapshot_id, "*"]).where({ archive_id }));
-    console.timeEnd(`copy ${table}`);
+    // console.timeEnd(`copy ${table}`);
   }
   for (const [table, { selectQuery }] of Object.entries(public_tables)) {
-    console.time(`delete ${table}`);
+    // console.time(`delete ${table}`);
     const deleteQuery = trx(`public_search.${table}`).where({ archive_id });
     if (table == "records") {
       deleteQuery.whereNotIn(
@@ -276,8 +276,8 @@ const publishSite = async (context) => {
       );
     }
     await deleteQuery.delete();
-    console.timeEnd(`delete ${table}`);
-    console.time(`update ${table}`);
+    // console.timeEnd(`delete ${table}`);
+    // console.time(`update ${table}`);
     await trx(`public_search.${table}`).insert(
       trx.fromRaw(selectQuery ? `(${selectQuery})` : table)
         .select()
@@ -286,7 +286,7 @@ const publishSite = async (context) => {
       //   .where({ archive_id })
       //   .select()
     );
-    console.timeEnd(`update ${table}`);
+    // console.timeEnd(`update ${table}`);
   }
   await trx("snapshots").where({ title: "Snapshot 3", archive_id }).delete();
   await trx("snapshots").where({ archive_id, title: "Snapshot 2" }).update({ title: "Snapshot 3" });

@@ -1,9 +1,19 @@
 import { authenticate } from "@feathersjs/authentication";
 import { transaction } from "@feathersjs/knex";
 
+import logger from "./logger.js";
 import { allowAnonymous, allowDisablePagination, authRoles, debugQuery, setArchive } from "./services/common_hooks/index.js";
 // Application hooks that run for every service
 const public_services = ["api/public/records", "api/public/settings", "api/public/collections"];
+
+const attachRequestId = async (context) => {
+  const requestId = context.params?.req?.requestId;
+  if (requestId) {
+    context.params.requestId = requestId;
+  }
+  return context;
+};
+
 const checkAuth = async (context) => {
   if (public_services.includes(context.path)) {
     allowAnonymous()(context);
@@ -15,6 +25,7 @@ const checkAuth = async (context) => {
 };
 export const before = {
   all: [
+    attachRequestId,
     checkAuth,
     authRoles,
     // logHook,
@@ -41,17 +52,33 @@ export const after = {
 export const error = {
   all: [
     async (context) => {
-      console.error("ERROR", context.error?.message);
-      console.error("ERROR", context.error?.data);
-      if (context.path === "api/authentication" && ["NotAuthenticated: jwt expired"].includes(context.error.message)) {
-        console.error(`Auth error: ${context.error.message}`);
+      const err = context.error;
+      const meta = {
+        path: context.path,
+        method: context.method,
+        hookType: context.type,
+        id: context.id,
+        requestId: context.params?.requestId,
+        data: err?.data,
+      };
+
+      if (context.path === "api/authentication" && err?.message === "NotAuthenticated: jwt expired") {
+        logger.warn("Auth error", { ...meta, message: err?.message });
       } else {
-        console.error(
-          `Error in ${context.path} calling ${context.method} method on ${context.id}`,
-          context.error.message,
-          context.error.stack,
-        );
+        if (err instanceof Error) {
+          const feathersErr = /** @type {any} */ (err);
+          logger.error(err.message, {
+            ...meta,
+            name: err.name,
+            code: feathersErr.code,
+            className: feathersErr.className,
+            stack: err.stack,
+          });
+        } else {
+          logger.error("Error in service method", { ...meta, err });
+        }
       }
+
       return context;
     },
   ],

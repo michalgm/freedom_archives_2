@@ -7,6 +7,12 @@ const port = app.get("port");
 // console.log(app);
 const server = app.listen(port, hostname);
 app.setup(server).then(() => {
-  console.log("Feathers server listening on localhost:3030");
+  logger.info("Feathers server listening on http://%s:%s", hostname, port);
 });
-process.on("unhandledRejection", (reason, p) => logger.error("Unhandled Rejection at: Promise ", p, reason));
+process.on("unhandledRejection", (reason, p) => {
+  logger.error("Unhandled Rejection at promise", { promise: p, reason });
+});
+
+process.on("uncaughtException", (err) => {
+  logger.error("Uncaught Exception", err);
+});

@@ -14,6 +14,7 @@ import { fileURLToPath } from "url";
 import appHooks from "./app.hooks.js";
 import authentication from "./authentication.js";
 import logger from "./logger.js";
+import middleware from "./middleware/index.js";
 import knex from "./postgresql.js";
 import services from "./services/index.js";
 
@@ -45,6 +46,7 @@ app.use(cors());
 app.use(compress());
 app.use(json({ limit: "13mb" }));
 app.use(urlencoded({ extended: true }));
+app.configure(middleware);
 app.configure(rest());
 app.use(favicon(path.join(clientDistPath, "favicon.ico")));
 
@@ -59,24 +61,8 @@ expressApp.get('/sitemap.xml', (req, res) => {
 
 // Host the public folder
 app.use("/", express.static(clientDistPath, { index: false }));
-
-app.use(
-  "/images/thumbnails",
-  express.static(path.join(publicPath, "img", "thumbnails"), {
-    fallthrough: false,
-    etag: true,
-    maxAge: "30d",
-    setHeaders: (res) => {
-      // Thumbnail URLs include a cache-busting query param (date_modified),
-      // so we can safely cache fairly aggressively.
-      res.setHeader("Cache-Control", "public, max-age=2592000, stale-while-revalidate=86400");
-    },
-  }),
-);
 // Configure a middleware for 404s and the error handler
 app.configure(knex);
-// Configure other middleware (see `middleware/index.js`)
-// app.configure(middleware);
 app.configure(authentication);
 // Set up our services (see `services/index.js`)
 app.configure(services);
@@ -96,13 +82,6 @@ expressApp.all(/.*/, async (request, response, next) => {
   } catch (err) {
     return next(err);
   }
-  // const serverBuild = await import(path.join(serverDistPath, "index.js"));
-  // createRequestHandler({
-  //   build: serverBuild,
-  // })(request, response, next);
-  // console.log('serving ', path.join(frontendDistPath, "__spa-fallback.html"));
-  // response.sendFile(path.join(frontendDistPath, "__spa-fallback.html"));
-  // response.sendFile(path.join(frontendDistPath, "index.html"));
 });
 // Configure a middleware for 404s and the error handler
 app.use(
