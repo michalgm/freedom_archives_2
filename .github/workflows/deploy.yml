@@ -166,8 +166,8 @@ jobs:
               KEEP_RELEASES="${{ github.event.inputs.keep_releases || '10' }}"
 
               echo "🚀 Starting Deployment Process..."
-              echo ${APP_DIR}
-              
+              echo APP DIR ${APP_DIR}
+
               echo "🔄 Updating backend code from git..."
               cd "$APP_DIR"
               git pull origin main
