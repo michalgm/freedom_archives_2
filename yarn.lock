@@ -8170,6 +8170,7 @@ __metadata:
     nodemon: "npm:^3.1.11"
     pg: "npm:^8.16.3"
     pg-tsquery: "npm:^8.4.2"
+    react: "npm:^19.2.3"
     react-router: "npm:^7.12.0"
     serve-favicon: "npm:^2.5.1"
     sharp: "npm:0.34.2"
