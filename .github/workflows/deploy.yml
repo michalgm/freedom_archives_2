@@ -167,9 +167,6 @@ jobs:
               # This avoids installing the frontend workspace dependencies on the server.
               yarn install
               
-              echo "🔄 Running Migrations..."
-              NODE_ENV=production yarn run migrate
-              
               echo "📦 Extracting frontend build into: $FRONTEND_RELEASE_DIR"
               mkdir -p "$DEPLOYMENTS_DIR"
               rm -rf "$FRONTEND_RELEASE_DIR"
@@ -179,6 +176,9 @@ jobs:
 
               echo "🔗 Updating public_dist symlink: $PUBLIC_DIST_LINK -> $FRONTEND_RELEASE_DIR"
               ln -sfn "$FRONTEND_RELEASE_DIR" "$PUBLIC_DIST_LINK"
+
+              echo "🔄 Running Migrations..."
+              NODE_ENV=production yarn run migrate
 
               echo "🧹 Cleaning up old frontend releases..."
               if [ -d "$DEPLOYMENTS_DIR" ]; then
