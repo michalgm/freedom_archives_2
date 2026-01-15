@@ -6,30 +6,88 @@ import { useLocation } from "react-router";
 import { public_records as recordsService } from "src/api";
 import { useImmer } from "use-immer";
 
+const decorateRecords = (recordsData) => {
+  return (recordsData || []).map((record) => {
+    const keys = [
+      "collection_title",
+      "date",
+      "producers",
+      "publishers",
+      "authors",
+      "call_number",
+      "vol_number",
+      "format",
+      "program",
+    ];
+    record.details = [];
+    keys.forEach((key) => {
+      let value = get(record, key);
+      if (value) {
+        if (Array.isArray(value)) {
+          if (value.length) {
+            value = value.map(({ item }) => item).join(", ");
+          }
+        } else if (typeof value === "object") {
+          value = value.item;
+        } else if (key === "date") {
+          if (value.match(/^1900/)) {
+            return;
+          }
+          value = dayjs(value).format("MMMM D, YYYY");
+        }
+      }
+      let label = key;
+      if (key === "vol_number") label = "Volume";
+      if (key === "collection_title") label = "Collection";
+      if (value && value.toString().trim()) {
+        record.details.push([label, value]);
+      }
+    });
+    return record;
+  });
+};
+
 export const usePublicSearch = (
   searchFilters = {},
   initialLoading = false,
   sortOptions,
   filterTypes,
   pageSize,
+  initialData,
 ) => {
   const location = useLocation();
-  const [records, setRecords] = useState({ count: 0, records: [] });
-  const [total, setTotal] = useState(0);
+  const skipInitialFetchRef = useRef(Boolean(initialData));
+  const [records, setRecords] = useState(() => {
+    if (!initialData) return { count: 0, records: [] };
+    return {
+      total: initialData.total,
+      nonDigitizedTotal: initialData.nonDigitizedTotal,
+      records: decorateRecords(initialData.data),
+    };
+  });
+  const [total, setTotal] = useState(() => initialData?.total || 0);
   const [offset, setOffset] = useState(0);
-  const [loading, setLoading] = useState(true);
-  const [recordsLoading, setRecordsLoading] = useState(true);
+  const [loading, setLoading] = useState(() => !initialData);
+  const [recordsLoading, setRecordsLoading] = useState(() => !initialData);
   const [search, setSearch] = useImmer({
     fullText: location.state?.search || "",
     include_non_digitized: false,
     sort: "Relevance",
   });
-  const [filters, setFilters] = useState([]);
-  const prevSearchRef = useRef(search);
+  const [filters, setFilters] = useState(() => initialData?.filters || []);
+  const prevSearchRef = useRef({ ...search, searchFilters });
 
   const fetchRecords = useCallback(async () => {
+    if (skipInitialFetchRef.current) {
+      skipInitialFetchRef.current = false;
+      return;
+    }
+
     setRecordsLoading(true);
-    if (initialLoading) return;
+    if (initialLoading) {
+      setRecordsLoading(false);
+      return;
+    }
 
     const isNewSearch = !isEqual(
       { ...search, searchFilters },
@@ -98,44 +156,7 @@ export const usePublicSearch = (
       setRecords({
         total,
         nonDigitizedTotal,
-        records: recordsData.map((record) => {
-          const keys = [
-            "collection_title",
-            "date",
-            "producers",
-            "publishers",
-            "authors",
-            "call_number",
-            "vol_number",
-            "format",
-            "program",
-          ];
-          record.details = [];
-          keys.forEach((key) => {
-            let value = get(record, key);
-            if (value) {
-              if (Array.isArray(value)) {
-                if (value.length) {
-                  value = value.map(({ item }) => item).join(", ");
-                }
-              } else if (typeof value === "object") {
-                value = value.item;
-              } else if (key === "date") {
-                if (value.match(/^1900/)) {
-                  return;
-                }
-                value = dayjs(value).format("MMMM D, YYYY");
-              }
-            }
-            let label = key;
-            if (key === "vol_number") label = "Volume";
-            if (key === "collection_title") label = "Collection";
-            if (value && value.toString().trim()) {
-              record.details.push([label, value]);
-            }
-          });
-          return record;
-        }),
+        records: decorateRecords(recordsData),
       });
 
       if (isNewSearch) {

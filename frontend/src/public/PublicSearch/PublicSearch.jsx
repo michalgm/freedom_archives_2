@@ -25,6 +25,7 @@ export function Search(params) {
     searchFilters = DEFAULT_SEARCH_FILTERS,
     focus = true,
     loading: initialLoading,
+    initialData,
   } = params;
 
   const {
@@ -47,6 +48,7 @@ export function Search(params) {
     SORT_OPTIONS,
     FILTER_TYPES,
     PAGE_SIZE,
+    initialData,
   );
   const [currentRecord, setCurrentRecord] = React.useState(null);
 

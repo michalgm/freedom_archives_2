@@ -13,12 +13,13 @@ import {
 import { isArray } from "lodash-es";
 import { useEffect, useRef, useState } from "react";
 import { useLoaderData } from "react-router";
-import { public_collections as collectionsService } from "src/api";
+import { public_collections as collectionsService, public_records as recordsService } from "src/api";
 import Carousel from "src/components/Carousel";
 import Link from "src/components/Link";
 import Show from "src/components/Show";
 import Thumbnail from "src/components/Thumbnail";
 import { ItemStack } from "src/public/ItemCard";
+import { PAGE_SIZE } from "src/public/PublicSearch/constants";
 import { Search } from "src/public/PublicSearch/PublicSearch";
 import { setMetaTags } from "src/utils";
 
@@ -40,14 +41,47 @@ async function fetchCollection({ params }) {
 
   const collection = await collectionsService.get(collection_id);
 
+  const search = {
+    collection_id: [
+      ...(collection.descendant_collection_ids || []),
+      collection.collection_id,
+    ],
+  };
+
+  // Fetch initial records server-side so hydration can reuse them without a
+  // client re-fetch on mount.
+  const initialRecordsQuery = {
+    $select: [
+      "collection_title",
+      "record_id",
+      "title",
+      "date",
+      "description",
+      "year",
+      "publishers",
+      "producers",
+      "authors",
+      "program",
+      "call_number",
+      "vol_number",
+      "media_type",
+      "url",
+    ],
+    $limit: PAGE_SIZE,
+    $skip: 0,
+    $sort: { title: 1 },
+    has_digital: true,
+    collection_id: { $in: search.collection_id },
+  };
+
+  const initialRecordsResult = await recordsService.find({
+    query: initialRecordsQuery,
+  });
+
   return {
     collection,
-    search: {
-      collection_id: [
-        ...(collection.descendant_collection_ids || []),
-        collection.collection_id,
-      ],
-    },
+    search,
+    initialRecordsResult,
   };
 }
 
@@ -109,7 +143,7 @@ export const DetailsRow = ({ label, value, keyProp = 'list_item_id', valueProp =
 };
 
 const PublicCollections = () => {
-  const { collection, search } = useLoaderData();
+  const { collection, search, initialRecordsResult } = useLoaderData();
   // const [search, setSearch] = useState(initialSearch);
   // const [loading, setLoading] = useState(false);
   const [tab, setTab] = useState("overview");
@@ -121,7 +155,21 @@ const PublicCollections = () => {
   useEffect(() => {
     if (!headerRef.current) return;
 
-    const resizeObserver = new ResizeObserver((entries) => {
+    // ResizeObserver isn't available in some older browsers; fall back to a one-time
+    // measurement + window resize listener.
+    // eslint-disable-next-line compat/compat -- runtime-guarded with a fallback implementation
+    const ResizeObserverCtor = globalThis.ResizeObserver;
+    if (typeof ResizeObserverCtor === "undefined") {
+      const update = () => {
+        if (!headerRef.current) return;
+        setScrollMarginTop(headerRef.current.offsetHeight + 16);
+      };
+      update();
+      window.addEventListener("resize", update);
+      return () => window.removeEventListener("resize", update);
+    }
+
+    const resizeObserver = new ResizeObserverCtor((entries) => {
       for (const entry of entries) {
         setScrollMarginTop(entry.target.offsetHeight + 16); // header height + spacing
       }
@@ -368,6 +416,7 @@ const PublicCollections = () => {
               searchFilters={search}
               focus={false}
               key={collection?.collection_id}
+              initialData={initialRecordsResult}
               // loading={loading}
             />
           </Box>
