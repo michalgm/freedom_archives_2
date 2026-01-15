@@ -14,7 +14,6 @@ import { fileURLToPath } from "url";
 import appHooks from "./app.hooks.js";
 import authentication from "./authentication.js";
 import logger from "./logger.js";
-import thumbnailProxy from "./middleware/thumbnail-proxy.js";
 import knex from "./postgresql.js";
 import services from "./services/index.js";
 
@@ -60,7 +59,20 @@ expressApp.get('/sitemap.xml', (req, res) => {
 
 // Host the public folder
 app.use("/", express.static(clientDistPath, { index: false }));
-app.use("/images/thumbnails", thumbnailProxy(app, publicPath));
+
+app.use(
+  "/images/thumbnails",
+  express.static(path.join(publicPath, "img", "thumbnails"), {
+    fallthrough: false,
+    etag: true,
+    maxAge: "30d",
+    setHeaders: (res) => {
+      // Thumbnail URLs include a cache-busting query param (date_modified),
+      // so we can safely cache fairly aggressively.
+      res.setHeader("Cache-Control", "public, max-age=2592000, stale-while-revalidate=86400");
+    },
+  }),
+);
 // Configure a middleware for 404s and the error handler
 app.configure(knex);
 // Configure other middleware (see `middleware/index.js`)
