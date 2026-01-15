@@ -118,6 +118,12 @@ jobs:
     name: Deploy to Server
     needs: fetch_release
     runs-on: ubuntu-latest
+    env:
+      APP_DIR: work/freedom_archives_2
+      DEPLOYMENTS_DIR: ${{ env.APP_DIR }}/deployments
+      TAG_NAME: "${{ needs.fetch_release.outputs.tag }}"
+      FRONTEND_RELEASE_DIR: "${{ env.DEPLOYMENTS_DIR }}/${{ env.TAG_NAME }}"
+
     steps:
       - name: Download Build Artifact
         uses: actions/download-artifact@v4
@@ -133,7 +139,7 @@ jobs:
           key: ${{ secrets.SSH_KEY }}
           port: ${{ secrets.SSH_PORT }}
           source: "frontend-build.tar.gz"
-          target: "~/frontend-build.tar.gz"
+          target: "${FRONTEND_RELEASE_DIR}"
 
       - name: Execute Remote Deployment
         uses: appleboy/ssh-action@master
@@ -147,10 +153,6 @@ jobs:
               set -e
               
               # Configuration
-              APP_DIR="work/freedom_archives_2"
-              DEPLOYMENTS_DIR="$APP_DIR/deployments"
-              TAG_NAME="${{ needs.fetch_release.outputs.tag }}"
-              FRONTEND_RELEASE_DIR="$DEPLOYMENTS_DIR/$TAG_NAME"
               PUBLIC_DIST_LINK="$APP_DIR/public_dist"
               KEEP_RELEASES="${{ github.event.inputs.keep_releases || '10' }}"
 
@@ -167,12 +169,12 @@ jobs:
               # This avoids installing the frontend workspace dependencies on the server.
               yarn install
               
-              echo "📦 Extracting frontend build into: $FRONTEND_RELEASE_DIR"
-              mkdir -p "$DEPLOYMENTS_DIR"
-              rm -rf "$FRONTEND_RELEASE_DIR"
-              mkdir -p "$FRONTEND_RELEASE_DIR"
-              tar -xzf ~/frontend-build.tar.gz -C "$FRONTEND_RELEASE_DIR"
-              rm ~/frontend-build.tar.gz
+              # echo "📦 Extracting frontend build into: $FRONTEND_RELEASE_DIR"
+              # mkdir -p "$DEPLOYMENTS_DIR"
+              # rm -rf "$FRONTEND_RELEASE_DIR"
+              # mkdir -p "$FRONTEND_RELEASE_DIR"
+              # tar -xzf ~/frontend-build.tar.gz -C "$FRONTEND_RELEASE_DIR"
+              # rm ~/frontend-build.tar.gz
 
               echo "🔗 Updating public_dist symlink: $PUBLIC_DIST_LINK -> $FRONTEND_RELEASE_DIR"
               ln -sfn "$FRONTEND_RELEASE_DIR" "$PUBLIC_DIST_LINK"
