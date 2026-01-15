@@ -137,7 +137,12 @@ jobs:
           path: .
 
       - name: Prepare Frontend Release Directory
+        uses: appleboy/ssh-action@master
         with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USER }}
+          key: ${{ secrets.SSH_KEY }}
+          port: ${{ secrets.SSH_PORT }}
           envs: FRONTEND_RELEASE_DIR
         script: |
           rm -rf "$FRONTEND_RELEASE_DIR"
