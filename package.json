@@ -1,7 +1,7 @@
 {
   "name": "freedom-archives-database",
   "description": "Freedom Archives database backend",
-  "version": "0.0.0",
+  "version": "0.0.4",
   "homepage": "",
   "private": true,
   "main": "backend",
@@ -47,7 +47,8 @@
     "bundle:client": "yarn pack --pack-destination ./public",
     "migrate": "yarn knex migrate:latest",
     "migrate:prod": "NODE_ENV=production yarn knex migrate:latest",
-    "migrate:make": "yarn knex migrate:make -x mjs"
+    "migrate:make": "yarn knex migrate:make -x mjs",
+    "release": "yarn version $0 && git tag -a v$(jq -r '.version' package.json) -m 'Release version v$(jq -r '.version' package.json)'"
   },
   "dependencies": {
     "@babel/core": "^7.28.6",
