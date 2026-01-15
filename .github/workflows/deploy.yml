@@ -137,7 +137,8 @@ jobs:
           path: .
 
       - name: Prepare Frontend Release Directory
-        envs: FRONTEND_RELEASE_DIR
+        with:
+          envs: FRONTEND_RELEASE_DIR
         script: |
           rm -rf "$FRONTEND_RELEASE_DIR"
           mkdir -p "$FRONTEND_RELEASE_DIR"
