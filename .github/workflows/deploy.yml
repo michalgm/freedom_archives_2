@@ -26,12 +26,8 @@ jobs:
           # Cache settings for Yarn Berry
           cache-dependency-path: 'yarn.lock'
 
-      - name: Focus frontend workspace
-        run: yarn workspaces focus frontend
-
       - name: Install Frontend Dependencies
-        working-directory: ./frontend
-        run: yarn install
+        run: yarn workspaces focus freedom-archives-frontend
 
       - name: Build Frontend
         working-directory: ./frontend
