@@ -144,9 +144,10 @@ jobs:
           key: ${{ secrets.SSH_KEY }}
           port: ${{ secrets.SSH_PORT }}
           envs: FRONTEND_RELEASE_DIR
-        script: |
-          rm -rf "$FRONTEND_RELEASE_DIR"
-          mkdir -p "$FRONTEND_RELEASE_DIR"
+          
+          script: |
+            rm -rf "$FRONTEND_RELEASE_DIR"
+            mkdir -p "$FRONTEND_RELEASE_DIR"
 
       - name: Copy to Server
         uses: appleboy/scp-action@master
