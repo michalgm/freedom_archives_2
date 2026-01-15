@@ -136,19 +136,6 @@ jobs:
           name: frontend-build
           path: .
 
-      # - name: Prepare Frontend Release Directory
-      #   uses: appleboy/ssh-action@master
-      #   with:
-      #     host: ${{ secrets.SSH_HOST }}
-      #     username: ${{ secrets.SSH_USER }}
-      #     key: ${{ secrets.SSH_KEY }}
-      #     port: ${{ secrets.SSH_PORT }}
-      #     envs: FRONTEND_RELEASE_DIR
-
-      #     script: |
-      #       rm -rf "$FRONTEND_RELEASE_DIR"
-      #       mkdir -p "$FRONTEND_RELEASE_DIR"
-
       - name: Copy to Server
         uses: appleboy/scp-action@master
         with:
@@ -167,38 +154,28 @@ jobs:
           username: ${{ secrets.SSH_USER }}
           key: ${{ secrets.SSH_KEY }}
           port: ${{ secrets.SSH_PORT }}
-
-          # Explicitly pass runner env vars to the remote shell.
-          # Without this, variables like APP_DIR will be empty on the server.
           envs: APP_DIR,DEPLOYMENTS_DIR,TAG_NAME,FRONTEND_RELEASE_DIR
 
           script: |
               set -e
               
               # Configuration
-   
               PUBLIC_DIST_LINK="$APP_DIR/public_dist"
               KEEP_RELEASES="${{ github.event.inputs.keep_releases || '10' }}"
-
-              echo "🚀 Starting Deployment Process..."
 
               echo "🔄 Updating backend code from git..."
               cd "$APP_DIR"
               git pull origin main
               
+              echo "🔄 Setting up environment..."
               source ./activate.sh || echo "⚠️ verify activate.sh path if this fails"
 
               echo "📦 Installing/updating backend dependencies (skip frontend workspace)..."
-              # Yarn Berry: focus only the backend workspace for production installs.
-              # This avoids installing the frontend workspace dependencies on the server.
               yarn install
               
-              # echo "📦 Extracting frontend build into: $FRONTEND_RELEASE_DIR"
-              # mkdir -p "$DEPLOYMENTS_DIR"
-              # rm -rf "$FRONTEND_RELEASE_DIR"
-              # mkdir -p "$FRONTEND_RELEASE_DIR"
+              echo "📦 Extracting frontend build into: $FRONTEND_RELEASE_DIR"
               tar -xzf ${FRONTEND_RELEASE_DIR}/frontend-build.tar.gz -C "$FRONTEND_RELEASE_DIR"
-              # rm ${FRONTEND_RELEASE_DIR}/frontend-build.tar.gz
+              rm ${FRONTEND_RELEASE_DIR}/frontend-build.tar.gz
 
               echo "🔗 Updating public_dist symlink: $PUBLIC_DIST_LINK -> $FRONTEND_RELEASE_DIR"
               rm "$PUBLIC_DIST_LINK"
@@ -206,22 +183,6 @@ jobs:
 
               echo "🔄 Running Migrations..."
               NODE_ENV=production yarn run migrate
-
-              # echo "🖼️  Ensuring thumbnails directory exists..."
-              # RESOURCE_DIR="$HOME/shared_resources"
-              # mkdir -p "$RESOURCE_DIR/thumbnails"
-              
-              # # Create symlink if it doesn't exist
-              # if [ ! -L "$APP_DIR/public/img/thumbnails" ]; then
-              #     echo "  Creating thumbnails symlink..."
-              #     mkdir -p "$APP_DIR/public/img"
-              #     # Backup any existing thumbnails first
-              #     if [ -d "$APP_DIR/public/img/thumbnails" ]; then
-              #         rsync -a "$APP_DIR/public/img/thumbnails/" "$RESOURCE_DIR/thumbnails/"
-              #         rm -rf "$APP_DIR/public/img/thumbnails"
-              #     fi
-              #     ln -sfn "$RESOURCE_DIR/thumbnails" "$APP_DIR/public/img/thumbnails"
-              # fi
 
               echo "🔄 Restarting Node Service..."
               # CloudLinux Node.js restart command
