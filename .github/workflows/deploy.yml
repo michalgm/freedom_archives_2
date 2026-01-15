@@ -127,6 +127,7 @@ jobs:
         run: |
           echo "DEPLOYMENTS_DIR=${APP_DIR}/deployments" >> $GITHUB_ENV
           echo "FRONTEND_RELEASE_DIR=${APP_DIR}/deployments/${TAG_NAME}" >> $GITHUB_ENV
+          mkdir -p "${APP_DIR}/deployments/${TAG_NAME}"
 
       - name: Download Build Artifact
         uses: actions/download-artifact@v4
