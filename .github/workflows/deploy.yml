@@ -20,6 +20,12 @@ on:
         default: '10'
         type: string
 
+# Ensure only one production deployment workflow runs at a time.
+# New runs will queue until the in-progress one completes.
+concurrency:
+  group: deploy-production
+  cancel-in-progress: false
+
 jobs:
   build:
     name: Build & Package
@@ -123,6 +129,8 @@ jobs:
     env:
       APP_DIR: /home/${{ secrets.SSH_USER }}/work/freedom_archives_2
       TAG_NAME: "${{ needs.fetch_release.outputs.tag }}"
+      DEPLOYMENTS_DIR: /home/${{ secrets.SSH_USER }}/work/freedom_archives_2/deployments
+      FRONTEND_RELEASE_DIR: /home/${{ secrets.SSH_USER }}/work/freedom_archives_2/deployments/${{ needs.fetch_release.outputs.tag }}
 
     steps:
       - name: Compute deploy paths
