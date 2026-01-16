@@ -6,6 +6,7 @@ import { useNavigate, useParams, useLocation } from "react-router";
 import { getServiceID } from "src/api";
 import { BaseForm } from "src/components/form/BaseForm";
 import ViewContainer from "src/components/ViewContainer";
+import { collectionSelectFields } from "src/config/constants";
 import { useTitle } from "src/stores";
 import { createQueryStore } from "src/stores/index";
 import EditItemView from "src/views/EditItemView";
@@ -34,6 +35,12 @@ const inferModeFromPath = (pathname) => {
     return "featured_collections";
   }
   return "";
+};
+
+const fetchOptions = {
+  query: {
+    $select: collectionSelectFields,
+  },
 };
 
 export function Collection() {
@@ -142,6 +149,7 @@ export function Collection() {
             setTitle(collection.title || "New Collection");
             return collection;
           },
+          fetchOptions,
           onDelete: () => navigate(`/admin/collections`),
         }}
       >
