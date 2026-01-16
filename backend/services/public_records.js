@@ -144,13 +144,13 @@ const searchRecords = async (context) => {
     context.service._find(params),
     lookupFilters(context),
     getNonDigitizedTotal(context),
-  ].map(async (p, index) => {
-    // console.time(`promise${index}`);
-    const res = await p;
-
-    // console.timeEnd(`promise${index}`);;
-    return res;
-  }));
+  ]);
+  //   .map(async (p, index) => {
+  //   // console.time(`promise${index}`);
+  //   const res = await p;
+  //   // console.timeEnd(`promise${index}`);;
+  //   return res;
+  // }));
   context.result = {
     ...data,
     filters,
