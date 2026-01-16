@@ -1,129 +1,41 @@
 
-
 Priorities:
-    ✔ auth roles: @done(25-05-28 02:30)
-        ✔ if not admin, can't change own role @done(25-05-28 02:30)
-        ✔ intern: set needs_review = true on records @done(25-05-28 02:30)
-        ✔ staff role : edit list values, manage users @done(25-05-28 02:30)
-        ✔ admin role : publish, review @done(25-05-28 02:30)
     ☐ look into publisher merge feature
     ☐ Thumbnail uploads/resizing/management
-        ✔ collection thumbnails @done(25-05-20 12:30)
-        ✔ vimeo thumbnails @done(25-05-22 15:13)
-        ✔ force update thumbnail @done(25-06-12 15:08)
         ☐ update "no digital" thumbnail
     ☐ export collections
         ☐ Export collections - intern can't export all
-    ✔ add force update thumbnail control @done(25-06-06 19:44)
     ☐ Backups\
-        ✔ automated server-side backups solution @done(25-06-05 15:36)
-    ✔ Vin -> VIN @done(25-05-28 02:35)
-    ✔ Publisher -> multivalue @done(25-11-04 02:00)
-    ✔ why record id search not match: 39067 @done(25-05-28 02:35)
-    ✔ Data cleanup to review / Send Nathaniel data cleanup lists @done(25-05-28 02:35)
-    ✔ Validate call numbers on save @done(25-06-01 03:57)
-    ✔ filter all sub-sub collections @done(25-05-29 08:07)
-    ✔ feature collection -> new collection (probably falsy 0 issue) @done(25-06-01 03:57)
-    ✔ staff user not working @done(25-12-25 13:26)
     ☐ add confirmation on user active toggle
-    ✔ fix non-digitized count on search @done(25-12-25 13:26)
     ☐ add title to table view re: media
-    ☐ hide hidden front page collections
-    ✔ RegExp.escape in upload @done(25-06-05 18:35)
-    ✔ remove 'record' interface from featured collections @done(25-06-05 18:38)
-    ✔ prevent access to restricted routes @done(25-06-12 15:08)
-    ✔ allow change password for all roles @done(25-06-12 15:08)
-    ✔ required collection? @done(25-06-05 23:17)
-    ✔ require descriptoin on collection @done(25-06-12 15:08)
     ☐ add validation on if username exists on create user
-    ✔ fix Admin breadcrumb link @done(25-12-16 11:37)
     ☐ merge records with [CD] at end of title
-    ✔ add media type + publisher + producers to fulltext @done(25-12-16 11:37)
     ☐ bug on record filters not working right?
 
-Public Site:
-  ✔ change viewport to ignore site header @done(25-10-01 23:36)
-  ✔ add word cloud @done(25-10-03 02:44)
-  ✔ breadcrumbs for collection nav @done(25-10-03 02:44)
   ☐ accessibility review
-  ☐ media player
-  ✔ add search help @done(25-10-31 17:32)
   ☐ records:
-    ✔ add format @done(25-10-07 13:35)
-    ✔ add collection @done(25-10-07 13:35)
-    ✔ add date @done(25-10-07 13:35)
-    ✔ program @done(25-10-07 13:35)
-    ✔ producer/organization @done(25-10-07 13:35)
   ☐ collections:
-    ✔ add keywords @done(25-10-07 13:18)
-    ✔ add date range @done(25-10-07 13:18)
-    ✔ mabel + robert f williams collection - missing records? @done(25-10-03 02:44)
-  ☐ word cloud: direct keyword filter, or basic search on term?
-  ☐ add word cloud to home page
-  ☐ fix search query param
-  ☐ word cloud only on homepage
-  ☐ link image to fa home
-  ☐ list subcollections on collection item in collection view (not home page)
-  ☐ fix tab header not scrolling
   ☐ fix loading.... suspense fallback
-  ☐ "right on" not appearing at top of results - 31035
   ☐ side scroll on phone view for browse by collection, etc
 
-
 Todos:
-    ✔ "loading" on empty dropdown interface (subjects, etc) @done(25-05-15 13:26)
-    ✔ confirmation on deletes @done(24-02-13 21:25)
-    ☐ duplicate records UI
-    ✔ merge/review changes UI @done(25-05-15 13:27)
-    ✔ embedded filter styling on Manage component @done(25-05-15 13:27)
     ☐ identity/merge duplicate list items
-    ✔ search: run search + filters lookup in parallel @done(25-05-14 12:17)
-    ✔ backup/restore database @done(25-05-15 13:28)
-    ✔ universal search in nav @done(25-06-06 19:46)
-    ✔ drop footer on site settings? or add update/mod times to settings? @done(25-05-15 14:00)
-    ✔ retain focus on multi-value fields @done(25-05-14 12:17)
-    ✔ handle long entries in dropdowns @done(25-05-15 13:30)
-    ✔ thumbnail update issue on live site @done(25-05-15 13:57)
-    ✔ editablelistitem - focus input on edit @done(25-05-14 12:25)
-    ✔ datestring starts as dirty? @done(25-05-14 12:25)
-    ✔ on records tab in collection, set default filter to uncategorized category @done(25-05-29 15:47)
     ☐ manage uncategorized + top-level categories per-archive
     ☐ check fuzzy-dupes on list item add
     ☐ clear canceled list-item add ("create new author 'xxx'")
-    ☐ sort option in manage interface
-    ✔ state management for manage interface (separate record/collection, and non-persistent) @done(25-05-28 02:40)
-    ☐ limit select fields on collection/record views
     ☐ clean up call numbers
     ☐ clean up list item capitalization duplicates
     ☐ clean up not null fields (like media type)
-    ✔ Add FACT number to record "Cloud backup reference id (FACT)" @done(26-01-05 17:52)
-    ✔ Automate insertion of fact ids from notes field @done(26-01-05 17:52)
     ☐ Add validation on fact ids - including unique on ID
     
 Archive Service:
     ☐ Add management interface
 
-API:
-    ✔ access controls @done(25-05-29 15:46)
-    ✔ intern auto-set "needs review" @done(25-05-29 15:46)
-
-Settings:
-    ✔ Site header text @done(25-05-08 15:00)
 Record:
-    ✔ vimeo thumbnails @done(25-05-21 10:20)
     Continuations:
         ☐ continuation needs order/index field
 Collection:
-    ✔ Manage Child records @done(25-05-15 14:02)
-    ✔ Featured Records interface @done(25-05-15 14:02)
-    ✔ Subcollections @done(25-05-15 14:02)
-    ✔ thumbnails @done(25-05-21 10:20)
-    ✔ check if collection has records before delete @done(25-05-21 10:20)
-    ✔ add validation @done(25-05-14 16:34)
     ☐ Add filter to left pane of edit lists
-
-Users:
-    ✔ confirm on user delete @done(25-03-14 18:24)
 
 Future Steps:
     ☐ Upload PDFs through admin tool? - maybe
@@ -135,17 +47,94 @@ Questions:
     ☐ Top-level records? "Prisoners of Conscence Project"
     ☐ featured records/collections independant of 'featured' collection?
     ☐ Date range - how to normalize?
-    ✔ Publisher - should it be multi-value? Example: Americans for Middle East Understanding; Council of the Advancement of Arab-British Understanding; UC Nuclear Weapons Labs Conversion Project; Fund to Restore an Educated Electorate; American-Arab Anti-Discrimination Committee; Los Angeles World Affairs Council; The American Committee of Justice in the Middle East; cd @done(25-11-12 08:19)
-    ✔ Are featured records always direct members of collection - no also subcollections, but never outside @done(25-05-15 13:53)
-    ✔ Filter by call number - just category, or full call number? - full call number as it is now works @done(25-05-15 13:53)
-    ✔ Update record thumbnails indepedently of primary instance URL? - no @done(25-03-20 13:29)
-    ✔ Collections thumbnail sources - pull from child record? - no @done(25-03-20 13:29)
-    ✔ Non-edit display of record/collection? - no @done(25-03-20 13:29)
-
-
-
 
 Archive:
+  ✔ duplicate records UI @done(26-01-15 19:16) @project(Todos)
+  ✔ sort option in manage interface @done(26-01-15 19:16) @project(Todos)
+  ✔ limit select fields on collection/record views @done(26-01-15 19:16) @project(Todos)
+  ✔ hide hidden front page collections @done(26-01-15 19:02) @project(Priorities)
+  ✔ media player @done(26-01-15 19:01)
+  ✔ word cloud: direct keyword filter, or basic search on term? @done(26-01-15 19:01)
+  ✔ add word cloud to home page @done(26-01-15 19:01)
+  ✔ fix search query param @done(26-01-15 19:01)
+  ✔ word cloud only on homepage @done(26-01-15 19:01)
+  ✔ link image to fa home @done(26-01-15 19:01)
+  ✔ list subcollections on collection item in collection view (not home page) @done(26-01-15 19:01)
+  ✔ fix tab header not scrolling @done(26-01-15 19:01)
+  ✔ "right on" not appearing at top of results - 31035 @done(26-01-15 19:01)
+  ✔ auth roles: @done(25-05-28 02:30) @project(Priorities)
+  ✔ if not admin, can't change own role @done(25-05-28 02:30) @project(Priorities)
+  ✔ intern: set needs_review = true on records @done(25-05-28 02:30) @project(Priorities)
+  ✔ staff role : edit list values, manage users @done(25-05-28 02:30) @project(Priorities)
+  ✔ admin role : publish, review @done(25-05-28 02:30) @project(Priorities)
+  ✔ collection thumbnails @done(25-05-20 12:30) @project(Priorities)
+  ✔ vimeo thumbnails @done(25-05-22 15:13) @project(Priorities)
+  ✔ force update thumbnail @done(25-06-12 15:08) @project(Priorities)
+  ✔ add force update thumbnail control @done(25-06-06 19:44) @project(Priorities)
+  ✔ automated server-side backups solution @done(25-06-05 15:36) @project(Priorities)
+  ✔ Vin -> VIN @done(25-05-28 02:35) @project(Priorities)
+  ✔ Publisher -> multivalue @done(25-11-04 02:00) @project(Priorities)
+  ✔ why record id search not match: 39067 @done(25-05-28 02:35) @project(Priorities)
+  ✔ Data cleanup to review / Send Nathaniel data cleanup lists @done(25-05-28 02:35) @project(Priorities)
+  ✔ Validate call numbers on save @done(25-06-01 03:57) @project(Priorities)
+  ✔ filter all sub-sub collections @done(25-05-29 08:07) @project(Priorities)
+  ✔ feature collection -> new collection (probably falsy 0 issue) @done(25-06-01 03:57) @project(Priorities)
+  ✔ staff user not working @done(25-12-25 13:26) @project(Priorities)
+  ✔ fix non-digitized count on search @done(25-12-25 13:26) @project(Priorities)
+  ✔ RegExp.escape in upload @done(25-06-05 18:35) @project(Priorities)
+  ✔ remove 'record' interface from featured collections @done(25-06-05 18:38) @project(Priorities)
+  ✔ prevent access to restricted routes @done(25-06-12 15:08) @project(Priorities)
+  ✔ allow change password for all roles @done(25-06-12 15:08) @project(Priorities)
+  ✔ required collection? @done(25-06-05 23:17) @project(Priorities)
+  ✔ require descriptoin on collection @done(25-06-12 15:08) @project(Priorities)
+  ✔ fix Admin breadcrumb link @done(25-12-16 11:37) @project(Priorities)
+  ✔ add media type + publisher + producers to fulltext @done(25-12-16 11:37) @project(Priorities)
+  ✔ change viewport to ignore site header @done(25-10-01 23:36)
+  ✔ add word cloud @done(25-10-03 02:44)
+  ✔ breadcrumbs for collection nav @done(25-10-03 02:44)
+  ✔ add search help @done(25-10-31 17:32)
+  ✔ add format @done(25-10-07 13:35)
+  ✔ add collection @done(25-10-07 13:35)
+  ✔ add date @done(25-10-07 13:35)
+  ✔ program @done(25-10-07 13:35)
+  ✔ producer/organization @done(25-10-07 13:35)
+  ✔ add keywords @done(25-10-07 13:18)
+  ✔ add date range @done(25-10-07 13:18)
+  ✔ mabel + robert f williams collection - missing records? @done(25-10-03 02:44)
+  ✔ "loading" on empty dropdown interface (subjects, etc) @done(25-05-15 13:26) @project(Todos)
+  ✔ confirmation on deletes @done(24-02-13 21:25) @project(Todos)
+  ✔ merge/review changes UI @done(25-05-15 13:27) @project(Todos)
+  ✔ embedded filter styling on Manage component @done(25-05-15 13:27) @project(Todos)
+  ✔ search: run search + filters lookup in parallel @done(25-05-14 12:17) @project(Todos)
+  ✔ backup/restore database @done(25-05-15 13:28) @project(Todos)
+  ✔ universal search in nav @done(25-06-06 19:46) @project(Todos)
+  ✔ drop footer on site settings? or add update/mod times to settings? @done(25-05-15 14:00) @project(Todos)
+  ✔ retain focus on multi-value fields @done(25-05-14 12:17) @project(Todos)
+  ✔ handle long entries in dropdowns @done(25-05-15 13:30) @project(Todos)
+  ✔ thumbnail update issue on live site @done(25-05-15 13:57) @project(Todos)
+  ✔ editablelistitem - focus input on edit @done(25-05-14 12:25) @project(Todos)
+  ✔ datestring starts as dirty? @done(25-05-14 12:25) @project(Todos)
+  ✔ on records tab in collection, set default filter to uncategorized category @done(25-05-29 15:47) @project(Todos)
+  ✔ state management for manage interface (separate record/collection, and non-persistent) @done(25-05-28 02:40) @project(Todos)
+  ✔ Add FACT number to record "Cloud backup reference id (FACT)" @done(26-01-05 17:52) @project(Todos)
+  ✔ Automate insertion of fact ids from notes field @done(26-01-05 17:52) @project(Todos)
+  ✔ access controls @done(25-05-29 15:46) @project(API)
+  ✔ intern auto-set "needs review" @done(25-05-29 15:46) @project(API)
+  ✔ Site header text @done(25-05-08 15:00) @project(Settings)
+  ✔ vimeo thumbnails @done(25-05-21 10:20) @project(Record)
+  ✔ Manage Child records @done(25-05-15 14:02) @project(Collection)
+  ✔ Featured Records interface @done(25-05-15 14:02) @project(Collection)
+  ✔ Subcollections @done(25-05-15 14:02) @project(Collection)
+  ✔ thumbnails @done(25-05-21 10:20) @project(Collection)
+  ✔ check if collection has records before delete @done(25-05-21 10:20) @project(Collection)
+  ✔ add validation @done(25-05-14 16:34) @project(Collection)
+  ✔ confirm on user delete @done(25-03-14 18:24) @project(Users)
+  ✔ Publisher - should it be multi-value? Example: Americans for Middle East Understanding; Council of the Advancement of Arab-British Understanding; UC Nuclear Weapons Labs Conversion Project; Fund to Restore an Educated Electorate; American-Arab Anti-Discrimination Committee; Los Angeles World Affairs Council; The American Committee of Justice in the Middle East; cd @done(25-11-12 08:19) @project(Questions)
+  ✔ Are featured records always direct members of collection - no also subcollections, but never outside @done(25-05-15 13:53) @project(Questions)
+  ✔ Filter by call number - just category, or full call number? - full call number as it is now works @done(25-05-15 13:53) @project(Questions)
+  ✔ Update record thumbnails indepedently of primary instance URL? - no @done(25-03-20 13:29) @project(Questions)
+  ✔ Collections thumbnail sources - pull from child record? - no @done(25-03-20 13:29) @project(Questions)
+  ✔ Non-edit display of record/collection? - no @done(25-03-20 13:29) @project(Questions)
   ✔ Notes should be textarea @done(22-04-28 14:18) @project(Todos.Collection)
   ✔ add record count + digitized @done(22-04-28 14:04) @project(Todos)
   ✔ link to collection in search results @done(21-06-14 23:32) @project(Todos)
