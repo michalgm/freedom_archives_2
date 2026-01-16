@@ -103,7 +103,7 @@ const EditItemView = ({ newItem, item, service, deleteOptions, className, childr
       type: "link",
       variant: "outlined",
       icon: <Link />,
-      to: `https://search.freedomarchives.org/admin/#/${service === "records" ? "documents" : service}/${id}`,
+      to: `https://search-old.freedomarchives.org/admin/#/${service === "records" ? "documents" : service}/${id}`,
       sx: { mr: "auto" },
       target: "_blank",
     });

@@ -42,9 +42,9 @@ function Relationship({ id }) {
                       <Link to={`/records/${relation[`docid_${num}`]}`}>(ID {relation[`docid_${num}`]})</Link>
                       <Link
                         target="_blank"
-                        href={`https://search.freedomarchives.org/admin/#/documents/${relation[`docid_${num}`]}`}
+                        href={`https://search-old.freedomarchives.org/admin/#/documents/${relation[`docid_${num}`]}`}
                       >
-                        (Live DB Link)
+                        (Old DB Link)
                       </Link>
                     </Typography>
                   </Stack>
