@@ -13,6 +13,7 @@ const searchTypes = {
   collections: {
     id: "collection_id",
     label: "title",
+    fields: ["collection_id", "title", "thumbnail", "parent", "call_number"],
     renderOption: (item) => <CollectionItem collection={item} component="div" dense />,
   },
   records: {
