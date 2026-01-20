@@ -75,7 +75,7 @@ export const usePublicSearch = (
     sort: "Relevance",
   });
   const [filters, setFilters] = useState(() => initialData?.filters || []);
-  const prevSearchRef = useRef({ ...search, searchFilters });
+  const prevSearchRef = useRef(initialData ? { ...search, searchFilters } : null);
 
   const fetchRecords = useCallback(async () => {
     if (skipInitialFetchRef.current) {
