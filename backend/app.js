@@ -71,7 +71,7 @@ app.hooks(appHooks);
 // Express 5 / path-to-regexp v6 doesn't accept "*" as a path pattern.
 // Use a regex catch-all instead.
 
-expressApp.all(/.*/, async (request, response, next) => {
+expressApp.get(/.*/, async (request, response, next) => {
   if (request.path.startsWith("/api/") || request.path.startsWith("/images/")) {
     return next();
   }
