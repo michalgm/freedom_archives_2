@@ -357,14 +357,14 @@ const PublicCollections = () => {
                 <Box className="overview-scrollable" sx={{ flex: 1, overflow: "auto" }}>
                   <Thumbnail
                     item={collection}
-                    width={200}
+                    width={{ md: 200, xs: 100 }}
                     sx={{ float: "left", mr: 2 }}
                   />
                   <Typography
                     variant="body1"
                     component="div"
                     dangerouslySetInnerHTML={{ __html: collection.description }}
-                    sx={{ "& p": { mt: 0, mb: 1 }, "textAlign": "justify" }}
+                    sx={{ "& p": { mt: 0, mb: 1 } }}
                   />
                 </Box>
               </Box>

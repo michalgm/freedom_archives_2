@@ -235,9 +235,9 @@ export function ItemStack({
 }) {
   return (
     <Box className="flex-container" {...props}>
-      <Typography variant="header" gutterBottom>
+      {title && <Typography variant="header" gutterBottom>
         {title}
-      </Typography>
+      </Typography>}
       <Stack
         spacing={dense ? 0 : 2}
         className="flex-scroller"

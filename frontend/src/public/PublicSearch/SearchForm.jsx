@@ -166,14 +166,14 @@ export function SearchForm({
       <Grid
         container
         spacing={1}
-        direction="row"
+        direction={{ xs: "column", md: "row" }}
         alignItems="center"
         sx={{ p: 1 }}
       >
-        <Grid size={5}>
+        <Grid size={{ xs: 12, md: 6 }}>
           <SearchInput focus={focus} />
         </Grid>
-        <Grid size={3}>
+        <Grid size={{ xs: 12, md: 3 }}>
           <SelectElement
             name="sort"
             label="Sort by"
@@ -182,7 +182,7 @@ export function SearchForm({
             fullWidth
           />
         </Grid>
-        <Grid size={3}>
+        <Grid size={{ xs: 12, md: 3 }}>
           <CheckboxElement
             name="include_non_digitized"
             label="Include non-digitized records"

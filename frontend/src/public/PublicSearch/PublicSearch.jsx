@@ -1,4 +1,13 @@
-import { Box, Divider, Grid, Stack } from "@mui/material";
+import {
+  Box,
+  Button,
+  Collapse,
+  Divider,
+  Grid,
+  Icon,
+  Stack,
+  useMediaQuery,
+} from "@mui/material";
 import React from "react";
 import { ItemStack } from "src/public/ItemCard";
 import {
@@ -51,29 +60,57 @@ export function Search(params) {
     initialData,
   );
   const [currentRecord, setCurrentRecord] = React.useState(null);
+  const isDesktop = useMediaQuery(theme => theme.breakpoints.up("md"));
+  const [filtersOpen, setFiltersOpen] = React.useState(() => isDesktop);
+
+  React.useEffect(() => {
+    setFiltersOpen(isDesktop);
+  }, [isDesktop]);
 
   return (
     <Box className="flex-container search-page">
       <Stack
-        direction="row"
+        direction={{ xs: "column", md: "row" }}
         className="records"
-        sx={{ height: "100%" }}
-        divider={<Divider orientation="vertical" flexItem />}
+        sx={{ height: { xs: "auto", md: "100%" } }}
+        divider={isDesktop ? <Divider orientation="vertical" flexItem /> : null}
         spacing={2}
       >
-        <Box sx={{ flexBasis: 300, flexGrow: 0, flexShrink: 0 }}>
-          <SearchFilters
-            {...{
-              search,
-              setSearch,
-              filters,
-              setFilters,
-              addFilter,
-              clearFilters,
-              loading,
-            }}
-            nonDigitizedTotal={records.nonDigitizedTotal}
-          />
+        <Box
+          sx={{
+            flexBasis: { xs: "auto", md: 300 },
+            flexGrow: 0,
+            flexShrink: 0,
+            width: { xs: "100%", md: "auto" },
+          }}
+        >
+          {!isDesktop && (
+            <Button
+              variant="outlined"
+              fullWidth
+              startIcon={<Icon>filter_list</Icon>}
+              endIcon={<Icon>{filtersOpen ? "expand_less" : "expand_more"}</Icon>}
+              onClick={() => setFiltersOpen(open => !open)}
+              sx={{ mb: 1 }}
+            >
+              Filters
+            </Button>
+          )}
+
+          <Collapse in={isDesktop || filtersOpen} timeout="auto" unmountOnExit={!isDesktop}>
+            <SearchFilters
+              {...{
+                search,
+                setSearch,
+                filters,
+                setFilters,
+                addFilter,
+                clearFilters,
+                loading,
+              }}
+              nonDigitizedTotal={records.nonDigitizedTotal}
+            />
+          </Collapse>
         </Box>
         <Box sx={{ flexGrow: 1 }} className="flex-container">
           <Box
