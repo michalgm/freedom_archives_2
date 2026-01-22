@@ -7,7 +7,8 @@
     "checkJs": true,
     "noEmit": true,
     "baseUrl": ".",
-    "allowSyntheticDefaultImports": true
+    "allowSyntheticDefaultImports": true,
+    "esModuleInterop": true
 
     // "paths": {
     //   "@mui/icons-material/*": ["../node_modules/@mui/icons-material/esm/*"]

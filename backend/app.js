@@ -26,7 +26,7 @@ expressApp.set("query parser", function (str) {
   return qs.parse(str, { strictNullHandling: true, arrayLimit: Infinity });
 });
 
-const app = feathersExpress(feathers(), expressApp);
+const app = /** @type {any} */ (feathersExpress)(feathers(), expressApp);
 app.configure(configuration());
 // Set up Plugins and providers
 const publicPath = path.resolve(__dirname, app.get("public")); // Adjust relative path as necessary
