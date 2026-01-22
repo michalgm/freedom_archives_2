@@ -40,7 +40,7 @@ const eslintConfig = [
     },
     rules: {
       'no-console': ['warn', { allow: ['warn', 'error'] }],
-      "indent": ["error", 2, { "SwitchCase": 1 }],
+      // "indent": ["error", 2, { "SwitchCase": 1 }],
       '@stylistic/quotes': 'off',
       '@stylistic/semi': 'off',
       '@stylistic/array-element-newline': ['warn', 'consistent'],
@@ -90,7 +90,7 @@ const eslintConfig = [
 
     rules: {
       ...js.configs.recommended.rules,
-      'indent': ['error', 2, { "SwitchCase": 1 }],
+      // 'indent': ['error', 2, { "SwitchCase": 1 }],
       'linebreak-style': ['error', 'unix'],
       'semi': ['error', 'always'],
       'no-undef': 'warn',
