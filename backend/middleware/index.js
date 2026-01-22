@@ -46,7 +46,7 @@ export default function (app) {
   app.use(
     "/images/thumbnails",
     express.static(path.join(publicPath, "img", "thumbnails"), {
-      fallthrough: false,
+      fallthrough: true,
       etag: true,
       maxAge: "30d",
       setHeaders: (res) => {

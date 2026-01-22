@@ -1,5 +1,5 @@
 import configuration from "@feathersjs/configuration";
-import feathersExpress, { errorHandler, json, rest, urlencoded } from "@feathersjs/express";
+import feathersExpress, { errorHandler, json, notFound, rest, urlencoded } from "@feathersjs/express";
 import { feathers } from "@feathersjs/feathers";
 import { createRequestHandler } from "@react-router/express";
 import compress from "compression";
@@ -84,6 +84,7 @@ expressApp.get(/.*/, async (request, response, next) => {
   }
 });
 // Configure a middleware for 404s and the error handler
+app.use(notFound());
 app.use(
   errorHandler({
     logger,
