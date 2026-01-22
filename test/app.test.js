@@ -32,6 +32,16 @@ describe("Feathers application tests", () => {
     }
   });
 
+  it("returns 404 for missing thumbnails (not 500)", { timeout: 10000 }, async () => {
+    try {
+      await axios.get(`${appUrl}/images/thumbnails/records/__does_not_exist__.jpg`);
+      expect.fail("Expected request to fail with 404");
+    } catch (error) {
+      const { response } = error;
+      expect(response?.status).toBe(404);
+    }
+  });
+
   // it("shows a 404 JSON error", async () => {
   //   try {
   //     const res = await axios.get(`${appUrl}/path/to/nowhere`, {
