@@ -11,8 +11,10 @@
     "build": "yarn react-router build",
     "preview": "yarn vite preview",
     "publish": "yarn run build && scp -Crp dist/* freedomarc:work/freedom_archives_2/frontend/build/",
-    "storybook": "yarn storybook dev -p 6006 --no-open",
-    "build-storybook": "yarn storybook build"
+    "storybook": "STORYBOOK=1 storybook dev -p 6006 --no-open",
+    "storybook:ci": "STORYBOOK=1 storybook dev -p 6006 --ci --no-open",
+    "build-storybook": "STORYBOOK=1 storybook build",
+    "test:storybook": "yarn vitest run --project storybook"
   },
   "dependencies": {
     "@babel/core": "^7.28.6",

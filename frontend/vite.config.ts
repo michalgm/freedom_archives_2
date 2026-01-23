@@ -12,6 +12,9 @@ const dirname
   = typeof __dirname !== 'undefined' ? __dirname : path.dirname(fileURLToPath(import.meta.url));
 
 export default defineConfig(({ mode }) => ({
+  // Storybook runs Vite programmatically and doesn't provide a configFile in the
+  // same way as `vite` CLI. The React Router Vite plugin expects that, so we
+  // disable it for Storybook runs.
   // depending on your application, base can also be "/"
   base: "/",
   define: {
@@ -27,7 +30,7 @@ export default defineConfig(({ mode }) => ({
   },
   plugins: [
     // react(),
-    reactRouter(),
+    ...(process.env.STORYBOOK ? [] : [reactRouter()]),
     // {
     //   name: "mui-icons-transformer",
     //   transform(code, id) {
@@ -66,7 +69,7 @@ export default defineConfig(({ mode }) => ({
             configDir: path.join(dirname, '.storybook'),
             // This should match your package.json script to run Storybook
             // The --ci flag will skip prompts and not open a browser
-            storybookScript: 'yarn storybook --ci',
+            storybookScript: 'yarn storybook:ci',
           }),
         ],
         test: {
