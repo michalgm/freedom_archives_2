@@ -154,9 +154,9 @@ const updateThumbnail = async (context) => {
       if (!media_type) {
         const ext = url.split('.').pop().replace(/\?.*/g, '').toLowerCase();
         media_type = MEDIA_TYPES[ext] || 'Webpage';
-        if (!MEDIA_TYPES[ext]) {
-          console.log(`  - Inferred media type for ${url} as ${media_type} from file extension .${ext}`);
-        }
+        // if (!MEDIA_TYPES[ext]) {
+        //   console.log(`  - Inferred media type for ${url} as ${media_type} from file extension .${ext}`);
+        // }
       }
       if (['Video', 'Image', 'PDF'].includes(media_type)) {
         await writeThumbnailsFromUrl(args);
