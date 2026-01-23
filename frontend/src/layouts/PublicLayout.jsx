@@ -159,10 +159,10 @@ const PublicShell = ({ children }) => {
         <Container
           id="main_content"
           sx={{
-            border: "5px solid",
-            borderColor: "rgba(0, 0, 0, 0.05)",
+            border: { sx: "none", md: "5px solid rgba(0, 0, 0, 0.05)" },
+            // borderColor: "rgba(0, 0, 0, 0.05)",
             backgroundClip: "padding-box",
-            p: 2,
+            p: { xs: 1, md: 2 },
             backgroundColor: "background.default",
             mt: -8,
             minHeight: 0,

@@ -82,7 +82,7 @@ function SearchHelpDialog({ open, onClose }) {
           },
         }}
         >
-          <dl>
+          <dl style={{ marginBottom: "8px !important" }}>
             <dt>How does this work?</dt>
             <dd>
               There are many ways to search the collections of the Freedom Archives. Below is a brief guide that will help you conduct effective searches. Note, anytime you search for anything in the Freedom Archives, the first results that appear will be our digitized items. Information for items that have yet to be scanned or yet to be digitized can still be viewed, but only by checking the "Include non-digitized records" checkbox. If you are interested in accessing these non-digitized materials, please email

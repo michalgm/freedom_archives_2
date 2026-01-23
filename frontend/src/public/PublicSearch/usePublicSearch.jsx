@@ -58,7 +58,7 @@ export const usePublicSearch = (
   const location = useLocation();
   const skipInitialFetchRef = useRef(Boolean(initialData));
   const [records, setRecords] = useState(() => {
-    if (!initialData) return { count: 0, records: [] };
+    if (!initialData) return { total: 0, nonDigitizedTotal: 0, records: [] };
     return {
       total: initialData.total,
       nonDigitizedTotal: initialData.nonDigitizedTotal,
@@ -77,26 +77,47 @@ export const usePublicSearch = (
   const [filters, setFilters] = useState(() => initialData?.filters || []);
   const prevSearchRef = useRef(initialData ? { ...search, searchFilters } : null);
 
+  const mergeRecordPages = useCallback((previousRecords, nextRecords) => {
+    const seen = new Set();
+    const merged = [];
+    [...(previousRecords || []), ...(nextRecords || [])].forEach((record) => {
+      const id = record?.record_id;
+      if (id === undefined || id === null) return;
+      if (seen.has(id)) return;
+      seen.add(id);
+      merged.push(record);
+    });
+    return merged;
+  }, []);
+
   const fetchRecords = useCallback(async () => {
     if (skipInitialFetchRef.current) {
       skipInitialFetchRef.current = false;
       return;
     }
 
-    setRecordsLoading(true);
-    if (initialLoading) {
-      setRecordsLoading(false);
+    if (initialLoading) return;
+
+    const nextSearch = { ...search, searchFilters };
+    const isNewSearch = !isEqual(nextSearch, prevSearchRef.current);
+
+    // When search params change, force offset back to 0 before fetching.
+    // IMPORTANT: do not update prevSearchRef yet; otherwise the subsequent
+    // offset=0 fetch will not be treated as a new search and will merge pages.
+    if (isNewSearch && offset !== 0) {
+      setLoading(true);
+      setOffset(0);
+      setRecords({ total: 0, nonDigitizedTotal: 0, records: [] });
+      setTotal(0);
       return;
     }
 
-    const isNewSearch = !isEqual(
-      { ...search, searchFilters },
-      prevSearchRef.current,
-    );
+    setRecordsLoading(true);
 
     if (isNewSearch) {
       setLoading(true);
-      prevSearchRef.current = { ...search, searchFilters };
+      setRecords({ total: 0, nonDigitizedTotal: 0, records: [] });
+      setTotal(0);
     }
 
     try {
@@ -122,6 +143,7 @@ export const usePublicSearch = (
         $limit: pageSize,
         $skip: offset,
         $sort: omit(sortOptions[sort], ["rank"]),
+        ...searchFilters,
       };
 
       if (fullText) {
@@ -153,29 +175,38 @@ export const usePublicSearch = (
         filters = [],
       } = await recordsService.find({ query });
 
-      setRecords({
-        total,
-        nonDigitizedTotal,
-        records: decorateRecords(recordsData),
+      const decorated = decorateRecords(recordsData);
+      setRecords((prev) => {
+        const nextPageRecords = isNewSearch
+          ? decorated
+          : mergeRecordPages(prev?.records, decorated);
+        return {
+          total,
+          nonDigitizedTotal,
+          records: nextPageRecords,
+        };
       });
 
       if (isNewSearch) {
+        prevSearchRef.current = nextSearch;
         setFilters(filters);
         setTotal(total);
-        setLoading(false);
       }
     } catch (error) {
       console.error("Error fetching records:", error);
     } finally {
       setRecordsLoading(false);
+      if (isNewSearch) setLoading(false);
     }
   }, [
     filterTypes,
     initialLoading,
+    mergeRecordPages,
     offset,
     pageSize,
     search,
     searchFilters,
+    setOffset,
     sortOptions,
   ]);
 

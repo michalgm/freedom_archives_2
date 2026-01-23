@@ -230,6 +230,7 @@ export function ItemStack({
   loading = false,
   dense = false,
   items,
+  footer,
   setCurrentRecord,
   ...props
 }) {
@@ -265,6 +266,7 @@ export function ItemStack({
             ),
           )
         )}
+        {footer}
       </Stack>
     </Box>
   );

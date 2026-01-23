@@ -1,25 +1,24 @@
 import {
   Box,
   Button,
-  Chip, Divider,
+  Chip,
+  Divider,
   Grid,
-  Icon, List,
+  Icon,
+  List,
   ListItem,
   ListItemButton,
-  ListItemText, Stack,
+  ListItemText,
+  Skeleton,
+  Stack,
   Typography,
 } from "@mui/material";
 import { startCase } from "lodash-es";
 import { useState } from "react";
-import {
-  CheckboxElement,
-  SelectElement, useFormContext,
-} from "react-hook-form-mui";
+import { CheckboxElement, SelectElement, useFormContext } from "react-hook-form-mui";
 import AutoSubmit from "src/components/AutoSubmit";
 import Form from "src/components/form/Form";
-import PaginationFooter from "src/components/PaginationFooter";
 import {
-  PAGE_SIZE,
   INITIAL_FILTER_DISPLAY_COUNT,
   FILTER_TYPE_LABELS,
   FILTER_TYPES,
@@ -42,12 +41,7 @@ const FilterItem = ({ value, label, count, type, addFilter, search }) => {
         }}
         primary={label || "???"}
       />
-      <Chip
-        size="small"
-        variant="outlined"
-        label={count.toLocaleString()}
-        sx={{ ml: "auto" }}
-      />
+      <Chip size="small" variant="outlined" label={count.toLocaleString()} sx={{ ml: "auto" }} />
     </ListItemButton>
   );
 };
@@ -75,12 +69,7 @@ const Filter = ({ type, values, addFilter, search }) => {
         ))}
         {values && values.length > limit && (
           <ListItem sx={{ justifyContent: "end" }}>
-            <Button
-              size="small"
-              variant="text"
-              startIcon={<Icon>add</Icon>}
-              onClick={() => setlimit(limit + 5)}
-            >
+            <Button size="small" variant="text" startIcon={<Icon>add</Icon>} onClick={() => setlimit(limit + 5)}>
               Show More...
             </Button>
           </ListItem>
@@ -90,35 +79,33 @@ const Filter = ({ type, values, addFilter, search }) => {
   );
 };
 
-export const SearchFilters = ({
-  search,
-  filters,
-  addFilter,
-  clearFilters,
-  loading,
-}) => {
+const LoadingFilters = () => {
+  return [1, 2, 3].map((i) => (
+    <Box key={i}>
+      <Typography variant="overline" sx={{ color: "text.secondary" }}>
+        <Skeleton width="60%" />
+      </Typography>
+      <List dense sx={{ p: 0 }}>
+        {[1, 2, 3].map((i) => (
+          <ListItem key={i}>
+            <Skeleton width="100%" />
+          </ListItem>
+        ))}
+      </List>
+    </Box>
+  ));
+};
+export const SearchFilters = ({ search, filters, addFilter, clearFilters, loading }) => {
   // const nonDigitizedTotalString = (parseInt(nonDigitizedTotal, 10) || 0).toLocaleString();
-
   return (
     <Box
       // p={1}
-      sx={{ backgroundColor: theme => theme.palette.background.paper }}
+      sx={{ backgroundColor: (theme) => theme.palette.background.paper }}
       className="flex-container"
     >
-      <Grid
-        size={12}
-        container
-        alignItems="center"
-        justifyContent="space-between"
-      >
+      <Grid size={12} container alignItems="center" justifyContent="space-between">
         <Typography variant="h6">Filter Results</Typography>
-        <Button
-          startIcon={<Icon>clear</Icon>}
-          color="inherit"
-          size="small"
-          variant="text"
-          onClick={clearFilters}
-        >
+        <Button startIcon={<Icon>clear</Icon>} color="inherit" size="small" variant="text" onClick={clearFilters}>
           Clear Filters
         </Button>
       </Grid>
@@ -128,48 +115,25 @@ export const SearchFilters = ({
           divider={<Divider orientation="horizontal" flexItem />}
           sx={{
             mt: 1,
-            backgroundColor: theme => theme.palette.background.paper,
+            backgroundColor: (theme) => theme.palette.background.paper,
           }}
         >
-          {FILTER_TYPES.filter(
-            type => filters[type] && filters[type].length > 0,
-          ).map((type) => {
-            return (
-              <Filter
-                key={type}
-                type={type}
-                values={filters[type]}
-                addFilter={addFilter}
-                search={search}
-              />
-            );
-          })}
+          {loading && <LoadingFilters />}
+          {!loading &&
+            FILTER_TYPES.filter((type) => filters[type] && filters[type].length > 0).map((type) => {
+              return <Filter key={type} type={type} values={filters[type]} addFilter={addFilter} search={search} />;
+            })}
         </Stack>
       </Grid>
     </Box>
   );
 };
 
-export function SearchForm({
-  search,
-  doSearch,
-  nonDigitizedTotal,
-  offset,
-  total,
-  setOffset,
-  focus,
-  filtersLoading,
-}) {
+export function SearchForm({ search, doSearch, nonDigitizedTotal, total, loadedCount, focus, loading }) {
   return (
     <Form defaultValues={search} onSubmit={doSearch}>
       <AutoSubmit action={doSearch} timeout={300} />
-      <Grid
-        container
-        spacing={1}
-        direction={{ xs: "column", md: "row" }}
-        alignItems="center"
-        sx={{ p: 1 }}
-      >
+      <Grid container spacing={1} direction={{ xs: "column", md: "row" }} alignItems="center" sx={{ p: 1 }}>
         <Grid size={{ xs: 12, md: 6 }}>
           <SearchInput focus={focus} />
         </Grid>
@@ -177,7 +141,7 @@ export function SearchForm({
           <SelectElement
             name="sort"
             label="Sort by"
-            options={Object.keys(SORT_OPTIONS).map(id => ({ id, label: id }))}
+            options={Object.keys(SORT_OPTIONS).map((id) => ({ id, label: id }))}
             size="small"
             fullWidth
           />
@@ -199,13 +163,14 @@ export function SearchForm({
             width={12}
           />
         </Grid>
-        <SearchResults
-          total={total}
-          nonDigitizedTotal={nonDigitizedTotal}
-          offset={offset}
-          setOffset={setOffset}
-          loading={filtersLoading}
-        />
+        {!loading && (
+          <SearchResults
+            total={total}
+            nonDigitizedTotal={nonDigitizedTotal}
+            loadedCount={loadedCount}
+            loading={loading}
+          />
+        )}
       </Grid>
     </Form>
   );
@@ -214,42 +179,32 @@ export function SearchForm({
 function SearchResults({
   total,
   nonDigitizedTotal,
-  offset,
-  setOffset,
-  loading,
+  loadedCount = 0,
+  // loading,
 }) {
   const { setValue } = useFormContext();
   return (
     <Box sx={{ width: "100%" }}>
       <Divider sx={{ my: 1 }} orientation="horizontal" flexItem />
-      {total === 0
-        ? (
-          <Typography variant="body2" color="text.secondary" sx={{ p: 2 }}>
-              No records found.
-            {nonDigitizedTotal > 0 && (
-              <>
-                <br/>
-                Hiding {nonDigitizedTotal} non-digitized records.
-                <Button
-                  size="small"
-                  onClick={() => setValue("include_non_digitized", true)}
-                >
-                    Show All
-                </Button>
-              </>
-            )}
-          </Typography>
-        )
-        : (
-          <PaginationFooter
-            offset={offset}
-            total={total}
-            page_size={PAGE_SIZE}
-            setOffset={setOffset}
-            size="small"
-            loading={loading}
-          />
-        )}
+      {total === 0 ? (
+        <Typography variant="body2" color="text.secondary" sx={{ p: 2 }}>
+          No records found.
+          {nonDigitizedTotal > 0 && (
+            <>
+              <br />
+              Hiding {nonDigitizedTotal} non-digitized records.
+              <Button size="small" onClick={() => setValue("include_non_digitized", true)}>
+                Show All
+              </Button>
+            </>
+          )}
+        </Typography>
+      ) : (
+        <Typography variant="body2" color="text.secondary">
+          Displaying {Math.min(loadedCount, total).toLocaleString()} of {total.toLocaleString()} found record
+          {total !== 1 ? "s" : ""}
+        </Typography>
+      )}
     </Box>
   );
 }

@@ -43,10 +43,7 @@ async function fetchCollection({ params }) {
   const collection = await collectionsService.get(collection_id);
 
   const search = {
-    collection_id: [
-      ...(collection.descendant_collection_ids || []),
-      collection.collection_id,
-    ],
+    ancestor_collection_ids: { $contains: [collection.collection_id] },
   };
 
   // Fetch initial records server-side so hydration can reuse them without a
@@ -72,7 +69,8 @@ async function fetchCollection({ params }) {
     $skip: 0,
     $sort: { title: 1 },
     has_digital: true,
-    collection_id: { $in: search.collection_id },
+    // collection_id: { $in: search.collection_id },
+    ...search,
   };
 
   const initialRecordsResult = await recordsService.find({
@@ -254,29 +252,27 @@ const PublicCollections = () => {
         <Breadcrumbs
           aria-label="Breadcrumb"
           separator={<NavigateNext fontSize="small" />}
+          // sx={{ fontFamily: '"franchiseregular", sans-serif', fontSize: '2rem', textTransform: 'lowercase', lineHeight: 1 }}
         >
           <Link color="primary.main" to="/">
             Search Home
           </Link>
-          {collection.ancestors
-            && collection.ancestors
+          {collection.ancestors &&
+            collection.ancestors
               .filter(({ collection_id }) => collection_id !== 0)
-              .map(ancestor => (
-                <Link
-                  key={ancestor.collection_id}
-                  color="primary.main"
-                  to={`/collections/${ancestor.collection_id}`}
-                >
+              .map((ancestor) => (
+                <Link key={ancestor.collection_id} color="primary.main" to={`/collections/${ancestor.collection_id}`}>
                   {ancestor.title}
                 </Link>
               ))}
-          <Typography color="text.primary" fontWeight={600}>
+          {/* <Box sx={{ color: "text.primary" }}>
             {collection.title}
-          </Typography>
+          </Box> */}
         </Breadcrumbs>
         <Stack
           direction={{
-            xs: "column", md: "row",
+            xs: "column",
+            md: "row",
           }}
           alignItems="flex-start"
           flexWrap="wrap"
@@ -290,30 +286,23 @@ const PublicCollections = () => {
           <Tabs
             value={tab}
             onChange={(_e, newValue) => {
-              setTab(newValue)
-              scrollToSection(newValue)
+              setTab(newValue);
+              scrollToSection(newValue);
             }}
             variant="scrollable"
             scrollButtons="auto"
             sx={{
-              '& .MuiTab-root': {
+              "& .MuiTab-root": {
                 padding: {
                   sm: "8px 12px",
-                  md: '12px 16px',
+                  md: "12px 16px",
                 },
               },
             }}
           >
-            <Tab
-              label="Overview"
-              value="overview"
-            />
-            {hasFeatured && (
-              <Tab label="Featured Content" value="featured" />
-            )}
-            {hasChildren && (
-              <Tab label="Subcollections" value="subcollections" />
-            )}
+            <Tab label="Overview" value="overview" />
+            {hasFeatured && <Tab label="Featured Content" value="featured" />}
+            {hasChildren && <Tab label="Subcollections" value="subcollections" />}
             <Tab label="Records" value="records" />
           </Tabs>
         </Stack>
@@ -355,11 +344,7 @@ const PublicCollections = () => {
                 }}
               >
                 <Box className="overview-scrollable" sx={{ flex: 1, overflow: "auto" }}>
-                  <Thumbnail
-                    item={collection}
-                    width={{ md: 200, xs: 100 }}
-                    sx={{ float: "left", mr: 2 }}
-                  />
+                  <Thumbnail item={collection} width={{ md: 200, xs: 100 }} sx={{ float: "left", mr: 2 }} />
                   <Typography
                     variant="body1"
                     component="div"
@@ -369,14 +354,8 @@ const PublicCollections = () => {
                 </Box>
               </Box>
               <Typography variant="caption" color="text.secondary">
-                <DetailsRow
-                  label="Date Range"
-                  value={collection.date_range}
-                />
-                <DetailsRow
-                  label="Keywords"
-                  value={collection.keywords}
-                />
+                <DetailsRow label="Date Range" value={collection.date_range} />
+                <DetailsRow label="Keywords" value={collection.keywords} />
               </Typography>
             </Paper>
           </Grid>
@@ -385,14 +364,16 @@ const PublicCollections = () => {
               size={{ xs: 12, md: 5 }}
               sx={{
                 scrollMarginTop,
-
               }}
               id="featured"
             >
               <Paper
                 variant="outlined"
                 sx={{
-                  p: 2, flexGrow: 1, height: "fit-content", maxHeight: "50vh",
+                  p: 2,
+                  flexGrow: 1,
+                  height: "fit-content",
+                  maxHeight: "50vh",
                 }}
               >
                 <Typography variant="header" sx={{ mb: 2 }}>
@@ -425,19 +406,20 @@ const PublicCollections = () => {
             flexDirection: "column",
             display: "flex",
             flexShrink: 0,
-            height: 'calc(100vh - 38px - 105px - 16px)', // viewport - margin - header - padding
+            height: "calc(100vh - 38px - 105px - 16px)", // viewport - margin - header - padding
             // scrollSnapAlign: "start",
             scrollMarginTop,
             // scrollSnapStop: "always",
           }}
         >
           <Typography variant="header">Records</Typography>
-          <Box className="flex-container">
+          <Box className="flex-container" sx={{ minHeight: 0 }}>
             <Search
               searchFilters={search}
               focus={false}
               key={collection?.collection_id}
               initialData={initialRecordsResult}
+              // scrollMode="container"
               // loading={loading}
             />
           </Box>

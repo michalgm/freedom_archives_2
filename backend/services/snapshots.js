@@ -73,7 +73,8 @@ SELECT
   (r.program->>'list_item_id')::INTEGER AS program_id,
   r.collection_id,
   r.fulltext,
-  r.search_text
+  r.search_text,
+  r.ancestor_collection_ids
 FROM
   _unified_records r
   JOIN _unified_collections c USING (collection_id)
