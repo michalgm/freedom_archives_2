@@ -99,6 +99,7 @@ CREATE TABLE IF NOT EXISTS records (
     collection_id integer,
     fulltext tsvector,
     search_text text,
+    ancestor_collection_ids integer[],
     CONSTRAINT records_pkey PRIMARY KEY (archive_id, record_id)
 );
 
@@ -180,6 +181,8 @@ CREATE INDEX IF NOT EXISTS records_subject_ids_idx ON records USING gin (subject
 
 CREATE INDEX IF NOT EXISTS records_year_idx ON records (archive_id, year);
 
+
+CREATE INDEX IF NOT EXISTS records_ancestor_collection_ids_idx ON records USING gin (ancestor_collection_ids);
 --
 -- Name: records_to_list_items; Type: TABLE; Schema: -; Owner: -
 --
@@ -235,7 +238,8 @@ CREATE OR REPLACE VIEW records_view AS
           WHERE list_items.list_item_id = ANY (r.producer_ids)) AS producers,
     ( SELECT json_agg(json_build_object('item', list_items.item, 'id', list_items.list_item_id)) AS json_agg
            FROM list_items
-          WHERE list_items.list_item_id = ANY (r.author_ids)) AS authors
+          WHERE list_items.list_item_id = ANY (r.author_ids)) AS authors,
+    r.ancestor_collection_ids
    FROM records r
      JOIN collections USING (collection_id)
      LEFT JOIN list_items programs ON r.program_id = programs.list_item_id AND programs.type = 'program'::text;

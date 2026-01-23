@@ -196,6 +196,7 @@ CREATE TABLE IF NOT EXISTS _unified_records (
     fact_number text,
     collection_title text,
     relationships jsonb,
+    ancestor_collection_ids integer[],
     CONSTRAINT _unified_records_pkey PRIMARY KEY (record_id)
 );
 
@@ -271,6 +272,7 @@ CREATE INDEX IF NOT EXISTS records_title ON _unified_records (title);
 
 CREATE INDEX IF NOT EXISTS records_year ON _unified_records (year);
 
+CREATE INDEX IF NOT EXISTS records_ancestor_collection_ids_idx ON _unified_records USING gin (ancestor_collection_ids);
 --
 -- Name: archives; Type: TABLE; Schema: -; Owner: -
 --
@@ -365,6 +367,8 @@ CREATE INDEX IF NOT EXISTS list_items_fulltext_idx ON list_items USING gin (full
 --
 
 CREATE INDEX IF NOT EXISTS list_items_search_text_idx ON list_items (search_text);
+
+CREATE INDEX IF NOT EXISTS list_items_search_text_trgm_idx ON list_items USING gin (search_text gin_trgm_ops);
 
 --
 -- Name: list_items_type_idx; Type: INDEX; Schema: -; Owner: -
@@ -505,6 +509,7 @@ CREATE TABLE IF NOT EXISTS records_snapshots (
     collection_id integer,
     fulltext tsvector,
     search_text text,
+    ancestor_collection_ids integer[],
     CONSTRAINT records_snapshots_pkey PRIMARY KEY (snapshot_id, archive_id, record_id),
     CONSTRAINT fk_snapshot FOREIGN KEY (snapshot_id) REFERENCES snapshots (snapshot_id) ON DELETE CASCADE
 );
@@ -1363,9 +1368,21 @@ CREATE OR REPLACE VIEW unified_records AS
     continuations.continuations,
     a.fact_number,
     b.collection->>'title' AS collection_title,
-    relationships.relationships AS relationships
+    relationships.relationships AS relationships,
+    (
+      COALESCE(
+        ARRAY (
+          SELECT
+            JSONB_ARRAY_ELEMENTS_TEXT(
+              JSONB_PATH_QUERY_ARRAY(c.ancestors, '$[*].collection_id')
+            )::INT
+        ),
+        '{}'::INT[]
+      )||ARRAY[c.collection_id]
+    ) AS ancestor_collection_ids
    FROM records a
      JOIN record_summaries b USING (record_id)
+     JOIN _unified_collections c USING (collection_id)
      LEFT JOIN list_items program_lookup ON a.program_id = program_lookup.list_item_id
      LEFT JOIN record_media_view media USING (record_id)
      LEFT JOIN media primary_media ON a.primary_media_id = primary_media.media_id
@@ -1576,9 +1593,59 @@ FROM
   AND a.date=b.date
   AND a.record_id<b.record_id;
 
--- CREATE INDEX IF NOT EXISTS duplicate_records_relevance_idx
 
+CREATE TABLE
+freedom_archives.duplicate_list_items_ignore (
+  list_item_id_1 INTEGER,
+  list_item_id_2 INTEGER,
+  CONSTRAINT duplicate_list_items_ignore_pkey PRIMARY KEY (list_item_id_1, list_item_id_2),
+  CONSTRAINT duplicate_list_items_ignore_list_item_1_fkey FOREIGN KEY (list_item_id_1) REFERENCES freedom_archives.list_items (list_item_id) ON DELETE CASCADE,
+  CONSTRAINT duplicate_list_items_ignore_list_item_2_fkey FOREIGN KEY (list_item_id_2) REFERENCES freedom_archives.list_items (list_item_id) ON DELETE CASCADE
+);
 
+CREATE MATERIALIZED VIEW freedom_archives.duplicate_list_items AS
+SELECT
+  a.list_item_id||'|'||b.list_item_id AS duplicate_list_item_id,
+  a.list_item_id AS list_item_id_1,
+  b.list_item_id AS list_item_id_2,
+  a.item        AS item_1,
+  b.item        AS item_2,
+  a.archive_id,
+  a.type,  
+  s.sim,
+  c.records_count AS records_count_1,
+  c.collections_count AS collections_count_1,
+  c.media_count AS media_count_1,
+  d.records_count AS records_count_2,
+  d.collections_count AS collections_count_2,
+  d.media_count AS media_count_2,
+  (
+    SELECT 1
+    FROM freedom_archives.duplicate_list_items_ignore dli
+    WHERE (dli.list_item_id_1 = a.list_item_id AND dli.list_item_id_2 = b.list_item_id)
+       OR (dli.list_item_id_1 = b.list_item_id AND dli.list_item_id_2 = a.list_item_id)
+) as is_ignored
+FROM freedom_archives.list_items a
+JOIN freedom_archives.list_items b
+  ON  b.archive_id   = a.archive_id
+  AND b.type         = a.type
+  AND b.list_item_id > a.list_item_id
+  AND a.search_text % b.search_text
+JOIN list_items_lookup c
+  ON c.list_item_id = a.list_item_id
+JOIN list_items_lookup d
+  ON d.list_item_id = b.list_item_id
+CROSS JOIN LATERAL (
+  SELECT similarity(a.search_text, b.search_text) AS sim
+) s
+
+ORDER BY s.sim DESC;
+
+CREATE INDEX IF NOT EXISTS duplicate_list_items_sim_idx
+  ON freedom_archives.duplicate_list_items (type, sim DESC);
+
+CREATE INDEX IF NOT EXISTS duplicate_list_items_id_1_idx 
+  ON freedom_archives.duplicate_list_items (type, archive_id, list_item_id_1, list_item_id_2);
 
 -- CREATE INDEX IF NOT EXISTS duplicate_records_similarity_idx 
 --   ON duplicate_records (similarity_score DESC);
