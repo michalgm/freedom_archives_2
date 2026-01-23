@@ -14,6 +14,7 @@ import { fileURLToPath } from "url";
 import appHooks from "./app.hooks.js";
 import authentication from "./authentication.js";
 import logger from "./logger.js";
+import dbMaintenance from "./middleware/dbMaintenance.js";
 import middleware from "./middleware/index.js";
 import knex from "./postgresql.js";
 import services from "./services/index.js";
@@ -46,6 +47,7 @@ app.use(cors());
 app.use(compress());
 app.use(json({ limit: "13mb" }));
 app.use(urlencoded({ extended: true }));
+
 app.configure(middleware);
 app.configure(rest());
 app.use(favicon(path.join(clientDistPath, "favicon.ico")));
@@ -63,6 +65,10 @@ expressApp.get('/sitemap.xml', (req, res) => {
 app.use("/", express.static(clientDistPath, { index: false }));
 // Configure a middleware for 404s and the error handler
 app.configure(knex);
+
+// Gracefully degrade when the DB is offline.
+app.configure(dbMaintenance);
+
 app.configure(authentication);
 // Set up our services (see `services/index.js`)
 app.configure(services);
