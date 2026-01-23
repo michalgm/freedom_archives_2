@@ -88,24 +88,22 @@ export function ItemCardLayout({
   );
 }
 
-export function ItemLink({ item, children, setCurrentRecord, ...props }) {
+export function ItemLink({ item, children, ...props }) {
   if (!item) return children;
-  const url = item.collection_id
-    ? `/collections/${item.collection_id}`
-    : item.url || item.primary_media_url;
+  const url = item.collection_id ? `/collections/${item.collection_id}` : item.url || item.primary_media_url;
   const target = item.collection_id ? "_self" : "_blank";
   if (!url) return children;
-  const onClick = ['Audio', 'Video'].includes(item.media_type) && setCurrentRecord ? (e) => {
-    e.preventDefault();
-    setCurrentRecord(item);
-  } : undefined;
+  // const onClick = ['Audio', 'Video'].includes(item.media_type) && setCurrentRecord ? (e) => {
+  //   e.preventDefault();
+  //   setCurrentRecord(item);
+  // } : undefined;
   return (
     <Link
       to={url}
       style={{ textDecoration: "none", color: "inherit" }}
       target={target}
       // preventScrollReset={true}
-      onClick={onClick}
+      // onClick={onClick}
       {...props}
     >
       {children}

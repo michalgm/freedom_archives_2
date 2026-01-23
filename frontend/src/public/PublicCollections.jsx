@@ -1,5 +1,6 @@
 import { NavigateNext } from "@mui/icons-material";
 import { Box, Breadcrumbs, Chip, Divider, Grid, Stack, Tab, Tabs, Typography } from "@mui/material";
+import { useMediaQuery } from "@mui/system";
 import { isArray } from "lodash-es";
 import { useEffect, useRef, useState } from "react";
 import { isRouteErrorResponse, useLoaderData, useRouteError } from "react-router";
@@ -155,12 +156,12 @@ const PublicCollections = () => {
   const { collection, search, initialRecordsResult } = useLoaderData();
   // const [search, setSearch] = useState(initialSearch);
   // const [loading, setLoading] = useState(false);
+  const isDesktop = useMediaQuery((theme) => theme.breakpoints.up("md"), { defaultMatches: true });
   const [tab, setTab] = useState("overview");
   const [scrollMarginTop, setScrollMarginTop] = useState(121); // default fallback
 
   const headerRef = useRef(null);
   const containerRef = useRef(null);
-
   useEffect(() => {
     if (!headerRef.current) return;
 
@@ -171,7 +172,7 @@ const PublicCollections = () => {
     if (typeof ResizeObserverCtor === "undefined") {
       const update = () => {
         if (!headerRef.current) return;
-        setScrollMarginTop(headerRef.current.offsetHeight + 16);
+        setScrollMarginTop(headerRef.current.offsetHeight + (isDesktop ? 16 : 0));
       };
       update();
       window.addEventListener("resize", update);
@@ -180,14 +181,14 @@ const PublicCollections = () => {
 
     const resizeObserver = new ResizeObserverCtor((entries) => {
       for (const entry of entries) {
-        setScrollMarginTop(entry.target.offsetHeight + 16); // header height + spacing
+        setScrollMarginTop(entry.target.offsetHeight + (isDesktop ? 16 : 0)); // header height + spacing
       }
     });
 
     resizeObserver.observe(headerRef.current);
 
     return () => resizeObserver.disconnect();
-  }, []);
+  }, [isDesktop]);
 
   // useEffect(() => {
   //   const fetchCollection = async () => {
@@ -228,14 +229,16 @@ const PublicCollections = () => {
         ref={headerRef}
         sx={{
           position: "sticky",
-          top: { xs: "-16px", md: 0 },
+          top: { xs: 1, md: 0 },
           backgroundColor: "secondary.main",
           zIndex: 10,
-          maxWidth: { xs: "calc(100vw - 16px)", md: "none" },
-          pt: 2,
-          pb: 1,
+          maxWidth: { xs: "100vw", md: "none" },
+          pt: { xs: 1, md: 2 },
+          pb: { xs: 0, md: 1 },
           px: { xs: 1, md: 2 },
           mb: 2,
+          mx: { xs: -1, md: 0 },
+          mt: { xs: -1, md: 0 },
           boxShadow: "0 2px 8px rgba(0, 0, 0, 0.1)",
           borderBottom: "1px solid rgba(0, 0, 0, 0.05)",
         }}
@@ -285,11 +288,28 @@ const PublicCollections = () => {
             // allowScrollButtonsMobile
             sx={{
               "&.MuiTabs-root": {
-                mx: { xs: "-8px", md: 0 },
+                mx: { xs: -1, md: 0 },
+                my: { xs: 0, md: 1 },
+                minHeight: { xs: "auto", md: "inherit" },
               },
               "& .MuiTab-root": {
+                minWidth: {
+                  xs: "auto",
+                  md: "inherit",
+                },
+                minHeight: {
+                  xs: "auto",
+                  md: "inherit",
+                },
+                // xs: {
+                //   fontSize: "0.75rem",
+                // },
+                fontSize: {
+                  xs: "0.75rem",
+                  md: "0.875rem",
+                },
                 padding: {
-                  xs: "4px 8px",
+                  xs: "8px 8px",
                   md: "12px 16px",
                 },
               },
@@ -313,7 +333,6 @@ const PublicCollections = () => {
         // divider={<Divider orientation="horizontal" flexItem />}
       >
         <Stack
-          container
           spacing={2}
           id="overview"
           direction={{ xs: "column", md: "row" }}
@@ -358,7 +377,7 @@ const PublicCollections = () => {
                 // p: 2,
                 // flexGrow: 1,
                 height: "fit-content",
-                maxHeight: "50vh",
+                // maxHeight: "50vh",
               }}
               id="featured"
             >

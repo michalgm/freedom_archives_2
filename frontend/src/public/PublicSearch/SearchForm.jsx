@@ -133,11 +133,11 @@ export function SearchForm({ search, doSearch, nonDigitizedTotal, total, loadedC
   return (
     <Form defaultValues={search} onSubmit={doSearch}>
       <AutoSubmit action={doSearch} timeout={300} />
-      <Grid container spacing={1} direction={{ xs: "column", md: "row" }} alignItems="center" sx={{ p: 1 }}>
-        <Grid size={{ xs: 12, md: 6 }}>
+      <Grid container spacing={1} direction={{ xs: "row", md: "row" }} alignItems="center">
+        <Grid size={{ xs: 8, md: 6 }}>
           <SearchInput focus={focus} />
         </Grid>
-        <Grid size={{ xs: 12, md: 3 }}>
+        <Grid size={{ xs: 4, md: 3 }}>
           <SelectElement
             name="sort"
             label="Sort by"
@@ -179,13 +179,13 @@ export function SearchForm({ search, doSearch, nonDigitizedTotal, total, loadedC
 function SearchResults({
   total,
   nonDigitizedTotal,
-  loadedCount = 0,
+  // loadedCount = 0,
   // loading,
 }) {
   const { setValue } = useFormContext();
   return (
     <Box sx={{ width: "100%" }}>
-      <Divider sx={{ my: 1 }} orientation="horizontal" flexItem />
+      {/* <Divider sx={{}} orientation="horizontal" flexItem /> */}
       {total === 0 ? (
         <Typography variant="body2" color="text.secondary" sx={{ p: 2 }}>
           No records found.
@@ -201,8 +201,7 @@ function SearchResults({
         </Typography>
       ) : (
         <Typography variant="body2" color="text.secondary">
-          Displaying {Math.min(loadedCount, total).toLocaleString()} of {total.toLocaleString()} found record
-          {total !== 1 ? "s" : ""}
+          Found {total.toLocaleString()} record{total !== 1 ? "s" : ""}
         </Typography>
       )}
     </Box>

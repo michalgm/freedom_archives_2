@@ -88,7 +88,7 @@ const PublicShell = ({ children }) => {
               id="header"
               sx={{
                 position: "relative",
-                pr: '5px',
+                pr: "5px",
                 height: {
                   lg: 240,
                   md: 200,
@@ -107,7 +107,7 @@ const PublicShell = ({ children }) => {
                     background: `url("/static/images/freedom_archives_header.jpg") no-repeat scroll  #b00000`,
                     height: "100%",
                     backgroundSize: "auto 100%",
-                    width: 'calc(100% + 299px)',
+                    width: "calc(100% + 299px)",
                     top: {
                       lg: 0,
                       md: -10,
@@ -124,22 +124,19 @@ const PublicShell = ({ children }) => {
                 />
               </a>
               <Stack
-                direction={{
-                  xs: 'column',
-                  sm: 'row',
-                }}
+                direction="row"
                 justifyContent="flex-end"
                 alignItems="end"
                 spacing={1}
                 sx={{
+                  display: { xs: "none", md: "flex" },
                   pt: {
                     md: 3,
                     sm: 2,
-                    xs: 1,
                   },
                 }}
               >
-                {headerLinks.map(link => (
+                {headerLinks.map((link) => (
                   <ButtonLink
                     key={link.title}
                     size="small"
@@ -214,10 +211,7 @@ const PublicShell = ({ children }) => {
             }}
           >
             <Box>
-              <Button
-                variant="outlined"
-                href="https://freedomarchives.org/donation"
-              >
+              <Button variant="outlined" href="https://freedomarchives.org/donation">
                 DONATE
               </Button>
             </Box>
@@ -226,11 +220,8 @@ const PublicShell = ({ children }) => {
               <br />
               1615 Hopkins Street, Berkeley, CA 94707
               <br />
-              Phone: (415) 863-9977 &bull; E-mail:
-              {" "}
-              <Link href="mailto:info@freedomarchives.org">
-                info [at] freedomarchives [dot] org
-              </Link>
+              Phone: (415) 863-9977 &bull; E-mail:{" "}
+              <Link href="mailto:info@freedomarchives.org">info [at] freedomarchives [dot] org</Link>
             </Typography>
           </Container>
         </Box>

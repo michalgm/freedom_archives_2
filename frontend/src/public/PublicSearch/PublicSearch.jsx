@@ -18,7 +18,7 @@ import {
   FILTER_TYPES,
   SORT_OPTIONS,
 } from "src/public/PublicSearch/constants";
-import PlayerModal from "src/public/PublicSearch/PlayerModal";
+// import PlayerModal from "src/public/PublicSearch/PlayerModal";
 import { SearchFilters, SearchForm } from "src/public/PublicSearch/SearchForm";
 import { usePublicSearch } from "src/public/PublicSearch/usePublicSearch";
 import { setMetaTags } from "src/utils";
@@ -55,7 +55,7 @@ export function Search(params) {
     setSearch,
     setFilters,
   } = usePublicSearch(searchFilters, initialLoading, SORT_OPTIONS, FILTER_TYPES, PAGE_SIZE, initialData);
-  const [currentRecord, setCurrentRecord] = React.useState(null);
+  // const [currentRecord, setCurrentRecord] = React.useState(null);
   const isDesktop = useMediaQuery((theme) => theme.breakpoints.up("md"), {
     defaultMatches: true,
   });
@@ -139,7 +139,7 @@ export function Search(params) {
               startIcon={<Icon>filter_list</Icon>}
               endIcon={<Icon>{filtersOpen ? "expand_less" : "expand_more"}</Icon>}
               onClick={() => setFiltersOpen((open) => !open)}
-              sx={{ mb: 1 }}
+              // sx={{ mb: 1 }}
             >
               Filters
             </Button>
@@ -196,13 +196,13 @@ export function Search(params) {
               type="record"
               loading={isInitialRecordsLoading}
               items={records.records}
-              setCurrentRecord={setCurrentRecord}
+              // setCurrentRecord={setCurrentRecord}
               footer={listFooter}
             />
           </Grid>
         </Box>
       </Stack>
-      <PlayerModal open={Boolean(currentRecord)} onClose={() => setCurrentRecord(null)} item={currentRecord} />
+      {/* <PlayerModal open={Boolean(currentRecord)} onClose={() => setCurrentRecord(null)} item={currentRecord} /> */}
     </Box>
   );
 }
