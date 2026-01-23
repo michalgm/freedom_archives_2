@@ -1,15 +1,5 @@
 import { NavigateNext } from "@mui/icons-material";
-import {
-  Box,
-  Breadcrumbs,
-  Chip,
-  Grid,
-  Paper,
-  Stack,
-  Tab,
-  Tabs,
-  Typography,
-} from "@mui/material";
+import { Box, Breadcrumbs, Chip, Divider, Grid, Stack, Tab, Tabs, Typography } from "@mui/material";
 import { isArray } from "lodash-es";
 import { useEffect, useRef, useState } from "react";
 import { isRouteErrorResponse, useLoaderData, useRouteError } from "react-router";
@@ -141,7 +131,7 @@ export const DetailsRow = ({ label, value, keyProp = 'list_item_id', valueProp =
     );
 
   return (
-    <Stack component="dl" direction="row" spacing={1} sx={{ mt: 1 }} useFlexGap>
+    <Stack component="dl" direction="row" spacing={1} sx={{ m: 0 }} useFlexGap>
       <Typography
         component="dt"
         variant="caption"
@@ -238,12 +228,13 @@ const PublicCollections = () => {
         ref={headerRef}
         sx={{
           position: "sticky",
-          top: 0,
+          top: { xs: "-16px", md: 0 },
           backgroundColor: "secondary.main",
           zIndex: 10,
+          maxWidth: { xs: "calc(100vw - 16px)", md: "none" },
           pt: 2,
           pb: 1,
-          px: 2,
+          px: { xs: 1, md: 2 },
           mb: 2,
           boxShadow: "0 2px 8px rgba(0, 0, 0, 0.1)",
           borderBottom: "1px solid rgba(0, 0, 0, 0.05)",
@@ -291,10 +282,14 @@ const PublicCollections = () => {
             }}
             variant="scrollable"
             scrollButtons="auto"
+            // allowScrollButtonsMobile
             sx={{
+              "&.MuiTabs-root": {
+                mx: { xs: "-8px", md: 0 },
+              },
               "& .MuiTab-root": {
                 padding: {
-                  sm: "8px 12px",
+                  xs: "4px 8px",
                   md: "12px 16px",
                 },
               },
@@ -315,59 +310,59 @@ const PublicCollections = () => {
           flex: "1 1 auto",
           minHeight: 0,
         }}
+        // divider={<Divider orientation="horizontal" flexItem />}
       >
-        <Grid
+        <Stack
           container
           spacing={2}
           id="overview"
+          direction={{ xs: "column", md: "row" }}
           sx={{
             scrollMarginTop: scrollMarginTop,
           }}
+          divider={hasFeatured ? <Divider orientation={{ xs: "horizontal", md: "vertical" }} flexItem /> : null}
         >
-          <Grid size={{ xs: 12, md: hasFeatured ? 7 : 12 }}>
-            <Paper
-              variant="outlined"
-              sx={{
-                p: 2,
-                overflow: "auto",
-                height: "fit-content",
-              }}
-            >
-              <Box
-                sx={{
-                  display: "flex",
-                  flexDirection: { xs: "column", sm: "row" },
-                  minWidth: 0,
-                  gap: 2,
-                  flexShrink: 1,
-                  minHeight: 0,
-                }}
-              >
-                <Box className="overview-scrollable" sx={{ flex: 1, overflow: "auto" }}>
-                  <Thumbnail item={collection} width={{ md: 200, xs: 100 }} sx={{ float: "left", mr: 2 }} />
-                  <Typography
-                    variant="body1"
-                    component="div"
-                    dangerouslySetInnerHTML={{ __html: collection.description }}
-                    sx={{ "& p": { mt: 0, mb: 1 } }}
-                  />
-                </Box>
-              </Box>
-              <Typography variant="caption" color="text.secondary">
+          <Box
+            sx={{
+              display: "flex",
+              flexDirection: { xs: "column" },
+              minWidth: 0,
+              // gap: 2,
+              flexShrink: 1,
+              minHeight: 0,
+              flexBasis: hasFeatured ? { xs: "auto", md: "60%" } : "100%",
+            }}
+          >
+            <Box className="overview-scrollable" sx={{ flex: 1, overflow: "auto" }}>
+              <Thumbnail item={collection} width={{ md: 200, xs: 100 }} sx={{ float: "left", mr: 2 }} />
+              <Typography
+                variant="body1"
+                component="div"
+                dangerouslySetInnerHTML={{ __html: collection.description }}
+                sx={{ "& p": { mt: 0, mb: 1 } }}
+              />
+            </Box>
+            <Typography variant="caption" color="text.secondary">
+              <Stack spacing={1} sx={{ mt: 2 }}>
                 <DetailsRow label="Date Range" value={collection.date_range} />
                 <DetailsRow label="Keywords" value={collection.keywords} />
-              </Typography>
-            </Paper>
-          </Grid>
+              </Stack>
+            </Typography>
+          </Box>
           <Show when={hasFeatured}>
             <Grid
-              size={{ xs: 12, md: 5 }}
+              flexBasis={{ xs: "auto", md: "40%" }}
+              // flexShrink={0}
               sx={{
                 scrollMarginTop,
+                // p: 2,
+                // flexGrow: 1,
+                height: "fit-content",
+                maxHeight: "50vh",
               }}
               id="featured"
             >
-              <Paper
+              {/* <Paper
                 variant="outlined"
                 sx={{
                   p: 2,
@@ -375,34 +370,32 @@ const PublicCollections = () => {
                   height: "fit-content",
                   maxHeight: "50vh",
                 }}
-              >
-                <Typography variant="header" sx={{ mb: 2 }}>
-                  Featured Content
-                </Typography>
-                <Box sx={{ mb: 2 }} className="flex-scroller">
-                  <Carousel items={collection.featured_records} width={180} />
-                </Box>
-              </Paper>
+              > */}
+              <Typography variant="header" gutterBottom>
+                Featured Content
+              </Typography>
+              <Box>
+                <Carousel items={collection.featured_records} width={180} />
+              </Box>
+              {/* </Paper> */}
             </Grid>
           </Show>
-        </Grid>
+        </Stack>
         <Show when={collection.children && collection.children.length !== 0}>
-          <Paper id="subcollections" variant="outlined" sx={{ p: 2, scrollMarginTop }}>
+          <Box id="subcollections" variant="outlined" sx={{ scrollMarginTop }}>
             <ItemStack
               title="Subcollections"
               type="collection"
               // loading={loading}
               items={collection.children}
               dense={true}
-              sx={{ maxHeight: 400, overflow: "auto" }}
+              sx={{ maxHeight: 400, overflow: "auto", maxWidth: { xs: "calc(100vw - 16px)", md: "none" } }}
             />
-          </Paper>
+          </Box>
         </Show>
-        <Paper
+        <Box
           id="records"
-          variant="outlined"
           sx={{
-            p: 2,
             flexDirection: "column",
             display: "flex",
             flexShrink: 0,
@@ -412,7 +405,9 @@ const PublicCollections = () => {
             // scrollSnapStop: "always",
           }}
         >
-          <Typography variant="header">Records</Typography>
+          <Typography variant="header" gutterBottom>
+            Records
+          </Typography>
           <Box className="flex-container" sx={{ minHeight: 0 }}>
             <Search
               searchFilters={search}
@@ -423,7 +418,7 @@ const PublicCollections = () => {
               // loading={loading}
             />
           </Box>
-        </Paper>
+        </Box>
       </Stack>
     </Box>
   );
