@@ -8,15 +8,15 @@ import { CssBaseline, ThemeProvider } from "@mui/material";
 import { LocalizationProvider } from "@mui/x-date-pickers";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import { initialize, mswLoader } from "msw-storybook-addon";
+import { theme } from "src/theme";
 
 import Authentication from "../src/Authentication";
-import { theme } from "../src/theme";
 
 import "../src/utils/logger";
 import { handlers } from "./mocks/handlers";
 
 initialize({
-  waitUntilReady: true,
+  // waitUntilReady: true,
   onUnhandledRequest: "warn", // Don't show errors for unhandled requests
 });
 

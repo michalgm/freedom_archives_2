@@ -1,4 +1,12 @@
+// This file has been automatically migrated to valid ESM format by Storybook.
+import react from "@vitejs/plugin-react";
+import { createRequire } from "node:module";
+import { fileURLToPath } from "node:url";
 import { dirname, join } from "path";
+import { mergeConfig } from "vite";
+
+const require = createRequire(import.meta.url);
+const srcDir = fileURLToPath(new URL("../src", import.meta.url));
 
 /**
  * This function is used to resolve the absolute path of a package.
@@ -15,7 +23,7 @@ const config = {
     // getAbsolutePath("@chromatic-com/storybook"),
     getAbsolutePath("@storybook/addon-vitest"),
     getAbsolutePath("@storybook/addon-themes"),
-    getAbsolutePath("@storybook/addon-docs")
+    getAbsolutePath("@storybook/addon-docs"),
   ],
   framework: {
     name: getAbsolutePath("@storybook/react-vite"),
@@ -25,6 +33,20 @@ const config = {
     ...options,
     presets: [...options.presets, "@babel/preset-react"],
   }),
+
+  async viteFinal(viteConfig) {
+    return mergeConfig(viteConfig, {
+      plugins: [react()],
+      esbuild: {
+        jsx: "automatic",
+      },
+      resolve: {
+        alias: {
+          src: srcDir,
+        },
+      },
+    });
+  },
 
   // async viteFinal(config) {
   //   // Customize the Vite config
