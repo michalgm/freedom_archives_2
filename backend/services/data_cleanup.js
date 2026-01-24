@@ -1,4 +1,7 @@
 import { KnexService } from "@feathersjs/knex";
+import { readdir } from "fs/promises";
+import path from "path";
+
 
 const queries = {
   'missing_description': `
@@ -74,8 +77,46 @@ const queries = {
         WHERE title IS NULL OR TRIM(title) = ''
         ORDER BY record_id
       ` ,
+  'missing_thumbnails': async function ({ app }) {
+    const thumbnailDir = path.join(app.get('publicPath'), "img", "thumbnails", "records");
+    const files = await readdir(thumbnailDir).then(files => new Set(files));
+    const thumbnails = new Set();
+    for (const file of files) {
+      const match = file.match(/^(\d+)\.jpg$/);
+      if (match) {
+        thumbnails.add(Number(match[1]));
+      }
+    }
+    return `
+SELECT
+  record_id,
+  title,
+  media_types
+FROM
+  _unified_records
+WHERE
+  has_digital=TRUE
+  AND media_types&&ARRAY['Video', 'PDF', 'Image']
+  AND record_id NOT IN (${[...thumbnails].join(','), -1})
+ORDER BY
+  record_id
+      `;
+  },
+  'featured_no_digital': `
+        SELECT
+          record_id,
+          title,
+          collection
+        FROM _unified_records
+        WHERE
+          has_digital=FALSE
+          AND (record_id IN (SELECT record_id FROM featured_records))
+        ORDER BY record_id
+      `,
 };
 // WHERE url IS NOT NULL AND url != '' AND url!~ '/^https\\?://([a-zA-Z0-9](\\?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])\\?\\.)+[a-zA-Z]{2,}\\//'
+
+
 
 
 class DataCleanupService extends KnexService {
@@ -100,10 +141,11 @@ const find = async function (context) {
   // Each type corresponds to a specific SQL query
 
 
-  const querySQL = queries[type];
-  if (!querySQL) {
+  const typeQuery = queries[type];
+  if (!typeQuery) {
     throw new Error(`Unknown query type: ${type}`);
   }
+  const querySQL = typeof typeQuery === 'function' ? await typeQuery(context) : typeQuery;
 
   const knex = this.options.Model;
 

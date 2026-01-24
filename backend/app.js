@@ -30,7 +30,7 @@ expressApp.set("query parser", function (str) {
 const app = /** @type {any} */ (feathersExpress)(feathers(), expressApp);
 app.configure(configuration());
 // Set up Plugins and providers
-const publicPath = path.resolve(__dirname, app.get("public")); // Adjust relative path as necessary
+app.set('publicPath', path.resolve(__dirname, app.get("public"))); // Adjust relative path as necessary
 const frontendDistPath = path.resolve(__dirname, '../public_dist/');
 const clientDistPath = path.resolve(frontendDistPath, 'client');
 const serverDistPath = path.resolve(frontendDistPath, 'server');
@@ -54,11 +54,11 @@ app.use(favicon(path.join(clientDistPath, "favicon.ico")));
 
 // Sitemap and robots.txt routes
 expressApp.get('/robots.txt', (req, res) => {
-  res.type('text/plain').sendFile(path.join(publicPath, 'robots.txt'));
+  res.type('text/plain').sendFile(path.join(app.get('publicPath'), 'robots.txt'));
 });
 
 expressApp.get('/sitemap.xml', (req, res) => {
-  res.type('application/xml').sendFile(path.join(publicPath, 'sitemap.xml'));
+  res.type('application/xml').sendFile(path.join(app.get('publicPath'), 'sitemap.xml'));
 });
 
 // Host the public folder

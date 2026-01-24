@@ -10,15 +10,33 @@ const PAGE_SIZE_DEFAULT = 100;
 
 // Define available cleanup query types
 const CLEANUP_TYPES = [
-  { value: 'missing_description', label: 'Missing Descriptions', description: 'Records with missing descriptions' },
+  { value: "missing_description", label: "Missing Descriptions", description: "Records with missing descriptions" },
   // { value: 'invalid_dates', label: 'Invalid Dates', description: 'Records with invalid dates' },
-  { value: 'missing_format', label: 'Missing Format', description: 'Records with media having no format defined' },
-  { value: 'missing_copy_number', label: 'Missing Copy Number', description: 'Records with media having no copy number defined' },
+  { value: "missing_format", label: "Missing Format", description: "Records with media having no format defined" },
+  {
+    value: "missing_copy_number",
+    label: "Missing Copy Number",
+    description: "Records with media having no copy number defined",
+  },
 
-  { value: 'invalid_call_numbers', label: 'Invalid Call Numbers', description: 'Media files with improperly formatted or missing call numbers' },
-  { value: 'duplicate_call_numbers', label: 'Duplicate Call Numbers', description: 'Media files with the same call number across multiple records' },
-  { value: 'invalid_url', label: 'Invalid URLs', description: 'Media files with improperly formatted URLs' },
-  { value: 'missing_title', label: 'Missing Titles', description: 'Records with missing titles' },
+  {
+    value: "invalid_call_numbers",
+    label: "Invalid Call Numbers",
+    description: "Media files with improperly formatted or missing call numbers",
+  },
+  {
+    value: "duplicate_call_numbers",
+    label: "Duplicate Call Numbers",
+    description: "Media files with the same call number across multiple records",
+  },
+  { value: "invalid_url", label: "Invalid URLs", description: "Media files with improperly formatted URLs" },
+  { value: "missing_title", label: "Missing Titles", description: "Records with missing titles" },
+  { value: "missing_thumbnails", label: "Missing Thumbnails", description: "Media files missing thumbnail images" },
+  {
+    value: "featured_no_digital",
+    label: "Featured Records not digitized",
+    description: "Featured records that have no digital media",
+  },
 ];
 
 function DataCleanupTable({ items, loading}) {
@@ -108,7 +126,18 @@ function DataCleanupTable({ items, loading}) {
           </Box>
         );
       }
-
+      if (key === "collection") {
+        col.renderCell = (params) =>
+          params.value ? (
+            <Link to={`/admin/collections/${params.value.collection_id}`} target="_blank" rel="noopener">
+              {params.value.title || params.value.collection_id}
+            </Link>
+          ) : (
+            <Typography variant="body2" color="text.secondary">
+              N/A
+            </Typography>
+          );
+      } 
       // Make title more prominent
       if (key === 'title') {
         col.flex = 2;

@@ -45,9 +45,9 @@ export default (function (app) {
 
     const item = await service._get(merge_target_id, { transaction });
 
-    console.log('@@@', item, merge_target_id, id, list_item_type, item.type);
+    // console.log('@@@', item, merge_target_id, id, list_item_type, item.type);
     if (item.type !== list_item_type) {
-      console.log('@@@', list_item_type, context.params.list_item_type);
+      // console.log('@@@', list_item_type, context.params.list_item_type);
       throw new BadRequest("Cannot merge items of different types");
     }
 
