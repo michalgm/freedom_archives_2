@@ -1,7 +1,7 @@
 export const ROLE_HIERARCHY = ["intern", "staff", "administrator"];
 
 export const routeConfig = {
-  "Collections": {
+  Collections: {
     icon: "library_books",
     routes: [
       {
@@ -10,6 +10,7 @@ export const routeConfig = {
         sidebar: {
           label: "Manage Collections",
           icon: "",
+          pattern: new RegExp(`^/admin/collections(\/[0-9]+)?$`),
         },
       },
       {
@@ -26,7 +27,7 @@ export const routeConfig = {
     ],
   },
 
-  "Records": {
+  Records: {
     icon: "description",
     routes: [
       // {
@@ -47,6 +48,7 @@ export const routeConfig = {
         sidebar: {
           label: "Manage Records",
           icon: "",
+          pattern: new RegExp(`^/admin/records(\/[0-9]+)?$`),
         },
       },
       {
@@ -121,14 +123,14 @@ export const routeConfig = {
           icon: "",
         },
       },
-      {
-        // path: "export-collections",
-        authRole: "staff",
-        sidebar: {
-          label: "Export Collections",
-          icon: "",
-        },
-      },
+      // {
+      //   // path: "export-collections",
+      //   authRole: "staff",
+      //   sidebar: {
+      //     label: "Export Collections",
+      //     icon: "",
+      //   },
+      // },
       {
         path: "site/find-duplicates/:id1?/:id2?",
         component: "./views/FindDuplicateRecords.jsx",
@@ -136,6 +138,16 @@ export const routeConfig = {
         sidebar: {
           sidebarPath: "site/find-duplicates",
           label: "Find Duplicate Records",
+          icon: "",
+        },
+      },
+      {
+        path: "site/find-duplicate-list-items/:type?",
+        component: "./views/FindDuplicateListItems.jsx",
+        authRole: "staff",
+        sidebar: {
+          sidebarPath: "site/find-duplicate-list-items",
+          label: "Find Duplicate List Items",
           icon: "",
         },
       },
@@ -151,7 +163,7 @@ export const routeConfig = {
     ],
   },
 
-  "Admin": {
+  Admin: {
     icon: "admin_panel_settings",
     routes: [
       {
@@ -204,11 +216,12 @@ export const routes = Object.entries(routeConfig).reduce((acc, [sectionName, sec
     }
     if (sidebar) {
       const { authRole } = config;
-      const { label, icon, sidebarPath } = sidebar;
+      const { label, icon, sidebarPath, pattern } = sidebar;
       sectionRoutes.push({
         label,
         icon,
         href: path,
+        pattern: pattern || path,
         authRole,
         sidebarPath: sidebarPath || path,
       });

@@ -1,0 +1,251 @@
+// @ts-nocheck
+import { BadRequest, MethodNotAllowed } from "@feathersjs/errors";
+import { KnexService } from "@feathersjs/knex";
+
+class ValueLookup extends KnexService {
+  constructor(options) {
+    super({
+      ...options,
+      name: "duplicate_list_items",
+    });
+    // this.find = this.find.bind(this);
+  }
+
+  setup(app) {
+    this.app = app;
+    // KnexService in this codebase doesn't require calling a super.setup.
+  }
+
+  _parseDuplicateId(duplicate_list_item_id) {
+    const raw = String(duplicate_list_item_id || "");
+    let decoded = raw;
+    try {
+      decoded = decodeURIComponent(raw);
+    } catch {
+      // If it isn't valid URI encoding, just parse as-is.
+    }
+
+    const [aRaw, bRaw] = decoded.split("|");
+    const a = Number(aRaw);
+    const b = Number(bRaw);
+    if (!Number.isInteger(a) || !Number.isInteger(b)) {
+      throw new BadRequest("Invalid duplicate_list_item_id; expected 'id1|id2'");
+    }
+    if (a === b) {
+      throw new BadRequest("Invalid duplicate_list_item_id; ids must differ");
+    }
+    return [a, b];
+  }
+
+  _duplicatesSelectSql() {
+    // Keep in sync with the original DB view logic, but inline it here so the service
+    // doesn't depend on `duplicate_list_items_view`.
+    return `
+      SELECT
+        a.list_item_id||'|'||b.list_item_id AS duplicate_list_item_id,
+        a.list_item_id AS list_item_id_1,
+        b.list_item_id AS list_item_id_2,
+        a.item        AS item_1,
+        b.item        AS item_2,
+        a.archive_id,
+        a.type,
+        s.sim,
+        c.records_count AS records_count_1,
+        c.collections_count AS collections_count_1,
+        c.media_count AS media_count_1,
+        d.records_count AS records_count_2,
+        d.collections_count AS collections_count_2,
+        d.media_count AS media_count_2,
+        EXISTS (
+          SELECT 1
+          FROM freedom_archives.duplicate_list_items_ignore dli
+          WHERE (dli.list_item_id_1 = a.list_item_id AND dli.list_item_id_2 = b.list_item_id)
+             OR (dli.list_item_id_1 = b.list_item_id AND dli.list_item_id_2 = a.list_item_id)
+        ) AS is_ignored
+      FROM freedom_archives.list_items a
+      JOIN freedom_archives.list_items b
+        ON  b.archive_id   = a.archive_id
+        AND b.type         = a.type
+        AND b.list_item_id > a.list_item_id
+        AND a.search_text % b.search_text
+      JOIN freedom_archives.list_items_lookup c
+        ON c.list_item_id = a.list_item_id
+      JOIN freedom_archives.list_items_lookup d
+        ON d.list_item_id = b.list_item_id
+      CROSS JOIN LATERAL (
+        SELECT similarity(a.search_text, b.search_text) AS sim
+      ) s
+    `;
+  }
+
+  async _refreshDuplicates(opts = {}) {
+    const { type, trx } = opts;
+    // `postgresql.connection.statement_timeout` is 15s by default in config.
+    // These rebuild queries can legitimately take longer (keywords especially).
+    // Raise it just for this transaction.
+    const refreshStatementTimeoutMs = 300_000; // 5 minutes
+
+    // Schema model:
+    // - freedom_archives.duplicate_list_items (TABLE): cached rows used by the API for pagination/filtering
+    // Refresh-by-type is implemented as delete+insert-from-query.
+    if (!type) {
+      throw new BadRequest("Missing 'type' parameter for _refreshDuplicates");
+    }
+    await trx.raw(`SET LOCAL statement_timeout TO ${refreshStatementTimeoutMs};`);
+    await trx("duplicate_list_items").where({ type }).delete();
+    await trx.raw(
+      `
+          INSERT INTO freedom_archives.duplicate_list_items
+          ${this._duplicatesSelectSql()}
+          WHERE a.type = ?
+          ORDER BY s.sim DESC
+          `,
+      [type],
+    );
+    return { ok: true, refreshed: "table_from_query", type };
+  }
+
+  async _normalizePair(list_item_id_1, list_item_id_2) {
+    const a = Number(list_item_id_1);
+    const b = Number(list_item_id_2);
+    if (!Number.isInteger(a) || !Number.isInteger(b)) {
+      throw new BadRequest("list_item_id_1 and list_item_id_2 must be integers");
+    }
+    if (a === b) {
+      throw new BadRequest("Cannot ignore a duplicate pair with identical ids");
+    }
+    return a < b ? [a, b] : [b, a];
+  }
+}
+
+const refresh = async (context) => {
+  // if (context.id !== "refresh") {
+  //   throw new MethodNotAllowed("Only update('refresh') is supported on duplicate_list_items");
+  // }
+  const type = context.data?.type || context.result?.type;
+  if (!type || typeof type !== "string") {
+    throw new BadRequest("Missing or invalid 'type' field in data for refresh");
+  }
+  const res = await context.service._refreshDuplicates({
+    type,
+    trx: context.params.transaction.trx,
+  });
+  context.result = { ok: true, refresh: res };
+  return context;
+};
+
+const ignorePair = async (context) => {
+  const { id, params } = context;
+  const restore = params.query?.restore === "true";
+  const {
+    params: {
+      transaction: { trx },
+    },
+  } = context;
+  if (id == null) {
+    throw new MethodNotAllowed("Bulk ignore is not supported");
+  }
+
+  const [raw1, raw2] = context.service._parseDuplicateId(id);
+  const [id1, id2] = await context.service._normalizePair(raw1, raw2);
+
+  const duplicateId = `${id1}|${id2}`;
+  if (restore) {
+    await trx("duplicate_list_items_ignore")
+      .where({ list_item_id_1: id1, list_item_id_2: id2 })
+      .orWhere({ list_item_id_1: id2, list_item_id_2: id1 })
+      .delete();
+  } else {
+    await trx("duplicate_list_items_ignore")
+      .insert({ list_item_id_1: id1, list_item_id_2: id2 })
+      .onConflict(["list_item_id_1", "list_item_id_2"])
+      .ignore();
+  }
+
+  await trx("duplicate_list_items").where({ duplicate_list_item_id: duplicateId }).update({ is_ignored: !restore });
+
+  context.result = { ok: true, ignored: { list_item_id_1: id1, list_item_id_2: id2 } };
+  return context;
+};
+
+const mergePair = async (context) => {
+  const { id, data, params } = context;
+  const {
+    transaction: { trx },
+  } = params;
+  if (id == null) {
+    throw new MethodNotAllowed("Bulk merge is not supported");
+  }
+
+  const [id1, id2] = context.service._parseDuplicateId(id);
+  const direction = data?.direction;
+
+  let source_id;
+  let target_id;
+  if (data?.source_id && data?.target_id) {
+    source_id = data.source_id;
+    target_id = data.target_id;
+  } else if (direction === "1_to_2") {
+    source_id = id1;
+    target_id = id2;
+  } else if (direction === "2_to_1") {
+    source_id = id2;
+    target_id = id1;
+  } else {
+    throw new BadRequest("Missing merge direction (direction: '1_to_2' | '2_to_1')");
+  }
+
+  const listItems = context.app.service("api/list_items");
+  const source = await listItems.get(source_id, params);
+  const type = source?.type;
+
+  // Remove lookup table entries where both source and target are present to avoid conflicts.
+  await trx("records_to_list_items as a")
+    .where("a.list_item_id", source_id)
+    .whereIn("a.record_id", function () {
+      this.select("b.record_id").from("records_to_list_items as b").where("b.list_item_id", target_id);
+    })
+    .delete();
+
+  await listItems.update(source_id, { merge_target_id: target_id }, params);
+
+  await trx("duplicate_list_items")
+    .where({ type, archive_id: source.archive_id })
+    .andWhere((qb) => {
+      qb.whereIn("list_item_id_1", [source_id, target_id]).orWhereIn("list_item_id_2", [source_id, target_id]);
+    })
+    .delete();
+
+  await trx.raw(
+    `
+        INSERT INTO freedom_archives.duplicate_list_items
+        ${context.service._duplicatesSelectSql()}
+        WHERE a.type = ?
+          AND (a.list_item_id = ? OR b.list_item_id = ?)
+        ORDER BY s.sim DESC
+        `,
+    [type, target_id, target_id],
+  );
+
+  context.result = { ok: true, merged: { source_id, target_id }, type };
+  return context;
+};
+export default (function (app) {
+  const options = {
+    id: "duplicate_list_item_id",
+    Model: app.get("postgresqlClient"),
+    paginate: app.get("paginate"),
+  };
+  // Initialize our service with any options it requires
+  app.use("/api/duplicate_list_items", new ValueLookup(options), { methods: ["find", "update", "remove", "patch"] });
+
+  const service = app.service("api/duplicate_list_items");
+
+  service.hooks({
+    before: {
+      update: [refresh],
+      remove: [ignorePair],
+      patch: [mergePair],
+    },
+  });
+});

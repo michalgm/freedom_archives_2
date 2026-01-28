@@ -61,3 +61,15 @@ export const collectionSelectFields = [
   "creator_name",
   "contributor_name",
 ];
+export const ITEM_TYPES = {
+  call_number: { description: true, collections: true, media: true },
+  generation: { description: true, media: true },
+  publisher: { records: true, collections: true },
+  program: { records: true },
+  author: { records: true },
+  producer: { records: true },
+  subject: { records: true, collections: true },
+  keyword: { records: true, collections: true },
+  format: { description: true, media: true },
+  quality: { description: true, media: true },
+};

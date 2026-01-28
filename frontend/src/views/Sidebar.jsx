@@ -13,8 +13,8 @@ import {
   Typography,
 } from "@mui/material";
 import { useMemo } from "react";
-import { Link, useLocation } from "react-router";
-import { sidebarConfig, hasAccess } from "src/config/routes";
+import { Link, useLocation, useMatch } from "react-router";
+import { hasAccess, sidebarConfig } from "src/config/routes";
 import { useAuth } from "src/stores";
 
 function Sidebar({ ...props }) {
@@ -26,9 +26,9 @@ function Sidebar({ ...props }) {
     return Object.entries(sidebarConfig).map(([sectionName, sectionData]) => {
       const { icon: sectionIcon, routes } = sectionData;
 
-      const links = routes.reduce((acc, { label, sidebarPath, icon, authRole }) => {
+      const links = routes.reduce((acc, { label, sidebarPath, pattern, icon, authRole }) => {
         if (hasAccess(role, authRole)) {
-          acc.push(<SidebarItem key={label} label={label} href={sidebarPath} icon={icon} />);
+          acc.push(<SidebarItem key={label} label={label} pattern={pattern} href={sidebarPath} icon={icon} />);
         }
         return acc;
       }, []);
@@ -64,14 +64,13 @@ function Sidebar({ ...props }) {
   );
 }
 
-function SidebarItem({ label, /* icon, */ href }) {
+function SidebarItem({ label, /* icon, */ href, pattern }) {
   const location = useLocation();
   // logger.log(location)?
-  const pattern = new RegExp(`^/admin/${href}(?:/\\d+)?/?$`);
-
-  const current
-    = Boolean(pattern.test(location.pathname) && href)
-      || (location.pathname === "/admin/" && href === "/records");
+  let current = Boolean(useMatch(typeof pattern === "string" ? `/admin/${pattern}` : ""));
+  if (!current && pattern instanceof RegExp) {
+    current = pattern.test(location.pathname) ? { pathname: location.pathname } : null;
+  }
 
   // logger.log({ label, href, pathname, current });
   return (

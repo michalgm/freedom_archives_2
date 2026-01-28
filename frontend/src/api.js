@@ -47,6 +47,7 @@ export const snapshots = app.service("/api/snapshots");
 export const settings = app.service("/api/settings");
 export const unified_search = app.service("/api/unified_search");
 export const duplicate_records = app.service("/api/duplicate_records");
+export const duplicate_list_items = app.service("/api/duplicate_list_items");
 export const data_cleanup = app.service("/api/data_cleanup");
 
 export const getServiceID = service => `${service.replace(/s$/, "")}_id`;
@@ -80,6 +81,7 @@ export const services = {
   settings,
   public_settings,
   duplicate_records,
+  duplicate_list_items,
 };
 
 export const getAuthentication = app.get("/api/authentication");

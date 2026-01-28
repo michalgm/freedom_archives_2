@@ -3,9 +3,13 @@ import { Forbidden } from '@feathersjs/errors';
 const ROLE_HIERARCHY = ['intern', 'staff', 'administrator'];
 
 const SERVICE_PERMISSIONS = {
-  'users': 'staff',
-  'settings': 'staff',
-  'snapshots': 'administator',
+  users: "staff",
+  settings: "staff",
+  snapshots: "administator",
+  duplicate_records: "staff",
+  duplicate_list_items: "staff",
+  data_cleanup: "staff",
+  // Other services default to 'intern' (all roles can write)
 };
 
 const INTERN_REVIEW_SERVICES = ['records', 'collections'];

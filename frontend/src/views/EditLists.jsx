@@ -18,6 +18,7 @@ import { FormContainer } from "react-hook-form-mui";
 import { Field } from "src/components/form/Field";
 import Notifications from "src/components/Notifications";
 import Show from "src/components/Show";
+import { ITEM_TYPES } from "src/config/constants";
 import { useAddNotification } from "src/stores";
 import { checkUnique } from "src/utils";
 
@@ -25,20 +26,7 @@ import { list_items, list_items_lookup } from "../api";
 
 const EditableDataTable = lazy(() => import("../components/EditableDataTable"))
 
-const item_types = {
-  call_number: { description: true, collections: true, media: true },
-  generation: { description: true, media: true },
-  publisher: { records: true, collections: true },
-  program: { records: true },
-  author: { records: true },
-  producer: { records: true },
-  subject: { records: true, collections: true },
-  keyword: { records: true, collections: true },
-  format: { description: true, media: true },
-  quality: { description: true, media: true },
-};
-
-const types = Object.keys(item_types)
+const types = Object.keys(ITEM_TYPES)
   .map((t) => [t, startCase(t)])
   .sort();
 
@@ -197,11 +185,11 @@ function EditLists() {
           prepareItem={prepareItem}
           rowCount={values.total}
           columnVisibilityModel={{
-            description: Boolean(item_types[type].description),
+            description: Boolean(ITEM_TYPES[type].description),
             list_item_id: true,
-            records_count: Boolean(item_types[type].records),
-            collections_count: Boolean(item_types[type].collections),
-            media_count: Boolean(item_types[type].media),
+            records_count: Boolean(ITEM_TYPES[type].records),
+            collections_count: Boolean(ITEM_TYPES[type].collections),
+            media_count: Boolean(ITEM_TYPES[type].media),
           }}
           sortModel={order}
           sortingOrder={["desc", "asc"]}
