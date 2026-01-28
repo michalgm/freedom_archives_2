@@ -1,7 +1,7 @@
 {
   "name": "freedom-archives-database",
   "description": "Freedom Archives database backend",
-  "version": "0.4.0",
+  "version": "0.5.0",
   "homepage": "",
   "private": true,
   "main": "backend",
