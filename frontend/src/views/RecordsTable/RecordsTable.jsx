@@ -1,4 +1,4 @@
-import { Link } from "@mui/material";
+import { Link, Paper } from "@mui/material";
 import { Box, Stack } from "@mui/system";
 import { useGridApiRef } from "@mui/x-data-grid";
 import { startCase } from "lodash-es";
@@ -37,9 +37,10 @@ const columnWidths = {
 };
 
 const columns = [
-
   {
-    field: "record_id", headerName: "Record ID", renderCell: (params) => (
+    field: "record_id",
+    headerName: "Record ID",
+    renderCell: (params) => (
       <Link href={`/admin/records/${params.value}`} target="_blank" rel="noreferrer">
         {params.value}
       </Link>
@@ -138,16 +139,19 @@ const Table = () => {
 
   const fetchData = useCallback(async () => {
     setLoading(true);
-    const data = await services["records"].find({
-      query: {
-        $sort: { title: 1 },
-        $disable_pagination: true,
-        $select: [...columns.filter((c) => !c._skipSelect).map((c) => c.field), "media", "record_id"],
-        $limit: Infinity,
-        collection_id: collectionID ? collectionID : undefined,
-      },
-    });
-    const rows = processRecordsToRows(data);
+    let rows = [];
+    if (collectionID) {
+      const data = await services["records"].find({
+        query: {
+          $sort: { title: 1 },
+          $disable_pagination: true,
+          $select: [...columns.filter((c) => !c._skipSelect).map((c) => c.field), "media", "record_id"],
+          $limit: Infinity,
+          collection_id: collectionID ? collectionID : undefined,
+        },
+      });
+      rows = processRecordsToRows(data);
+    }
     setRows(rows);
     setLoading(false);
     return rows;
@@ -172,6 +176,8 @@ const Table = () => {
       <BaseForm
         formConfig={{
           service: "records",
+          skipUpdateCheck: true,
+          skipDirtyCheck: true,
         }}
       >
         <Stack
@@ -203,18 +209,25 @@ const Table = () => {
           </Box>
         </Stack>
       </BaseForm>
-      <DataGrid
-        apiRef={apiRef}
-        rows={rows}
-        columns={columns}
-        getRowHeight={() => "auto"}
-        loading={loading}
-        density="compact"
-        showCellVerticalBorder
-        showToolbar
-        disableRowSelectionOnClick
-        getRowClassName={getRowClassName}
-      />
+      {!collectionID && (
+        <Paper sx={{ p: 2, pt: 6 }}>
+          <em>Please select a collection to view its records.</em>
+        </Paper>
+      )}
+      {collectionID && (
+        <DataGrid
+          apiRef={apiRef}
+          rows={rows}
+          columns={columns}
+          getRowHeight={() => "auto"}
+          loading={loading}
+          density="compact"
+          showCellVerticalBorder
+          showToolbar
+          disableRowSelectionOnClick
+          getRowClassName={getRowClassName}
+        />
+      )}
       {/* <Button onClick={() => fetchData()}>Reload Data</Button> */}
     </Box>
   );
