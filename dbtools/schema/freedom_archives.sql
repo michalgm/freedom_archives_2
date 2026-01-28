@@ -1603,7 +1603,7 @@ freedom_archives.duplicate_list_items_ignore (
   CONSTRAINT duplicate_list_items_ignore_list_item_2_fkey FOREIGN KEY (list_item_id_2) REFERENCES freedom_archives.list_items (list_item_id) ON DELETE CASCADE
 );
 
-CREATE MATERIALIZED VIEW freedom_archives.duplicate_list_items AS
+CREATE VIEW freedom_archives.duplicate_list_items_view AS
 SELECT
   a.list_item_id||'|'||b.list_item_id AS duplicate_list_item_id,
   a.list_item_id AS list_item_id_1,
@@ -1619,7 +1619,7 @@ SELECT
   d.records_count AS records_count_2,
   d.collections_count AS collections_count_2,
   d.media_count AS media_count_2,
-  (
+  EXISTS (
     SELECT 1
     FROM freedom_archives.duplicate_list_items_ignore dli
     WHERE (dli.list_item_id_1 = a.list_item_id AND dli.list_item_id_2 = b.list_item_id)
@@ -1638,11 +1638,31 @@ JOIN list_items_lookup d
 CROSS JOIN LATERAL (
   SELECT similarity(a.search_text, b.search_text) AS sim
 ) s
-
 ORDER BY s.sim DESC;
 
+CREATE TABLE duplicate_list_items (
+  duplicate_list_item_id TEXT NOT NULL,
+  list_item_id_1 INTEGER NOT NULL,
+  list_item_id_2 INTEGER NOT NULL,
+  item_1 TEXT NOT NULL,
+  item_2 TEXT NOT NULL,
+  archive_id INTEGER NOT NULL,
+  type TEXT NOT NULL,
+  sim NUMERIC NOT NULL,
+  records_count_1 INTEGER NOT NULL,
+  collections_count_1 INTEGER NOT NULL, 
+  media_count_1 INTEGER NOT NULL,
+  records_count_2 INTEGER NOT NULL,
+  collections_count_2 INTEGER NOT NULL,
+  media_count_2 INTEGER NOT NULL,
+  is_ignored BOOLEAN NOT NULL,
+  CONSTRAINT duplicate_list_items_pkey PRIMARY KEY (duplicate_list_item_id),
+  CONSTRAINT duplicate_list_items_list_item_1_fkey FOREIGN KEY (list_item_id_1) REFERENCES freedom_archives.list_items (list_item_id) ON DELETE CASCADE,
+  CONSTRAINT duplicate_list_items_list_item_2_fkey FOREIGN KEY (list_item_id_2) REFERENCES freedom_archives.list_items (list_item_id) ON DELETE CASCADE
+);
+
 CREATE INDEX IF NOT EXISTS duplicate_list_items_sim_idx
-  ON freedom_archives.duplicate_list_items (type, sim DESC);
+  ON freedom_archives.duplicate_list_items (type, is_ignored, sim DESC);
 
 CREATE INDEX IF NOT EXISTS duplicate_list_items_id_1_idx 
   ON freedom_archives.duplicate_list_items (type, archive_id, list_item_id_1, list_item_id_2);
