@@ -15,12 +15,16 @@ import {
 // import { useGridApiRef } from "@mui/x-data-grid";
 import { startCase } from "lodash-es";
 import { useConfirm } from "material-ui-confirm";
-import { lazy, useCallback, useEffect, useMemo, useState } from "react";
+import { lazy, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate, useParams } from "react-router";
 import { ITEM_TYPES } from "src/config/constants";
 import { useAddNotification } from "src/stores";
+import { sleep } from "src/utils";
 
-import { duplicate_list_items } from "../api";
+import { duplicate_list_items, duplicate_list_items_refresh_status } from "../api";
+
+const REFRESH_POLL_INTERVAL_MS = 3000;
+const REFRESH_POLL_MAX_MS = 5 * 60 * 1000; // 5 minutes
 
 const DataGrid = lazy(() => import("@mui/x-data-grid").then((module) => ({ default: module.DataGrid })));
 
@@ -64,7 +68,10 @@ function FindDuplicateListItems() {
   const [paginationModel, setPaginationModel] = useState({ page: 0, pageSize: PAGE_SIZE_DEFAULT });
   const [values, setValues] = useState({ data: [], total: 0 });
   const [loading, setLoading] = useState(false);
+  const [refreshing, setRefreshing] = useState(false);
+
   const confirm = useConfirm();
+  const refreshPollTokenRef = useRef(0);
 
   useEffect(() => {
     const nextType = initialType;
@@ -76,6 +83,36 @@ function FindDuplicateListItems() {
   useEffect(() => {
     setPaginationModel((prev) => ({ ...prev, page: 0 }));
   }, [type, filter, includeIgnored]);
+
+  useEffect(() => {
+    return () => {
+      // cancel any in-flight refresh polling loop on unmount
+      refreshPollTokenRef.current += 1;
+    };
+  }, []);
+
+  const waitForRefreshToFinish = useCallback(async (typeToPoll) => {
+    const pollToken = refreshPollTokenRef.current + 1;
+    refreshPollTokenRef.current = pollToken;
+
+    // Allow long-running refreshes (keywords can be slow).
+    const maxAttempts = REFRESH_POLL_MAX_MS / REFRESH_POLL_INTERVAL_MS; // ~10 minutes at 1s interval
+    for (let attempt = 0; attempt < maxAttempts; attempt += 1) {
+      if (refreshPollTokenRef.current !== pollToken) return;
+
+      const status = await duplicate_list_items_refresh_status.get(typeToPoll);
+      if (refreshPollTokenRef.current !== pollToken) return;
+      if (!Boolean(status?.refreshing)) {
+        if (status?.ok === false) {
+          throw new Error(status?.error || "Duplicate refresh failed");
+        }
+        return;
+      }
+      await sleep(REFRESH_POLL_INTERVAL_MS);
+    }
+
+    throw new Error(`Timed out waiting for duplicate refresh (${typeToPoll})`);
+  }, []);
 
   const fetchValues = useCallback(async () => {
     setLoading(true);
@@ -113,7 +150,6 @@ function FindDuplicateListItems() {
 
       const res = await duplicate_list_items.find({ query });
       setValues(res);
-      await new Promise((resolve) => setTimeout(resolve, 100));
       // gridRef.current.autosizeColumns({
       // 	includeHeaders: true,
       // 	// includeOutliers: true,
@@ -129,17 +165,23 @@ function FindDuplicateListItems() {
 
   const refreshDuplicates = useCallback(async () => {
     setLoading(true);
+    setRefreshing(true);
     try {
-      await duplicate_list_items.update("refresh", { type });
-      addNotification({ message: `Refreshed duplicate ${startCase(type)} list items` });
-      await fetchValues();
+      const result = await duplicate_list_items.update("refresh", { type });
+      if (!result?.refresh?.ok) {
+        addNotification({ message: `Duplicate ${startCase(type)} refresh already in progress` });
+      } else {
+        await waitForRefreshToFinish(type);
+        addNotification({ message: `Refreshed duplicate ${startCase(type)} list items` });
+        await fetchValues();
+      }
     } catch (e) {
-      console.error("Error refreshing duplicate list items", e);
-      addNotification({ message: "Error refreshing duplicate list items" });
+      addNotification({ severity: "error", message: `Error refreshing duplicate list items: ${e?.message || e}` });
     } finally {
       setLoading(false);
+      setRefreshing(false);
     }
-  }, [addNotification, fetchValues, type]);
+  }, [addNotification, fetchValues, type, waitForRefreshToFinish]);
 
   const mergePair = useCallback(
     async ({ type, targetItem, sourceItem, direction, duplicateId, sourceCounts }) => {
@@ -338,7 +380,14 @@ function FindDuplicateListItems() {
             label="Include ignored"
           />
           <Box sx={{ flexGrow: 1, textAlign: "right" }}>
-            <Button startIcon={<Refresh />} variant="outlined" onClick={refreshDuplicates} disabled={loading}>
+            <Button
+              loading={refreshing}
+              loadingPosition="start"
+              startIcon={<Refresh />}
+              variant="outlined"
+              onClick={refreshDuplicates}
+              disabled={loading}
+            >
               Recalculate Duplicates
             </Button>
           </Box>

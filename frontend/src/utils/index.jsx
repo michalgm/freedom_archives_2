@@ -5,7 +5,7 @@ import { stripHtml } from "string-strip-html";
 
 import { services } from "../api";
 
-const usePrevious = (value) => {
+export const usePrevious = (value) => {
   const ref = useRef();
   useEffect(() => {
     ref.current = value;
@@ -13,7 +13,7 @@ const usePrevious = (value) => {
   return ref.current;
 };
 
-export { usePrevious };
+export const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
 export const asyncDebounce = (fn, wait) => {
   let pending = null;

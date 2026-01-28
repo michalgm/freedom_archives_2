@@ -2,45 +2,45 @@
 import { BadRequest, MethodNotAllowed } from "@feathersjs/errors";
 import { KnexService } from "@feathersjs/knex";
 
-class ValueLookup extends KnexService {
-  constructor(options) {
-    super({
-      ...options,
-      name: "duplicate_list_items",
-    });
-    // this.find = this.find.bind(this);
-  }
+// In-memory store for refresh status per type.
+// NOTE: This is per-process and resets on restart.
+const refreshingStatus = {};
 
-  setup(app) {
-    this.app = app;
-    // KnexService in this codebase doesn't require calling a super.setup.
-  }
+const getRefreshStatusForType = (type) => {
+  const key = String(type || "");
+  return (
+    refreshingStatus[key] || {
+      type: key,
+      refreshing: false,
+      startedAt: null,
+      finishedAt: null,
+      ok: null,
+      error: null,
+    }
+  );
+};
 
-  _parseDuplicateId(duplicate_list_item_id) {
-    const raw = String(duplicate_list_item_id || "");
-    let decoded = raw;
-    try {
-      decoded = decodeURIComponent(raw);
-    } catch {
-      // If it isn't valid URI encoding, just parse as-is.
+class DuplicateListItemsRefreshStatusService {
+  async find(params = {}) {
+    const type = params.query?.type;
+    if (type) {
+      const status = getRefreshStatusForType(type);
+      return { data: [status], total: 1, limit: 1, skip: 0 };
     }
 
-    const [aRaw, bRaw] = decoded.split("|");
-    const a = Number(aRaw);
-    const b = Number(bRaw);
-    if (!Number.isInteger(a) || !Number.isInteger(b)) {
-      throw new BadRequest("Invalid duplicate_list_item_id; expected 'id1|id2'");
-    }
-    if (a === b) {
-      throw new BadRequest("Invalid duplicate_list_item_id; ids must differ");
-    }
-    return [a, b];
+    const data = Object.values(refreshingStatus);
+    return { data, total: data.length, limit: data.length, skip: 0 };
   }
 
-  _duplicatesSelectSql() {
-    // Keep in sync with the original DB view logic, but inline it here so the service
-    // doesn't depend on `duplicate_list_items_view`.
-    return `
+  async get(id) {
+    return getRefreshStatusForType(id);
+  }
+}
+
+const duplicatesSelectSql = () => {
+  // Keep in sync with the original DB view logic, but inline it here so the service
+  // doesn't depend on `duplicate_list_items_view`.
+  return `
       SELECT
         a.list_item_id||'|'||b.list_item_id AS duplicate_list_item_id,
         a.list_item_id AS list_item_id_1,
@@ -76,33 +76,41 @@ class ValueLookup extends KnexService {
         SELECT similarity(a.search_text, b.search_text) AS sim
       ) s
     `;
+};
+
+class ValueLookup extends KnexService {
+  constructor(options) {
+    super({
+      ...options,
+      name: "duplicate_list_items",
+    });
+    // this.find = this.find.bind(this);
   }
 
-  async _refreshDuplicates(opts = {}) {
-    const { type, trx } = opts;
-    // `postgresql.connection.statement_timeout` is 15s by default in config.
-    // These rebuild queries can legitimately take longer (keywords especially).
-    // Raise it just for this transaction.
-    const refreshStatementTimeoutMs = 300_000; // 5 minutes
+  setup(app) {
+    this.app = app;
+    // KnexService in this codebase doesn't require calling a super.setup.
+  }
 
-    // Schema model:
-    // - freedom_archives.duplicate_list_items (TABLE): cached rows used by the API for pagination/filtering
-    // Refresh-by-type is implemented as delete+insert-from-query.
-    if (!type) {
-      throw new BadRequest("Missing 'type' parameter for _refreshDuplicates");
+  _parseDuplicateId(duplicate_list_item_id) {
+    const raw = String(duplicate_list_item_id || "");
+    let decoded = raw;
+    try {
+      decoded = decodeURIComponent(raw);
+    } catch {
+      // If it isn't valid URI encoding, just parse as-is.
     }
-    await trx.raw(`SET LOCAL statement_timeout TO ${refreshStatementTimeoutMs};`);
-    await trx("duplicate_list_items").where({ type }).delete();
-    await trx.raw(
-      `
-          INSERT INTO freedom_archives.duplicate_list_items
-          ${this._duplicatesSelectSql()}
-          WHERE a.type = ?
-          ORDER BY s.sim DESC
-          `,
-      [type],
-    );
-    return { ok: true, refreshed: "table_from_query", type };
+
+    const [aRaw, bRaw] = decoded.split("|");
+    const a = Number(aRaw);
+    const b = Number(bRaw);
+    if (!Number.isInteger(a) || !Number.isInteger(b)) {
+      throw new BadRequest("Invalid duplicate_list_item_id; expected 'id1|id2'");
+    }
+    if (a === b) {
+      throw new BadRequest("Invalid duplicate_list_item_id; ids must differ");
+    }
+    return [a, b];
   }
 
   async _normalizePair(list_item_id_1, list_item_id_2) {
@@ -119,18 +127,83 @@ class ValueLookup extends KnexService {
 }
 
 const refresh = async (context) => {
-  // if (context.id !== "refresh") {
-  //   throw new MethodNotAllowed("Only update('refresh') is supported on duplicate_list_items");
-  // }
+  const { app } = context;
+  const {
+    params: {
+      transaction: { trx },
+    },
+  } = context;
+  const refreshStatementTimeoutMs = 300_000; // 5 minutes
   const type = context.data?.type || context.result?.type;
+
   if (!type || typeof type !== "string") {
     throw new BadRequest("Missing or invalid 'type' field in data for refresh");
   }
-  const res = await context.service._refreshDuplicates({
+
+  const existingStatus = getRefreshStatusForType(type);
+  if (existingStatus.refreshing) {
+    context.result = { ok: true, refresh: { ok: false, reason: "already_refreshing", status: existingStatus } };
+    return context;
+  }
+
+  const startedAt = new Date().toISOString();
+  refreshingStatus[type] = {
     type,
-    trx: context.params.transaction.trx,
+    refreshing: true,
+    startedAt,
+    finishedAt: null,
+    ok: null,
+    error: null,
+  };
+
+  await trx("duplicate_list_items").where({ type }).delete();
+
+  setImmediate(async () => {
+    const knex = app.get("postgresqlClient");
+    try {
+      await knex.transaction(async (trx) => {
+        await trx.raw(`SET LOCAL statement_timeout TO ${refreshStatementTimeoutMs};`);
+        await trx.raw("SELECT pg_advisory_xact_lock(hashtext(?))", [`duplicate_list_items_refresh:${type}`]);
+        await trx.raw(
+          `
+          INSERT INTO freedom_archives.duplicate_list_items
+          ${duplicatesSelectSql()}
+          WHERE a.type = ?
+          ORDER BY s.sim DESC
+          `,
+          [type],
+        );
+      });
+
+      refreshingStatus[type] = {
+        ...getRefreshStatusForType(type),
+        refreshing: false,
+        finishedAt: new Date().toISOString(),
+        ok: true,
+        error: null,
+      };
+    } catch (err) {
+      console.error("Error refreshing duplicate_list_items:", err);
+
+      refreshingStatus[type] = {
+        ...getRefreshStatusForType(type),
+        refreshing: false,
+        finishedAt: new Date().toISOString(),
+        ok: false,
+        error: String(err?.message || err),
+      };
+    }
   });
-  context.result = { ok: true, refresh: res };
+
+  context.result = {
+    ok: true,
+    refresh: {
+      ok: true,
+      refreshed: "table_from_query",
+      type,
+      status: getRefreshStatusForType(type),
+    },
+  };
   return context;
 };
 
@@ -219,7 +292,7 @@ const mergePair = async (context) => {
   await trx.raw(
     `
         INSERT INTO freedom_archives.duplicate_list_items
-        ${context.service._duplicatesSelectSql()}
+        ${duplicatesSelectSql()}
         WHERE a.type = ?
           AND (a.list_item_id = ? OR b.list_item_id = ?)
         ORDER BY s.sim DESC
@@ -230,6 +303,7 @@ const mergePair = async (context) => {
   context.result = { ok: true, merged: { source_id, target_id }, type };
   return context;
 };
+
 export default (function (app) {
   const options = {
     id: "duplicate_list_item_id",
@@ -237,7 +311,15 @@ export default (function (app) {
     paginate: app.get("paginate"),
   };
   // Initialize our service with any options it requires
-  app.use("/api/duplicate_list_items", new ValueLookup(options), { methods: ["find", "update", "remove", "patch"] });
+  app.use("/api/duplicate_list_items", new ValueLookup(options), {
+    methods: ["find", "update", "remove", "patch"],
+  });
+
+  // Polling endpoint (in-memory, per-process) for UI.
+  // Example: GET /api/duplicate_list_items_refresh_status?type=keyword
+  app.use("/api/duplicate_list_items_refresh_status", new DuplicateListItemsRefreshStatusService(), {
+    methods: ["find", "get"],
+  });
 
   const service = app.service("api/duplicate_list_items");
 
