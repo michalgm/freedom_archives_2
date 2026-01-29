@@ -140,7 +140,9 @@ const recordsSchema = z.object({
   program_id: z.number().nullable().optional(),
   needs_review: z.boolean().default(false),
   is_hidden: z.boolean().default(false),
-  fact_number: z.string()
+  fact_number: z
+    .string()
+    .describe("Cloud Backup Reference ID (FACT)")
     .regex(/^FACT_[0-9]{4,6}_[A-Z0-9_]+$/, { error: "Fact number must be in format 'FACT_XXXX_XXXX'" })
     .nullable()
     .optional(),
@@ -152,7 +154,7 @@ const recordsSchema = z.object({
     .superRefine((val, ctx) => {
       if (!val || val === "") return; // Allow empty/null
 
-      const parts = val.split('/');
+      const parts = val.split("/");
       if (parts.length !== 3) {
         ctx.addIssue({
           code: "custom",
@@ -190,7 +192,7 @@ const recordsSchema = z.object({
     .describe("Date"),
   year_is_circa: z.boolean().default(false).describe("Approximate Date"),
   program: list_itemsSchema.nullable().optional(),
-  media: z.array(mediaSchema).describe('Media').min(1),
+  media: z.array(mediaSchema).describe("Media").min(1),
   has_digital: z.boolean().default(false),
   authors: z.array(list_itemsSchema).nullable().optional(),
   subjects: z.array(list_itemsSchema).nullable().optional(),
@@ -239,21 +241,27 @@ const recordItemSchema = recordsSchema.pick({
 
 const embeddedRecordItemSchema = recordItemSchema.extend({ delete: z.boolean().optional() });
 
-const mediaDataSchema = mediaSchema.pick({
-  media_id: true,
-  call_number_item: true,
-  call_number_suffix: true,
-  generation_item: true,
-  format_item: true,
-  quality_item: true,
-  no_copies: true,
-  url: true,
-}).refine((data) => {
-  return !data.call_number_item || data.call_number_suffix;
-}, {
-  error: "Required if call number class is provided",
-  path: ["call_number_suffix"],
-});
+const mediaDataSchema = mediaSchema
+  .pick({
+    media_id: true,
+    call_number_item: true,
+    call_number_suffix: true,
+    generation_item: true,
+    format_item: true,
+    quality_item: true,
+    no_copies: true,
+    url: true,
+  })
+  .extend({ delete: z.boolean().optional() })
+  .refine(
+    (data) => {
+      return !data.call_number_item || data.call_number_suffix;
+    },
+    {
+      error: "Required if call number class is provided",
+      path: ["call_number_suffix"],
+    },
+  );
 
 const recordsDataSchema = recordsSchema
   .pick({
