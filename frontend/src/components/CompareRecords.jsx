@@ -17,9 +17,9 @@ import { EditItemFooter } from 'src/views/EditItemView';
 
 const schema = {
   title: {},
-  description: { field_type: 'textarea' },
-  is_hidden: { field_type: 'checkbox' },
-  needs_review: { field_type: 'checkbox' },
+  description: { field_type: "textarea" },
+  is_hidden: { field_type: "checkbox" },
+  needs_review: { field_type: "checkbox" },
   authors: { multiple: true, field_type: "list_item", itemType: "author" },
   producers: { multiple: true, field_type: "list_item", itemType: "producer" },
   keywords: { multiple: true, field_type: "list_item", itemType: "keyword" },
@@ -29,11 +29,14 @@ const schema = {
   program: { field_type: "list_item", itemType: "program" },
   publishers: { multiple: true, field_type: "list_item", itemType: "publisher" },
   location: {},
-  date_string: { field_type: "datestring", label: "Date", helperText: "MM/DD/YYYY format - enter '00' for unknown day or month" },
+  date_string: {
+    field_type: "datestring",
+    label: "Date",
+    helperText: "MM/DD/YYYY format - enter '00' for unknown day or month",
+  },
   year_is_circa: { field_type: "checkbox", label: "Approximate Date" },
+  fact_number: {},
   notes: { field_type: "textarea" },
-
-
 };
 
 const fields = [
