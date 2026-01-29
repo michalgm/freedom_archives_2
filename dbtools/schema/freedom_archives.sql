@@ -654,7 +654,7 @@ CREATE TABLE IF NOT EXISTS records (
     notes text,
     location text,
     vol_number text,
-    collection_id integer DEFAULT 1000,
+    collection_id integer NOT NULL DEFAULT 1000,
     parent_record_id integer,
     primary_media_id integer,
     year integer,
