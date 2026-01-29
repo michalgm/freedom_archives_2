@@ -2,15 +2,15 @@ import { ExpandMore } from "@mui/icons-material";
 import {
   Box,
   Button,
-  Skeleton,
-  Stack,
-  Typography,
   Card,
   CardActionArea,
   CardActions,
   CardContent,
-  Grid,
   Divider,
+  Grid,
+  Skeleton,
+  Stack,
+  Typography,
 } from "@mui/material";
 import { startCase } from "lodash-es";
 import { useRef } from "react";
@@ -31,7 +31,6 @@ export function ItemCardLayout({
   isOverflowing,
   dense = false,
   item,
-  setCurrentRecord,
   ...cardProps
 }) {
   const content = (
@@ -73,17 +72,16 @@ export function ItemCardLayout({
       {...cardProps}
     >
       {url ? (
-        <ItemLink item={item} setCurrentRecord={setCurrentRecord}>
+        <ItemLink item={item}>
           <CardActionArea>{content}</CardActionArea>
         </ItemLink>
       ) : (
         content
       )}
-      {item?.actions || isOverflowing && (
-        <CardActions sx={{ textAlign: "right", justifyContent: "flex-end" }}>
-          {item.actions || actions}
-        </CardActions>
-      )}
+      {item?.actions ||
+        (isOverflowing && (
+          <CardActions sx={{ textAlign: "right", justifyContent: "flex-end" }}>{item.actions || actions}</CardActions>
+        ))}
     </Card>
   );
 }
