@@ -184,7 +184,18 @@ function FindDuplicateListItems() {
   }, [addNotification, fetchValues, type, waitForRefreshToFinish]);
 
   const mergePair = useCallback(
-    async ({ type, targetItem, sourceItem, direction, duplicateId, sourceCounts }) => {
+    async ({ row, direction }) => {
+      const duplicateId = row.duplicate_list_item_id;
+      const type = row.type;
+      const source = direction === "1to2" ? "1" : "2";
+      const target = direction === "1to2" ? "2" : "1";
+      const sourceItem = row[`item_${source}`];
+      const targetItem = row[`item_${target}`];
+      const sourceCounts = {
+        records: Number(row[`records_count_${source}`] || 0),
+        collections: Number(row[`collections_count_${source}`] || 0),
+        media: Number(row[`media_count_${source}`] || 0),
+      };
       const { confirmed } = await confirm({
         title: `Merge duplicate ${type} items`,
         description: (
@@ -200,7 +211,10 @@ function FindDuplicateListItems() {
         ),
       });
       if (confirmed) {
-        await duplicate_list_items.patch(duplicateId, { direction: direction });
+        await duplicate_list_items.patch(duplicateId, {
+          source_id: row[`list_item_id_${source}`],
+          target_id: row[`list_item_id_${target}`],
+        });
         addNotification({
           message: `Merged ${type} "${sourceItem}" into "${targetItem}"`,
         });
@@ -252,17 +266,6 @@ function FindDuplicateListItems() {
 
         width: 250,
         renderCell: ({ row }) => {
-          const sourceCounts1 = {
-            records: Number(row.records_count_1 || 0),
-            collections: Number(row.collections_count_1 || 0),
-            media: Number(row.media_count_1 || 0),
-          };
-          const sourceCounts2 = {
-            records: Number(row.records_count_2 || 0),
-            collections: Number(row.collections_count_2 || 0),
-            media: Number(row.media_count_2 || 0),
-          };
-
           return (
             <Stack direction="column" spacing={1} sx={{ height: "100%", alignItems: "center", p: 1 }}>
               <Button
@@ -271,12 +274,8 @@ function FindDuplicateListItems() {
                 startIcon={<Merge />}
                 onClick={() =>
                   mergePair({
-                    duplicateId: row.duplicate_list_item_id,
-                    type: row.type,
-                    direction: "1_to_2",
-                    sourceItem: row.item_1,
-                    targetItem: row.item_2,
-                    sourceCounts: sourceCounts1,
+                    row,
+                    direction: "1to2",
                   })
                 }
               >
@@ -288,12 +287,8 @@ function FindDuplicateListItems() {
                 startIcon={<Merge />}
                 onClick={() =>
                   mergePair({
-                    duplicateId: row.duplicate_list_item_id,
-                    type: row.type,
-                    direction: "2_to_1",
-                    sourceItem: row.item_2,
-                    targetItem: row.item_1,
-                    sourceCounts: sourceCounts2,
+                    row,
+                    direction: "2to1",
                   })
                 }
               >

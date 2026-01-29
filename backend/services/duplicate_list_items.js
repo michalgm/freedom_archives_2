@@ -5,6 +5,7 @@ import { KnexService } from "@feathersjs/knex";
 // In-memory store for refresh status per type.
 // NOTE: This is per-process and resets on restart.
 const refreshingStatus = {};
+const STATEMENT_TIMEOUT_MS = 300_000; // 5 minutes
 
 const getRefreshStatusForType = (type) => {
   const key = String(type || "");
@@ -37,44 +38,59 @@ class DuplicateListItemsRefreshStatusService {
   }
 }
 
-const duplicatesSelectSql = () => {
-  // Keep in sync with the original DB view logic, but inline it here so the service
-  // doesn't depend on `duplicate_list_items_view`.
+const duplicatesSelectSql = (targeted) => {
+  const baseSql = `
+    SELECT
+      a.list_item_id||'|'||b.list_item_id AS duplicate_list_item_id,
+      a.list_item_id AS list_item_id_1,
+      b.list_item_id AS list_item_id_2,
+      a.item        AS item_1,
+      b.item        AS item_2,
+      a.archive_id,
+      a.type,
+      s.sim,
+      c.records_count AS records_count_1,
+      c.collections_count AS collections_count_1,
+      c.media_count AS media_count_1,
+      d.records_count AS records_count_2,
+      d.collections_count AS collections_count_2,
+      d.media_count AS media_count_2,
+      (dli.list_item_id_1 IS NOT NULL) AS is_ignored
+    FROM freedom_archives.list_items a
+    JOIN freedom_archives.list_items b
+      ON  b.archive_id   = a.archive_id
+      AND b.type         = a.type
+      AND b.list_item_id > a.list_item_id
+      AND a.search_text % b.search_text
+    JOIN freedom_archives.list_items_lookup c
+      ON c.list_item_id = a.list_item_id
+    JOIN freedom_archives.list_items_lookup d
+      ON d.list_item_id = b.list_item_id
+    LEFT JOIN freedom_archives.duplicate_list_items_ignore dli
+      ON dli.list_item_id_1 = a.list_item_id
+     AND dli.list_item_id_2 = b.list_item_id
+    CROSS JOIN LATERAL (
+      SELECT similarity(a.search_text, b.search_text) AS sim
+    ) s
+  `;
+
+  // Full refresh: caller can append WHERE a.type = ? / ORDER BY etc.
+  if (!targeted) {
+    return baseSql;
+  }
+
+  // Targeted: same query twice, no OR.
   return `
-      SELECT
-        a.list_item_id||'|'||b.list_item_id AS duplicate_list_item_id,
-        a.list_item_id AS list_item_id_1,
-        b.list_item_id AS list_item_id_2,
-        a.item        AS item_1,
-        b.item        AS item_2,
-        a.archive_id,
-        a.type,
-        s.sim,
-        c.records_count AS records_count_1,
-        c.collections_count AS collections_count_1,
-        c.media_count AS media_count_1,
-        d.records_count AS records_count_2,
-        d.collections_count AS collections_count_2,
-        d.media_count AS media_count_2,
-        EXISTS (
-          SELECT 1
-          FROM freedom_archives.duplicate_list_items_ignore dli
-          WHERE (dli.list_item_id_1 = a.list_item_id AND dli.list_item_id_2 = b.list_item_id)
-             OR (dli.list_item_id_1 = b.list_item_id AND dli.list_item_id_2 = a.list_item_id)
-        ) AS is_ignored
-      FROM freedom_archives.list_items a
-      JOIN freedom_archives.list_items b
-        ON  b.archive_id   = a.archive_id
-        AND b.type         = a.type
-        AND b.list_item_id > a.list_item_id
-        AND a.search_text % b.search_text
-      JOIN freedom_archives.list_items_lookup c
-        ON c.list_item_id = a.list_item_id
-      JOIN freedom_archives.list_items_lookup d
-        ON d.list_item_id = b.list_item_id
-      CROSS JOIN LATERAL (
-        SELECT similarity(a.search_text, b.search_text) AS sim
-      ) s
+      SELECT * FROM (
+        ${baseSql}
+        WHERE a.list_item_id = ? AND a.archive_id = ? AND a.type = ?
+
+        UNION ALL
+
+        ${baseSql}
+        WHERE b.list_item_id = ? AND b.archive_id = ? AND b.type = ?
+      ) q
+      ORDER BY q.sim DESC
     `;
 };
 
@@ -128,12 +144,6 @@ class ValueLookup extends KnexService {
 
 const refresh = async (context) => {
   const { app } = context;
-  const {
-    params: {
-      transaction: { trx },
-    },
-  } = context;
-  const refreshStatementTimeoutMs = 300_000; // 5 minutes
   const type = context.data?.type || context.result?.type;
 
   if (!type || typeof type !== "string") {
@@ -156,13 +166,13 @@ const refresh = async (context) => {
     error: null,
   };
 
-  await trx("duplicate_list_items").where({ type }).delete();
 
   setImmediate(async () => {
     const knex = app.get("postgresqlClient");
     try {
       await knex.transaction(async (trx) => {
-        await trx.raw(`SET LOCAL statement_timeout TO ${refreshStatementTimeoutMs};`);
+        await trx.raw(`SET LOCAL statement_timeout TO ${STATEMENT_TIMEOUT_MS};`);
+        await trx("duplicate_list_items").where({ type }).delete();
         await trx.raw("SELECT pg_advisory_xact_lock(hashtext(?))", [`duplicate_list_items_refresh:${type}`]);
         await trx.raw(
           `
@@ -221,6 +231,7 @@ const ignorePair = async (context) => {
 
   const [raw1, raw2] = context.service._parseDuplicateId(id);
   const [id1, id2] = await context.service._normalizePair(raw1, raw2);
+  await trx.raw(`SET LOCAL statement_timeout TO ${STATEMENT_TIMEOUT_MS};`);
 
   const duplicateId = `${id1}|${id2}`;
   if (restore) {
@@ -245,25 +256,17 @@ const mergePair = async (context) => {
   const { id, data, params } = context;
   const {
     transaction: { trx },
+    user: { archive_id },
   } = params;
   if (id == null) {
     throw new MethodNotAllowed("Bulk merge is not supported");
   }
-
-  const [id1, id2] = context.service._parseDuplicateId(id);
-  const direction = data?.direction;
 
   let source_id;
   let target_id;
   if (data?.source_id && data?.target_id) {
     source_id = data.source_id;
     target_id = data.target_id;
-  } else if (direction === "1_to_2") {
-    source_id = id1;
-    target_id = id2;
-  } else if (direction === "2_to_1") {
-    source_id = id2;
-    target_id = id1;
   } else {
     throw new BadRequest("Missing merge direction (direction: '1_to_2' | '2_to_1')");
   }
@@ -272,6 +275,7 @@ const mergePair = async (context) => {
   const source = await listItems.get(source_id, params);
   const type = source?.type;
 
+  await trx.raw(`SET LOCAL statement_timeout TO ${STATEMENT_TIMEOUT_MS};`);
   // Remove lookup table entries where both source and target are present to avoid conflicts.
   await trx("records_to_list_items as a")
     .where("a.list_item_id", source_id)
@@ -289,16 +293,14 @@ const mergePair = async (context) => {
     })
     .delete();
 
-  await trx.raw(
-    `
-        INSERT INTO freedom_archives.duplicate_list_items
-        ${duplicatesSelectSql()}
-        WHERE a.type = ?
-          AND (a.list_item_id = ? OR b.list_item_id = ?)
-        ORDER BY s.sim DESC
-        `,
-    [type, target_id, target_id],
-  );
+  await trx.raw(` INSERT INTO freedom_archives.duplicate_list_items ${duplicatesSelectSql(true)} `, [
+    target_id,
+    archive_id,
+    type,
+    target_id,
+    archive_id,
+    type,
+  ]);
 
   context.result = { ok: true, merged: { source_id, target_id }, type };
   return context;
