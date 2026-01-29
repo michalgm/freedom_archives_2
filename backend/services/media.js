@@ -1,4 +1,4 @@
-import { KnexService, transaction } from "@feathersjs/knex";
+import { KnexService } from "@feathersjs/knex";
 
 class Media extends KnexService {
   constructor(options) {
@@ -38,7 +38,7 @@ export default (function (app) {
     const { data } = context;
     ["format", "quality", "generation"].forEach((key) => {
       if (data[`${key}_item`] !== undefined) {
-        data[`${key}_id`] = data[`${key}_item`].list_item_id;
+        data[`${key}_id`] = data[`${key}_item`]?.list_item_id;
         delete data[`${key}_item`];
       }
     });
@@ -48,25 +48,31 @@ export default (function (app) {
       delete data.call_number_item;
     }
 
-    ["contributor_name", "contributor_username", "creator_name", "creator_username", "is_primary", "delete"].forEach(
-      (key) => delete data[key],
-    );
+    [
+      "contributor_name",
+      "contributor_username",
+      "creator_name",
+      "creator_username",
+      "is_primary",
+      "delete",
+      "call_number",
+    ].forEach((key) => delete data[key]);
     return context;
   };
 
   service.hooks({
     before: {
       all: [],
-      create: [transaction.start(), cleanupMeta],
-      patch: [transaction.start(), cleanupMeta],
+      create: [cleanupMeta],
+      patch: [cleanupMeta],
     },
     after: {
-      create: [updateView, transaction.end()],
-      patch: [updateView, transaction.end()],
-      remove: [updateView, transaction.end()],
+      create: [updateView],
+      patch: [updateView],
+      remove: [updateView],
     },
     error: {
-      patch: [transaction.rollback()],
+      patch: [],
     },
   });
 });

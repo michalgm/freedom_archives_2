@@ -20,9 +20,7 @@ export const setUser = (context) => {
     data = {},
     method,
     service: { Model },
-    params: {
-      user,
-    },
+    params: { user },
   } = context;
   if (!user) return context;
   const { user_id } = user;
@@ -132,21 +130,26 @@ export const refreshView = async (context) => {
   const table = fullName.slice(0, -1);
   const id = context.id || result[`${table}_id`];
   const additional_views = context.additional_views || [];
+  await Promise.all(
+    additional_views.map(async ([table, id]) => {
+      await app.service(`api/${table}`).patch(id, {}, { transaction: { trx } });
+    }),
+  );
 
-  await Promise.all(additional_views.map(async ([table, id]) => {
-    await app.service(`api/${table}`).patch(id, {}, { transaction: { trx } });
-  }));
+  const unifiedTable = `_unified_${table}s`;
+  const columns = await trx(unifiedTable).columnInfo();
+  const pk = `${table}_id`;
 
-  if (["update", "patch", "remove", "create"].includes(method)) {
-    await trx(`_unified_${table}s`).where(`${table}_id`, id).delete();
+  if (["remove"].includes(method)) {
+    await trx(unifiedTable).where(pk, id).delete();
+    return context;
   }
 
   if (["update", "patch", "create"].includes(method)) {
-    const res = await trx(`_unified_${table}s`).insert(
-      function () {
-        this.select("*").from(`unified_${table}s`).where(`${table}_id`, id);
-      })
-      .returning('*');
+    // Concurrency-safe refresh: INSERT from the unified view with an UPSERT.
+    // NOTE: The onConflict/merge must be chained on the INSERT builder, not the SELECT subquery.
+    const selectRow = trx.select("*").from(`unified_${table}s`).where(pk, id);
+    const res = await trx(unifiedTable).insert(selectRow).onConflict(pk).merge(Object.keys(columns)).returning("*");
     context.result = res?.[0] || {};
     return context;
   }
@@ -191,5 +194,4 @@ export const allowDisablePagination = (context) => {
   return context;
 };
 
-export { allowAnonymous, updateThumbnail, rankedSearch, authRoles };
-
+export { allowAnonymous, authRoles, rankedSearch, updateThumbnail };

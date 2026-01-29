@@ -1,4 +1,4 @@
-import { KnexService, transaction } from "@feathersjs/knex";
+import { KnexService } from "@feathersjs/knex";
 
 class Relationships extends KnexService {
   constructor(options) {
@@ -68,14 +68,10 @@ export default (function (app) {
   };
   service.hooks({
     before: {
-      all: [],
-      patch: [transaction.start(), setUser],
+      patch: [setUser],
     },
     after: {
-      patch: [updateRelations, transaction.end()],
-    },
-    error: {
-      patch: [transaction.rollback()],
+      patch: [updateRelations],
     },
   });
 });

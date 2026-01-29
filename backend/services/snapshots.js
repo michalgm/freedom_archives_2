@@ -1,4 +1,4 @@
-import { KnexService, transaction } from "@feathersjs/knex";
+import { KnexService } from "@feathersjs/knex";
 import path from "path";
 import { fileURLToPath } from "url";
 
@@ -103,7 +103,6 @@ FROM
   JOIN media_to_list_items l USING (media_id)
   JOIN (${records_select_query}) r USING (record_id)
 `;
-
 
 const public_tables = {
   records: {
@@ -280,7 +279,8 @@ const publishSite = async (context) => {
     // console.timeEnd(`delete ${table}`);
     // console.time(`update ${table}`);
     await trx(`public_search.${table}`).insert(
-      trx.fromRaw(selectQuery ? `(${selectQuery})` : table)
+      trx
+        .fromRaw(selectQuery ? `(${selectQuery})` : table)
         .select()
         .where({ archive_id }),
       // trx(selectTarget || table)
@@ -310,7 +310,6 @@ const publishSite = async (context) => {
 };
 
 const cacheConfig = async (context) => {
-
   const {
     params: {
       transaction: { trx },
@@ -318,28 +317,30 @@ const cacheConfig = async (context) => {
     data: { archive_id },
   } = context;
 
-  const keywords = (await trx('list_items').select(trx.raw('jsonb_build_array(item, count(*)) as value'))
-    .join('records_to_list_items AS rti', 'list_items.list_item_id', 'rti.list_item_id')
-    .where({ archive_id })
-    .groupBy('item')
-    .orderBy(trx.raw('count(*)'), 'desc')
-    .limit(30))
-    .map(({ value }) => value);
+  const keywords = (
+    await trx("list_items")
+      .select(trx.raw("jsonb_build_array(item, count(*)) as value"))
+      .join("records_to_list_items AS rti", "list_items.list_item_id", "rti.list_item_id")
+      .where({ archive_id })
+      .groupBy("item")
+      .orderBy(trx.raw("count(*)"), "desc")
+      .limit(30)
+  ).map(({ value }) => value);
 
-  const collection = await trx('_unified_collections')
+  const collection = await trx("_unified_collections")
     .select(
       trx.raw(`jsonb_path_query_array(array_to_json(children)::jsonb, '$[*] \\? (@.is_hidden == false)') as children`),
-      'featured_records',
+      "featured_records",
     )
     .where({ archive_id, collection_id: 0 });
   await trx(`public_search.config`).insert([
     { archive_id, setting: "topKeywords", value: JSON.stringify(keywords) },
-    { archive_id, setting: "topCollection", value: JSON.stringify(collection[0]) }],
-  );
+    { archive_id, setting: "topCollection", value: JSON.stringify(collection[0]) },
+  ]);
 };
 
 const analyzeSnapshot = async ({ service }) => {
-  await service.getModel().raw(`VACUUM ANALYZE ${Object.keys(public_tables).join(', ')}`);
+  await service.getModel().raw(`VACUUM ANALYZE ${Object.keys(public_tables).join(", ")}`);
 };
 
 const writeSitemap = async (context) => {
@@ -359,7 +360,6 @@ export default (function (app) {
     before: {
       all: [],
       create: [
-        transaction.start(),
         setArchive,
         (context) => {
           context.data.title = LIVE_SNAPSHOT_TITLE;
@@ -371,20 +371,15 @@ export default (function (app) {
           context.params.query.$sort ||= { is_live: -1, date_published: -1 };
         },
       ],
-      patch: [transaction.start(), restoreSnapshot],
+      patch: [restoreSnapshot],
     },
     after: {
-      create: [
-        publishSite,
-        cacheConfig,
-        transaction.end(),
-        analyzeSnapshot,
-        writeSitemap],
-      patch: [transaction.end(), analyzeSnapshot, writeSitemap],
+      create: [publishSite, cacheConfig, analyzeSnapshot, writeSitemap],
+      patch: [analyzeSnapshot, writeSitemap],
     },
     error: {
-      create: [transaction.rollback()],
-      patch: [transaction.rollback()],
+      create: [],
+      patch: [],
     },
   });
 });

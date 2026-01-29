@@ -1,5 +1,5 @@
 import { BadRequest } from "@feathersjs/errors";
-import { KnexService, transaction } from "@feathersjs/knex";
+import { KnexService } from "@feathersjs/knex";
 
 import { rankedSearch } from "./common_hooks/index.js";
 
@@ -121,20 +121,20 @@ export default (function (app) {
   service.hooks({
     before: {
       all: [],
-      patch: [transaction.start(), findRelations],
-      update: [transaction.start(), findRelations, merge],
-      remove: [transaction.start(), findRelations],
+      patch: [findRelations],
+      update: [findRelations, merge],
+      remove: [findRelations],
       find: [rankedSearch],
     },
     after: {
-      patch: [updateRelations, transaction.end()],
-      update: [updateRelations, transaction.end()],
-      remove: [updateRelations, transaction.end()],
+      patch: [updateRelations],
+      update: [updateRelations],
+      remove: [updateRelations],
     },
     error: {
-      patch: [transaction.rollback()],
-      update: [transaction.rollback()],
-      remove: [transaction.rollback()],
+      patch: [],
+      update: [],
+      remove: [],
     },
   });
 });

@@ -164,13 +164,13 @@ const updateRelations = async (context) => {
   }
   const params = { user, transaction: { trx } };
   if (relation_data.media !== undefined) {
-    const media = await Promise.all(
+    await Promise.all(
       relation_data.media.map((media) => {
         if (media.delete) {
           return app.service("api/media").remove(media.media_id, params);
         } else if (media.media_id) {
-          if (media.url === '') {
-            media.media_type = '';
+          if (media.url === "") {
+            media.media_type = "";
           }
           return app.service("api/media").patch(media.media_id, { record_id: id, ...media }, params);
         }
@@ -179,8 +179,13 @@ const updateRelations = async (context) => {
         return app.service("api/media").create(media, params);
       }),
     );
-    if (media.length && !data.primary_media_id) {
-      await app.service("api/records")._patch(id, { primary_media_id: media[0].media_id }, params);
+    const media = await app.service("api/media").find({
+      ...params,
+      query: { record_id: id, $disable_pagination: true, $sort: { url: "asc" } },
+    });
+
+    if (!data.primary_media_id) {
+      await app.service("api/records")._patch(id, { primary_media_id: media?.[0]?.media_id || null }, params);
     }
   }
   if (relation_data.children !== undefined) {

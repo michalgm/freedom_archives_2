@@ -1,4 +1,4 @@
-import { KnexService, transaction } from "@feathersjs/knex";
+import { KnexService } from "@feathersjs/knex";
 
 import { rankedSearch } from "./common_hooks/rankedSearch.js";
 
@@ -13,7 +13,7 @@ class DuplicateRecords extends KnexService {
 
 const getRecordIds = (context) => {
   const { id } = context;
-  const [record_id_1, record_id_2] = id.split('%7C');
+  const [record_id_1, record_id_2] = id.split("%7C");
   if (!record_id_1 || !record_id_2) {
     throw new Error("invalid duplicate record id");
   }
@@ -39,15 +39,14 @@ export default (function (app) {
     const { id } = context;
     const [record_id_1, record_id_2] = getRecordIds(context);
 
-    const knex = context.app.get('postgresqlClient');
-    await knex.table('duplicate_records_ignore').insert({ record_id_1, record_id_2 });
+    const knex = context.app.get("postgresqlClient");
+    await knex.table("duplicate_records_ignore").insert({ record_id_1, record_id_2 });
 
     context.result = {
       id,
     };
     return context;
   };
-
 
   const mergeDuplicateRecords = async (context) => {
     const {
@@ -58,14 +57,15 @@ export default (function (app) {
     // console.log('Merging duplicate records:', record_id_1, record_id_2, data);
     const trx = tx?.trx;
     if (!trx) {
-      throw new Error('Missing transaction for duplicate record merge');
+      throw new Error("Missing transaction for duplicate record merge");
     }
 
-    const res = await context.app.service('/api/records').patch(record_id_1, data, { transaction: tx });
+    const res = await context.app.service("/api/records").patch(record_id_1, data, { transaction: tx });
 
     // Update related_records to point at the surviving record, and normalize ordering
     // so record_id_1 is always <= record_id_2.
-    await trx.raw(`
+    await trx.raw(
+      `
       WITH params AS (
         SELECT :old_id::bigint AS old_id, :new_id::bigint AS new_id
       )
@@ -81,11 +81,12 @@ export default (function (app) {
         )
       FROM params
       WHERE r.record_id_1 = params.old_id OR r.record_id_2 = params.old_id;
-      `, { old_id: record_id_2, new_id: record_id_1 },
+      `,
+      { old_id: record_id_2, new_id: record_id_1 },
     );
-    await trx('related_records').whereRaw('record_id_1 = record_id_2').delete();
+    await trx("related_records").whereRaw("record_id_1 = record_id_2").delete();
 
-    await context.app.service('/api/records').remove(record_id_2, { transaction: tx });
+    await context.app.service("/api/records").remove(record_id_2, { transaction: tx });
     context.result = {
       ...res,
     };
@@ -94,22 +95,11 @@ export default (function (app) {
 
   service.hooks({
     before: {
-      all: [transaction.start()],
       find: [rankedSearch],
       patch: [mergeDuplicateRecords],
       remove: [ignoreDuplicateRecord],
     },
-    after: {
-      all: [transaction.end()],
-      find: [],
-      patch: [],
-      remove: [],
-    },
-    error: {
-      all: [transaction.rollback()],
-      find: [],
-      patch: [],
-      remove: [],
-    },
+    after: {},
+    error: {},
   });
 });
