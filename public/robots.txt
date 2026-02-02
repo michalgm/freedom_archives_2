@@ -22,13 +22,13 @@ User-agent: Slurp
 User-agent: DuckDuckBot
 Disallow: /api/
 Disallow: /admin/
-Crawl-delay: 1
-Request-rate: 30/60
+# Crawl-delay: 1
+# Request-rate: 30/60
 
 # Disallow everything else by default
 User-agent: *
 Disallow: /api/
 Disallow: /admin/
-Crawl-delay: 2
+# Crawl-delay: 2
 
-Sitemap: /sitemap.xml
+Sitemap: https://search.freedomarchives.org/sitemap.xml
