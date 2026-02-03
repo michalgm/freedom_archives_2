@@ -431,6 +431,7 @@ CREATE TABLE IF NOT EXISTS collections_snapshots (
     ancestors jsonb,
     children json,
     display_order integer,
+    parent_collection_id integer,
     CONSTRAINT collections_snapshots_pkey PRIMARY KEY (snapshot_id, archive_id, collection_id),
     CONSTRAINT fk_snapshot FOREIGN KEY (snapshot_id) REFERENCES snapshots (snapshot_id) ON DELETE CASCADE
 );

@@ -139,52 +139,9 @@ SELECT
 	c.keywords,
 	c.date_range,
 	c.ancestors,
-	(
-		SELECT
-			COALESCE(
-				JSONB_AGG(
-					JSONB_BUILD_OBJECT(
-						'title',
-						b.title,
-						'collection_id',
-						b.collection_id,
-						'summary',
-						b.summary,
-						'thumbnail',
-						b.thumbnail,
-						'display_order',
-						b.display_order,
-						'children',
-						(
-							SELECT
-								JSONB_AGG(
-									JSONB_BUILD_OBJECT(
-										'title',
-										c.title,
-										'collection_id',
-										c.collection_id
-									)
-								)
-							FROM
-								_unified_collections c
-							WHERE
-								c.parent_collection_id = b.collection_id
-						)
-					)
-					ORDER BY
-						b.display_order
-				) FILTER (
-					WHERE
-						b.collection_id IS NOT NULL
-				),
-				'[]'::JSONB
-			)
-		FROM
-			_unified_collections b
-		WHERE
-			b.parent_collection_id = c.collection_id
-	) AS children,
-	c.display_order
+	'[]'::JSONB AS children,
+	c.display_order,
+  c.parent_collection_id
 FROM
 	_unified_collections c
 WHERE
@@ -287,8 +244,46 @@ const publishSite = async (context) => {
       //   .where({ archive_id })
       //   .select()
     );
-    // console.timeEnd(`update ${table}`);
+
+    await trx("public_search.collections")
+      .where({ archive_id })
+      .update({
+        children: trx.raw(
+          `(
+        SELECT
+          COALESCE(
+            JSONB_AGG(
+              JSONB_BUILD_OBJECT(
+                'title', b.title,
+                'collection_id', b.collection_id,
+                'summary', b.summary,
+                'thumbnail', b.thumbnail,
+                'display_order', b.display_order,
+                'children',
+                  (
+                    SELECT
+                      JSONB_AGG(
+                        JSONB_BUILD_OBJECT(
+                          'title', c.title,
+                          'collection_id', c.collection_id
+                        )
+                        ORDER BY c.display_order
+                      )
+                    FROM public_search.collections c
+                    WHERE c.parent_collection_id = b.collection_id
+                  )
+              )
+              ORDER BY b.display_order
+            ) FILTER (WHERE b.collection_id IS NOT NULL),
+            '[]'::JSONB
+          )
+        FROM public_search.collections b
+        WHERE b.parent_collection_id = public_search.collections.collection_id
+      )`,
+        ),
+      });
   }
+
   await trx("snapshots").where({ title: "Snapshot 3", archive_id }).delete();
   await trx("snapshots").where({ archive_id, title: "Snapshot 2" }).update({ title: "Snapshot 3" });
   await trx("snapshots").where({ archive_id, title: "Snapshot 1" }).update({ title: "Snapshot 2" });

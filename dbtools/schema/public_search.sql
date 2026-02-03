@@ -30,6 +30,7 @@ CREATE TABLE IF NOT EXISTS collections (
     ancestors jsonb,
     children jsonb,
     display_order integer,
+    parent_collection_id integer,
     CONSTRAINT collections_pkey PRIMARY KEY (archive_id, collection_id)
 );
 
