@@ -42,6 +42,9 @@ export default (function (app) {
     if (!merge_target_id) {
       throw new BadRequest("Missing merge target id");
     }
+    if (!list_item_type) {
+      throw new BadRequest("Missing list_item_type in params");
+    }
 
     const item = await service._get(merge_target_id, { transaction });
 
@@ -53,9 +56,23 @@ export default (function (app) {
 
     const tables = (fk_map[list_item_type] || []).map(table => [table, table.match('_to_list_items') ? 'list_item_id' : `${list_item_type}_id`]);
 
+
     await Promise.all(
       tables.map(async ([table, field]) => {
-        return transaction.trx(table)
+        // Remove lookup table entries where both source and target are present to avoid conflicts.
+        if (table.endsWith("_to_list_items")) {
+          const object_type = table.replace("s_to_list_items", "");
+          await transaction
+            .trx(`${table} as a`)
+            .where("a.list_item_id", id)
+            .whereIn(`a.${object_type}_id`, function () {
+              this.select(`b.${object_type}_id`).from(`${table} as b`).where("b.list_item_id", merge_target_id);
+            })
+            .delete();
+        }
+
+        await transaction
+          .trx(table)
           .where(field, id)
           .update({
             [field]: merge_target_id,
@@ -118,6 +135,22 @@ export default (function (app) {
     return context;
   };
 
+  const handleErrors = async (context) => {
+    const {
+      error,
+      data: { item },
+    } = context;
+
+    // Check for duplicate key violation on list_items_type_idx
+    if (error?.code === "23505" && error?.constraint === "list_items_type_idx") {
+      throw new BadRequest(
+        `An entry for '${item}' already exists for this list type. Did you mean to merge it instead?`,
+      );
+    }
+
+    return context;
+  };
+
   service.hooks({
     before: {
       all: [],
@@ -132,7 +165,7 @@ export default (function (app) {
       remove: [updateRelations],
     },
     error: {
-      patch: [],
+      patch: [handleErrors],
       update: [],
       remove: [],
     },

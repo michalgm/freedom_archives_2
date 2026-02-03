@@ -4,23 +4,18 @@ import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import app from "../../backend/app.js";
 import logger from "../../backend/logger.js";
 
+
 // Verifies nested service calls participate in the same overall transaction:
 // if media creation fails during records.create, the record insert should be rolled back.
 describe("records transactional behavior", () => {
-  const knex = app.get("postgresqlClient");
-
   beforeAll(async () => {
     // Keep expected error-path tests quiet.
     sinon.stub(logger, "error");
-
-    await knex.raw(
-      'insert into "archives" ("archive_id", "title") values (?, ?) on conflict ("archive_id") do nothing',
-      [1, "Test Archive"],
-    );
   });
 
-  afterAll(() => {
+  afterAll(async () => {
     if (logger.error.restore) logger.error.restore();
+    await app.get("postgresqlClient").raw('delete from "records" where title like ?', ["__vitest_records_tx _%"]);
   });
 
   it("rolls back record create if nested media.create fails", async () => {
@@ -51,7 +46,7 @@ describe("records transactional behavior", () => {
       app.service("api/records").create(
         {
           title: recordTitle,
-          collection_id: null,
+          collection_id: 1000,
           media: [{ url: failingUrl, media_type: "" }],
         },
         params,

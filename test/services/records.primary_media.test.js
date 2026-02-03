@@ -1,21 +1,19 @@
-import { describe, expect, it } from "vitest";
+import { afterAll, describe, expect, it } from "vitest";
 
 import app from "../../backend/app.js";
 
 const TEST_COLLECTION_ID = 1000;
 
+afterAll(async () => {
+  await app.get("postgresqlClient").raw('delete from "records" where title like ?', ["__vitest_primary_media_%"]);
+});
+
 describe("records primary_media_id behavior", () => {
   it("does not change primary_media_id on delete-only media patch", async () => {
-    const knex = app.get("postgresqlClient");
     const uniq = `__vitest_primary_media_${Date.now()}_${Math.random().toString(16).slice(2)}`;
 
-    await knex.raw(
-      'insert into "archives" ("archive_id", "title") values (?, ?) on conflict ("archive_id") do nothing',
-      [1, "Test Archive"],
-    );
-
     const params = {
-      user: { archive_id: 1, role: "administrator" },
+      user: { user_id: 4, archive_id: 1, role: "administrator" },
     };
 
     const title = `${uniq}_record`;
@@ -89,13 +87,7 @@ describe("records primary_media_id behavior", () => {
   });
 
   it("moves primary_media_id when the primary media is deleted", async () => {
-    const knex = app.get("postgresqlClient");
     const uniq = `__vitest_primary_media_delete_primary_${Date.now()}_${Math.random().toString(16).slice(2)}`;
-
-    await knex.raw(
-      'insert into "archives" ("archive_id", "title") values (?, ?) on conflict ("archive_id") do nothing',
-      [1, "Test Archive"],
-    );
 
     const params = {
       user: { archive_id: 1, role: "administrator" },

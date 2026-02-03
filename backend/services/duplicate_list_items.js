@@ -276,13 +276,6 @@ const mergePair = async (context) => {
   const type = source?.type;
 
   await trx.raw(`SET LOCAL statement_timeout TO ${STATEMENT_TIMEOUT_MS};`);
-  // Remove lookup table entries where both source and target are present to avoid conflicts.
-  await trx("records_to_list_items as a")
-    .where("a.list_item_id", source_id)
-    .whereIn("a.record_id", function () {
-      this.select("b.record_id").from("records_to_list_items as b").where("b.list_item_id", target_id);
-    })
-    .delete();
 
   await listItems.update(source_id, { merge_target_id: target_id }, params);
 

@@ -174,6 +174,7 @@ export const validateArchive = (context) => {
 };
 
 export const logHook = (context) => {
+  // eslint-disable-next-line no-console
   console.log(`HOOK: ${context.path} ${context.method} ${context.type} ${context.id ? `ID:${context.id}` : ""}`);
 };
 
@@ -187,7 +188,7 @@ export const debugQuery = (context) => {
 
 export const allowDisablePagination = (context) => {
   const { method, params } = context;
-  if (["find", "get"].includes(method) && params.query.$disable_pagination) {
+  if (["find", "get"].includes(method) && params.query?.$disable_pagination) {
     context.params.paginate = false;
     delete params.query.$disable_pagination;
   }
