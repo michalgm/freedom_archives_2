@@ -2,6 +2,7 @@ import { Box, Button, Paper, Tab, Tabs, Typography } from "@mui/material";
 import { lazy, useCallback, useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router";
 import { data_cleanup } from "src/api";
+import ButtonLink from "src/components/ButtonLink";
 import Link from "src/components/Link";
 
 const DataGrid = lazy(() => import("@mui/x-data-grid").then((module) => ({ default: module.DataGrid })));
@@ -102,26 +103,27 @@ function DataCleanupTable({ items, loading}) {
         col.minWidth = 400;
         col.flex = 3;
         col.renderCell = (params) => (
-          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.5, py: 0.5 }}>
+          <Box sx={{ display: "flex", flexDirection: "column", gap: 0.5, py: 0.5 }}>
             {params.value.map((record) => (
-              <Button
+              <ButtonLink
                 key={record.record_id}
                 size="small"
                 variant="outlined"
-                onClick={() => navigate(`/admin/records/${record.record_id}`)}
-                sx={{ 
-                  textTransform: 'none', 
-                  justifyContent: 'flex-start',
-                  textAlign: 'left',
+                to={`/admin/records/${record.record_id}`}
+                target="_blank"
+                sx={{
+                  textTransform: "none",
+                  justifyContent: "flex-start",
+                  textAlign: "left",
                 }}
               >
-                <Box component="span" sx={{ fontWeight: 'bold', mr: 1 }}>
+                <Box component="span" sx={{ fontWeight: "bold", mr: 1 }}>
                   {record.record_id}:
                 </Box>
-                <Box component="span" sx={{ overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                <Box component="span" sx={{ overflow: "hidden", textOverflow: "ellipsis" }}>
                   {record.title}
                 </Box>
-              </Button>
+              </ButtonLink>
             ))}
           </Box>
         );
