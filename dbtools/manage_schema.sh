@@ -46,18 +46,24 @@ export const down = async function (knex) {
 };
   " >>$MIGRATIONS_PATH/"$MIGRATION_NAME".js
 elif [ "$ACTION" = "apply" ]; then
-  if [ "$TARGET_ENV" = "development" ]; then
-    source ./read_pg_config.sh development
-    ./schema/pgschema apply --file ./schema/freedom_archives.sql --schema freedom_archives --db freedom_archives --auto-approve
-    ./schema/pgschema apply --file ./schema/public_search.sql --schema public_search --db freedom_archives --auto-approve
-  else
-    # source ./read_pg_config.sh production
-    cd ../
-    pwd
-    # echo $PGHOST
-    # export NODE_ENV=production
-    NODE_ENV=production yarn knex migrate:up
-  fi
+echo "Applying schema to $TARGET_ENV environment"
+  # if [ "$TARGET_ENV" = "development" ]; then
+  #   source ./read_pg_config.sh development
+  #   ./schema/pgschema apply --file ./schema/freedom_archives.sql --schema freedom_archives --db freedom_archives --auto-approve
+  #   ./schema/pgschema apply --file ./schema/public_search.sql --schema public_search --db freedom_archives --auto-approve
+  # else
+
+    source ./read_pg_config.sh "$TARGET_ENV"
+    ./schema/pgschema apply --file ./schema/freedom_archives.sql --schema freedom_archives 
+    ./schema/pgschema apply --file ./schema/public_search.sql --schema public_search  
+
+    # # source ./read_pg_config.sh production
+    # cd ../
+    # pwd
+    # # echo $PGHOST
+    # # export NODE_ENV=production
+    # NODE_ENV=production yarn knex migrate:up
+  # fi
 else
   echo "Usage: $0 [dump | create [migration_name] | apply [development | prod]]"
 fi
