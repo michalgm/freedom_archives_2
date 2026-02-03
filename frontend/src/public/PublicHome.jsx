@@ -128,13 +128,13 @@ const PublicHome = ({ loaderData: { settings } }) => {
           borderBottom: "1px solid rgba(0, 0, 0, 0.05)",
         }}
       >
-        <Box sx={{ display: loading ? 'block' : 'none' }}>
+        <Box sx={{ display: loading ? "block" : "none" }}>
           <Skeleton />
           <Skeleton />
           <Skeleton />
           <Skeleton />
         </Box>
-        <Box dangerouslySetInnerHTML={{ __html: introText || "" }} sx={{ display: loading ? 'none' : 'block' }} />
+        <Box dangerouslySetInnerHTML={{ __html: introText || "" }} sx={{ display: loading ? "none" : "block" }} />
       </Box>
       <Stack spacing={2}>
         <Stack>
@@ -151,27 +151,24 @@ const PublicHome = ({ loaderData: { settings } }) => {
         <Stack
           spacing={2}
           sx={{ overflowX: "auto !important" }}
-          divider={<Divider sx={{ borderBottomWidth: { xs: 'thin', md: 0 }, borderRightWidth: { xs: 0, md: 'thin' } }} flexItem />}
-          flexDirection={{ sx: 'column', md: 'row' }}
+          divider={
+            <Divider
+              sx={{ borderBottomWidth: { xs: "thin", md: 0 }, borderRightWidth: { xs: 0, md: "thin" } }}
+              flexItem
+            />
+          }
+          flexDirection={{ sx: "column", md: "row" }}
           useFlexGap
         >
           <Box sx={{ width: { xs: "100%", md: "60%" }, height: { xs: "50vh", md: "auto" } }}>
-            <ItemStack
-              title="Browse by Collection"
-              type="collection"
-              items={topCollections}
-              loading={loading}
-            />
+            <ItemStack title="Browse by Collection" type="collection" items={topCollections} loading={loading} />
           </Box>
           <Stack sx={{ width: { xs: "100%", md: "40%" } }} divider={<Divider flexItem />} spacing={2}>
             <Stack>
               <Typography variant="header" gutterBottom>
-                Common Terms
+                Common Search Terms
               </Typography>
-              <WordCloud
-                data={topKeywords}
-                loading={loading}
-              />
+              <WordCloud data={topKeywords} loading={loading} />
             </Stack>
             <Box className="flex-container">
               <Typography variant="header" gutterBottom>
