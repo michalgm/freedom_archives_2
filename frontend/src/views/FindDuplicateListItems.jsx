@@ -1,5 +1,8 @@
-import { Block, Merge, Refresh } from "@mui/icons-material";
+import { Block, ExpandMore, Merge, Refresh } from "@mui/icons-material";
 import {
+  Accordion,
+  AccordionDetails,
+  AccordionSummary,
   Box,
   Button,
   DialogContentText,
@@ -17,11 +20,12 @@ import { startCase } from "lodash-es";
 import { useConfirm } from "material-ui-confirm";
 import { lazy, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate, useParams } from "react-router";
+import Link from "src/components/Link";
 import { ITEM_TYPES } from "src/config/constants";
 import { useAddNotification } from "src/stores";
 import { sleep } from "src/utils";
 
-import { duplicate_list_items, duplicate_list_items_refresh_status } from "../api";
+import { duplicate_list_items, duplicate_list_items_refresh_status, records } from "../api";
 
 const REFRESH_POLL_INTERVAL_MS = 3000;
 const REFRESH_POLL_MAX_MS = 5 * 60 * 1000; // 5 minutes
@@ -34,11 +38,36 @@ const DEFAULT_TYPE = "author";
 const PAGE_SIZE_DEFAULT = 100;
 
 function ListItemCell({ row, index }) {
+  const [recordsData, setRecordsData] = useState([]);
+  const [expanded, setExpanded] = useState(false);
+
   const item = row[`item_${index}`];
   const id = row[`list_item_id_${index}`];
+  const type = row.type;
+  const record_field = ["format", "quality", "generation"].includes(type) ? `${type}s` : `${type}_ids`;
   const recordsCount = row[`records_count_${index}`];
   const collectionsCount = row[`collections_count_${index}`];
   const mediaCount = row[`media_count_${index}`];
+
+  const fetchRecords = useCallback(async () => {
+    const newExpanded = !expanded;
+    setExpanded(newExpanded);
+    const query = {
+      $select: ["record_id", "title", "call_numbers_text"],
+      $sort: { title: 1 },
+    };
+    if (["program"].includes(type)) {
+      query[`${type}_id`] = id;
+    } else {
+      query[record_field] = {
+        $contains: [id],
+      };
+    }
+    if (newExpanded) {
+      const res = await records.find({ query });
+      setRecordsData(res.data);
+    }
+  }, [expanded, record_field, id, type]);
 
   return (
     <Stack spacing={0.25} sx={{ py: 1 }}>
@@ -50,6 +79,27 @@ function ListItemCell({ row, index }) {
         {Number(recordsCount || 0)} records · {Number(collectionsCount || 0)} collections · {Number(mediaCount || 0)}{" "}
         media
       </Typography>
+      {type !== "call_number" && (
+        <Accordion expanded={expanded} onChange={fetchRecords} sx={{ p: 0 }} variant="outlined" disableGutters>
+          <AccordionSummary expandIcon={<ExpandMore />} sx={{ m: 0 }}>
+            <Typography>Records</Typography>
+          </AccordionSummary>
+          <AccordionDetails>
+            {recordsData.length > 0 && (
+              <Stack spacing={1}>
+                {recordsData.map((r) => (
+                  <Typography key={r.record_id} variant="body2">
+                    <Link to={`/admin/records/${r.record_id}`} target="_blank" rel="noopener noreferrer">
+                      {r.title}
+                    </Link>
+                    {r.call_numbers_text ? ` [${r.call_numbers_text}]` : ""}
+                  </Typography>
+                ))}
+              </Stack>
+            )}
+          </AccordionDetails>
+        </Accordion>
+      )}
     </Stack>
   );
 }

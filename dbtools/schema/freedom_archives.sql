@@ -197,6 +197,11 @@ CREATE TABLE IF NOT EXISTS _unified_records (
     collection_title text,
     relationships jsonb,
     ancestor_collection_ids integer[],
+    author_ids integer[],
+    subject_ids integer[],
+    keyword_ids integer[],
+    producer_ids integer[],
+    publisher_ids integer[],
     CONSTRAINT _unified_records_pkey PRIMARY KEY (record_id)
 );
 
@@ -1109,7 +1114,8 @@ CREATE OR REPLACE VIEW records_list_items_view AS
            FROM ( SELECT a.list_item_id,
                     a.item) i)) ORDER BY a.item))::jsonb AS items,
     string_agg(a.item, ' ## '::text ORDER BY a.item) AS items_text,
-    array_agg(a.item ORDER BY a.item) AS items_search
+    array_agg(a.item ORDER BY a.item) AS items_search,
+    array_agg(a.list_item_id ORDER BY a.item) AS item_ids
    FROM list_items a
      JOIN records_to_list_items b USING (list_item_id)
   GROUP BY b.record_id, a.type;
@@ -1380,7 +1386,12 @@ CREATE OR REPLACE VIEW unified_records AS
         ),
         '{}'::INT[]
       )||ARRAY[c.collection_id]
-    ) AS ancestor_collection_ids
+    ) AS ancestor_collection_ids,
+    authors.item_ids AS author_ids,
+    subjects.item_ids AS subject_ids,
+    keywords.item_ids AS keyword_ids,
+    producers.item_ids AS producer_ids,
+    publishers.item_ids AS publisher_ids
    FROM records a
      JOIN record_summaries b USING (record_id)
      JOIN _unified_collections c USING (collection_id)
