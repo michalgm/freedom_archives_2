@@ -416,12 +416,9 @@ export function Record({ id /*  embedded = false */ }) {
     [setTitle],
   );
 
-  const onDelete = useCallback(
-    () => {
-      navigate(`/admin/records`);
-    },
-    [navigate],
-  );
+  const onDelete = useCallback(() => {
+    navigate(`/admin/records`);
+  }, [navigate]);
 
   logger.log("Record RENDER");
   return (

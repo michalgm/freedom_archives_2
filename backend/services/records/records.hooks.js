@@ -133,18 +133,20 @@ const prepData = async (context) => {
       data.parent_record_id = data.parent ? data.parent.record_id : null;
       delete data.parent;
     }
-    ["media", "children", "continuations", "authors", "producers", "keywords", "subjects", "publishers"].forEach((key) => {
-      if (key in data) {
-        relation_data[key] = data[key];
-        delete data[key];
-      }
-    });
+    ["media", "children", "continuations", "authors", "producers", "keywords", "subjects", "publishers"].forEach(
+      (key) => {
+        if (key in data) {
+          relation_data[key] = data[key];
+          delete data[key];
+        }
+      },
+    );
     context.relation_data = relation_data;
   }
   prepListItemRelations(context);
   if (method === "remove") {
     const { collection_id } = await context.app.service("api/records")._get(context.id, context.params);
-    context.additional_views = [['collections', collection_id]];
+    context.additional_views = [["collections", collection_id]];
   }
   return context;
 };
@@ -164,29 +166,29 @@ const updateRelations = async (context) => {
   }
   const params = { user, transaction: { trx } };
   if (relation_data.media !== undefined) {
+    let primary_media_id = null;
     await Promise.all(
-      relation_data.media.map((media) => {
+      relation_data.media.map(async (media) => {
+        let updated_media;
         if (media.delete) {
           return app.service("api/media").remove(media.media_id, params);
         } else if (media.media_id) {
           if (media.url === "") {
             media.media_type = "";
           }
-          return app.service("api/media").patch(media.media_id, { record_id: id, ...media }, params);
+          updated_media = await app.service("api/media").patch(media.media_id, { record_id: id, ...media }, params);
+        } else {
+          delete media.media_id;
+          media.record_id ||= id;
+          updated_media = await app.service("api/media").create(media, params);
         }
-        delete media.media_id;
-        media.record_id ||= id;
-        return app.service("api/media").create(media, params);
+        if (!primary_media_id && !media.delete) {
+          primary_media_id = updated_media.media_id;
+        }
       }),
     );
-    const media = await app.service("api/media").find({
-      ...params,
-      query: { record_id: id, $disable_pagination: true, $sort: { url: "asc" } },
-    });
 
-    if (!data.primary_media_id) {
-      await app.service("api/records")._patch(id, { primary_media_id: media?.[0]?.media_id || null }, params);
-    }
+    await app.service("api/records")._patch(id, { primary_media_id }, params);
   }
   if (relation_data.children !== undefined) {
     await Promise.all(

@@ -31,6 +31,7 @@ export function ItemCardLayout({
   isOverflowing,
   dense = false,
   item,
+  setCurrentRecord: _setCurrentRecord,
   ...cardProps
 }) {
   const content = (

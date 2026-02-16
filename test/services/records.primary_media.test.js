@@ -135,7 +135,7 @@ describe("records primary_media_id behavior", () => {
       await app.service("api/records").patch(
         recordId,
         {
-          media: [{ media_id: initialPrimary, delete: true }],
+          media: mediaRows.map((m) => (m.media_id === initialPrimary ? { ...m, delete: true } : m)),
         },
         params,
       );
