@@ -89,8 +89,8 @@
   "devDependencies": {
     "@babel/eslint-parser": "^7.28.6",
     "@eslint/eslintrc": "^3.3.5",
-    "@eslint/js": "^10.0.1",
-    "@eslint/json": "^1.0.1",
+    "@eslint/js": "9.39.4",
+    "@eslint/json": "^1.1.0",
     "@stylistic/eslint-plugin": "^5.10.0",
     "@typescript-eslint/eslint-plugin": "^8.57.1",
     "@typescript-eslint/parser": "^8.57.1",
