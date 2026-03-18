@@ -74,6 +74,16 @@ app.configure(authentication);
 app.configure(services);
 
 app.hooks(appHooks);
+
+// redirect old search urls
+expressApp.get("/search.php", (req, res) => {
+  const collectionId = req.query.view_collection;
+  if (collectionId) {
+    return res.redirect(301, `/collections/${collectionId}`);
+  }
+  return res.redirect(301, `/search`);
+});
+
 // Express 5 / path-to-regexp v6 doesn't accept "*" as a path pattern.
 // Use a regex catch-all instead.
 
