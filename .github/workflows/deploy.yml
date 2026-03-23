@@ -219,6 +219,7 @@ jobs:
       RELEASE_NAME: ${{ needs.package_frontend.outputs.release_name }}
       DEPLOY_REF: ${{ needs.package_frontend.outputs.deploy_ref }}
       FRONTEND_RELEASE_DIR: /home/${{ secrets.SSH_USER }}/work/${{ needs.resolve.outputs.app_name }}/deployments/${{ needs.package_frontend.outputs.release_name }}
+      ACTIVATE_SCRIPT: /home/${{ secrets.SSH_USER }}/nodevenv/work/${{ needs.resolve.outputs.app_name }}/20/bin/activate
     steps:
       - name: Download Build Artifact
         uses: actions/download-artifact@v4
@@ -285,7 +286,7 @@ jobs:
             git reset --hard "$DEPLOY_REF"
 
             echo "🔄 Setting up environment..."
-            source ./activate.sh || echo "⚠️ verify activate.sh path if this fails"
+            source "$ACTIVATE_SCRIPT" || echo "⚠️ verify activate.sh path if this fails"
 
             echo "📦 Installing/updating backend dependencies..."
             yarn install
