@@ -40,9 +40,7 @@ jobs:
       target_env: ${{ steps.resolve.outputs.target_env }}
       source_mode: ${{ steps.resolve.outputs.source_mode }}
       checkout_ref: ${{ steps.resolve.outputs.checkout_ref }}
-      app_dir: ${{ steps.resolve.outputs.app_dir }}
-      deployments_dir: ${{ steps.resolve.outputs.deployments_dir }}
-      public_dist_link: ${{ steps.resolve.outputs.public_dist_link }}
+      app_name: ${{ steps.resolve.outputs.app_name }}
       keep_releases: ${{ steps.resolve.outputs.keep_releases }}
       run_migrations: ${{ steps.resolve.outputs.run_migrations }}
     steps:
@@ -62,7 +60,7 @@ jobs:
           fi
 
           if [ "$TARGET_ENV" = "prod" ]; then
-            APP_DIR="/home/${{ secrets.SSH_USER }}/work/freedom_archives_2"
+            APP_NAME="freedom_archives_2"
             KEEP_RELEASES="${{ github.event.inputs.keep_releases || '10' }}"
             RUN_MIGRATIONS="true"
 
@@ -86,7 +84,7 @@ jobs:
               SOURCE_MODE="build"
             fi
           else
-            APP_DIR="/home/${{ secrets.SSH_USER }}/work/freedom_archives_staging"
+            APP_NAME="freedom_archives_staging"
             KEEP_RELEASES="0"
             RUN_MIGRATIONS="false"
             CHECKOUT_REF="${{ github.event.inputs.ref }}"
@@ -96,15 +94,10 @@ jobs:
             SOURCE_MODE="build"
           fi
 
-          DEPLOYMENTS_DIR="${APP_DIR}/deployments"
-          PUBLIC_DIST_LINK="${APP_DIR}/public_dist"
-
           echo "target_env=$TARGET_ENV" >> "$GITHUB_OUTPUT"
           echo "source_mode=$SOURCE_MODE" >> "$GITHUB_OUTPUT"
           echo "checkout_ref=$CHECKOUT_REF" >> "$GITHUB_OUTPUT"
-          echo "app_dir=$APP_DIR" >> "$GITHUB_OUTPUT"
-          echo "deployments_dir=$DEPLOYMENTS_DIR" >> "$GITHUB_OUTPUT"
-          echo "public_dist_link=$PUBLIC_DIST_LINK" >> "$GITHUB_OUTPUT"
+          echo "app_name=$APP_NAME" >> "$GITHUB_OUTPUT"
           echo "keep_releases=$KEEP_RELEASES" >> "$GITHUB_OUTPUT"
           echo "run_migrations=$RUN_MIGRATIONS" >> "$GITHUB_OUTPUT"
 
@@ -217,14 +210,15 @@ jobs:
       - package_frontend
     env:
       TARGET_ENV: ${{ needs.resolve.outputs.target_env }}
-      APP_DIR: ${{ needs.resolve.outputs.app_dir }}
-      DEPLOYMENTS_DIR: ${{ needs.resolve.outputs.deployments_dir }}
-      PUBLIC_DIST_LINK: ${{ needs.resolve.outputs.public_dist_link }}
+      APP_NAME: ${{ needs.resolve.outputs.app_name }}
+      APP_DIR: /home/${{ secrets.SSH_USER }}/work/${{ needs.resolve.outputs.app_name }}
+      DEPLOYMENTS_DIR: /home/${{ secrets.SSH_USER }}/work/${{ needs.resolve.outputs.app_name }}/deployments
+      PUBLIC_DIST_LINK: /home/${{ secrets.SSH_USER }}/work/${{ needs.resolve.outputs.app_name }}/public_dist
       KEEP_RELEASES: ${{ needs.resolve.outputs.keep_releases }}
       RUN_MIGRATIONS: ${{ needs.resolve.outputs.run_migrations }}
       RELEASE_NAME: ${{ needs.package_frontend.outputs.release_name }}
       DEPLOY_REF: ${{ needs.package_frontend.outputs.deploy_ref }}
-      FRONTEND_RELEASE_DIR: ${{ needs.resolve.outputs.deployments_dir }}/${{ needs.package_frontend.outputs.release_name }}
+      FRONTEND_RELEASE_DIR: /home/${{ secrets.SSH_USER }}/work/${{ needs.resolve.outputs.app_name }}/deployments/${{ needs.package_frontend.outputs.release_name }}
     steps:
       - name: Download Build Artifact
         uses: actions/download-artifact@v4
