@@ -9,6 +9,7 @@ import {
   ListItem,
   ListItemButton,
   ListItemText,
+  Paper,
   Skeleton,
   Stack,
   Typography,
@@ -18,6 +19,7 @@ import { useState } from "react";
 import { CheckboxElement, SelectElement, useFormContext } from "react-hook-form-mui";
 import AutoSubmit from "src/components/AutoSubmit";
 import Form from "src/components/form/Form";
+import Link from "src/components/Link";
 import {
   INITIAL_FILTER_DISPLAY_COUNT,
   FILTER_TYPE_LABELS,
@@ -129,7 +131,7 @@ export const SearchFilters = ({ search, filters, addFilter, clearFilters, loadin
   );
 };
 
-export function SearchForm({ search, doSearch, nonDigitizedTotal, total, loadedCount, focus, loading }) {
+export function SearchForm({ search, doSearch, nonDigitizedTotal, total, loadedCount, focus, loading, collections }) {
   return (
     <Form defaultValues={search} onSubmit={doSearch}>
       <AutoSubmit action={doSearch} timeout={300} />
@@ -169,6 +171,7 @@ export function SearchForm({ search, doSearch, nonDigitizedTotal, total, loadedC
             nonDigitizedTotal={nonDigitizedTotal}
             loadedCount={loadedCount}
             loading={loading}
+            collections={collections}
           />
         )}
       </Grid>
@@ -176,15 +179,45 @@ export function SearchForm({ search, doSearch, nonDigitizedTotal, total, loadedC
   );
 }
 
+const CollectionMatches = ({ collections }) => {
+  if (!collections || collections.length === 0) return null;
+  return (
+    <Paper
+      elevation={0}
+      sx={{ p: 1, my: 1, background: (theme) => theme.palette.action.hover }}
+      // variant="outlined"
+    >
+      <Typography variant="subtitle2" color="text.secondary" gutterBottom>
+        The following collection titles match your search term:
+      </Typography>
+      <Stack direction="row" spacing={1} sx={{ flexWrap: "wrap" }} useFlexGap>
+        {collections.map((c) => (
+          <Chip
+            key={c.collection_id}
+            label={c.title}
+            component={Link}
+            href={`/collections/${c.collection_id}`}
+            clickable
+            size="small"
+            variant="filled"
+          />
+        ))}
+      </Stack>
+    </Paper>
+  );
+};
+
 function SearchResults({
   total,
   nonDigitizedTotal,
+  collections,
   // loadedCount = 0,
   // loading,
 }) {
   const { setValue } = useFormContext();
   return (
     <Box sx={{ width: "100%" }}>
+      <CollectionMatches collections={collections} />
       {/* <Divider sx={{}} orientation="horizontal" flexItem /> */}
       {total === 0 ? (
         <Typography variant="body2" color="text.secondary" sx={{ p: 2 }}>

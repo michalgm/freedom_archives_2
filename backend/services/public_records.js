@@ -136,14 +136,37 @@ const getNonDigitizedTotal = async (context) => {
   }
 };
 
+const searchCollectionTitles = async (context) => {
+  const {
+    params: {
+      _rankedSearch: searchTerm,
+      query: { ancestor_collection_ids },
+    },
+  } = context;
+
+  // Don't run collection title search if we are on a collection page
+  const ancestorIds = ancestor_collection_ids?.$contains || [];
+  if (!searchTerm || ancestorIds.length > 0) {
+    return [];
+  }
+
+  return await context.app.service("api/public/collections").find({
+    query: {
+      $or: [{ title: { $ilike: `%${searchTerm}%` } }, { title: { $fulltext: searchTerm } }],
+      $select: ["collection_id", "title"],
+    },
+  });
+};
+
 const searchRecords = async (context) => {
   context.params.query.archive_id = archive_id;
   const params = await sanitizeParams(context);
 
-  const [data, filters, nonDigitizedTotal] = await Promise.all([
+  const [data, filters, nonDigitizedTotal, collections] = await Promise.all([
     context.service._find(params),
     lookupFilters(context),
     getNonDigitizedTotal(context),
+    searchCollectionTitles(context),
   ]);
   //   .map(async (p, index) => {
   //   // console.time(`promise${index}`);
@@ -155,6 +178,7 @@ const searchRecords = async (context) => {
     ...data,
     filters,
     nonDigitizedTotal,
+    collections,
   };
   return context;
 };

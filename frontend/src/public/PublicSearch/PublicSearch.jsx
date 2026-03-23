@@ -48,6 +48,7 @@ export function Search(params) {
     loading,
     recordsLoading,
     filters,
+    collections,
     doSearch,
     addFilter,
     clearFilters,
@@ -113,10 +114,10 @@ export function Search(params) {
         </Typography>
       )}
     </Box>
-  );
+  );  
 
   return (
-    <Box className="flex-container search-page">
+    <Box className="flex-container search-page" sx={{ overflowX: "visible !important" }}>
       <Stack
         direction={{ xs: "column", md: "row" }}
         className="records"
@@ -179,9 +180,9 @@ export function Search(params) {
               loadedCount={loadedCount}
               nonDigitizedTotal={records.nonDigitizedTotal}
               focus={focus}
+              collections={collections}
             />
           </Box>
-
           <Grid
           // className="flex-container"
           // ref={scrollMode === "container" ? setScrollRootRef : undefined}

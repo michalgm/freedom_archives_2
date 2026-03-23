@@ -65,6 +65,7 @@ export const usePublicSearch = (
       records: decorateRecords(initialData.data),
     };
   });
+  const [collections, setCollections] = useState(() => initialData?.collections || []);
   const [total, setTotal] = useState(() => initialData?.total || 0);
   const [offset, setOffset] = useState(0);
   const [loading, setLoading] = useState(() => !initialData);
@@ -109,6 +110,7 @@ export const usePublicSearch = (
       setOffset(0);
       setRecords({ total: 0, nonDigitizedTotal: 0, records: [] });
       setTotal(0);
+      setCollections([]);
       return;
     }
 
@@ -118,6 +120,7 @@ export const usePublicSearch = (
       setLoading(true);
       setRecords({ total: 0, nonDigitizedTotal: 0, records: [] });
       setTotal(0);
+      setCollections([]);
     }
 
     try {
@@ -173,6 +176,7 @@ export const usePublicSearch = (
         data: recordsData,
         nonDigitizedTotal,
         filters = [],
+        collections = [],
       } = await recordsService.find({ query });
 
       const decorated = decorateRecords(recordsData);
@@ -191,6 +195,7 @@ export const usePublicSearch = (
         prevSearchRef.current = nextSearch;
         setFilters(filters);
         setTotal(total);
+        setCollections(collections);
       }
     } catch (error) {
       console.error("Error fetching records:", error);
@@ -259,6 +264,7 @@ export const usePublicSearch = (
     loading,
     recordsLoading,
     filters,
+    collections,
 
     // Actions
     doSearch,
