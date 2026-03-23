@@ -234,6 +234,7 @@ jobs:
           echo "DEPLOYMENTS_DIR=$DEPLOYMENTS_DIR"
           echo "RELEASE_NAME=$RELEASE_NAME"
           echo "FRONTEND_RELEASE_DIR=$FRONTEND_RELEASE_DIR"
+          echo "ACTIVATE_SCRIPT=$ACTIVATE_SCRIPT"
 
       - name: Prepare remote release directory
         uses: appleboy/ssh-action@master
@@ -264,7 +265,7 @@ jobs:
           username: ${{ secrets.SSH_USER }}
           key: ${{ secrets.SSH_KEY }}
           port: ${{ secrets.SSH_PORT }}
-          envs: TARGET_ENV,APP_DIR,DEPLOYMENTS_DIR,PUBLIC_DIST_LINK,KEEP_RELEASES,RUN_MIGRATIONS,RELEASE_NAME,DEPLOY_REF,FRONTEND_RELEASE_DIR
+          envs: TARGET_ENV,APP_DIR,DEPLOYMENTS_DIR,PUBLIC_DIST_LINK,KEEP_RELEASES,RUN_MIGRATIONS,RELEASE_NAME,DEPLOY_REF,FRONTEND_RELEASE_DIR,ACTIVATE_SCRIPT
           script: |
             set -euo pipefail
 
