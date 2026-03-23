@@ -287,7 +287,9 @@ jobs:
             git reset --hard "$DEPLOY_REF"
 
             echo "🔄 Setting up environment..."
+            set +u
             source "$ACTIVATE_SCRIPT" || echo "⚠️ verify activate.sh path if this fails"
+            set -u
 
             echo "📦 Installing/updating backend dependencies..."
             yarn install
