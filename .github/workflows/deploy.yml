@@ -1,145 +1,231 @@
-name: Deploy Production
+name: Deploy
 
 permissions:
   contents: write
 
 on:
   push:
-    # branches: ['main']  # Build on every push to main
-    tags: ['v*']        # Build AND Deploy on tags
+    branches: ['**']
+    tags: ['v*']
 
   workflow_dispatch:
     inputs:
-      tag:
-        description: 'Tag to deploy (e.g. v1.2.3). Leave blank to deploy latest release.'
+      environment:
+        description: 'Deploy target'
+        required: true
+        default: stage
+        type: choice
+        options:
+          - stage
+          - prod
+      ref:
+        description: 'Stage: branch/SHA. Prod: tag. Blank = current SHA (stage) or latest release tag (prod).'
         required: false
         type: string
       keep_releases:
-        description: 'How many tag directories to keep under deployments/'
+        description: 'Prod only: how many tag directories to keep under deployments/'
         required: false
         default: '10'
         type: string
 
-# Ensure only one production deployment workflow runs at a time.
-# New runs will queue until the in-progress one completes.
 concurrency:
-  group: deploy-production
+  group: deploy-${{ github.workflow }}-${{ github.event_name == 'workflow_dispatch' && github.event.inputs.environment || startsWith(github.ref, 'refs/tags/v') && 'prod' || 'stage' }}
   cancel-in-progress: false
 
 jobs:
-  build:
-    name: Build & Package
+  resolve:
+    name: Resolve deployment target
     runs-on: ubuntu-latest
-    steps:
-      - name: Checkout Code
-        if: startsWith(github.ref, 'refs/tags/v')
-        uses: actions/checkout@v4
-  
-      - name: Enable Corepack
-        if: startsWith(github.ref, 'refs/tags/v')
-        run: corepack enable
-
-      - name: Setup Node.js
-        if: startsWith(github.ref, 'refs/tags/v')
-        uses: actions/setup-node@v6
-        with:
-          node-version: '20'
-          cache: 'yarn'
-          # Cache settings for Yarn Berry
-          cache-dependency-path: 'yarn.lock'
-
-      - name: Install Frontend Dependencies
-        if: startsWith(github.ref, 'refs/tags/v')
-        run: yarn workspaces focus freedom-archives-frontend
-
-      - name: Build Frontend
-        if: startsWith(github.ref, 'refs/tags/v')
-        working-directory: ./frontend
-        run: yarn run build
-
-      - name: Prepare Release Package
-        if: startsWith(github.ref, 'refs/tags/v')
-        run: |
-          # Package ONLY the frontend build.
-          # Important: tar the *contents* of frontend/build so extraction doesn't add extra nesting.
-          test -d frontend/build
-          tar -czf freedom-archives-frontend-build.tar.gz -C frontend/build .
-
-      - name: Upload Build Artifact
-        if: startsWith(github.ref, 'refs/tags/v')
-        uses: actions/upload-artifact@v4
-        with:
-          name: freedom-archives-frontend-build
-          path: freedom-archives-frontend-build.tar.gz
-          retention-days: 1
-
-      - name: Publish GitHub Release Asset (tag)
-        if: startsWith(github.ref, 'refs/tags/v')
-        uses: softprops/action-gh-release@v2
-        with:
-          tag_name: ${{ github.ref_name }}
-          name: ${{ github.ref_name }}
-          files: |
-            freedom-archives-frontend-build.tar.gz
-
-  fetch_release:
-    name: Fetch Release Asset
-    runs-on: ubuntu-latest
-    needs: build
     outputs:
-      tag: ${{ steps.resolve.outputs.tag }}
+      target_env: ${{ steps.resolve.outputs.target_env }}
+      source_mode: ${{ steps.resolve.outputs.source_mode }}
+      checkout_ref: ${{ steps.resolve.outputs.checkout_ref }}
+      app_dir: ${{ steps.resolve.outputs.app_dir }}
+      deployments_dir: ${{ steps.resolve.outputs.deployments_dir }}
+      public_dist_link: ${{ steps.resolve.outputs.public_dist_link }}
+      keep_releases: ${{ steps.resolve.outputs.keep_releases }}
+      run_migrations: ${{ steps.resolve.outputs.run_migrations }}
     steps:
-      - name: Resolve Tag
+      - name: Resolve settings
         id: resolve
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
           set -euo pipefail
-          if [ -n "${{ github.event.inputs.tag }}" ]; then
-            TAG="${{ github.event.inputs.tag }}"
-          elif [[ "${GITHUB_REF}" == refs/tags/* ]]; then
-            TAG="${GITHUB_REF_NAME}"
-          else
-            TAG=$(gh api "repos/${GITHUB_REPOSITORY}/releases/latest" --jq .tag_name)
-          fi
-          echo "Resolved tag: $TAG"
-          echo "tag=$TAG" >> "$GITHUB_OUTPUT"
 
-      - name: Download freedom-archives-frontend-build.tar.gz from Release
-        if: github.event_name == 'workflow_dispatch'
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            TARGET_ENV="${{ github.event.inputs.environment }}"
+          elif [[ "${GITHUB_REF}" == refs/tags/v* ]]; then
+            TARGET_ENV="prod"
+          else
+            TARGET_ENV="stage"
+          fi
+
+          if [ "$TARGET_ENV" = "prod" ]; then
+            APP_DIR="/home/${{ secrets.SSH_USER }}/work/freedom_archives_2"
+            KEEP_RELEASES="${{ github.event.inputs.keep_releases || '10' }}"
+            RUN_MIGRATIONS="true"
+
+            if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+              if [ -n "${{ github.event.inputs.ref }}" ]; then
+                CHECKOUT_REF="${{ github.event.inputs.ref }}"
+              elif [[ "${GITHUB_REF}" == refs/tags/v* ]]; then
+                CHECKOUT_REF="${GITHUB_REF_NAME}"
+              else
+                CHECKOUT_REF="$(gh api "repos/${GITHUB_REPOSITORY}/releases/latest" --jq .tag_name)"
+              fi
+
+              if [[ ! "$CHECKOUT_REF" =~ ^v ]]; then
+                echo "Production deploys require a v* tag." >&2
+                exit 1
+              fi
+
+              SOURCE_MODE="release"
+            else
+              CHECKOUT_REF="${GITHUB_REF_NAME}"
+              SOURCE_MODE="build"
+            fi
+          else
+            APP_DIR="/home/claude/work/freedom_archives_staging"
+            KEEP_RELEASES="0"
+            RUN_MIGRATIONS="false"
+            CHECKOUT_REF="${{ github.event.inputs.ref }}"
+            if [ -z "$CHECKOUT_REF" ]; then
+              CHECKOUT_REF="${GITHUB_SHA}"
+            fi
+            SOURCE_MODE="build"
+          fi
+
+          DEPLOYMENTS_DIR="${APP_DIR}/deployments"
+          PUBLIC_DIST_LINK="${APP_DIR}/public_dist"
+
+          echo "target_env=$TARGET_ENV" >> "$GITHUB_OUTPUT"
+          echo "source_mode=$SOURCE_MODE" >> "$GITHUB_OUTPUT"
+          echo "checkout_ref=$CHECKOUT_REF" >> "$GITHUB_OUTPUT"
+          echo "app_dir=$APP_DIR" >> "$GITHUB_OUTPUT"
+          echo "deployments_dir=$DEPLOYMENTS_DIR" >> "$GITHUB_OUTPUT"
+          echo "public_dist_link=$PUBLIC_DIST_LINK" >> "$GITHUB_OUTPUT"
+          echo "keep_releases=$KEEP_RELEASES" >> "$GITHUB_OUTPUT"
+          echo "run_migrations=$RUN_MIGRATIONS" >> "$GITHUB_OUTPUT"
+
+  package_frontend:
+    name: Build or fetch frontend package
+    runs-on: ubuntu-latest
+    needs: resolve
+    outputs:
+      release_name: ${{ steps.meta.outputs.release_name }}
+      deploy_ref: ${{ steps.meta.outputs.deploy_ref }}
+    steps:
+      - name: Checkout Code
+        if: needs.resolve.outputs.source_mode == 'build'
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ needs.resolve.outputs.checkout_ref }}
+
+      - name: Enable Corepack
+        if: needs.resolve.outputs.source_mode == 'build'
+        run: corepack enable
+
+      - name: Setup Node.js
+        if: needs.resolve.outputs.source_mode == 'build'
+        uses: actions/setup-node@v6
+        with:
+          node-version: '20'
+          cache: 'yarn'
+          cache-dependency-path: 'yarn.lock'
+
+      - name: Install Frontend Dependencies
+        if: needs.resolve.outputs.source_mode == 'build'
+        run: yarn workspaces focus freedom-archives-frontend
+
+      - name: Build Frontend
+        if: needs.resolve.outputs.source_mode == 'build'
+        working-directory: ./frontend
+        run: yarn run build
+
+      - name: Prepare Release Package
+        if: needs.resolve.outputs.source_mode == 'build'
+        run: |
+          set -euo pipefail
+          test -d frontend/build
+          tar -czf freedom-archives-frontend-build.tar.gz -C frontend/build .
+
+      - name: Set build metadata
+        if: needs.resolve.outputs.source_mode == 'build'
+        id: meta_build
+        run: |
+          set -euo pipefail
+          FULL_SHA="$(git rev-parse HEAD)"
+          SHORT_SHA="$(git rev-parse --short=12 HEAD)"
+
+          if [ "${{ needs.resolve.outputs.target_env }}" = "stage" ]; then
+            RELEASE_NAME="$SHORT_SHA"
+            DEPLOY_REF="$FULL_SHA"
+          else
+            RELEASE_NAME="${{ needs.resolve.outputs.checkout_ref }}"
+            DEPLOY_REF="${{ needs.resolve.outputs.checkout_ref }}"
+          fi
+
+          echo "release_name=$RELEASE_NAME" >> "$GITHUB_OUTPUT"
+          echo "deploy_ref=$DEPLOY_REF" >> "$GITHUB_OUTPUT"
+
+      - name: Download release asset
+        if: needs.resolve.outputs.source_mode == 'release'
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
           set -euo pipefail
-          gh release download "${{ steps.resolve.outputs.tag }}" --repo "${GITHUB_REPOSITORY}" --pattern "freedom-archives-frontend-build.tar.gz"
+          gh release download "${{ needs.resolve.outputs.checkout_ref }}" \
+            --repo "${GITHUB_REPOSITORY}" \
+            --pattern "freedom-archives-frontend-build.tar.gz"
           ls -lh freedom-archives-frontend-build.tar.gz
 
-      - name: Upload Release Asset as Workflow Artifact
-        if: github.event_name == 'workflow_dispatch'
+      - name: Set release metadata
+        if: needs.resolve.outputs.source_mode == 'release'
+        id: meta_release
+        run: |
+          echo "release_name=${{ needs.resolve.outputs.checkout_ref }}" >> "$GITHUB_OUTPUT"
+          echo "deploy_ref=${{ needs.resolve.outputs.checkout_ref }}" >> "$GITHUB_OUTPUT"
+
+      - name: Normalize metadata
+        id: meta
+        run: |
+          echo "release_name=${{ steps.meta_build.outputs.release_name || steps.meta_release.outputs.release_name }}" >> "$GITHUB_OUTPUT"
+          echo "deploy_ref=${{ steps.meta_build.outputs.deploy_ref || steps.meta_release.outputs.deploy_ref }}" >> "$GITHUB_OUTPUT"
+
+      - name: Upload Build Artifact
         uses: actions/upload-artifact@v4
         with:
           name: freedom-archives-frontend-build
           path: freedom-archives-frontend-build.tar.gz
           retention-days: 1
 
-  deploy:
-    name: Deploy to Server
-    needs: fetch_release
-    runs-on: ubuntu-latest
-    env:
-      APP_DIR: /home/${{ secrets.SSH_USER }}/work/freedom_archives_2
-      TAG_NAME: "${{ needs.fetch_release.outputs.tag }}"
-      DEPLOYMENTS_DIR: /home/${{ secrets.SSH_USER }}/work/freedom_archives_2/deployments
-      FRONTEND_RELEASE_DIR: /home/${{ secrets.SSH_USER }}/work/freedom_archives_2/deployments/${{ needs.fetch_release.outputs.tag }}
+      - name: Publish GitHub Release Asset
+        if: needs.resolve.outputs.target_env == 'prod' && github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v')
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ needs.resolve.outputs.checkout_ref }}
+          name: ${{ needs.resolve.outputs.checkout_ref }}
+          files: |
+            freedom-archives-frontend-build.tar.gz
 
+  deploy:
+    name: Deploy to server
+    runs-on: ubuntu-latest
+    needs:
+      - resolve
+      - package_frontend
+    env:
+      TARGET_ENV: ${{ needs.resolve.outputs.target_env }}
+      APP_DIR: ${{ needs.resolve.outputs.app_dir }}
+      DEPLOYMENTS_DIR: ${{ needs.resolve.outputs.deployments_dir }}
+      PUBLIC_DIST_LINK: ${{ needs.resolve.outputs.public_dist_link }}
+      KEEP_RELEASES: ${{ needs.resolve.outputs.keep_releases }}
+      RUN_MIGRATIONS: ${{ needs.resolve.outputs.run_migrations }}
+      RELEASE_NAME: ${{ needs.package_frontend.outputs.release_name }}
+      DEPLOY_REF: ${{ needs.package_frontend.outputs.deploy_ref }}
+      FRONTEND_RELEASE_DIR: ${{ needs.resolve.outputs.deployments_dir }}/${{ needs.package_frontend.outputs.release_name }}
     steps:
-      - name: Compute deploy paths
-        run: |
-          export DEPLOYMENTS_DIR="${APP_DIR}/deployments"
-          export FRONTEND_RELEASE_DIR="${DEPLOYMENTS_DIR}/${TAG_NAME}"
-          echo "DEPLOYMENTS_DIR=$DEPLOYMENTS_DIR" >> $GITHUB_ENV
-          echo "FRONTEND_RELEASE_DIR=$FRONTEND_RELEASE_DIR" >> $GITHUB_ENV
-      
       - name: Download Build Artifact
         uses: actions/download-artifact@v4
         with:
@@ -155,7 +241,6 @@ jobs:
           port: ${{ secrets.SSH_PORT }}
           source: "freedom-archives-frontend-build.tar.gz"
           target: ${{ env.FRONTEND_RELEASE_DIR }}
-      
 
       - name: Execute Remote Deployment
         uses: appleboy/ssh-action@master
@@ -164,49 +249,62 @@ jobs:
           username: ${{ secrets.SSH_USER }}
           key: ${{ secrets.SSH_KEY }}
           port: ${{ secrets.SSH_PORT }}
-          envs: APP_DIR,DEPLOYMENTS_DIR,TAG_NAME,FRONTEND_RELEASE_DIR
-
+          envs: TARGET_ENV,APP_DIR,DEPLOYMENTS_DIR,PUBLIC_DIST_LINK,KEEP_RELEASES,RUN_MIGRATIONS,RELEASE_NAME,DEPLOY_REF,FRONTEND_RELEASE_DIR
           script: |
-              set -e
-              
-              # Configuration
-              PUBLIC_DIST_LINK="$APP_DIR/public_dist"
-              KEEP_RELEASES="${{ github.event.inputs.keep_releases || '10' }}"
+            set -euo pipefail
 
-              echo "🔄 Updating backend code from git..."
-              cd "$APP_DIR"
-              git pull origin main
-              
-              echo "🔄 Setting up environment..."
-              source ./activate.sh || echo "⚠️ verify activate.sh path if this fails"
+            echo "Deploy target: $TARGET_ENV"
+            echo "Backend ref: $DEPLOY_REF"
+            echo "Frontend release: $RELEASE_NAME"
 
-              echo "📦 Installing/updating backend dependencies (skip frontend workspace)..."
-              yarn install
-              
-              echo "📦 Extracting frontend build into: $FRONTEND_RELEASE_DIR"
-              tar -xzf ${FRONTEND_RELEASE_DIR}/freedom-archives-frontend-build.tar.gz -C "$FRONTEND_RELEASE_DIR"
-              rm ${FRONTEND_RELEASE_DIR}/freedom-archives-frontend-build.tar.gz
+            mkdir -p "$FRONTEND_RELEASE_DIR"
 
-              echo "🔗 Updating public_dist symlink: $PUBLIC_DIST_LINK -> $FRONTEND_RELEASE_DIR"
-              rm "$PUBLIC_DIST_LINK"
-              ln -sfn "$FRONTEND_RELEASE_DIR" "$PUBLIC_DIST_LINK"
+            if [ ! -d "$APP_DIR/.git" ]; then
+              echo "Missing git checkout at $APP_DIR" >&2
+              exit 1
+            fi
 
-              echo "🔄 Running Migrations..."
+            echo "🔄 Updating backend code..."
+            cd "$APP_DIR"
+            git fetch --tags --prune origin
+            git checkout --force "$DEPLOY_REF"
+            git reset --hard "$DEPLOY_REF"
+
+            echo "🔄 Setting up environment..."
+            source ./activate.sh || echo "⚠️ verify activate.sh path if this fails"
+
+            echo "📦 Installing/updating backend dependencies..."
+            yarn install
+
+            echo "📦 Extracting frontend build into: $FRONTEND_RELEASE_DIR"
+            tar -xzf "$FRONTEND_RELEASE_DIR/freedom-archives-frontend-build.tar.gz" -C "$FRONTEND_RELEASE_DIR"
+            rm -f "$FRONTEND_RELEASE_DIR/freedom-archives-frontend-build.tar.gz"
+
+            echo "🔗 Updating public_dist symlink: $PUBLIC_DIST_LINK -> $FRONTEND_RELEASE_DIR"
+            rm -rf "$PUBLIC_DIST_LINK"
+            ln -sfn "$FRONTEND_RELEASE_DIR" "$PUBLIC_DIST_LINK"
+
+            if [ "$RUN_MIGRATIONS" = "true" ]; then
+              echo "🔄 Running migrations..."
               NODE_ENV=production yarn run migrate
+            else
+              echo "⏭️ Skipping migrations on staging deploy."
+            fi
 
-              echo "🔄 Restarting Node Service..."
-              # CloudLinux Node.js restart command
-              /usr/sbin/cloudlinux-selector restart --interpreter nodejs --app-root "$APP_DIR" --json
+            echo "🔄 Restarting Node Service..."
+            /usr/sbin/cloudlinux-selector restart --interpreter nodejs --app-root "$APP_DIR" --json
 
-              echo "🧹 Cleaning up old frontend releases..."
+            echo "🧹 Cleaning up old frontend releases..."
+            if [ "$TARGET_ENV" = "prod" ]; then
               if [ -d "$DEPLOYMENTS_DIR" ]; then
                 RELEASES=$(find "$DEPLOYMENTS_DIR" -maxdepth 1 -mindepth 1 -type d -name 'v*' -printf '%f\n' 2>/dev/null | sort -V || true)
                 TOTAL=$(printf "%s\n" "$RELEASES" | sed '/^$/d' | wc -l | tr -d ' ')
-                if [ "${TOTAL:-0}" -gt "$KEEP_RELEASES" ]; then
+
+                if [ "${TOTAL:-0}" -gt "${KEEP_RELEASES:-10}" ]; then
                   DELETE_COUNT=$((TOTAL - KEEP_RELEASES))
                   printf "%s\n" "$RELEASES" | sed '/^$/d' | head -n "$DELETE_COUNT" | while read -r rel; do
                     [ -z "$rel" ] && continue
-                    [ "$rel" = "$TAG_NAME" ] && continue
+                    [ "$rel" = "$RELEASE_NAME" ] && continue
                     echo "  removing $DEPLOYMENTS_DIR/$rel"
                     rm -rf "$DEPLOYMENTS_DIR/$rel"
                   done
@@ -214,5 +312,10 @@ jobs:
                   echo "  nothing to clean (have $TOTAL, keeping $KEEP_RELEASES)"
                 fi
               fi
+            else
+              if [ -d "$DEPLOYMENTS_DIR" ]; then
+                find "$DEPLOYMENTS_DIR" -maxdepth 1 -mindepth 1 -type d ! -name "$RELEASE_NAME" -exec rm -rf {} +
+              fi
+            fi
 
-              echo "✅ Deployment Success!"
+            echo "✅ Deployment Success!"
