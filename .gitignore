@@ -127,6 +127,9 @@ sharp-libvips/sharp-libvips
 frontend/dist/*
 frontend/public/assets/*
 config/*
+!config/default.json
+!config/custom-environment-variables.json
+!config/development.json.example
 .react-router/
 dbtools/cruft/*
 .yarn/*

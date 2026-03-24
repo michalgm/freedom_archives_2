@@ -1,0 +1,14 @@
+{
+  "authentication": {
+    "secret": "change-me-any-random-string-is-fine-for-local-dev"
+  },
+  "postgresql": {
+    "debug": false,
+    "connection": {
+      "host": "localhost",
+      "user": "fa_dev",
+      "password": "fa_dev",
+      "database": "freedom_archives"
+    }
+  }
+}

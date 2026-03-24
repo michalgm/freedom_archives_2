@@ -1,45 +1,24 @@
-# freedom-archives-database
+# Freedom Archives Search
 
-> Freedom Archives database backend
+Web application for the [Freedom Archives](https://freedomarchives.org/) — a public search
+and browse interface for the archival collection, plus a role-based admin portal for
+cataloguing and managing content.
 
-## About
+**Live site:** https://search.freedomarchives.org
 
-This project uses [Feathers](http://feathersjs.com). An open source web framework for building modern real-time applications.
+## Documentation
 
-## Getting Started
+- [Architecture Overview](docs/architecture.md) — system design, domain model, tech stack, publish workflow
+- [Local Development](docs/local-development.md) — setup, running locally, making schema changes
+- [Operations Runbook](docs/runbook.md) — deploying, restarting, logs, database backup and restore
 
-Getting up and running is as easy as 1, 2, 3.
+## Quick start
 
-1. Make sure you have [NodeJS](https://nodejs.org/) and [npm](https://www.npmjs.com/) installed.
-2. Install your dependencies
-
-    ```
-    cd path/to/freedom-archives-database
-    npm install
-    ```
-
-3. Start your app
-
-    ```
-    npm start
-    ```
-
-## Testing
-
-Simply run `npm test` and all your tests in the `test/` directory will be run.
-
-## Scaffolding
-
-Feathers has a powerful command line interface. Here are a few things it can do:
-
-```
-$ npm install -g @feathersjs/cli          # Install Feathers CLI
-
-$ feathers generate service               # Generate a new Service
-$ feathers generate hook                  # Generate a new Hook
-$ feathers help                           # Show all commands
+```bash
+corepack enable
+yarn install
+cp config/development.json.example config/development.json
+yarn start
 ```
 
-## Help
-
-For more information on all the things you can do with Feathers visit [docs.feathersjs.com](http://docs.feathersjs.com).
+See [Local Development](docs/local-development.md) for database setup and full instructions.
