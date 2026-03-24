@@ -86,7 +86,7 @@ jobs:
           else
             APP_NAME="freedom_archives_staging"
             KEEP_RELEASES="0"
-            RUN_MIGRATIONS="false"
+            RUN_MIGRATIONS="true"
             CHECKOUT_REF="${{ github.event.inputs.ref }}"
             if [ -z "$CHECKOUT_REF" ]; then
               CHECKOUT_REF="${GITHUB_SHA}"
