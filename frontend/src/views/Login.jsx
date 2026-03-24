@@ -47,34 +47,19 @@ function LoginForm() {
     <Grid container justifyContent="center">
       <Grid size={{ md: 7, lg: 5 }}>
         <Paper style={{ padding: "20px 28px" }}>
-          <Typography
-            variant="h4"
-            align="center"
-            gutterBottom
-            sx={{ paddingTop: hasError ? "50px" : 0 }}
-          >
+          <Typography variant="h4" align="center" gutterBottom sx={{ paddingTop: hasError ? "50px" : 0 }}>
             Log in
           </Typography>
           <FormContainer onSuccess={login} initialValues={{}}>
             <Stack spacing={3}>
-              <Field
-                name="username"
-                placeholder="username"
-                highlightDirty={false}
-                rules={{ required: "Username is required" }}
-              />
+              <Field name="username" highlightDirty={false} rules={{ required: "Username is required" }} />
               <Field
                 name="password"
-                placeholder="password"
                 type="password"
                 highlightDirty={false}
                 rules={{ required: "Password is required" }}
               />
-              <ButtonsHeader
-                useFormManager={false}
-                buttons={buttons}
-                justifyContent="flex-start"
-              />
+              <ButtonsHeader useFormManager={false} buttons={buttons} justifyContent="flex-start" />
             </Stack>
           </FormContainer>
         </Paper>
