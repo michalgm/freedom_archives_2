@@ -117,6 +117,7 @@ interferencedb/
 ck_editor/public.bak
 public.bak
 public/img/thumbnails/*
+public/sitemap.xml
 
 .mysql-opts
 
@@ -125,9 +126,7 @@ sharp-libvips/sharp-libvips
 
 frontend/dist/*
 frontend/public/assets/*
-config/production.json
-config/local.json
-config/development.json
+config/*
 .react-router/
 dbtools/cruft/*
 .yarn/*
