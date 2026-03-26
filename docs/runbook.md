@@ -4,7 +4,7 @@ This document covers day-to-day operations for the Freedom Archives search site:
 how to deploy a fix, restart the application, check logs, and restore the database from backup.
 
 **Live site:** https://search.freedomarchives.org
-**Repo:** this repository
+**Repo:** https://github.com/Freedom-Archives/freedom_archives_search
 **Stack:** Node.js / FeathersJS backend + React frontend, PostgreSQL database
 
 ---
@@ -17,6 +17,7 @@ how to deploy a fix, restart the application, check logs, and restore the databa
 | Web server | SSH or cPanel at search.freedomarchives.org |
 | Database server | SSH from the web server (see [Database](#database) below) |
 | App config & secrets | `~/work/freedom_archives_2/config/local.json` on the web server (not in repo) |
+| Credentials & access details | `~/work/README.md` on the web server |
 
 > **Config files are not in the repository.** Each server instance has a `config/local.json`
 > that overrides defaults — this is where database credentials and other secrets live.
