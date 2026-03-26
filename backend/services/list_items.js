@@ -1,7 +1,7 @@
 import { BadRequest } from "@feathersjs/errors";
 import { KnexService } from "@feathersjs/knex";
 
-import { rankedSearch } from "./common_hooks/index.js";
+import { rankedSearch, resetCallNumberRegex } from "./common_hooks/rankedSearch.js";
 
 const fk_map = {
   generation: ['media'],
@@ -151,6 +151,13 @@ export default (function (app) {
     return context;
   };
 
+  const clearCallNumberCache = (context) => {
+    if (context.data?.type === "call_number" || context.params?.list_item_type === "call_number") {
+      resetCallNumberRegex();
+    }
+    return context;
+  };
+
   service.hooks({
     before: {
       all: [],
@@ -160,9 +167,10 @@ export default (function (app) {
       find: [rankedSearch],
     },
     after: {
-      patch: [updateRelations],
-      update: [updateRelations],
-      remove: [updateRelations],
+      create: [clearCallNumberCache],
+      patch: [updateRelations, clearCallNumberCache],
+      update: [updateRelations, clearCallNumberCache],
+      remove: [updateRelations, clearCallNumberCache],
     },
     error: {
       patch: [handleErrors],

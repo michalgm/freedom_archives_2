@@ -11,61 +11,95 @@ const TITLE_MATCH_BOOST = 1500;
 
 const FULLTEXT_NORMALIZATION_CONFIG = 32; // normalize for length and frequency
 
-function applyBasicPrefixing(input) {
-  return input
-    .split(/\s+/)
-    .map((token) => {
-      if (
-        token.match(/["'()|&!:]/) ||  // already quoted or operator
-        token.endsWith(':*') ||      // already prefixed
-        token.length === 0
-      ) {
-        return token;
-      }
-      return `${token}:*`;
-    })
-    .join(' ');
+export function applyBasicPrefixing(input) {
+  const quotes_regex = /"[^"]*"|\S+/g;
+
+  const tokens = [];
+  let match;
+  while ((match = quotes_regex.exec(input)) !== null) {
+    const token = match[0];
+    if (
+      token.startsWith('"') ||
+      token.match(/["'()|&!:]/) || // already quoted or operator
+      token.endsWith(":*") || // already prefixed
+      token.length === 0
+    ) {
+      tokens.push(token);
+    } else {
+      tokens.push(`${token}:*`);
+    }
+  }
+  return tokens.join(" ");
 }
 
 const isNumeric = /^\d+$/;
 
+let callNumberRegex = null;
+
+export function resetCallNumberRegex() {
+  callNumberRegex = null;
+}
+
+const RegExpEscape = (s) => s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+
+async function getCallNumberRegex(knex) {
+  if (callNumberRegex) return callNumberRegex;
+  const rows = await knex("list_items").select("item").where("type", "call_number").orderByRaw("LENGTH(item) DESC");
+  const regexString = `^(${rows.map((r) => RegExpEscape(r.item)).join("|")})(\\s+[\\d.]{1,5}([A-Z]| +R[\\d])?)?$`;
+  callNumberRegex = new RegExp(regexString, "i");
+  return callNumberRegex;
+}
+
+export async function detectCallNumber(searchTerm, regex) {
+  return regex.test(searchTerm.trim()) ? searchTerm : null;
+}
 
 function getFulltextRank() {
   return `${FULLTEXT_WEIGHT} * COALESCE(ts_rank_cd(fulltext, ts_query.query, ${FULLTEXT_NORMALIZATION_CONFIG}), 0)`;
 }
 
 function getTrigramRank(knex, searchTerm) {
-  return `${TRIGRAM_WEIGHT} * ${knex.raw('word_similarity(search_text, ?)', [searchTerm])}`;
+  return `${TRIGRAM_WEIGHT} * ${knex.raw("word_similarity(search_text, ?)", [searchTerm])}`;
 }
 
 function getCallNumbersBoost(knex, tableName, searchTerm) {
-  return tableName.match(/(records|collections)/) && tableName !== 'duplicate_records'
-    ? knex.raw(
-      `CASE WHEN ${tableName.match('record') ? `EXISTS( SELECT 1 FROM unnest(call_numbers) AS elem WHERE elem LIKE ? )` : `call_number LIKE ?`} THEN ${CALL_NUMBERS_WEIGHT} ELSE 0 END`,
-      [`${searchTerm}%`],
-    ).toString()
-    : '0';
+  return tableName.match(/(records|collections)/) && tableName !== "duplicate_records"
+    ? knex
+        .raw(
+          `CASE WHEN ${tableName.match("record") ? `EXISTS( SELECT 1 FROM unnest(call_numbers) AS elem WHERE elem LIKE ? )` : `call_number LIKE ?`} THEN ${CALL_NUMBERS_WEIGHT} ELSE 0 END`,
+          [`${searchTerm}%`],
+        )
+        .toString()
+    : "0";
 }
 
 function getFullTermBoost(knex, searchTerm) {
-  return knex.raw(`CASE WHEN search_text LIKE ? THEN ${FULL_TERM_MATCH_BOOST} ELSE 0 END`, [`%${searchTerm}%`]).toString();
+  return knex
+    .raw(`CASE WHEN search_text LIKE ? THEN ${FULL_TERM_MATCH_BOOST} ELSE 0 END`, [`%${searchTerm}%`])
+    .toString();
 }
 
 function getPositionScore(knex, searchTerm) {
-  return knex.raw(
-    `CASE WHEN position(? in search_text) > 0 THEN ${(POSITION_BOOST_WEIGHT)}::float / position(? in search_text) ELSE 0 END`,
-    [searchTerm, searchTerm],
-  ).toString();
+  return knex
+    .raw(
+      `CASE WHEN position(? in search_text) > 0 THEN ${POSITION_BOOST_WEIGHT}::float / position(? in search_text) ELSE 0 END`,
+      [searchTerm, searchTerm],
+    )
+    .toString();
 }
 
 function getTitleMatchBoost(knex, searchTerm) {
-  return knex.raw(
-    `CASE WHEN search_text LIKE ? THEN ${(TITLE_MATCH_BOOST)}::float ELSE 0 END`,
-    [`${searchTerm}%`],
-  ).toString();
+  return knex
+    .raw(`CASE WHEN search_text LIKE ? THEN ${TITLE_MATCH_BOOST}::float ELSE 0 END`, [`${searchTerm}%`])
+    .toString();
 }
 
-function buildRankExpr({ useFulltext, useTrigram, useCallNumbers, useFullTerm, usePosition }, knex, tableName, searchTerm) {
+function buildRankExpr(
+  { useFulltext, useTrigram, useCallNumbers, useFullTerm, usePosition },
+  knex,
+  tableName,
+  searchTerm,
+) {
   const parts = [];
   if (useFulltext) parts.push(getFulltextRank());
   if (useTrigram) parts.push(getTrigramRank(knex, searchTerm));
@@ -73,7 +107,7 @@ function buildRankExpr({ useFulltext, useTrigram, useCallNumbers, useFullTerm, u
   if (useFullTerm) parts.push(getFullTermBoost(knex, searchTerm));
   if (useFullTerm) parts.push(getTitleMatchBoost(knex, searchTerm));
   if (usePosition) parts.push(getPositionScore(knex, searchTerm));
-  return parts.length ? parts.join(' + ') : '0';
+  return parts.length ? parts.join(" + ") : "0";
 }
 
 function getRankSelect(knex, useIdCheck, idField, idValue, rankExpr) {
@@ -83,12 +117,12 @@ function getRankSelect(knex, useIdCheck, idField, idValue, rankExpr) {
         CASE WHEN "${idField}" = ? THEN 1000000
         ELSE (${rankExpr})
         END
-      ) as rank`, [idValue],
+      ) as rank`,
+      [idValue],
     );
   }
   return knex.raw(`(${rankExpr}) as rank`);
 }
-
 
 // const applyWhere = (qb, { idField, idValue, searchTerm }) => {
 //   qb.where(function () {
@@ -116,28 +150,31 @@ function buildWhere(qb, { idField, idValue, fuzzyTerm, useIdCheck = true, useFuz
         this.whereRaw("id_check.exists = true");
         this.where(`${idField}`, idValue);
       }
-    })
-      .orWhere(function () {
-        if (includeId) {
-          this.whereRaw("id_check.exists = false");
-        }
-        this.whereRaw("fulltext @@ ts_query.query");
-        if (useFuzzy && idValue == null) {
-          this.orWhereRaw("search_text %> ?", [fuzzyTerm]);
-        }
-      });
+    }).orWhere(function () {
+      if (includeId) {
+        this.whereRaw("id_check.exists = false");
+      }
+      this.whereRaw("fulltext @@ ts_query.query");
+      if (useFuzzy && idValue == null) {
+        this.orWhereRaw("search_text %> ?", [fuzzyTerm]);
+      }
+    });
   });
 }
 
 // Usage in rankedSearch:
 export const rankedSearch = async (context) => {
   const { query = {} } = context.params;
-  const isPublic = context.path.includes('/public/');
+  const isPublic = context.path.includes("/public/");
+  const isQuoted = /".+"/.test(query.$fullText || "");
   const useIdCheck = !isPublic;
-  const useFuzzy = !isPublic;
-  const language = 'english';
+  const useFuzzy = !isPublic && !isQuoted;
+  const language = "english";
 
-  const searchTerm = (query?.$fullText || context?.params?._rankedSearch || '').toLowerCase().trim().replace(/\s+/g, ' ');
+  const searchTerm = (query?.$fullText || context?.params?._rankedSearch || "")
+    .toLowerCase()
+    .trim()
+    .replace(/\s+/g, " ");
   delete query.$fullText;
 
   const queryParams = await context.service.sanitizeQuery({ ...context.params, query });
@@ -149,9 +186,31 @@ export const rankedSearch = async (context) => {
     return context;
   }
 
-  const fuzzyTerm = searchTerm.replace(/["'()]/g, '');
-  const knex = context.app.get('postgresqlClient');
+  const fuzzyTerm = searchTerm.replace(/["'()]/g, "");
+  const knex = context.app.get("postgresqlClient");
   const { id: idField, name: tableName } = context.service.getOptions({});
+
+  const regex = await getCallNumberRegex(knex);
+  const callNumber = await detectCallNumber(searchTerm, regex);
+  // console.log("Search term:", searchTerm, "Fuzzy term:", fuzzyTerm, "Detected call number:", callNumber);
+  if (callNumber) {
+    const isRecords = tableName.match("record") && tableName !== "duplicate_records";
+    const rankExpr = getTrigramRank(knex, callNumber);
+    const callNumberQuery = baseQuery
+      .clone()
+      .select(knex.raw(`(${rankExpr}) as rank`))
+      .where(function () {
+        if (isRecords) {
+          this.whereRaw("EXISTS (SELECT 1 FROM unnest(call_numbers) AS cn WHERE upper(cn) LIKE upper(?))", [
+            `${callNumber}%`,
+          ]);
+        } else {
+          this.whereRaw("upper(call_number) LIKE upper(?)", [`${callNumber}%`]);
+        }
+      });
+    context.params.knex = callNumberQuery;
+    return context;
+  }
   const idValue = isNumeric.test(fuzzyTerm) ? parseInt(fuzzyTerm, 10) : null;
   const tsqueryString = parser(applyBasicPrefixing(searchTerm));
 
@@ -168,33 +227,33 @@ export const rankedSearch = async (context) => {
     fuzzyTerm,
   );
 
-  let rankedQuery = baseQuery.clone()
-    .with('ts_query', knex.raw(`select to_tsquery(?, ?) as query`, [language, tsqueryString]))
-    .crossJoin('ts_query');
+  let rankedQuery = baseQuery
+    .clone()
+    .with("ts_query", knex.raw(`select to_tsquery(?, ?) as query`, [language, tsqueryString]))
+    .crossJoin("ts_query");
 
   if (useIdCheck) {
     rankedQuery = rankedQuery
       .with(
         "id_check",
-        idValue !== null ? knex.raw(
-          `SELECT EXISTS(
+        idValue !== null
+          ? knex.raw(
+              `SELECT EXISTS(
               SELECT 1 FROM "${tableName}" 
               WHERE "${idField}" = ?
             ) AS exists`,
-          [idValue],
-        ) : knex.raw(`SELECT false AS exists`),
+              [idValue],
+            )
+          : knex.raw(`SELECT false AS exists`),
       )
-      .crossJoin('id_check');
+      .crossJoin("id_check");
   }
 
   rankedQuery = rankedQuery
-    .modify(q => buildWhere(q, { idField, idValue, fuzzyTerm, useIdCheck, useFuzzy }))
-    .select(
-      getRankSelect(knex, useIdCheck, idField, idValue, rankExpr),
-    );
+    .modify((q) => buildWhere(q, { idField, idValue, fuzzyTerm, useIdCheck, useFuzzy }))
+    .select(getRankSelect(knex, useIdCheck, idField, idValue, rankExpr));
 
   // console.log("Ranked Query:", rankedQuery.toString());
-
 
   context.params.knex = rankedQuery;
   return context;
