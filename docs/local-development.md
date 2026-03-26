@@ -93,16 +93,14 @@ cp config/development.json.example config/development.json
 The example contains working defaults (local DB credentials + a placeholder JWT secret).
 The JWT secret can be any string for local dev — it only needs to be secret in production.
 
-The [`dbtools/`](../dbtools/) scripts read DB credentials from `config/development.json`,
-so this file is required even if you're not changing any settings.
-
-To override any setting locally (e.g. to use a different DB password or port), create a
-`config/local.json` — this file is gitignored and takes precedence over all other config files:
-
 ```json
 {
   "port": 3030,
+  "authentication": {
+    "secret": "change-me-any-random-string-is-fine-for-local-dev"
+  },
   "postgresql": {
+    "debug": false,
     "connection": {
       "host": "localhost",
       "user": "fa_dev",
@@ -112,6 +110,59 @@ To override any setting locally (e.g. to use a different DB password or port), c
   }
 }
 ```
+
+The [`dbtools/`](../dbtools/) scripts read DB credentials directly from named config files —
+`config/development.json` for local scripts, `config/production.json` for production, and
+`config/stage.json` for staging. These are all gitignored.
+
+To run dbtools against staging or production locally, copy `development.json` and fill in
+the remote credentials:
+
+```bash
+cp config/development.json config/production.json
+cp config/development.json config/stage.json
+```
+
+Then update the `postgresql.connection` block in each with the appropriate host, port, user,
+password, and database. Ask the project maintainer for credentials (see the
+[runbook](runbook.md#database) for the DB server hostname and port).
+
+### Available scripts
+
+All scripts must be run from the `dbtools/` directory.
+
+**`db_connect.sh [env]`** — opens a psql shell against the specified environment.
+Accepts `development` (default), `production`, `stage`, or shorthand `p`/`prod` for production.
+Any additional arguments are passed through to psql.
+
+```bash
+./db_connect.sh              # connects to local dev DB
+./db_connect.sh production   # connects to production
+./db_connect.sh stage        # connects to staging
+```
+
+**`stage_db_sync.sh`** — overwrites the staging database with a fresh copy of production.
+Syncs both the `freedom_archives` and `public_search` schemas. Destructive — drops and
+recreates staging schemas before copying.
+
+```bash
+./stage_db_sync.sh
+```
+
+**`manage_schema.sh`** — schema management using the `pgschema` binary (see
+[Making schema changes](#making-schema-changes) above). Three subcommands:
+
+```bash
+./manage_schema.sh dump                          # dump current dev DB schema to schema/*.sql files
+./manage_schema.sh apply [env]                   # apply schema files to the target environment
+./manage_schema.sh create [env] [migration_name] # diff schema files against target env and generate a Knex migration
+```
+
+**`read_pg_config.sh [env]`** — not meant to be called directly. Used by the other scripts
+to load DB connection details from the appropriate config file into `PG*` environment variables.
+
+To override any setting locally (e.g. to use a different DB password or port), create a
+`config/local.json` — this file is gitignored and takes precedence over all other config files:
 
 ---
 

@@ -133,15 +133,15 @@ tail -f ~/work/freedom_archives_2/stderr.log
 
 ## Database
 
-The database is PostgreSQL, running on a separate server. It is **not** directly accessible
-from the public internet — connections go through SSH from the web server.
+The database is PostgreSQL 17, running in Docker on a separate Linode VPS
+(`fa-search-postgres.freedomarchives.org`, port 9000). SSL is required for all connections.
 
 **Database names:**
 - Production: `freedom_archives`
 - Staging: `freedom_archives_stage`
 
 The database connection details (host, user, password) are in `config/production.json`
-and `config/stage.json` on the web server.
+and `config/stage.json` on the web server (not in the repo).
 
 ### Connecting manually
 
@@ -153,6 +153,103 @@ source pg_backup.config   # sets up ssh-tunnelled psql/pg_dump/pg_restore
 
 psql -d freedom_archives  # opens a psql shell on the production database
 ```
+
+Or SSH directly to the DB server and connect via Docker. The web server's SSH key is
+already in `freedomarchives@fa-search-postgres`'s `authorized_keys`, so this works
+without a password from the web server:
+
+```bash
+ssh freedomarchives@fa-search-postgres.freedomarchives.org
+cd /home/freedomarchives/docker-postgres
+docker compose exec -u postgres db psql -d freedom_archives
+```
+
+---
+
+## Database Server
+
+The database server is a separate Linode VPS running Ubuntu. SSH access is available as both
+`root` and `freedomarchives`. Docker Compose is used to manage the Postgres container.
+
+**Files on the DB server:**
+```
+/home/freedomarchives/docker-postgres/
+  docker-compose.yml     # container config
+  postgres.env           # DB credentials (POSTGRES_USER, POSTGRES_PASSWORD, etc.)
+  certs/                 # SSL certs copied here by the deploy hook (see below)
+    fullchain.pem        # world-readable
+    privkey.pem          # owned by uid 999 (postgres inside container), mode 600
+```
+
+### Docker management
+
+```bash
+cd /home/freedomarchives/docker-postgres
+
+docker compose ps                           # check status
+docker compose logs -f                      # follow logs
+docker compose down && docker compose up -d # restart (a few seconds of downtime)
+docker compose kill -s SIGHUP db           # reload config without restart
+```
+
+### SSL certificates
+
+SSL is provided by a Let's Encrypt cert for `fa-search-postgres.freedomarchives.org`.
+Certbot manages renewal automatically via a systemd timer (runs twice daily).
+
+**How it works:**
+1. Certbot renews the cert into `/etc/letsencrypt/live/fa-search-postgres.freedomarchives.org/`
+2. The deploy hook at `/etc/letsencrypt/renewal-hooks/deploy/postgres.sh` runs automatically
+   after each successful renewal — it copies the certs to `certs/` with correct permissions,
+   then sends SIGHUP to the Postgres container to reload without downtime
+3. The container mounts `certs/` rather than the letsencrypt directories directly
+
+**Why the copy step?** The letsencrypt `live/` directory contains symlinks into `archive/`,
+which Docker can't follow across a single volume mount. The `archive/` private keys are also
+owned by `polkitd` (uid 999 on this host) with restricted permissions. Copying to a controlled
+directory avoids all of this.
+
+**Check what cert the server is presenting:**
+```bash
+# run from any machine
+openssl s_client -connect fa-search-postgres.freedomarchives.org:9000 -starttls postgres 2>/dev/null | grep -E "NotBefore|NotAfter"
+```
+
+**Check certbot's view of the cert and renewal history:**
+```bash
+certbot certificates
+journalctl -u certbot -n 50
+```
+
+**Force a manual renewal** (e.g. if the cert has expired):
+```bash
+certbot renew --cert-name fa-search-postgres.freedomarchives.org --force-renewal
+# this also runs the deploy hook automatically
+```
+
+**If Postgres still shows the old cert after renewal:**
+```bash
+cd /home/freedomarchives/docker-postgres
+docker compose kill -s SIGHUP db
+# if that doesn't work:
+docker compose down && docker compose up -d
+```
+
+### App-side SSL config
+
+The app connects with `"ssl": true` in `config/production.json` (and `config/stage.json`).
+This enables full certificate validation. Do not set `rejectUnauthorized: false` — the server
+has a valid Let's Encrypt cert and validation should work.
+
+### Firewall
+
+Port 9000 is restricted via a Linode Cloud Firewall (FA-DB-Firewall) attached to the DB VPS.
+Only the app server IP and any developer IPs are allowlisted — all other inbound traffic on
+port 9000 is dropped.
+
+**If you can't connect to the database from a new IP** (e.g. your dev IP changed), log in to
+the Linode dashboard → **Firewalls** → **FA-DB-Firewall** → **Rules** and add your IP to the
+Postgres inbound rule.
 
 ---
 

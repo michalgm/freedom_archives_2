@@ -1,4 +1,5 @@
 {
+  "port": 3030,
   "authentication": {
     "secret": "change-me-any-random-string-is-fine-for-local-dev"
   },
