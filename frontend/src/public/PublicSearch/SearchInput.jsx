@@ -9,27 +9,25 @@ import {
   InputAdornment,
   Link,
   ListItemText,
+  TextField,
 } from "@mui/material";
 import { alpha } from "@mui/material/styles";
 import { useState } from "react";
-import {
-  TextFieldElement,
-} from "react-hook-form-mui";
 
 export function SearchInput({ focus, ...props }) {
   const [showHelp, setShowHelp] = useState(false);
   return (
     <>
-      <TextFieldElement
+      <TextField
         name="fullText"
         size="small"
         label=""
         placeholder="Search archives..."
         sx={{
-          "backgroundColor": alpha("#000", 0.04),
+          backgroundColor: alpha("#000", 0.04),
           "&:hover": { backgroundColor: alpha("#000", 0.07) },
-          "borderRadius": 1000,
-          "fieldset": { border: "none" },
+          borderRadius: 1000,
+          fieldset: { border: "none" },
         }}
         hiddenLabel
         InputProps={{

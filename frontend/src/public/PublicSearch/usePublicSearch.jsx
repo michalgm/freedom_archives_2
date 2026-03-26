@@ -217,6 +217,9 @@ export const usePublicSearch = (
   const doSearch = useCallback(
     (fields) => {
       setSearch((search) => {
+        if ("fullText" in fields && fields.fullText !== search.fullText) {
+          fields = { ...fields, sort: "Relevance" };
+        }
         merge(search, fields);
       });
     },

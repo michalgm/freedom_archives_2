@@ -1,9 +1,8 @@
-import { Box, Divider, Paper, Skeleton, Stack, Typography } from "@mui/material";
+import { Box, Button, Divider, Paper, Skeleton, Stack, Typography } from "@mui/material";
 import { useNavigate } from "react-router";
 import { TagCloud } from "react-tagcloud";
 import { public_settings } from "src/api";
 import Carousel from "src/components/Carousel";
-import Form from "src/components/form/Form";
 import Link from "src/components/Link";
 import { ItemStack } from "src/public/ItemCard";
 import { SearchInput } from "src/public/PublicSearch/SearchInput";
@@ -22,13 +21,11 @@ export const WordCloud = ({ data, loading }) => {
       </Stack>
     );
   } else {
-    const words = (data || [])
-      ?.slice(0, 30)
-      .map(([value, count, key]) => ({
-        value,
-        count,
-        key,
-      }));
+    const words = (data || [])?.slice(0, 30).map(([value, count, key]) => ({
+      value,
+      count,
+      key,
+    }));
     contents = (
       <TagCloud
         minSize={8}
@@ -86,7 +83,7 @@ export async function loader() {
 }
 // eslint-disable-next-line react-refresh/only-export-components
 export function meta(data) {
-  const description = data?.data?.settings?.introText
+  const description = data?.data?.settings?.introText;
   const title = "Home";
   const image = "/logo512.png";
   return setMetaTags({ data, title, description, image });
@@ -94,25 +91,18 @@ export function meta(data) {
 
 const PublicHome = ({ loaderData: { settings } }) => {
   const loading = false;
-  // const [settings, setSettings] = useState({ introText: "", topCollection: { children: [], featured_records: [] }, topKeywords: [] });
-  // const [loading, setLoading] = useState(true);
-  // useEffect(() => {
-  //   const fetchData = async () => {
-  //     const res = await public_settings.find({ query: { archive_id: 1 } });
-  //     const settings = res.reduce((acc, setting) => {
-  //       acc[setting.setting] = setting.value;
-  //       return acc;
-  //     }, {});
-  //     // await new Promise(resolve => setTimeout(resolve, 10000));
-  //     setSettings(settings);
-  //     setLoading(false);
-  //   };
-  //   fetchData();
-  // }, []);
-  const { introText, topCollection: { children: topCollections, featured_records: featuredRecords }, topKeywords } = settings;
+
+  const {
+    introText,
+    topCollection: { children: topCollections, featured_records: featuredRecords },
+    topKeywords,
+  } = settings;
 
   const navigate = useNavigate();
-  const onSubmit = ({ search }) => {
+  const onSubmit = (e) => {
+    e.preventDefault();
+    const formData = new FormData(e.target);
+    const search = formData.get("search");
     navigate(`/search`, { state: { search } });
   };
 
@@ -142,9 +132,14 @@ const PublicHome = ({ loaderData: { settings } }) => {
             Search the Archives
           </Typography>
           <Box className="flex-scroller">
-            <Form defaultValues={{ search: "" }} onSuccess={onSubmit}>
-              <SearchInput name="search" />
-            </Form>
+            <form onSubmit={onSubmit} autoComplete="off">
+              <Stack direction="row" spacing={1} alignItems="center">
+                <SearchInput name="search" />
+                <Button type="submit" variant="outlined">
+                  Search
+                </Button>
+              </Stack>
+            </form>
           </Box>
         </Stack>
         <Divider />

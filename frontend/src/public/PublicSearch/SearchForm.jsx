@@ -1,24 +1,26 @@
 import {
   Box,
   Button,
+  Checkbox,
   Chip,
   Divider,
+  FormControlLabel,
+  FormGroup,
   Grid,
   Icon,
   List,
   ListItem,
   ListItemButton,
   ListItemText,
+  MenuItem,
   Paper,
+  Select,
   Skeleton,
   Stack,
   Typography,
 } from "@mui/material";
 import { startCase } from "lodash-es";
 import { useState } from "react";
-import { CheckboxElement, SelectElement, useFormContext } from "react-hook-form-mui";
-import AutoSubmit from "src/components/AutoSubmit";
-import Form from "src/components/form/Form";
 import Link from "src/components/Link";
 import {
   INITIAL_FILTER_DISPLAY_COUNT,
@@ -26,6 +28,7 @@ import {
   FILTER_TYPES,
   SORT_OPTIONS,
 } from "src/public/PublicSearch/constants";
+import { useDebouncedCallback } from "use-debounce";
 
 import { SearchInput } from "./SearchInput";
 
@@ -131,51 +134,68 @@ export const SearchFilters = ({ search, filters, addFilter, clearFilters, loadin
   );
 };
 
+
 export function SearchForm({ search, doSearch, nonDigitizedTotal, total, loadedCount, focus, loading, collections }) {
+  const [textSearchValue, setTextSearchValue] = useState(search.fullText);
+  const debouncedSearch = useDebouncedCallback((fields) => doSearch(fields), 300);
+
   return (
-    <Form defaultValues={search} onSubmit={doSearch}>
-      <AutoSubmit action={doSearch} timeout={300} />
-      <Grid container spacing={1} direction={{ xs: "row", md: "row" }} alignItems="center">
-        <Grid size={{ xs: 8, md: 6 }}>
-          <SearchInput focus={focus} />
-        </Grid>
-        <Grid size={{ xs: 4, md: 3 }}>
-          <SelectElement
-            name="sort"
-            label="Sort by"
-            options={Object.keys(SORT_OPTIONS).map((id) => ({ id, label: id }))}
-            size="small"
-            fullWidth
-          />
-        </Grid>
-        <Grid size={{ xs: 12, md: 3 }}>
-          <CheckboxElement
-            name="include_non_digitized"
-            label="Include non-digitized records"
-            field_type="checkbox"
-            // sx={{ "& .MuiFormControlLabel-label": { fontSize: "0.875rem" } }}
-            // slotProps={{ label: { size: "small" } }}
-            labelProps={{
-              size: "small",
-              slotProps: {
-                typography: { fontSize: "0.875rem" },
-              },
-            }}
-            // autoSubmit
-            width={12}
-          />
-        </Grid>
-        {!loading && (
-          <SearchResults
-            total={total}
-            nonDigitizedTotal={nonDigitizedTotal}
-            loadedCount={loadedCount}
-            loading={loading}
-            collections={collections}
-          />
-        )}
+    <Grid container spacing={1} alignItems="center">
+      <Grid size={{ xs: 8, md: 6 }}>
+        <SearchInput
+          focus={focus}
+          value={textSearchValue}
+          onChange={(e) => {
+            setTextSearchValue(e.target.value);
+            debouncedSearch({ fullText: e.target.value });
+          }}
+        />
       </Grid>
-    </Form>
+      <Grid size={{ xs: 4, md: 3 }}>
+        <Select
+          name="sort"
+          label="Sort by"
+          size="small"
+          value={search.sort}
+          onChange={(e) => doSearch({ sort: e.target.value })}
+          fullWidth
+        >
+          {Object.keys(SORT_OPTIONS).map((option) => (
+            <MenuItem key={option} value={option}>
+              {option}
+            </MenuItem>
+          ))}
+        </Select>
+      </Grid>
+      <Grid size={{ xs: 12, md: 3 }}>
+        <FormGroup>
+          <FormControlLabel
+            size="small"
+            slotProps={{
+              typography: { fontSize: "0.875rem" },
+            }}
+            control={
+              <Checkbox
+                name="include_non_digitized"
+                checked={search.include_non_digitized}
+                onChange={(e) => doSearch({ include_non_digitized: e.target.checked })}
+              />
+            }
+            label="Include non-digitized records"
+          />
+        </FormGroup>
+      </Grid>
+      {!loading && (
+        <SearchResults
+          doSearch={doSearch}
+          total={total}
+          nonDigitizedTotal={nonDigitizedTotal}
+          loadedCount={loadedCount}
+          loading={loading}
+          collections={collections}
+        />
+      )}
+    </Grid>
   );
 }
 
@@ -213,8 +233,8 @@ function SearchResults({
   collections,
   // loadedCount = 0,
   // loading,
+  doSearch,
 }) {
-  const { setValue } = useFormContext();
   return (
     <Box sx={{ width: "100%" }}>
       <CollectionMatches collections={collections} />
@@ -226,7 +246,7 @@ function SearchResults({
             <>
               <br />
               Hiding {nonDigitizedTotal} non-digitized records.
-              <Button size="small" onClick={() => setValue("include_non_digitized", true)}>
+              <Button size="small" onClick={() => doSearch({ include_non_digitized: true })}>
                 Show All
               </Button>
             </>

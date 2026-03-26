@@ -145,12 +145,18 @@ const FilterBar = ({
         ...values,
         filters: values.filters.filter((f) => f.field != null && f.value != null),
       };
+      if (values.search !== filter.search) {
+        search.sort = "relevance";
+        search.sort_desc = true;
+        formContext.setValue("sort", search.sort);
+        formContext.setValue("sort_desc", search.sort_desc);
+      }
       if (!isEqual(search, filter)) {
         setFilter(search);
         setSearch({ offset: 0 });
       }
     },
-    [filter, setFilter, setSearch],
+    [filter, formContext, setFilter, setSearch],
   );
 
   const reset = useCallback(() => {
