@@ -14,7 +14,7 @@ import {
   Stack,
   TextField,
 } from "@mui/material";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router";
 import { unified_search } from "src/api";
 import Thumbnail from "src/components/Thumbnail";
@@ -57,14 +57,18 @@ function QuickSearch() {
   const [searchValue, setSearchValue] = useState("");
   const [results, setResults] = useState([]);
   const [loading, setLoading] = useState(false);
+  const searchCountRef = useRef(0);
 
   const navigate = useNavigate();
 
   const performSearch = useDebouncedCallback(
     useCallback(async (query) => {
       setLoading(true);
+      const searchCount = ++searchCountRef.current;
+
       try {
         const res = await unified_search.find({ query, noLoading: true });
+        if (searchCount !== searchCountRef.current) return;
         setResults(res.data);
       } finally {
         setLoading(false);

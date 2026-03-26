@@ -12,7 +12,7 @@ import {
   Tooltip,
 } from "@mui/material";
 import { isEqual, merge, startCase } from "lodash-es";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { FormProvider, useFieldArray, useForm } from "react-hook-form-mui";
 import AutoSubmit from "src/components/AutoSubmit";
 import Show from "src/components/Show";
@@ -169,7 +169,7 @@ const FilterBar = ({
         flexWrap={"nowrap"}
         alignContent={"flex-start"}
         alignItems={"flex-start"}
-      // justifyContent={"space-between"}
+        // justifyContent={"space-between"}
       >
         <Grid container flex="1 1 fit-content" spacing={1}>
           <Grid container flex="1 1 fit-content" rowSpacing={1}>
@@ -375,6 +375,7 @@ const ManageBase = ({
   const [items, setItems] = useState([]);
   const [digitizedTotal, setDigitizedTotal] = useState(0);
   const [loading, setLoading] = useState(false);
+  const searchCountRef = useRef(0);
   const offset = useStore((s) => s.search.offset);
   const total = useStore((s) => s.search.total);
   const filter = useStore((s) => s.search.filter);
@@ -384,6 +385,7 @@ const ManageBase = ({
 
   const lookupItems = useCallback(
     async ({ filter, offset, page_size, service }) => {
+      const searchCount = ++searchCountRef.current;
       setLoading(true);
       const { filters } = filter;
       const query = createQuery(filter);
@@ -426,16 +428,17 @@ const ManageBase = ({
         (service === "records" ? records : collections).find({ noLoading, query }),
         service === "records"
           ? records.find({
-            noLoading,
-            query: {
-              ...query,
-              has_digital: true,
-              $select: [`record_id`],
-              $limit: 1,
-            },
-          })
+              noLoading,
+              query: {
+                ...query,
+                has_digital: true,
+                $select: [`record_id`],
+                $limit: 1,
+              },
+            })
           : {},
       ]);
+      if (searchCount !== searchCountRef.current) return;
       setItems(data);
       setDigitizedTotal(digitizedTotal);
       if (!embedded) {

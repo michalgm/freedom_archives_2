@@ -77,6 +77,7 @@ export const usePublicSearch = (
   });
   const [filters, setFilters] = useState(() => initialData?.filters || []);
   const prevSearchRef = useRef(initialData ? { ...search, searchFilters } : null);
+  const searchCountRef = useRef(0);
 
   const mergeRecordPages = useCallback((previousRecords, nextRecords) => {
     const seen = new Set();
@@ -115,7 +116,6 @@ export const usePublicSearch = (
     }
 
     setRecordsLoading(true);
-
     if (isNewSearch) {
       setLoading(true);
       setRecords({ total: 0, nonDigitizedTotal: 0, records: [] });
@@ -125,6 +125,7 @@ export const usePublicSearch = (
 
     try {
       const { fullText, include_non_digitized, sort } = search;
+      const searchCount = ++searchCountRef.current;
 
       const query = {
         $select: [
@@ -179,11 +180,11 @@ export const usePublicSearch = (
         collections = [],
       } = await recordsService.find({ query });
 
+      if (searchCount !== searchCountRef.current) return;
+
       const decorated = decorateRecords(recordsData);
       setRecords((prev) => {
-        const nextPageRecords = isNewSearch
-          ? decorated
-          : mergeRecordPages(prev?.records, decorated);
+        const nextPageRecords = isNewSearch ? decorated : mergeRecordPages(prev?.records, decorated);
         return {
           total,
           nonDigitizedTotal,
@@ -203,17 +204,7 @@ export const usePublicSearch = (
       setRecordsLoading(false);
       if (isNewSearch) setLoading(false);
     }
-  }, [
-    filterTypes,
-    initialLoading,
-    mergeRecordPages,
-    offset,
-    pageSize,
-    search,
-    searchFilters,
-    setOffset,
-    sortOptions,
-  ]);
+  }, [filterTypes, initialLoading, mergeRecordPages, offset, pageSize, search, searchFilters, setOffset, sortOptions]);
 
   useEffect(() => {
     setOffset(0);
@@ -237,7 +228,7 @@ export const usePublicSearch = (
       setSearch((search) => {
         let newFilter = [...(search[type] || [])];
         if (newFilter.includes(value)) {
-          newFilter = newFilter.filter(v => v !== value);
+          newFilter = newFilter.filter((v) => v !== value);
         } else {
           newFilter.push(value);
         }
@@ -252,7 +243,7 @@ export const usePublicSearch = (
     filterTypes.forEach((type) => {
       newFilters[type] = [];
     });
-    setSearch(search => ({ ...search, ...newFilters }));
+    setSearch((search) => ({ ...search, ...newFilters }));
   }, [setSearch, filterTypes]);
 
   return {
