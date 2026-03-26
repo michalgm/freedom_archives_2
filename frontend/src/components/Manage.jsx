@@ -393,71 +393,74 @@ const ManageBase = ({
     async ({ filter, offset, page_size, service }) => {
       const searchCount = ++searchCountRef.current;
       setLoading(true);
-      const { filters } = filter;
-      const query = createQuery(filter);
-      query.$skip = offset;
-      query.$limit = page_size;
-      const noLoading = Boolean(embedded);
-      if (filters.length) {
-        filters.forEach((filterValue) => {
-          const { field } = filterValue;
-          let { value } = filterValue;
-          if (!field) return;
-          const filter = filterTypes[field];
+      try {
+        const { filters } = filter;
+        const query = createQuery(filter);
+        query.$skip = offset;
+        query.$limit = page_size;
+        const noLoading = Boolean(embedded);
+        if (filters.length) {
+          filters.forEach((filterValue) => {
+            const { field } = filterValue;
+            let { value } = filterValue;
+            if (!field) return;
+            const filter = filterTypes[field];
 
-          if (filter && (value !== null || (value !== undefined && filter.allowNull))) {
-            if (filter.case === "upper" && typeof value === "string") {
-              value = value.toUpperCase();
+            if (filter && (value !== null || (value !== undefined && filter.allowNull))) {
+              if (filter.case === "upper" && typeof value === "string") {
+                value = value.toUpperCase();
+              }
+              switch (filter.match) {
+                case "contained":
+                  query[field] = {
+                    $contains: [value.list_item_id || value.value || value],
+                  };
+                  break;
+                case "fuzzy":
+                  query[field] = { $ilike: `%${value.replace(/ /g, "%")}%` };
+                  break;
+                case "listitem":
+                  query[`${field}_search`] = { $contains: [value.item] };
+                  break;
+                case "listitem_id":
+                  query[`${field.replace(/s$/, "")}_id`] = value.list_item_id;
+                  break;
+                default:
+                  query[field] = value;
+              }
             }
-            switch (filter.match) {
-              case "contained":
-                query[field] = {
-                  $contains: [value.list_item_id || value.value || value],
-                };
-                break;
-              case "fuzzy":
-                query[field] = { $ilike: `%${value.replace(/ /g, "%")}%` };
-                break;
-              case "listitem":
-                query[`${field}_search`] = { $contains: [value.item] };
-                break;
-              case "listitem_id":
-                query[`${field.replace(/s$/, "")}_id`] = value.list_item_id;
-                break;
-              default:
-                query[field] = value;
-            }
-          }
-        });
+          });
+        }
+        const [{ data, total }, { total: digitizedTotal = 0 }] = await Promise.all([
+          (service === "records" ? records : collections).find({ noLoading, query }),
+          service === "records"
+            ? records.find({
+                noLoading,
+                query: {
+                  ...query,
+                  has_digital: true,
+                  $select: [`record_id`],
+                  $limit: 1,
+                },
+              })
+            : {},
+        ]);
+        if (searchCount !== searchCountRef.current) return;
+        setItems(data);
+        setDigitizedTotal(digitizedTotal);
+        if (!embedded) {
+          setSearch({
+            query,
+            total,
+            offset,
+            page_size,
+          });
+        } else {
+          setSearch({ total });
+        }
+      } finally {
+        setLoading(false);
       }
-      const [{ data, total }, { total: digitizedTotal = 0 }] = await Promise.all([
-        (service === "records" ? records : collections).find({ noLoading, query }),
-        service === "records"
-          ? records.find({
-              noLoading,
-              query: {
-                ...query,
-                has_digital: true,
-                $select: [`record_id`],
-                $limit: 1,
-              },
-            })
-          : {},
-      ]);
-      if (searchCount !== searchCountRef.current) return;
-      setItems(data);
-      setDigitizedTotal(digitizedTotal);
-      if (!embedded) {
-        setSearch({
-          query,
-          total,
-          offset,
-          page_size,
-        });
-      } else {
-        setSearch({ total });
-      }
-      setLoading(false);
     },
     [createQuery, embedded, filterTypes, setSearch],
   );
