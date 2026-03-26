@@ -68,6 +68,8 @@ interface SearchState<T extends SearchData> {
   search_index: number;
 }
 
+const STORE_VERSION = 1;
+
 export type SearchType = "records" | "collections" | "duplicate_records";
 
 interface Actions<T extends SearchData> {
@@ -182,6 +184,15 @@ export const createQueryStore = <T extends SearchData>(type: SearchType, persist
   if (persistStore) {
     return create<SearchState<T> & Actions<T>>()(persist(baseStore, {
       name: `queryStore-${type}`,
+      version: STORE_VERSION,
+      migrate: (persistedState, version) => {
+        if (version === STORE_VERSION) {
+          return persistedState;
+        }
+        // If we have an older version, we can choose to migrate it here
+        // For now, we'll just return the initial state for any version mismatch
+        return initialData;
+      },  
       storage: createJSONStorage(() => localStorage),
     }))
   }
