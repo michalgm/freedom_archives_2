@@ -190,32 +190,28 @@ export function Collection() {
 function CollectionFields() {
   return (
     <>
-      <Stack direction="row" spacing={2} sx={{ mt: 2 }}>
-        <Grid container spacing={2}>
-          <Grid size={12}>
-            <Field name="title" />
+      <FieldRow>
+        <Stack direction="row" spacing={2} sx={{ mt: 2 }}>
+          <Grid container spacing={2} sx={{ flexGrow: 1 }}>
+            <Grid size={12}>
+              <Field name="title" />
+            </Grid>
+            <Grid size={12}>
+              <Field name="description" field_type="html" />
+            </Grid>
           </Grid>
-          <Grid size={12}>
-            <Field name="description" field_type="html" />
+          <Grid container size="auto" className="record-thumbnail" spacing={2} direction="column" alignItems="center">
+            <Field
+              field_type="upload"
+              name="thumbnail"
+              label="Thumbnail"
+              width={100}
+              accept={["image/gif", "image/jpeg", "image/png", "image/webp", "image/tiff", "application/pdf"]}
+            />
           </Grid>
-        </Grid>
-        <Grid
-          container
-          size="auto"
-          className="record-thumbnail"
-          spacing={2}
-          direction="column"
-          alignItems="center"
-        >
-          <Field
-            field_type="upload"
-            name="thumbnail"
-            label="Thumbnail"
-            width={100}
-            accept={["image/gif", "image/jpeg", "image/png", "image/webp", "image/tiff", "application/pdf"]}
-          />
-        </Grid>
-      </Stack>
+        </Stack>
+      </FieldRow>
+      \
       <FieldRow>
         <Grid container spacing={0}>
           <Grid size={6}>
