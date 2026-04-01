@@ -5,7 +5,6 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { defineConfig } from "vite";
 import commonjs from "vite-plugin-commonjs";
-import viteTsconfigPaths from "vite-tsconfig-paths";
 import { defineProject } from "vitest/config";
 
 const dirname
@@ -28,6 +27,9 @@ export default defineConfig(({ mode }) => ({
   build: {
     sourcemap: mode === "development",
   },
+  resolve: {
+    tsconfigPaths: true,
+  },
   plugins: [
     // react(),
     ...(process.env.STORYBOOK ? [] : [reactRouter()]),
@@ -48,7 +50,6 @@ export default defineConfig(({ mode }) => ({
     //     }
     //   },
     // },
-    viteTsconfigPaths(),
     commonjs(),
   ],
   server: {
