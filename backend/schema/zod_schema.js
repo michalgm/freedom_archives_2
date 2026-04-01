@@ -142,7 +142,7 @@ const recordsSchema = z.object({
   is_hidden: z.boolean().default(false),
   fact_number: z
     .union([
-      z.string().regex(/^FACT_[0-9]{4,6}$/, { error: "Fact number must be in format 'FACT_XXXX'" }),
+      z.string().regex(/^FACT_[0-9]{4,6}_[A-Z0-9_]+$/, { error: "Fact number must be in format 'FACT_XXXX_XXXX'" }),
       z.literal(""),
       z.null(),
     ])

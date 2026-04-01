@@ -17,7 +17,7 @@ export default (function (app) {
     Model: app.get("postgresqlClient"),
   };
   // Initialize our service with any options it requires
-  app.use("/api/public/collections", new PublicCollections(options), { methods: ["get"] });
+  app.use("/api/public/collections", new PublicCollections(options), { methods: ["get", "find"] });
   const service = app.service("api/public/collections");
 
   service.hooks({
