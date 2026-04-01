@@ -302,9 +302,12 @@ jobs:
             rm -rf "$PUBLIC_DIST_LINK"
             ln -sfn "$FRONTEND_RELEASE_DIR" "$PUBLIC_DIST_LINK"
 
+            echo "🔄 Stopping Node service..."
+            /usr/sbin/cloudlinux-selector stop --interpreter nodejs --app-root "$APP_DIR" --json || true
+
             if [ "$RUN_MIGRATIONS" = "true" ]; then
               echo "🔄 Running migrations..."
-              NODE_ENV=production yarn run migrate
+              NODE_ENV=production node node_modules/.bin/knex migrate:latest
             else
               echo "⏭️ Skipping migrations on staging deploy."
             fi
