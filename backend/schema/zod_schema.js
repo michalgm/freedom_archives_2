@@ -141,19 +141,20 @@ const recordsSchema = z.object({
   needs_review: z.boolean().default(false),
   is_hidden: z.boolean().default(false),
   fact_number: z
-    .string()
+    .union([
+      z.string().regex(/^FACT_[0-9]{4,6}$/, { error: "Fact number must be in format 'FACT_XXXX'" }),
+      z.literal(""),
+      z.null(),
+    ])
     .describe("Cloud Backup Reference ID (FACT)")
-    .regex(/^FACT_[0-9]{4,6}_[A-Z0-9_]+$/, { error: "Fact number must be in format 'FACT_XXXX_XXXX'" })
     .nullable()
     .optional(),
   date_string: z
-    .string()
-    .regex(/\d{2}\/\d{2}\/\d{4}/)
+    .union([z.string().regex(/\d{2}\/\d{2}\/\d{4}/), z.literal("MM/DD/YYYY"), z.null()])
     .nullable()
     .optional()
     .superRefine((val, ctx) => {
-      if (!val || val === "") return; // Allow empty/null
-
+      if (!val || val === "" || val === "MM/DD/YYYY") return; // Allow empty/null
       const parts = val.split("/");
       if (parts.length !== 3) {
         ctx.addIssue({
