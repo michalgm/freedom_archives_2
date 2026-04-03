@@ -29,7 +29,8 @@ on:
         type: string
 
 concurrency:
-  group: deploy-${{ github.workflow }}-${{ github.event_name == 'workflow_dispatch' && github.event.inputs.environment || startsWith(github.ref, 'refs/tags/v') && 'prod' || 'stage' }}
+  group: deploy
+  # group: deploy-${{ github.workflow }}-${{ github.event_name == 'workflow_dispatch' && github.event.inputs.environment || startsWith(github.ref, 'refs/tags/v') && 'prod' || 'stage' }}
   cancel-in-progress: false
 
 jobs:
