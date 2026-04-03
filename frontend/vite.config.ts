@@ -20,10 +20,6 @@ export default defineConfig(({ mode }) => ({
     // This will be replaced at build time
     __WDYR_ENABLED__: mode === 'development',
   },
-  esbuild: {
-    // Limit esbuild parallelism to avoid thread exhaustion in constrained environments
-    logLevel: 'info',
-  },
   build: {
     sourcemap: mode === "development",
   },
