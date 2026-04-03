@@ -20,8 +20,20 @@ export default defineConfig(({ mode }) => ({
     // This will be replaced at build time
     __WDYR_ENABLED__: mode === 'development',
   },
+  optimizeDeps: {
+    include: ['@emotion/react', '@emotion/styled', '@emotion/cache'],
+  },
   build: {
     sourcemap: mode === "development",
+    rollupOptions: {
+      output: {
+        manualChunks(id) {
+          if (id.includes('@emotion') || id.includes('@mui')) {
+            return 'mui';
+          }
+        },
+      },
+    },
   },
   resolve: {
     tsconfigPaths: true,
