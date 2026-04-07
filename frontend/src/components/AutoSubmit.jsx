@@ -8,14 +8,14 @@ const AutoSubmit = ({ action, timeout = 300 }) => {
 
   const data = watch();
   const debouncedAction = useDebouncedCallback(action, timeout);
-  const lastDataRef = useRef(data);
+  const lastDataRef = useRef(structuredClone(data));
 
   useEffect(() => {
     const dataChanged = !isEqual(data, lastDataRef.current);
 
     if (dataChanged) {
       debouncedAction(data);
-      lastDataRef.current = data;
+      lastDataRef.current = structuredClone(data);
     }
   }, [data, debouncedAction]);
 
