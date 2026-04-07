@@ -211,7 +211,6 @@ function CollectionFields() {
           </Grid>
         </Stack>
       </FieldRow>
-      \
       <FieldRow>
         <Grid container spacing={0}>
           <Grid size={6}>
