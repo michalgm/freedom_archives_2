@@ -4,12 +4,11 @@
     "module": "node20",
     "moduleResolution": "node16",
     "allowJs": true,
-    "checkJs": true,
+    "checkJs": false,
     "noEmit": true,
     "baseUrl": ".",
     "allowSyntheticDefaultImports": true,
     "esModuleInterop": true
-
     // "paths": {
     //   "@mui/icons-material/*": ["../node_modules/@mui/icons-material/esm/*"]
     // }
