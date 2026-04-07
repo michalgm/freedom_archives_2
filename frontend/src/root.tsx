@@ -33,7 +33,7 @@ declare module '@mui/material/LinearProgress' {
 }
 
 // eslint-disable-next-line react-refresh/only-export-components
-export function loader({ request }) {
+export function loader({ request }: { request: Request }) {
   const url = new URL(request.url);
   return { baseUrl: `${url.protocol}//${url.host}` };
 }

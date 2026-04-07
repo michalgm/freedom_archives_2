@@ -16,9 +16,9 @@ export {
   createQueryStore,
 };
 
-const parseError = (error: string | Error) => {
-  const message = typeof error === "string" ? error : error?.message || error;
-  return typeof message === "string" ? errorMessages?.[message] || message : message;
+const parseError = (error: string | Error): string => {
+  const message = typeof error === "string" ? error : error.message || error.toString();
+  return errorMessages?.[message as keyof typeof errorMessages] || message;
 };
 
 export const useAuth = () => {

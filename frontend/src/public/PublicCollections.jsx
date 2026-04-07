@@ -167,7 +167,6 @@ const PublicCollections = () => {
 
     // ResizeObserver isn't available in some older browsers; fall back to a one-time
     // measurement + window resize listener.
-    // eslint-disable-next-line compat/compat -- runtime-guarded with a fallback implementation
     const ResizeObserverCtor = globalThis.ResizeObserver;
     if (typeof ResizeObserverCtor === "undefined") {
       const update = () => {

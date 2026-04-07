@@ -1,6 +1,6 @@
 
 import { Query } from "@feathersjs/feathers";
-import { create } from "zustand";
+import { type StateCreator, create } from "zustand";
 import { createJSONStorage, persist } from "zustand/middleware";
 import { immer } from 'zustand/middleware/immer';
 // Store for search state (synced with URL params)
@@ -42,7 +42,7 @@ interface SearchFilter {
   sort: string;
   sort_desc: boolean;
   needs_review: boolean;
-  [key: string]: string | number | boolean | undefined | FilterItem[];
+  [key: string]: string | number | boolean | undefined | null | FilterItem[];
   filters?: FilterItem[];
 }
 
@@ -63,22 +63,31 @@ interface RecordSearchData extends SearchData {
   filter: RecordSearchFilter;
 }
 
-interface SearchState<T extends SearchData> {
+type AnySearchData = SearchData | RecordSearchData;
+
+interface SearchState<T extends AnySearchData = AnySearchData> {
   search: T;
   search_index: number;
 }
 
 const STORE_VERSION = 1;
 
-export type SearchType = "records" | "collections" | "duplicate_records";
+type SearchDataByType = {
+  records: SearchState<RecordSearchData>;
+  collections: SearchState<SearchData>;
+  duplicate_records: SearchState<SearchData>;
+};
 
-interface Actions<T extends SearchData> {
-  // Actions
-  setSearch: (searchData: Partial<T>) => void;
+export type SearchType = keyof SearchDataByType;
+
+interface Actions {
+  setSearch: (searchData: Partial<AnySearchData>) => void;
   setFilter: (filter: SearchFilter) => void;
   setSearchIndex: (index: number) => void;
   resetSearch: () => void;
 }
+
+type QueryStore = SearchState & Actions;
 
 const initialSearchData: SearchData = {
   type: "",
@@ -95,7 +104,7 @@ const initialSearchData: SearchData = {
   query: {},
 };
 
-export const initialSearch = {
+export const initialSearch: SearchDataByType = {
   records: {
     search: {
       ...initialSearchData,
@@ -106,19 +115,19 @@ export const initialSearch = {
       },
     },
     search_index: 0,
-  } as SearchState<RecordSearchData>,
+  },
   collections: {
     search: {
       ...initialSearchData,
     },
     search_index: 0,
-  } as SearchState<SearchData>,
+  },
   duplicate_records: {
     search: {
       ...initialSearchData,
     },
     search_index: 0,
-  } as SearchState<SearchData>,
+  },
 }
 
 // const getUrlSearch = () => {
@@ -156,48 +165,52 @@ export const initialSearch = {
 //   },
 // }
 
-const getStateManager = (initialData) => (set) => ({
-  search: initialData,
-  search_index: 0,
-  setSearch: (searchData) => set((state) => {
-    state.search = { ...state.search, ...searchData };
-  }),
+const getStateManager = (initialData: AnySearchData): StateCreator<
+  QueryStore,
+  [["zustand/immer", never]],
+  []
+> => (set) => ({
+    search: initialData,
+    search_index: 0,
+    setSearch: (searchData) => set((state) => {
+      state.search = { ...state.search, ...searchData };
+    }),
 
-  setFilter: (filterData) => set((state) => {
-    state.search.filter = structuredClone(filterData);
-  }),
+    setFilter: (filterData) => set((state) => {
+      state.search.filter = structuredClone(filterData);
+    }),
 
-  setSearchIndex: (index) => set((state) => {
-    state.search_index = index;
-  }),
+    setSearchIndex: (index) => set((state) => {
+      state.search_index = index;
+    }),
 
-  resetSearch: () => set((state) => {
-    state.search = initialData;
-    state.search_index = 0;
-  }),
-})
+    resetSearch: () => set((state) => {
+      state.search = initialData;
+      state.search_index = 0;
+    }),
+  })
 
-export const createQueryStore = <T extends SearchData>(type: SearchType, persistStore: boolean = false) => {
+export const createQueryStore = (type: SearchType, persistStore: boolean = false) => {
   const initialData = initialSearch[type].search
-  const baseStore = immer<SearchState<T> & Actions<T>>(getStateManager(initialData))
+  const baseStore = immer<QueryStore>(getStateManager(initialData))
 
   if (persistStore) {
-    return create<SearchState<T> & Actions<T>>()(persist(baseStore, {
+    return create<QueryStore>()(persist(baseStore, {
       name: `queryStore-${type}`,
       version: STORE_VERSION,
-      migrate: (persistedState, version) => {
+      migrate: (persistedState: unknown, version: number) => {
         if (version === STORE_VERSION) {
-          return persistedState;
+          return persistedState as QueryStore;
         }
         // If we have an older version, we can choose to migrate it here
         // For now, we'll just return the initial state for any version mismatch
-        return initialData;
-      },  
+        return { search: initialData, search_index: 0 } as QueryStore;
+      },
       storage: createJSONStorage(() => localStorage),
     }))
   }
 
-  return create<SearchState<T> & Actions<T>>()(baseStore)
+  return create<QueryStore>()(baseStore)
 }
 
 const useRecordsQueryStore = createQueryStore('records', true);

@@ -1,6 +1,6 @@
 import { Box, FormControl, FormHelperText, InputLabel } from "@mui/material";
-import TextAlign from "@tiptap/extension-text-align";
-import StarterKit from "@tiptap/starter-kit";
+import { TextAlign } from "@tiptap/extension-text-align";
+import { StarterKit } from "@tiptap/starter-kit";
 import { merge } from "lodash-es";
 import {
   LinkBubbleMenu,

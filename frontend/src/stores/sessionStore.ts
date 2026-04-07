@@ -1,7 +1,7 @@
 import zod from "zod";
 import { create } from "zustand";
 
-import schemas from '../../../backend/services/zod_schema';
+import schemas from '../../../backend/schema/zod_schema';
 
 type User = zod.infer<typeof schemas.usersSchema>
 

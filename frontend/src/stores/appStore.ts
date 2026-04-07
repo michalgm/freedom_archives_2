@@ -8,6 +8,8 @@ interface Notification {
     keepOnNavigate?: boolean;
 }
 
+type NotificationInput = Omit<Notification, 'id'> & { id?: string };
+
 interface AppState {
     loading: boolean;
     title: string;
@@ -19,7 +21,7 @@ interface AppState {
     setLoading: (loading: boolean) => void;
     setTitle: (title: string) => void;
     initializeHooks: () => void;
-    addNotification: (notification: Omit<Notification, 'id'> & { id?: string }) => void;
+    addNotification: (notification: NotificationInput) => void;
     removeNotification: (id: string) => void;
     removeNotificationsOnNavigate: () => void;
 }
@@ -40,9 +42,9 @@ const useAppStore = create<AppState>((set) => ({
   setTitle: (title) => set({ title }),
   initializeHooks: () => set({ hooks_initialized: true }),
 
-  addNotification: (notification: Notification) => set((state) => {
+  addNotification: (notification: NotificationInput) => set((state) => {
     const id = notification.id || (Math.random() + 1).toString(36).substring(7);
-    const notifications = [...state.notifications, { 'severity': 'success', ...notification, id } as Notification]
+    const notifications = [...state.notifications, { severity: 'success', ...notification, id } as Notification]
     const hasError = checkHasError(notifications);
     return { notifications: notifications, hasError: hasError }
   }),
