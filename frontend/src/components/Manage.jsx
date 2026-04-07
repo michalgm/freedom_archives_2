@@ -93,7 +93,7 @@ function Filter({ index, remove, filterTypes, filter, update }) {
           <IconButton onClick={() => remove(index)} variant="outlined" size="small" sx={{ p: 0, height: 18 }}>
             <Close fontSize="inherit" />
           </IconButton>
-          <Box sx={{ width: 0.4 }}>
+          <Box sx={{ minWidth: 140 }}>
             <Field
               size="x-small"
               name={`filters.${index}.field`}
