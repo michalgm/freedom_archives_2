@@ -191,21 +191,23 @@ export const rankedSearch = async (context) => {
   const { id: idField, name: tableName } = context.service.getOptions({});
 
   const regex = await getCallNumberRegex(knex);
-  const callNumber = await detectCallNumber(searchTerm, regex);
+  const termIsCallNumber = await detectCallNumber(searchTerm, regex);
+  const interceptCallNumber =
+    termIsCallNumber && ["_unified_records", "_unified_collections", "unified_search_view"].includes(tableName);
   // console.log("Search term:", searchTerm, "Fuzzy term:", fuzzyTerm, "Detected call number:", callNumber);
-  if (callNumber) {
-    const isRecords = tableName.match("record") && tableName !== "duplicate_records";
-    const rankExpr = getTrigramRank(knex, callNumber);
+  if (interceptCallNumber) {
+    const multipleCallNumbers = ["_unified_records", "unified_search_view"].includes(tableName);
+    const rankExpr = getTrigramRank(knex, termIsCallNumber);
     const callNumberQuery = baseQuery
       .clone()
       .select(knex.raw(`(${rankExpr}) as rank`))
       .where(function () {
-        if (isRecords) {
+        if (multipleCallNumbers) {
           this.whereRaw("EXISTS (SELECT 1 FROM unnest(call_numbers) AS cn WHERE upper(cn) LIKE upper(?))", [
-            `${callNumber}%`,
+            `${termIsCallNumber}%`,
           ]);
         } else {
-          this.whereRaw("upper(call_number) LIKE upper(?)", [`${callNumber}%`]);
+          this.whereRaw("upper(call_number) LIKE upper(?)", [`${termIsCallNumber}%`]);
         }
       });
     context.params.knex = callNumberQuery;
