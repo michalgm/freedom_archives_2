@@ -1,4 +1,7 @@
-import { Box, Breadcrumbs as Crumbs, Icon, Typography } from "@mui/material";
+import Box from "@mui/material/Box";
+import Crumbs from "@mui/material/Breadcrumbs";
+import Icon from "@mui/material/Icon";
+import Typography from "@mui/material/Typography";
 import { startCase } from "lodash-es";
 import { useLocation } from "react-router";
 import { routes } from "src/config/routes";
@@ -20,13 +23,11 @@ function Breadcrumbs() {
       .filter((p) => p !== "new" && !p.match(/^\d+$/))
       .map((p, index) => {
         const link = `${parts.slice(0, index + 1).join("/")}`;
-        return (
-          {
-            link: routes[link] ? link : null,
-            title: startCase(p),
-          })
-      },
-      ),
+        return {
+          link: routes[link] ? link : null,
+          title: startCase(p),
+        };
+      }),
   ];
 
   if (title && parts.length + 1 !== paths.length) {
@@ -68,7 +69,9 @@ function Breadcrumbs() {
           return (
             <Typography variant="h6" key={title}>
               {link ? (
-                <Link color="inherit" to={`${link}`}>{title}</Link>
+                <Link color="inherit" to={`${link}`}>
+                  {title}
+                </Link>
               ) : (
                 title
               )}

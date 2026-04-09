@@ -1,25 +1,25 @@
 import "./Record.scss";
 
-import { ExpandMore, RadioButtonCheckedOutlined, RadioButtonUncheckedOutlined } from "@mui/icons-material";
-import {
-  Accordion,
-  AccordionDetails,
-  AccordionSummary,
-  Box,
-  Button,
-  Divider,
-  Grid,
-  Icon,
-  IconButton,
-  Stack,
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableRow,
-  Tooltip,
-  Typography,
-} from "@mui/material";
+import ExpandMore from "@mui/icons-material/ExpandMore";
+import RadioButtonCheckedOutlined from "@mui/icons-material/RadioButtonCheckedOutlined";
+import RadioButtonUncheckedOutlined from "@mui/icons-material/RadioButtonUncheckedOutlined";
+import Accordion from "@mui/material/Accordion";
+import AccordionDetails from "@mui/material/AccordionDetails";
+import AccordionSummary from "@mui/material/AccordionSummary";
+import Box from "@mui/material/Box";
+import Button from "@mui/material/Button";
+import Divider from "@mui/material/Divider";
+import Grid from "@mui/material/Grid";
+import Icon from "@mui/material/Icon";
+import IconButton from "@mui/material/IconButton";
+import Stack from "@mui/material/Stack";
+import Table from "@mui/material/Table";
+import TableBody from "@mui/material/TableBody";
+import TableCell from "@mui/material/TableCell";
+import TableHead from "@mui/material/TableHead";
+import TableRow from "@mui/material/TableRow";
+import Tooltip from "@mui/material/Tooltip";
+import Typography from "@mui/material/Typography";
 import React, { useCallback } from "react";
 import { useFieldArray, useFormContext } from "react-hook-form-mui";
 import { useNavigate, useParams } from "react-router";

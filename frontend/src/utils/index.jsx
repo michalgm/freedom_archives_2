@@ -1,6 +1,5 @@
 import { isEqual, pickBy } from "lodash-es";
 import { useEffect, useRef } from "react";
-import { renderToStaticMarkup } from "react-dom/server";
 import { stripHtml } from "string-strip-html";
 
 import { services } from "../api";
@@ -31,12 +30,6 @@ export const asyncDebounce = (fn, wait) => {
   };
 };
 
-export const convertSvgToDataUrl = (Icon, color = "white") => {
-  return `url('data:image/svg+xml,${renderToStaticMarkup(<Icon style={{ fill: color }} />).replace(
-    "<svg ",
-    '<svg xmlns="http://www.w3.org/2000/svg" ',
-  )}')`;
-};
 
 export const flattenErrors = (target, path = [], result = {}) => {
   for (const key in target) {

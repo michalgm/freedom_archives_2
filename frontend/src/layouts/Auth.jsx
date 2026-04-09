@@ -1,4 +1,4 @@
-import { LinearProgress } from "@mui/material";
+import LinearProgress from '@mui/material/LinearProgress';
 import React, { useEffect, useRef } from "react";
 import { Navigate, Outlet, useLocation, useMatches, useNavigate } from "react-router";
 import { hasAccess, currentRouteConfig } from "src/config/routes";

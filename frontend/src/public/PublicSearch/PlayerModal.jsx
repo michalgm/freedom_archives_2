@@ -1,8 +1,11 @@
-import { Close } from '@mui/icons-material';
-import { Box, Dialog, DialogContent, DialogTitle } from "@mui/material";
-import IconButton from '@mui/material/IconButton';
-import { useMediaQuery } from "@mui/system";
-import ReactPlayer from 'react-player';
+import Close from "@mui/icons-material/Close";
+import Box from "@mui/material/Box";
+import Dialog from "@mui/material/Dialog";
+import DialogContent from "@mui/material/DialogContent";
+import DialogTitle from "@mui/material/DialogTitle";
+import IconButton from "@mui/material/IconButton";
+import useMediaQuery from "@mui/material/useMediaQuery";
+import ReactPlayer from "react-player";
 
 function parseAspectRatio(value) {
   if (!value) return null;

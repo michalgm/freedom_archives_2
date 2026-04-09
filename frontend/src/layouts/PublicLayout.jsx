@@ -1,18 +1,16 @@
-import {
-  Box,
-  Button,
-  Container,
-  createTheme,
-  Link,
-  Stack,
-  ThemeProvider,
-  Typography,
-} from "@mui/material";
+import Box from "@mui/material/Box";
+import Button from "@mui/material/Button";
+import Container from "@mui/material/Container";
+import Link from "@mui/material/Link";
+import Stack from "@mui/material/Stack";
+import { createTheme, ThemeProvider } from "@mui/material/styles";
+import Typography from "@mui/material/Typography";
 import { Suspense } from "react";
 import { isRouteErrorResponse, Outlet, useRouteError } from "react-router";
 import ButtonLink from "src/components/ButtonLink";
 import ErrorBoundaryComp, { ErrorFallback } from "src/components/ErrorBoundary";
 import { theme } from "src/theme";
+
 import "./PublicLayout.scss";
 
 // import FranchiseBold from "font/franchise-bold-webfont.woff";
@@ -230,7 +228,6 @@ const PublicShell = ({ children }) => {
   );
 };
 
-
 const PublicLayout = () => {
   return (
     <PublicShell>
@@ -251,15 +248,19 @@ export function ErrorBoundary() {
     const e = new Error(typeof err.data === "string" ? err.data : err.statusText || "Route error");
     e.name = `HTTP ${err.status}`;
 
-    return <PublicShell>
-      <ErrorFallback title="Something went wrong" error={e} />
-    </PublicShell>
+    return (
+      <PublicShell>
+        <ErrorFallback title="Something went wrong" error={e} />
+      </PublicShell>
+    );
   }
 
   // Unknown error shape
   const e = err instanceof Error ? err : new Error(String(err));
-  return <PublicShell>
-    <ErrorFallback title="Something went wrong" error={e} />
-  </PublicShell>
+  return (
+    <PublicShell>
+      <ErrorFallback title="Something went wrong" error={e} />
+    </PublicShell>
+  );
 }
 export default PublicLayout;

@@ -9,6 +9,7 @@ import reactPlugin from 'eslint-plugin-react'
 import reactHooks from 'eslint-plugin-react-hooks'
 import reactRefresh from 'eslint-plugin-react-refresh'
 import storybook from 'eslint-plugin-storybook'
+import unusedImports from "eslint-plugin-unused-imports";
 import globals from 'globals'
 // const __filename = fileURLToPath(import.meta.url);what about this war
 // const __dirname = path.dirname(__filename);
@@ -19,7 +20,7 @@ import globals from 'globals'
 // });
 
 const eslintConfig = [
-  ...storybook.configs['flat/recommended'],
+  ...storybook.configs["flat/recommended"],
   // stylistic.configs.customize({
   //   // the following options are the default values
   //   indent: 2,
@@ -30,54 +31,63 @@ const eslintConfig = [
   // }),
   // stylistic.configs.recommended,
   {
-    name: 'recommended',
-    ignores: ['sharp-libvips', 'frontend/dist/**/*'],
+    name: "recommended",
+    ignores: ["sharp-libvips", "frontend/dist/**/*"],
     ...js.configs.recommended,
     ...importPlugin.flatConfigs.recommended,
     plugins: {
-      "import": importPlugin,
-      '@stylistic': stylistic,
+      import: importPlugin,
+      "@stylistic": stylistic,
+      "unused-imports": unusedImports,
     },
     rules: {
-      'no-console': ['warn', { allow: ['warn', 'error'] }],
+      "no-console": ["warn", { allow: ["warn", "error"] }],
       // "indent": ["error", 2, { "SwitchCase": 1 }],
-      '@stylistic/quotes': 'off',
-      '@stylistic/semi': 'off',
-      '@stylistic/array-element-newline': ['warn', 'consistent'],
-      '@stylistic/brace-style': ['error', '1tbs', { allowSingleLine: true }],
-      '@stylistic/comma-dangle': ['warn', 'always-multiline'],
-      'import/order': [
-        'error',
+      "@stylistic/quotes": "off",
+      "@stylistic/semi": "off",
+      "@stylistic/array-element-newline": ["warn", "consistent"],
+      "@stylistic/brace-style": ["error", "1tbs", { allowSingleLine: true }],
+      "@stylistic/comma-dangle": ["warn", "always-multiline"],
+      "import/order": [
+        "error",
         {
-          'groups': [['builtin', 'external'], 'internal', 'parent', 'sibling', 'index'],
-          'newlines-between': 'always',
-          'alphabetize': { order: 'asc', caseInsensitive: true },
+          groups: [["builtin", "external"], "internal", "parent", "sibling", "index"],
+          "newlines-between": "always",
+          alphabetize: { order: "asc", caseInsensitive: true },
         },
       ],
-      'import/no-duplicates': 'error',
-      'import/newline-after-import': 'error',
-      'no-unused-vars': [
-        'warn',
+      "import/no-duplicates": "error",
+      "import/newline-after-import": "error",
+      "no-unused-vars": "off",
+      "@typescript-eslint/no-unused-vars": "off",
+      "unused-imports/no-unused-imports": "warn",
+      "unused-imports/no-unused-vars": [
+        "warn",
         {
-          caughtErrors: 'none',
-          varsIgnorePattern: '^_',
-          argsIgnorePattern: '^_',
-          destructuredArrayIgnorePattern: '^_',
+          caughtErrors: "none",
+          varsIgnorePattern: "^_",
+          argsIgnorePattern: "^_",
+          destructuredArrayIgnorePattern: "^_",
         },
       ],
-
+      "no-restricted-imports": [
+        "error",
+        {
+          patterns: ["@mui/*/*/*", "!@mui/material/test-utils/*", "@material-ui/core"],
+        },
+      ],
     },
   },
   {
     ...js.configs.recommended,
-    name: 'backend',
-    files: ['backend/*.{js,mjs,cjs}', 'backend/**/*.{js,mjs,cjs}', 'test/**/*.js'],
+    name: "backend",
+    files: ["backend/*.{js,mjs,cjs}", "backend/**/*.{js,mjs,cjs}", "test/**/*.js"],
     plugins: {
       js,
       import: importPlugin,
       stylistic,
     },
-    extends: ['js/recommended'],
+    extends: ["js/recommended"],
     languageOptions: {
       globals: {
         ...globals.node,
@@ -85,90 +95,90 @@ const eslintConfig = [
       },
 
       ecmaVersion: 2022,
-      sourceType: 'module',
+      sourceType: "module",
     },
 
     rules: {
       ...js.configs.recommended.rules,
       // 'indent': ['error', 2, { "SwitchCase": 1 }],
-      'linebreak-style': ['error', 'unix'],
-      'semi': ['error', 'always'],
-      'no-undef': 'warn',
+      "linebreak-style": ["error", "unix"],
+      semi: ["error", "always"],
+      "no-undef": "warn",
     },
   },
   {
-    ...compat.configs['flat/recommended'],
+    ...compat.configs["flat/recommended"],
     ...reactPlugin.configs.flat.recommended,
-    ...reactPlugin.configs.flat['jsx-runtime'],
-    ...reactHooks.configs['recommended-latest'],
-    name: 'frontend',
-    files: ['frontend/**/*.{js,jsx,ts,tsx}'],
+    ...reactPlugin.configs.flat["jsx-runtime"],
+    ...reactHooks.configs["recommended-latest"],
+    name: "frontend",
+    files: ["frontend/**/*.{js,jsx,ts,tsx}"],
     languageOptions: {
       globals: {
         ...globals.node,
         ...globals.browser,
         ...globals.mocha,
-        logger: 'readonly',
+        logger: "readonly",
       },
       ecmaVersion: 2022,
-      sourceType: 'module',
+      sourceType: "module",
       parser: tsParser,
       parserOptions: {
         ecmaFeatures: {
           jsx: true,
         },
-        sourceType: 'module',
-        project: './frontend/tsconfig.json', // Add this line
+        sourceType: "module",
+        project: "./frontend/tsconfig.json", // Add this line
       },
     },
     plugins: {
-      'react-hooks': reactHooks,
-      'react': reactPlugin,
-      'import': importPlugin,
-      '@typescript-eslint': tseslint,
-      'compat': compat,
+      "react-hooks": reactHooks,
+      react: reactPlugin,
+      import: importPlugin,
+      "@typescript-eslint": tseslint,
+      compat: compat,
     },
-    ignores: ['frontend/dist/**/*', 'frontend/public/**/*'],
+    ignores: ["frontend/dist/**/*", "frontend/public/**/*"],
 
     rules: {
-      'react-hooks/rules-of-hooks': 'error',
-      'react-hooks/exhaustive-deps': 'warn',
-      'react/jsx-uses-react': 'off',
-      'react/jsx-uses-vars': 'error',
-      'react/no-object-type-as-default-prop': 'warn',
-      'no-console': ['warn', { allow: ['warn', 'error'] }],
-      'no-unused-expressions': ['error', { allowShortCircuit: true, allowTernary: true }],
-      'prefer-const': 'error',
-      'react/no-array-index-key': 'warn',
-      'react/no-danger': 'warn',
-      'react/jsx-key': 'error',
-      'import/no-unresolved': 'off',
-      'import/named': 'error',
-      'import/default': 'error',
-      'import/no-named-as-default': 'warn',
-      'no-undef': 'error',
-      'no-unused-vars': 'off',
+      "react-hooks/rules-of-hooks": "error",
+      "react-hooks/exhaustive-deps": "warn",
+      "react/jsx-uses-react": "off",
+      "react/jsx-uses-vars": "error",
+      "react/no-object-type-as-default-prop": "warn",
+      "no-console": ["warn", { allow: ["warn", "error"] }],
+      "no-unused-expressions": ["error", { allowShortCircuit: true, allowTernary: true }],
+      "prefer-const": "error",
+      "react/no-array-index-key": "warn",
+      "react/no-danger": "warn",
+      "react/jsx-key": "error",
+      "import/no-unresolved": "off",
+      "import/named": "error",
+      "import/default": "error",
+      "import/no-named-as-default": "warn",
+      "no-undef": "error",
+      "no-unused-vars": "off",
       // "padding-line-between-statements": [
       //     "error",
       //     { blankLine: "always", prev: ["multiline-const", "multiline-let", "export", "function"], next: ["multiline-const", "multiline-let", "export", "function"] },
       // ],
-      '@typescript-eslint/no-unused-vars': [
-        'warn',
+      "@typescript-eslint/no-unused-vars": [
+        "warn",
         {
-          argsIgnorePattern: '^_',
-          varsIgnorePattern: '^_',
-          caughtErrors: 'none',
-          destructuredArrayIgnorePattern: '^_',
+          argsIgnorePattern: "^_",
+          varsIgnorePattern: "^_",
+          caughtErrors: "none",
+          destructuredArrayIgnorePattern: "^_",
         },
       ],
-      '@typescript-eslint/no-explicit-any': 'warn',
-      '@typescript-eslint/explicit-function-return-type': 'off',
-      '@typescript-eslint/explicit-module-boundary-types': 'off',
-      'compat/compat': 'warn',
+      "@typescript-eslint/no-explicit-any": "warn",
+      "@typescript-eslint/explicit-function-return-type": "off",
+      "@typescript-eslint/explicit-module-boundary-types": "off",
+      "compat/compat": "warn",
     },
     settings: {
       react: {
-        version: 'detect',
+        version: "detect",
       },
       lintAllEsApis: true,
     },
@@ -193,7 +203,7 @@ const eslintConfig = [
   //     },
   // },
   reactRefresh.configs.vite,
-]
+];
 
 // "no-unused-vars": ["warn", { "ignoreRestSiblings": true }],
 // {

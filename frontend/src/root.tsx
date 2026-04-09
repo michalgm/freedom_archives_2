@@ -3,11 +3,11 @@ import '@fontsource/roboto/300.css';
 import '@fontsource/roboto/400.css';
 import '@fontsource/roboto/500.css';
 import '@fontsource/roboto/700.css';
-import { Box, CssBaseline, LinearProgress, Typography } from "@mui/material";
+import Box from '@mui/material/Box';
+import CssBaseline from '@mui/material/CssBaseline';
+import LinearProgress from '@mui/material/LinearProgress';
 import { StyledEngineProvider, ThemeProvider } from "@mui/material/styles";
-import { LocalizationProvider } from "@mui/x-date-pickers";
-import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
-import { ConfirmProvider } from "material-ui-confirm";
+import Typography from '@mui/material/Typography';
 import { ReactNode, useMemo } from 'react';
 import { Links, Meta, Outlet, Scripts, ScrollRestoration } from "react-router";
 import "src/App.scss";
@@ -15,6 +15,7 @@ import { theme } from "src/theme.jsx";
 
 import "src/utils/logger";
 import createEmotionCache from './createEmotionCache.js';
+
 
 declare module '@mui/material/styles' {
   interface PaletteColor {
@@ -104,11 +105,7 @@ export function HydrateFallback() {
 export default function Root() {
   return (
     <LayoutProviders>
-      <LocalizationProvider dateAdapter={AdapterDayjs}>
-        <ConfirmProvider defaultOptions={{ confirmationButtonProps: { variant: "contained" } }}>
-          <Outlet />
-        </ConfirmProvider>
-      </LocalizationProvider>
+      <Outlet />
     </LayoutProviders>
   );
 }

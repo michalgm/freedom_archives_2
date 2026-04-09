@@ -1,17 +1,15 @@
-import { ExpandMore } from "@mui/icons-material";
-import {
-  Box,
-  Button,
-  Card,
-  CardActionArea,
-  CardActions,
-  CardContent,
-  Divider,
-  Grid,
-  Skeleton,
-  Stack,
-  Typography,
-} from "@mui/material";
+import ExpandMore from "@mui/icons-material/ExpandMore";
+import Box from "@mui/material/Box";
+import Button from "@mui/material/Button";
+import Card from "@mui/material/Card";
+import CardActionArea from "@mui/material/CardActionArea";
+import CardActions from "@mui/material/CardActions";
+import CardContent from "@mui/material/CardContent";
+import Divider from "@mui/material/Divider";
+import Grid from "@mui/material/Grid";
+import Skeleton from "@mui/material/Skeleton";
+import Stack from "@mui/material/Stack";
+import Typography from "@mui/material/Typography";
 import { startCase } from "lodash-es";
 import { useRef } from "react";
 import { Link } from "react-router";
@@ -109,21 +107,13 @@ export function ItemLink({ item, children, ...props }) {
     </Link>
   );
 }
-export function ItemCard({
-  item,
-  expand = false,
-  url,
-  dense = false,
-  setCurrentRecord,
-  ...props
-}) {
+export function ItemCard({ item, expand = false, url, dense = false, setCurrentRecord, ...props }) {
   const title = item?.title || "Untitled";
   const { details = [], description, summary } = item || {};
   const text = summary || description || "";
   const textRef = useRef(null);
 
-  const { isOverflowing, isExpanded, setIsExpanded, styles } =
-    useExpandableText({ textRef, expand });
+  const { isOverflowing, isExpanded, setIsExpanded, styles } = useExpandableText({ textRef, expand });
   const detailChips = details.map(([key, value]) => (
     <Grid key={key}>
       <KVChip
@@ -131,29 +121,20 @@ export function ItemCard({
         value={value}
         variant="outlined"
         size="small"
-        sx={{ height: 'auto', whiteSpace: 'wrap', '.MuiChip-label': { whiteSpace: 'wrap' } }}
-      // color={key === 'Collection' ? 'primary' : 'default'}
+        sx={{ height: "auto", whiteSpace: "wrap", ".MuiChip-label": { whiteSpace: "wrap" } }}
+        // color={key === 'Collection' ? 'primary' : 'default'}
       />
     </Grid>
   ));
 
   const body = (
-    <Typography
-      variant="body2"
-      color="text.secondary"
-      ref={textRef}
-      sx={styles}
-    >
+    <Typography variant="body2" color="text.secondary" ref={textRef} sx={styles}>
       {text}
     </Typography>
   );
   const actions =
     expand && !isExpanded && isOverflowing ? (
-      <Button
-        startIcon={<ExpandMore />}
-        size="small"
-        onClick={() => setIsExpanded(!isExpanded)}
-      >
+      <Button startIcon={<ExpandMore />} size="small" onClick={() => setIsExpanded(!isExpanded)}>
         View More
       </Button>
     ) : null;
@@ -195,7 +176,9 @@ export function CollectionCard({ collection, ...props }) {
     <ItemCard
       item={{
         ...collection,
-        extra: <DetailsRow label="Subcollections" value={collection.children} keyProp="collection_id" valueProp="title" />,
+        extra: (
+          <DetailsRow label="Subcollections" value={collection.children} keyProp="collection_id" valueProp="title" />
+        ),
       }}
       type="collection"
       url={`/collections/${collection.collection_id}`}
@@ -221,27 +204,22 @@ export function LoadingCard({ ...props }) {
   );
 }
 
-export function ItemStack({
-  title,
-  type,
-  loading = false,
-  dense = false,
-  items,
-  footer,
-  setCurrentRecord,
-  ...props
-}) {
+export function ItemStack({ title, type, loading = false, dense = false, items, footer, setCurrentRecord, ...props }) {
   return (
     <Box className="flex-container" {...props}>
-      {title && <Typography variant="header" gutterBottom>
-        {title}
-      </Typography>}
+      {title && (
+        <Typography variant="header" gutterBottom>
+          {title}
+        </Typography>
+      )}
       <Stack
         spacing={dense ? 0 : 2}
         className="flex-scroller"
-        sx={{
-          // scrollSnapType: "y mandatory",
-        }}
+        sx={
+          {
+            // scrollSnapType: "y mandatory",
+          }
+        }
         divider={dense ? <Divider /> : null}
       >
         {loading ? (
@@ -255,11 +233,7 @@ export function ItemStack({
             type === "record" ? (
               <RecordCard key={child.record_id} record={child} dense={dense} setCurrentRecord={setCurrentRecord} />
             ) : (
-              <CollectionCard
-                key={child.collection_id}
-                collection={child}
-                dense={dense}
-              />
+              <CollectionCard key={child.collection_id} collection={child} dense={dense} />
             ),
           )
         )}

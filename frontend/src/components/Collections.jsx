@@ -1,5 +1,8 @@
-import { BrokenImage } from "@mui/icons-material";
-import { Avatar, ListItemAvatar, ListItemText, Typography } from "@mui/material";
+import BrokenImage from "@mui/icons-material/BrokenImage";
+import Avatar from "@mui/material/Avatar";
+import ListItemAvatar from "@mui/material/ListItemAvatar";
+import ListItemText from "@mui/material/ListItemText";
+import Typography from "@mui/material/Typography";
 import { cloneDeep } from "lodash-es";
 import { useCallback } from "react";
 
@@ -30,9 +33,7 @@ const sort_options = {
   call_number: { label: "Call Number", sort: { call_number: 1, display_order: 1, rank: -1, title: 1 } },
 };
 
-
 export function Collections({ embedded, itemAction, filter, forcedFilter, useStore }) {
-
   const createQuery = useCallback(
     (filter) => {
       const { search, hidden, needs_review, sort = "relevance", sort_desc = true } = filter;

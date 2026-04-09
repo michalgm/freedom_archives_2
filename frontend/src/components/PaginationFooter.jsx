@@ -1,5 +1,8 @@
-import { Chip, Stack, Pagination, Skeleton } from "@mui/material";
-import { useMediaQuery } from "@mui/system";
+import Chip from "@mui/material/Chip";
+import Pagination from "@mui/material/Pagination";
+import Skeleton from "@mui/material/Skeleton";
+import Stack from "@mui/material/Stack";
+import useMediaQuery from "@mui/material/useMediaQuery";
 import { startCase } from "lodash-es";
 
 function PaginationFooter({
@@ -13,7 +16,7 @@ function PaginationFooter({
   loading = false,
   ...props
 }) {
-  const isDesktop = useMediaQuery(theme => theme.breakpoints.up("md"));
+  const isDesktop = useMediaQuery((theme) => theme.breakpoints.up("md"));
   const label = `${total.toLocaleString()} ${startCase(type)} ${
     type === "records" && digitizedTotal !== undefined ? `(${digitizedTotal} digitized)` : ""
   } Found`;
@@ -49,9 +52,9 @@ function PaginationFooter({
             sx={{ "& .MuiPagination-ul": { flexWrap: "nowrap" } }}
             {...props}
           />
-            {!embedded && isDesktop &&
-              <Chip sx={{ visibility: "hidden" }} className="spacer-chip" variant="outlined" label={label} />
-            }
+          {!embedded && isDesktop && (
+            <Chip sx={{ visibility: "hidden" }} className="spacer-chip" variant="outlined" label={label} />
+          )}
         </>
       )}
     </Stack>

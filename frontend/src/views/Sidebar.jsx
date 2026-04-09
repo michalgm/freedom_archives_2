@@ -1,17 +1,15 @@
-import {
-  Box,
-  Divider,
-  Drawer,
-  Icon,
-  List,
-  ListItem,
-  ListItemButton,
-  ListItemIcon,
-  ListItemText,
-  Stack,
-  Toolbar,
-  Typography,
-} from "@mui/material";
+import Box from "@mui/material/Box";
+import Divider from "@mui/material/Divider";
+import Drawer from "@mui/material/Drawer";
+import Icon from "@mui/material/Icon";
+import List from "@mui/material/List";
+import ListItem from "@mui/material/ListItem";
+import ListItemButton from "@mui/material/ListItemButton";
+import ListItemIcon from "@mui/material/ListItemIcon";
+import ListItemText from "@mui/material/ListItemText";
+import Stack from "@mui/material/Stack";
+import Toolbar from "@mui/material/Toolbar";
+import Typography from "@mui/material/Typography";
 import { useMemo } from "react";
 import { Link, useLocation, useMatch } from "react-router";
 import { hasAccess, sidebarConfig } from "src/config/routes";

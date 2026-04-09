@@ -1,4 +1,5 @@
-import { Button, Grid } from "@mui/material";
+import Button from '@mui/material/Button';
+import Grid from '@mui/material/Grid';
 import { useCallback, useState } from "react";
 import { useFormContext } from "react-hook-form";
 import ButtonLink from "src/components/ButtonLink";

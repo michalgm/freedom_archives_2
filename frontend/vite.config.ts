@@ -28,6 +28,15 @@ export default defineConfig(({ mode }) => ({
     rollupOptions: {
       output: {
         manualChunks(id) {
+          if (id.includes('@mui/x-data-grid')) {
+            return 'mui-data-grid';
+          }
+          if (id.includes('node_modules/dayjs')) {
+            return 'dayjs';
+          }
+          if (id.includes('@mui/x-date-pickers')) {
+            return 'mui-date-pickers';
+          }
           if (id.includes('@emotion') || id.includes('@mui')) {
             return 'mui';
           }

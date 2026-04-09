@@ -1,5 +1,10 @@
-import { Delete, Link, Save } from "@mui/icons-material";
-import { Box, Grid, Icon, Typography } from "@mui/material";
+import Delete from '@mui/icons-material/Delete';
+import Link from '@mui/icons-material/Link';
+import Save from '@mui/icons-material/Save';
+import Box from '@mui/material/Box';
+import Grid from '@mui/material/Grid';
+import Icon from '@mui/material/Icon';
+import Typography from '@mui/material/Typography';
 import { isEmpty, startCase } from "lodash-es";
 import { useEffect, useState } from "react";
 import { getServiceID, services } from "src/api";

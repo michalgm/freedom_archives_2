@@ -1,11 +1,18 @@
-import {
-  Add,
-  KeyboardDoubleArrowLeft,
-  OpenInNew, Replay,
-  Sync,
-} from "@mui/icons-material";
-import { Button, Divider, FormControlLabel, Grid, IconButton, Paper, Switch, Tooltip, Typography } from "@mui/material";
-import { Stack } from "@mui/system";
+import Add from "@mui/icons-material/Add";
+import KeyboardDoubleArrowLeft from "@mui/icons-material/KeyboardDoubleArrowLeft";
+import OpenInNew from "@mui/icons-material/OpenInNew";
+import Replay from "@mui/icons-material/Replay";
+import Sync from "@mui/icons-material/Sync";
+import Button from "@mui/material/Button";
+import Divider from "@mui/material/Divider";
+import FormControlLabel from "@mui/material/FormControlLabel";
+import Grid from "@mui/material/Grid";
+import IconButton from "@mui/material/IconButton";
+import Paper from "@mui/material/Paper";
+import Stack from "@mui/material/Stack";
+import Switch from "@mui/material/Switch";
+import Tooltip from "@mui/material/Tooltip";
+import Typography from "@mui/material/Typography";
 import dayjs from "dayjs";
 import { get, isEqual, isObject } from "lodash-es";
 import { useEffect, useState } from "react";
@@ -109,7 +116,9 @@ const MediaCard = ({ media }) => {
           <Grid size="auto">
             <Tooltip title={media.url}>
               <Link href={media.url} target="_blank" rel="noreferrer">
-                <IconButton size="small"> <OpenInNew fontSize="small" /></IconButton>
+                <IconButton size="small">
+                  <OpenInNew fontSize="small" />
+                </IconButton>
               </Link>
             </Tooltip>
           </Grid>
@@ -275,8 +284,7 @@ const CompareForm = ({ compareData: inputData, fields, schema, loading, id, comp
       shouldDirty: true,
     });
     compareFormMethods.setValue("media", compareMedia);
-
-  }
+  };
 
   return (
     <Stack direction="column" spacing={2}>

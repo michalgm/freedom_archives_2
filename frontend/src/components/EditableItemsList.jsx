@@ -1,20 +1,22 @@
-import { Add, Delete, KeyboardArrowDown, KeyboardArrowUp, Restore } from "@mui/icons-material";
-import {
-  Box,
-  Button,
-  Divider,
-  Grid,
-  Icon,
-  IconButton,
-  InputAdornment,
-  List,
-  ListItem,
-  ListItemAvatar,
-  ListItemButton,
-  ListItemText,
-  Stack,
-  Typography,
-} from "@mui/material";
+import Add from "@mui/icons-material/Add";
+import Delete from "@mui/icons-material/Delete";
+import KeyboardArrowDown from "@mui/icons-material/KeyboardArrowDown";
+import KeyboardArrowUp from "@mui/icons-material/KeyboardArrowUp";
+import Restore from "@mui/icons-material/Restore";
+import Box from "@mui/material/Box";
+import Button from "@mui/material/Button";
+import Divider from "@mui/material/Divider";
+import Grid from "@mui/material/Grid";
+import Icon from "@mui/material/Icon";
+import IconButton from "@mui/material/IconButton";
+import InputAdornment from "@mui/material/InputAdornment";
+import List from "@mui/material/List";
+import ListItem from "@mui/material/ListItem";
+import ListItemAvatar from "@mui/material/ListItemAvatar";
+import ListItemButton from "@mui/material/ListItemButton";
+import ListItemText from "@mui/material/ListItemText";
+import Stack from "@mui/material/Stack";
+import Typography from "@mui/material/Typography";
 import { startCase } from "lodash-es";
 import React, { useState } from "react";
 import { useFieldArray, useFormContext } from "react-hook-form";
@@ -100,9 +102,8 @@ export function EditableItemsListBase({
           update(index, {
             ...currentValue,
             delete: !currentValue.delete,
-          })
-        }
-        }
+          });
+        }}
         // disabled={index === 0}
         icon={item.delete ? "Restore" : "Delete"}
         size={reorder ? "small" : "large"}

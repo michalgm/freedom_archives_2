@@ -1,24 +1,18 @@
-import {
-  Box,
-  Button,
-  CircularProgress,
-  Collapse,
-  Divider,
-  Grid,
-  Icon,
-  Stack,
-  Typography,
-  useMediaQuery,
-} from "@mui/material";
+// import PlayerModal from "src/public/PublicSearch/PlayerModal";
+import Box from "@mui/material/Box";
+import Button from "@mui/material/Button";
+import CircularProgress from "@mui/material/CircularProgress";
+import Collapse from "@mui/material/Collapse";
+import Divider from "@mui/material/Divider";
+import Grid from "@mui/material/Grid";
+import Icon from "@mui/material/Icon";
+import Stack from "@mui/material/Stack";
+import Typography from "@mui/material/Typography";
+import useMediaQuery from "@mui/material/useMediaQuery";
 import React from "react";
 import { useInView } from "react-intersection-observer";
 import { ItemStack } from "src/public/ItemCard";
-import {
-  PAGE_SIZE,
-  FILTER_TYPES,
-  SORT_OPTIONS,
-} from "src/public/PublicSearch/constants";
-// import PlayerModal from "src/public/PublicSearch/PlayerModal";
+import { PAGE_SIZE, FILTER_TYPES, SORT_OPTIONS } from "src/public/PublicSearch/constants";
 import { SearchFilters, SearchForm } from "src/public/PublicSearch/SearchForm";
 import { usePublicSearch } from "src/public/PublicSearch/usePublicSearch";
 import { setMetaTags } from "src/utils";
@@ -27,7 +21,7 @@ const DEFAULT_SEARCH_FILTERS = {};
 
 // eslint-disable-next-line react-refresh/only-export-components
 export function meta(data) {
-  const description = 'Search the Freedom Archives';
+  const description = "Search the Freedom Archives";
   const title = "Search";
   const image = "/logo512.png";
   return setMetaTags({ data, title, description, image });
@@ -114,7 +108,7 @@ export function Search(params) {
         </Typography>
       )}
     </Box>
-  );  
+  );
 
   return (
     <Box className="flex-container search-page" sx={{ overflowX: "visible !important" }}>

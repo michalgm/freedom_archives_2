@@ -1,4 +1,3 @@
-
 export const recordSelectFields = [
   "record_id",
   "title",

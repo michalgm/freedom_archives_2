@@ -1,4 +1,7 @@
-import { Box, FormControl, FormHelperText, InputLabel } from "@mui/material";
+import Box from '@mui/material/Box';
+import FormControl from '@mui/material/FormControl';
+import FormHelperText from '@mui/material/FormHelperText';
+import InputLabel from '@mui/material/InputLabel';
 import { TextAlign } from "@tiptap/extension-text-align";
 import { StarterKit } from "@tiptap/starter-kit";
 import { merge } from "lodash-es";

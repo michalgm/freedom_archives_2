@@ -1,5 +1,8 @@
-import { Login } from "@mui/icons-material";
-import { Grid, Paper, Stack, Typography } from "@mui/material";
+import Login from "@mui/icons-material/Login";
+import Grid from "@mui/material/Grid";
+import Paper from "@mui/material/Paper";
+import Stack from "@mui/material/Stack";
+import Typography from "@mui/material/Typography";
 import { useCallback } from "react";
 import { FormContainer } from "react-hook-form-mui";
 import { useLocation, useNavigate } from "react-router";
@@ -18,11 +21,7 @@ function LoginForm() {
     async ({ username, password }) => {
       await authenticate(username.toLowerCase(), password);
       const { state } = location;
-      if (
-        state &&
-        state.referrer &&
-        state.referrer.pathname !== "/admin/login"
-      ) {
+      if (state && state.referrer && state.referrer.pathname !== "/admin/login") {
         navigate(state.referrer.pathname, {
           replace: true,
           state: state.referrer.state,

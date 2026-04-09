@@ -1,5 +1,8 @@
-import { Button, Chip, Typography } from "@mui/material";
-import { Box, Stack } from "@mui/system";
+import Box from "@mui/material/Box";
+import Button from "@mui/material/Button";
+import Chip from "@mui/material/Chip";
+import Stack from "@mui/material/Stack";
+import Typography from "@mui/material/Typography";
 import { cloneDeep } from "lodash-es";
 import { lazy, useCallback, useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router";
@@ -38,8 +41,12 @@ function RecordCell({ row, index }) {
   return (
     <Stack spacing={0} sx={{ py: 1 }}>
       <Typography variant="body1">{row[`title_${index}`]}</Typography>
-      <Typography variant="caption" color="text.secondary">Record ID: {row[`record_id_${index}`]}</Typography>
-      <Typography variant="caption" color="text.secondary">Collection: {row[`collection_${index}`]}</Typography>
+      <Typography variant="caption" color="text.secondary">
+        Record ID: {row[`record_id_${index}`]}
+      </Typography>
+      <Typography variant="caption" color="text.secondary">
+        Collection: {row[`collection_${index}`]}
+      </Typography>
       <Stack direction="row" spacing={1} flexWrap="wrap" useFlexGap>
         {(row[`call_numbers_${index}`] || []).map((cn) => (
           <Chip key={cn} label={cn} size="small" variant="outlined" />
@@ -47,7 +54,7 @@ function RecordCell({ row, index }) {
       </Stack>
     </Stack>
   );
-};
+}
 
 function DuplicateRecords() {
   const useStore = queryStores["duplicate_records"];
@@ -64,16 +71,16 @@ function DuplicateRecords() {
     const { sort = "relevance", sort_desc = true, search } = filter;
     const query = {
       $select: [
-        'duplicate_record_id',
-        'record_id_1',
-        'title_1',
-        'collection_1',
-        'call_numbers_1',
-        'record_id_2',
-        'title_2',
-        'collection_2',
-        'call_numbers_2',
-        'relevance',
+        "duplicate_record_id",
+        "record_id_1",
+        "title_1",
+        "collection_1",
+        "call_numbers_1",
+        "record_id_2",
+        "title_2",
+        "collection_2",
+        "call_numbers_2",
+        "relevance",
       ],
       is_ignored: false,
     };
@@ -120,16 +127,22 @@ function DuplicateRecordsTable({ items, loading }) {
   const sortField = useStore((s) => s.search.filter.sort);
   const sortDesc = useStore((s) => s.search.filter.sort_desc);
 
-  const setPaginationModel = useCallback(({ page, pageSize }) => {
-    setSearch({ offset: page * pageSize, page_size: pageSize });
-    setSearchIndex(page * pageSize);
-  }, [setSearch, setSearchIndex]);
+  const setPaginationModel = useCallback(
+    ({ page, pageSize }) => {
+      setSearch({ offset: page * pageSize, page_size: pageSize });
+      setSearchIndex(page * pageSize);
+    },
+    [setSearch, setSearchIndex],
+  );
 
-  const setSortModel = useCallback((model) => {
-    const { field, sort } = model?.[0] || defaultSort;
-    setSearch({ filter: { sort: field, sort_desc: sort === "desc" }, offset: 0 });
-    setSearchIndex(0);
-  }, [setSearch, setSearchIndex]);
+  const setSortModel = useCallback(
+    (model) => {
+      const { field, sort } = model?.[0] || defaultSort;
+      setSearch({ filter: { sort: field, sort_desc: sort === "desc" }, offset: 0 });
+      setSearchIndex(0);
+    },
+    [setSearch, setSearchIndex],
+  );
 
   const navigate = useNavigate();
 
@@ -139,46 +152,52 @@ function DuplicateRecordsTable({ items, loading }) {
     [offset],
   );
 
-  const columns = useMemo(() => [
-    {
-      field: "compare",
-      headerName: "Compare",
-      justifyContent: 'center',
-      align: 'center',
-      // width:'auti',
-      renderCell: (params) => (
-        <Box sx={{ height: '100%', display: 'flex', alignItems: 'center' }}>
-          <Button variant="outlined" onClick={() => {
-            setSearchIndex(offset + items.indexOf(params.row));
-            navigate(`/admin/site/find-duplicates/${params.row.record_id_1}/${params.row.record_id_2}`)
-          }}>
-            Compare
-          </Button>
-        </Box>
-      ),
-    },
-    {
-      field: "title_1",
-      headerName: "Record 1",
-      flex: 1,
-      renderCell: ({ row }) => <RecordCell row={row} index={1} />,
-    },
-    {
-      field: "title_2", headerName: "Title 2",
-      flex: 1,
-      renderCell: ({ row }) => <RecordCell row={row} index={2} />,
-
-    },
-    {
-      field: "relevance", headerName: "Similarity Score",
-      flex: 0.5,
-      align: 'right',
-      valueFormatter: (value, row) => (row.relevance * 100).toFixed(2) + '%',
-    },
-  ], [offset, items, navigate, setSearchIndex]);
+  const columns = useMemo(
+    () => [
+      {
+        field: "compare",
+        headerName: "Compare",
+        justifyContent: "center",
+        align: "center",
+        // width:'auti',
+        renderCell: (params) => (
+          <Box sx={{ height: "100%", display: "flex", alignItems: "center" }}>
+            <Button
+              variant="outlined"
+              onClick={() => {
+                setSearchIndex(offset + items.indexOf(params.row));
+                navigate(`/admin/site/find-duplicates/${params.row.record_id_1}/${params.row.record_id_2}`);
+              }}
+            >
+              Compare
+            </Button>
+          </Box>
+        ),
+      },
+      {
+        field: "title_1",
+        headerName: "Record 1",
+        flex: 1,
+        renderCell: ({ row }) => <RecordCell row={row} index={1} />,
+      },
+      {
+        field: "title_2",
+        headerName: "Title 2",
+        flex: 1,
+        renderCell: ({ row }) => <RecordCell row={row} index={2} />,
+      },
+      {
+        field: "relevance",
+        headerName: "Similarity Score",
+        flex: 0.5,
+        align: "right",
+        valueFormatter: (value, row) => (row.relevance * 100).toFixed(2) + "%",
+      },
+    ],
+    [offset, items, navigate, setSearchIndex],
+  );
 
   return (
-
     <Box sx={{ display: "flex", flexDirection: "column", maxHeight: "100%", minHeight: 0 }}>
       <DataGrid
         rows={items}
