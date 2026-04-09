@@ -1,10 +1,13 @@
-import { Add } from "@mui/icons-material";
+import Add from "@mui/icons-material/Add";
 import CancelIcon from "@mui/icons-material/Cancel";
 import DeleteIcon from "@mui/icons-material/Delete";
 import EditIcon from "@mui/icons-material/Edit";
 import SaveIcon from "@mui/icons-material/Save";
-import { Box, Button, Stack, Tooltip } from "@mui/material";
-import { DataGrid, GridActionsCellItem, GridEditInputCell, GridToolbar, useGridApiRef } from "@mui/x-data-grid";
+import Box from "@mui/material/Box";
+import Button from "@mui/material/Button";
+import Stack from "@mui/material/Stack";
+import Tooltip from "@mui/material/Tooltip";
+import { useGridApiRef, DataGrid, GridActionsCellItem, GridEditInputCell, GridToolbar } from "@mui/x-data-grid";
 import { merge, omit, startCase } from "lodash-es";
 import { useConfirm } from "material-ui-confirm";
 import { useCallback, useEffect, useMemo, useState } from "react";
@@ -42,7 +45,7 @@ function RenderInputCell(props) {
   );
 }
 
-const emptyFunction = () => { }; 
+const emptyFunction = () => {};
 const emptyArray = [];
 const emptyObject = {};
 export const EditableDataTable = ({
@@ -190,14 +193,14 @@ export const EditableDataTable = ({
       const isInEditMode = id === editRow;
       const icons = isInEditMode
         ? [
-          ["Save", SaveIcon, () => updateRow(id, "save")],
-          ["Cancel", CancelIcon, () => updateRow(id, "cancel")],
-        ]
+            ["Save", SaveIcon, () => updateRow(id, "save")],
+            ["Cancel", CancelIcon, () => updateRow(id, "cancel")],
+          ]
         : [
-          ["Edit", EditIcon, () => updateRow(id)],
-          ...extraActions.map(([label, Icon, action]) => [label, Icon, () => action(row, apiRef, id, setEditRow)]),
-          disableDelete ? null : ["Delete", DeleteIcon, () => deleteRow(row)],
-        ];
+            ["Edit", EditIcon, () => updateRow(id)],
+            ...extraActions.map(([label, Icon, action]) => [label, Icon, () => action(row, apiRef, id, setEditRow)]),
+            disableDelete ? null : ["Delete", DeleteIcon, () => deleteRow(row)],
+          ];
 
       const actions = icons
         .filter((i) => i)

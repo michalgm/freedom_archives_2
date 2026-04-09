@@ -1,8 +1,17 @@
-import { Grid, Paper, Typography } from "@mui/material";
+import Grid from "@mui/material/Grid";
+import Paper from "@mui/material/Paper";
+import Typography from "@mui/material/Typography";
 
 const emptyArray = [];
-
-function GridBlock({ children = emptyArray, title = "", subtitle = "", width = 12, spacing, gutterBottom = false, ...props }) {
+function GridBlock({
+  children = emptyArray,
+  title = "",
+  subtitle = "",
+  width = 12,
+  spacing,
+  gutterBottom = false,
+  ...props
+}) {
   return (
     <Grid size={width}>
       <Paper {...props}>

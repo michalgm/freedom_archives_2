@@ -1,21 +1,18 @@
-import { Check } from "@mui/icons-material";
-import {
-  Checkbox,
-  FormControl,
-  FormControlLabel,
-  FormGroup,
-  FormHelperText,
-  FormLabel,
-  Grid,
-  InputAdornment,
-  Radio,
-  Skeleton,
-  Switch,
-  TextField,
-  ToggleButton,
-  ToggleButtonGroup,
-} from "@mui/material";
-import { Box } from "@mui/system";
+import Box from "@mui/material/Box";
+import Checkbox from "@mui/material/Checkbox";
+import FormControl from "@mui/material/FormControl";
+import FormControlLabel from "@mui/material/FormControlLabel";
+import FormGroup from "@mui/material/FormGroup";
+import FormHelperText from "@mui/material/FormHelperText";
+import FormLabel from "@mui/material/FormLabel";
+import Grid from "@mui/material/Grid";
+import InputAdornment from "@mui/material/InputAdornment";
+import Radio from "@mui/material/Radio";
+import Skeleton from "@mui/material/Skeleton";
+import Switch from "@mui/material/Switch";
+import TextField from "@mui/material/TextField";
+import ToggleButton from "@mui/material/ToggleButton";
+import ToggleButtonGroup from "@mui/material/ToggleButtonGroup";
 import { merge } from "lodash-es";
 import React, { Suspense, useMemo } from "react";
 import {
@@ -29,7 +26,6 @@ import {
 } from "react-hook-form-mui";
 import FileUpload from "src/components/form/FileUpload";
 import { formatLabel } from "src/components/form/schemaUtils";
-import { convertSvgToDataUrl } from "src/utils";
 
 import Autocomplete from "../Autocomplete/Autocomplete";
 import DateStringField from "../DateStringField";
@@ -433,7 +429,7 @@ export const BaseField = ({
     // </FormGroup>
   };
 
-  const checkBoxImageUrl = convertSvgToDataUrl(Check);
+  const checkBoxImageUrl = `url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path style="fill: white" d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>')`;
 
   const renderSwitch = () => {
     const Component = isRHF ? SwitchElement : Switch;

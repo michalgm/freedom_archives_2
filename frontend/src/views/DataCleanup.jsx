@@ -1,4 +1,9 @@
-import { Box, Button, Paper, Tab, Tabs, Typography } from "@mui/material";
+import Box from "@mui/material/Box";
+import Button from "@mui/material/Button";
+import Paper from "@mui/material/Paper";
+import Tab from "@mui/material/Tab";
+import Tabs from "@mui/material/Tabs";
+import Typography from "@mui/material/Typography";
 import { lazy, useCallback, useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router";
 import { data_cleanup } from "src/api";
@@ -40,7 +45,7 @@ const CLEANUP_TYPES = [
   },
 ];
 
-function DataCleanupTable({ items, loading}) {
+function DataCleanupTable({ items, loading }) {
   const navigate = useNavigate();
 
   // Generate columns dynamically based on the data structure
@@ -54,21 +59,21 @@ function DataCleanupTable({ items, loading}) {
 
     // Auto-generate columns from data keys
     Object.keys(firstItem).forEach((key) => {
-      if (key === 'media_id') {
+      if (key === "media_id") {
         return;
       }
 
       const col = {
         field: key,
         headerName: key
-          .split('_')
-          .map(word => word.charAt(0).toUpperCase() + word.slice(1))
-          .join(' '),
+          .split("_")
+          .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+          .join(" "),
         flex: 1,
         minWidth: 150,
       };
 
-      if (key === 'record_id') {
+      if (key === "record_id") {
         col.headerName = "Record ID";
         col.renderCell = (params) => (
           <Link to={`/admin/records/${params.value}`} target="_blank" rel="noopener">
@@ -78,18 +83,18 @@ function DataCleanupTable({ items, loading}) {
       }
 
       // Handle array fields like record_ids (simple array of IDs)
-      if (key === 'record_ids' && Array.isArray(firstItem[key])) {
+      if (key === "record_ids" && Array.isArray(firstItem[key])) {
         col.minWidth = 300;
         col.flex = 2;
         col.renderCell = (params) => (
-          <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5, py: 0.5 }}>
+          <Box sx={{ display: "flex", flexWrap: "wrap", gap: 0.5, py: 0.5 }}>
             {params.value.map((id) => (
               <Button
                 key={id}
                 size="small"
                 variant="outlined"
                 onClick={() => navigate(`/admin/records/${id}`)}
-                sx={{ textTransform: 'none', minWidth: 'auto', px: 1 }}
+                sx={{ textTransform: "none", minWidth: "auto", px: 1 }}
               >
                 {id}
               </Button>
@@ -99,7 +104,12 @@ function DataCleanupTable({ items, loading}) {
       }
 
       // Handle records array (array of objects with record_id and title)
-      if (key === 'records' && Array.isArray(firstItem[key]) && firstItem[key].length > 0 && firstItem[key][0].record_id) {
+      if (
+        key === "records" &&
+        Array.isArray(firstItem[key]) &&
+        firstItem[key].length > 0 &&
+        firstItem[key][0].record_id
+      ) {
         col.minWidth = 400;
         col.flex = 3;
         col.renderCell = (params) => (
@@ -139,9 +149,9 @@ function DataCleanupTable({ items, loading}) {
               N/A
             </Typography>
           );
-      } 
+      }
       // Make title more prominent
-      if (key === 'title') {
+      if (key === "title") {
         col.flex = 2;
         col.minWidth = 250;
       }
@@ -171,11 +181,11 @@ function DataCleanupTable({ items, loading}) {
 
   const getRowId = useCallback((row) => {
     // Use record_id if available, otherwise use a combination of fields
-    return row.media_id || row.record_id || `${row.docid || ''}-${row.call_number || ''}-${Math.random()}`;
+    return row.media_id || row.record_id || `${row.docid || ""}-${row.call_number || ""}-${Math.random()}`;
   }, []);
 
   return (
-    <Box sx={{ height: '100%', width: '100%' }}>
+    <Box sx={{ height: "100%", width: "100%" }}>
       <DataGrid
         rows={items}
         columns={columns}
@@ -183,9 +193,9 @@ function DataCleanupTable({ items, loading}) {
         pageSizeOptions={[25, 50, 100, 200]}
         getRowId={getRowId}
         disableRowSelectionOnClick
-        getRowHeight={() => 'auto'}
+        getRowHeight={() => "auto"}
         sx={{
-          '& .MuiDataGrid-cell': {
+          "& .MuiDataGrid-cell": {
             py: 1,
           },
         }}
@@ -213,12 +223,12 @@ export default function DataCleanup() {
         type,
         $limit: 1000000,
       };
-      
+
       const result = await data_cleanup.find({ query });
       setItems(result.data || []);
       setTotal(result.total || 0);
     } catch (error) {
-      console.error('Error fetching cleanup data:', error);
+      console.error("Error fetching cleanup data:", error);
       setItems([]);
       setTotal(0);
     } finally {
@@ -243,7 +253,7 @@ export default function DataCleanup() {
 
   return (
     <Paper className="flex-container" sx={{ p: 0 }}>
-      <Tabs value={activeTab} variant="scrollable" scrollButtons="auto"  onChange={handleTabChange}>
+      <Tabs value={activeTab} variant="scrollable" scrollButtons="auto" onChange={handleTabChange}>
         {CLEANUP_TYPES.map((type) => (
           <Tab key={type.value} label={type.label} />
         ))}

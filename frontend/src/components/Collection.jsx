@@ -1,4 +1,10 @@
-import { Box, Divider, Grid, Stack, Tab, Tabs, Typography } from "@mui/material";
+import Box from "@mui/material/Box";
+import Divider from "@mui/material/Divider";
+import Grid from "@mui/material/Grid";
+import Stack from "@mui/material/Stack";
+import Tab from "@mui/material/Tab";
+import Tabs from "@mui/material/Tabs";
+import Typography from "@mui/material/Typography";
 import { startCase } from "lodash-es";
 import { useEffect, useMemo, useState } from "react";
 import { useFieldArray, useFormContext } from "react-hook-form";
@@ -11,11 +17,11 @@ import { useTitle } from "src/stores";
 import { createQueryStore } from "src/stores/index";
 import EditItemView from "src/views/EditItemView";
 
-import {Collections} from "./Collections";
+import { Collections } from "./Collections";
 import { EditableItemsListBase } from "./EditableItemsList";
 import FieldRow from "./FieldRow";
 import { Field } from "./form/Field";
-import {Records} from "./Records";
+import { Records } from "./Records";
 
 const getDefaultTab = (mode, tab = "") => {
   if (mode === "featured_records") {
@@ -48,7 +54,7 @@ export function Collection() {
   const { id: paramId } = useParams();
 
   const mode = inferModeFromPath(location.pathname);
-  const id = mode == '' ? paramId : 0; 
+  const id = mode == "" ? paramId : 0;
   const defaultTab = getDefaultTab(mode);
 
   const [tab, setTab] = useState(defaultTab);
@@ -62,7 +68,7 @@ export function Collection() {
 
   useEffect(() => {
     return () => {
-      [useRecordsStore, useSubcollectionsStore, useFeaturedRecordsStore].forEach(store => store.destroy?.());
+      [useRecordsStore, useSubcollectionsStore, useFeaturedRecordsStore].forEach((store) => store.destroy?.());
     };
   }, [useRecordsStore, useSubcollectionsStore, useFeaturedRecordsStore]);
 
@@ -90,8 +96,8 @@ export function Collection() {
               newCollection || mode === "featured_records"
                 ? null
                 : {
-                  collection_id: { $in: [...(collection.descendant_collection_ids || []), collection.collection_id] },
-                }
+                    collection_id: { $in: [...(collection.descendant_collection_ids || []), collection.collection_id] },
+                  }
             }
             useStore={useFeaturedRecordsStore}
             reorder
@@ -143,8 +149,7 @@ export function Collection() {
           service: "collections",
           id: newCollection ? null : id,
           namePath: "title",
-          onCreate: ({ collection_id }) =>
-            navigate(`/admin/collections/${collection_id}`),
+          onCreate: ({ collection_id }) => navigate(`/admin/collections/${collection_id}`),
           onFetch: (collection) => {
             setTitle(collection.title || "New Collection");
             return collection;
@@ -290,10 +295,10 @@ function EditList({
   const idField = getServiceID(type);
 
   const excludeIds = useMemo(() => {
-    return [...(fields.map(item => item[idField])), ...(_excludeIds || [])];
+    return [...fields.map((item) => item[idField]), ...(_excludeIds || [])];
   }, [fields, idField, _excludeIds]);
 
-  const count = fields.filter(f => !f.delete).length;
+  const count = fields.filter((f) => !f.delete).length;
   let label = startCase(_label || property);
   if (count === 1) {
     label = label.slice(0, -1);

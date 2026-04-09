@@ -1,16 +1,14 @@
-import { Help } from "@mui/icons-material";
+import Help from "@mui/icons-material/Help";
 import PasswordIcon from "@mui/icons-material/Password";
-import {
-  Box,
-  Checkbox,
-  FormControl,
-  FormControlLabel,
-  FormGroup,
-  Paper,
-  Stack,
-  Tooltip,
-  Typography,
-} from "@mui/material";
+import Box from "@mui/material/Box";
+import Checkbox from "@mui/material/Checkbox";
+import FormControl from "@mui/material/FormControl";
+import FormControlLabel from "@mui/material/FormControlLabel";
+import FormGroup from "@mui/material/FormGroup";
+import Paper from "@mui/material/Paper";
+import Stack from "@mui/material/Stack";
+import Tooltip from "@mui/material/Tooltip";
+import Typography from "@mui/material/Typography";
 import { startCase } from "lodash-es";
 import { lazy, useCallback, useEffect, useMemo, useState } from "react";
 import { useAuth } from "src/stores";
@@ -20,7 +18,7 @@ import { users as usersService } from "../api";
 
 import ChangePassword from "./ChangePassword";
 
-const EditableDataTable = lazy(() => import("../components/EditableDataTable"))
+const EditableDataTable = lazy(() => import("../components/EditableDataTable"));
 
 export default function Users() {
   const [users, setUsers] = useState([]);

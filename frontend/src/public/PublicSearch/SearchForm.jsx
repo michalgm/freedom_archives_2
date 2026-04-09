@@ -1,24 +1,22 @@
-import {
-  Box,
-  Button,
-  Checkbox,
-  Chip,
-  Divider,
-  FormControlLabel,
-  FormGroup,
-  Grid,
-  Icon,
-  List,
-  ListItem,
-  ListItemButton,
-  ListItemText,
-  MenuItem,
-  Paper,
-  Select,
-  Skeleton,
-  Stack,
-  Typography,
-} from "@mui/material";
+import Box from '@mui/material/Box';
+import Button from '@mui/material/Button';
+import Checkbox from '@mui/material/Checkbox';
+import Chip from '@mui/material/Chip';
+import Divider from '@mui/material/Divider';
+import FormControlLabel from '@mui/material/FormControlLabel';
+import FormGroup from '@mui/material/FormGroup';
+import Grid from '@mui/material/Grid';
+import Icon from '@mui/material/Icon';
+import List from '@mui/material/List';
+import ListItem from '@mui/material/ListItem';
+import ListItemButton from '@mui/material/ListItemButton';
+import ListItemText from '@mui/material/ListItemText';
+import MenuItem from '@mui/material/MenuItem';
+import Paper from '@mui/material/Paper';
+import Select from '@mui/material/Select';
+import Skeleton from '@mui/material/Skeleton';
+import Stack from '@mui/material/Stack';
+import Typography from '@mui/material/Typography';
 import { startCase } from "lodash-es";
 import { useState } from "react";
 import Link from "src/components/Link";

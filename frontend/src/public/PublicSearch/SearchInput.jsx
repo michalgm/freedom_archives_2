@@ -1,17 +1,15 @@
-import { Close } from "@mui/icons-material";
-import {
-  Dialog,
-  DialogContent,
-  DialogContentText,
-  DialogTitle,
-  Icon,
-  IconButton,
-  InputAdornment,
-  Link,
-  ListItemText,
-  TextField,
-} from "@mui/material";
+import Close from '@mui/icons-material/Close';
+import Dialog from '@mui/material/Dialog';
+import DialogContent from '@mui/material/DialogContent';
+import DialogContentText from '@mui/material/DialogContentText';
+import DialogTitle from '@mui/material/DialogTitle';
+import Icon from '@mui/material/Icon';
+import IconButton from '@mui/material/IconButton';
+import InputAdornment from '@mui/material/InputAdornment';
+import Link from '@mui/material/Link';
+import ListItemText from '@mui/material/ListItemText';
 import { alpha } from "@mui/material/styles";
+import TextField from '@mui/material/TextField';
 import { useState } from "react";
 
 export function SearchInput({ focus, ...props }) {

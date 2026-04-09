@@ -1,4 +1,4 @@
-import { LinearProgress } from "@mui/material";
+import LinearProgress from '@mui/material/LinearProgress';
 import { debounce } from "lodash-es";
 import { useLoading } from "src/stores";
 

@@ -1,4 +1,9 @@
-import { FormControl, FormHelperText, Icon, IconButton, InputLabel, List } from "@mui/material";
+import FormControl from "@mui/material/FormControl";
+import FormHelperText from "@mui/material/FormHelperText";
+import Icon from "@mui/material/Icon";
+import IconButton from "@mui/material/IconButton";
+import InputLabel from "@mui/material/InputLabel";
+import List from "@mui/material/List";
 import { startCase } from "lodash-es";
 import { useEffect, useRef, useState } from "react";
 import { useFormContext } from "react-hook-form";

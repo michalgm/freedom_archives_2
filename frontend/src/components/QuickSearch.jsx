@@ -1,19 +1,17 @@
-import { Search } from "@mui/icons-material";
-import {
-  alpha,
-  Autocomplete,
-  Avatar,
-  Box,
-  CircularProgress,
-  Icon,
-  InputAdornment,
-  List,
-  ListItem,
-  ListItemAvatar,
-  ListItemText,
-  Stack,
-  TextField,
-} from "@mui/material";
+import Search from "@mui/icons-material/Search";
+import Autocomplete from "@mui/material/Autocomplete";
+import Avatar from "@mui/material/Avatar";
+import Box from "@mui/material/Box";
+import CircularProgress from "@mui/material/CircularProgress";
+import Icon from "@mui/material/Icon";
+import InputAdornment from "@mui/material/InputAdornment";
+import List from "@mui/material/List";
+import ListItem from "@mui/material/ListItem";
+import ListItemAvatar from "@mui/material/ListItemAvatar";
+import ListItemText from "@mui/material/ListItemText";
+import Stack from "@mui/material/Stack";
+import { alpha } from "@mui/material/styles";
+import TextField from "@mui/material/TextField";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router";
 import { unified_search } from "src/api";

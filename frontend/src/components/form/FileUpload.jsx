@@ -1,15 +1,13 @@
-import {
-  Box,
-  Typography,
-  CircularProgress,
-  FormControl,
-  FormHelperText,
-  InputLabel,
-  OutlinedInput,
-  lighten,
-  Stack,
-  Link,
-} from "@mui/material";
+import Box from "@mui/material/Box";
+import CircularProgress from "@mui/material/CircularProgress";
+import FormControl from "@mui/material/FormControl";
+import FormHelperText from "@mui/material/FormHelperText";
+import InputLabel from "@mui/material/InputLabel";
+import Link from "@mui/material/Link";
+import OutlinedInput from "@mui/material/OutlinedInput";
+import Stack from "@mui/material/Stack";
+import { lighten } from "@mui/material/styles";
+import Typography from "@mui/material/Typography";
 import { useState, useCallback } from "react";
 import { useController, useFormContext } from "react-hook-form";
 import Show from "src/components/Show";
@@ -69,7 +67,6 @@ const parseMimes = (accept) => {
     })
     .join(", ");
 };
-
 
 const FileUpload = ({
   name,

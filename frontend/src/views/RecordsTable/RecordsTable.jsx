@@ -1,11 +1,14 @@
-import { Link, Paper } from "@mui/material";
-import { Box, Stack } from "@mui/system";
-import { useGridApiRef } from "@mui/x-data-grid";
+import Box from "@mui/material/Box";
+import Link from "@mui/material/Link";
+import Paper from "@mui/material/Paper";
+import Stack from "@mui/material/Stack";
 import { startCase } from "lodash-es";
 import { lazy, useCallback, useEffect, useState } from "react";
 import { services } from "src/api";
 import { BaseForm } from "src/components/form/BaseForm";
 import { Field } from "src/components/form/Field";
+
+const useGridApiRef = lazy(() => import("@mui/x-data-grid").then((module) => ({ default: module.useGridApiRef })));
 
 const columnWidths = {
   title: 500,

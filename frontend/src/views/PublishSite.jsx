@@ -1,5 +1,10 @@
-import { Publish, Restore } from "@mui/icons-material";
-import { Button, DialogContentText, Paper, Stack, Typography } from "@mui/material";
+import Publish from "@mui/icons-material/Publish";
+import Restore from "@mui/icons-material/Restore";
+import Button from "@mui/material/Button";
+import DialogContentText from "@mui/material/DialogContentText";
+import Paper from "@mui/material/Paper";
+import Stack from "@mui/material/Stack";
+import Typography from "@mui/material/Typography";
 import { startCase } from "lodash-es";
 import { useConfirm } from "material-ui-confirm";
 import React, { useCallback, useEffect, useMemo, useState, lazy } from "react";
@@ -11,7 +16,7 @@ import { snapshots as snapshotsService } from "../api";
 // import { useAddNotification } from "../appContext";
 // import { EditableDataTable } from "../components/EditableDataTable";
 
-const EditableDataTable = lazy(() => import("../components/EditableDataTable"))
+const EditableDataTable = lazy(() => import("../components/EditableDataTable"));
 
 const PublishSite = () => {
   const [snapshots, setSnapshots] = useState([]);

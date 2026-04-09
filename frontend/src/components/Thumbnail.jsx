@@ -1,5 +1,10 @@
-import { BrokenImage, HeadphonesTwoTone, LanguageTwoTone, OndemandVideo, PictureAsPdf } from "@mui/icons-material";
-import { Avatar, Box } from "@mui/material";
+import BrokenImage from "@mui/icons-material/BrokenImage";
+import HeadphonesTwoTone from "@mui/icons-material/HeadphonesTwoTone";
+import LanguageTwoTone from "@mui/icons-material/LanguageTwoTone";
+import OndemandVideo from "@mui/icons-material/OndemandVideo";
+import PictureAsPdf from "@mui/icons-material/PictureAsPdf";
+import Avatar from "@mui/material/Avatar";
+import Box from "@mui/material/Box";
 import { useCallback, useState } from "react";
 
 const no_digital_image = "/static/images/nodigital.png";
@@ -66,14 +71,17 @@ export default function Thumbnail({ item, src: _src, width = 75, alt = "", type:
   const Badge = MEDIA_TYPE_BADGES[media_type];
 
   return (
-    <Box sx={{
-      width,
-      minWidth: width,
-      display: "inline-flex",
-      position: "relative",
-      border: '1px solid rgba(0, 0, 0, 0.1)',
-      ...(sx || {}),
-    }} {...props}>
+    <Box
+      sx={{
+        width,
+        minWidth: width,
+        display: "inline-flex",
+        position: "relative",
+        border: "1px solid rgba(0, 0, 0, 0.1)",
+        ...(sx || {}),
+      }}
+      {...props}
+    >
       {Badge && (
         <Box
           sx={{

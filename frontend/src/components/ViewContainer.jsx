@@ -1,4 +1,7 @@
-import { Box, Grid, Paper, Stack } from "@mui/material";
+import Box from "@mui/material/Box";
+import Grid from "@mui/material/Grid";
+import Paper from "@mui/material/Paper";
+import Stack from "@mui/material/Stack";
 import { FormErrors } from "src/components/form/BaseForm";
 import ButtonsHeader from "src/components/form/ButtonsHeader";
 import useFormManagerContext from "src/components/form/FormManagerContext";
@@ -41,7 +44,7 @@ function ViewContainer({
 
   const buttonsHeader = buttons ? <ButtonsHeader key="buttons" buttons={buttons} /> : <></>;
   const Container = noPaper ? Box : Paper;
-  
+
   return (
     <Stack direction="column" spacing={embedded ? 1 : 2} useFlexGap className="scroll-container">
       <Section elements={[...headerElements, buttonsHeader]} header service={service} embedded={embedded} />

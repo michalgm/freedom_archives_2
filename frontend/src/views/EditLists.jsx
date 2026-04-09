@@ -1,17 +1,15 @@
-import { Merge } from "@mui/icons-material";
-import {
-  Box,
-  Button,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogContentText,
-  DialogTitle,
-  Paper,
-  Stack,
-  Tab,
-  Tabs,
-} from "@mui/material";
+import Merge from "@mui/icons-material/Merge";
+import Box from "@mui/material/Box";
+import Button from "@mui/material/Button";
+import Dialog from "@mui/material/Dialog";
+import DialogActions from "@mui/material/DialogActions";
+import DialogContent from "@mui/material/DialogContent";
+import DialogContentText from "@mui/material/DialogContentText";
+import DialogTitle from "@mui/material/DialogTitle";
+import Paper from "@mui/material/Paper";
+import Stack from "@mui/material/Stack";
+import Tab from "@mui/material/Tab";
+import Tabs from "@mui/material/Tabs";
 import { startCase } from "lodash-es";
 import { lazy, useCallback, useEffect, useState } from "react";
 import { FormContainer } from "react-hook-form-mui";
@@ -24,7 +22,7 @@ import { checkUnique } from "src/utils";
 
 import { list_items, list_items_lookup } from "../api";
 
-const EditableDataTable = lazy(() => import("../components/EditableDataTable"))
+const EditableDataTable = lazy(() => import("../components/EditableDataTable"));
 
 const types = Object.keys(ITEM_TYPES)
   .map((t) => [t, startCase(t)])

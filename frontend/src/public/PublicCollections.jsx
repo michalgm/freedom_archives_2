@@ -1,6 +1,14 @@
-import { NavigateNext } from "@mui/icons-material";
-import { Box, Breadcrumbs, Chip, Divider, Grid, Stack, Tab, Tabs, Typography } from "@mui/material";
-import { useMediaQuery } from "@mui/system";
+import NavigateNext from "@mui/icons-material/NavigateNext";
+import Box from "@mui/material/Box";
+import Breadcrumbs from "@mui/material/Breadcrumbs";
+import Chip from "@mui/material/Chip";
+import Divider from "@mui/material/Divider";
+import Grid from "@mui/material/Grid";
+import Stack from "@mui/material/Stack";
+import Tab from "@mui/material/Tab";
+import Tabs from "@mui/material/Tabs";
+import Typography from "@mui/material/Typography";
+import useMediaQuery from "@mui/material/useMediaQuery";
 import { isArray } from "lodash-es";
 import { useEffect, useRef, useState } from "react";
 import { isRouteErrorResponse, useLoaderData, useRouteError } from "react-router";
@@ -75,7 +83,6 @@ async function fetchCollection({ params }) {
   };
 }
 
-
 // eslint-disable-next-line react-refresh/only-export-components
 export async function loader({ params }) {
   try {
@@ -110,26 +117,18 @@ export function meta(data) {
 
   return setMetaTags({ data, title, description: summary || description, date_modified, image: thumbnail, keywords });
 }
-export const DetailsRow = ({ label, value, keyProp = 'list_item_id', valueProp = 'item' }) => {
+export const DetailsRow = ({ label, value, keyProp = "list_item_id", valueProp = "item" }) => {
   if (!value || !value.length) return null;
 
-  const displayValue = isArray(value)
-    ? (
-      <Stack spacing={1} useFlexGap direction="row" flexWrap="wrap" rowGap={1} component="dd" sx={{ m: 0 }}>
-        {
-          value.map(({ [valueProp]: item, [keyProp]: key }) => (
-            <Chip key={key} label={item} size="small" variant="outlined" />
-          ))
-        }
-      </Stack>
-    )
-    : (
-      <dd style={{ margin: 0 }}>
-        {' '}
-        {value}
-        {' '}
-      </dd>
-    );
+  const displayValue = isArray(value) ? (
+    <Stack spacing={1} useFlexGap direction="row" flexWrap="wrap" rowGap={1} component="dd" sx={{ m: 0 }}>
+      {value.map(({ [valueProp]: item, [keyProp]: key }) => (
+        <Chip key={key} label={item} size="small" variant="outlined" />
+      ))}
+    </Stack>
+  ) : (
+    <dd style={{ margin: 0 }}> {value} </dd>
+  );
 
   return (
     <Stack component="dl" direction="row" spacing={1} sx={{ m: 0 }} useFlexGap>
@@ -217,8 +216,7 @@ const PublicCollections = () => {
   if (!collection || !collection.collection_id) {
     return null;
   }
-  const hasFeatured
-    = collection.featured_records && collection.featured_records.length !== 0;
+  const hasFeatured = collection.featured_records && collection.featured_records.length !== 0;
   const hasChildren = collection.children && collection.children.length !== 0;
   // const hasSidebar = hasFeatured || hasChildren;
   return (

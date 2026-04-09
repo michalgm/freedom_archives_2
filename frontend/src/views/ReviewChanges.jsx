@@ -1,4 +1,9 @@
-import { Box, Button, Divider, Grid, Stack, Typography } from "@mui/material";
+import Box from "@mui/material/Box";
+import Button from "@mui/material/Button";
+import Divider from "@mui/material/Divider";
+import Grid from "@mui/material/Grid";
+import Stack from "@mui/material/Stack";
+import Typography from "@mui/material/Typography";
 import dayjs from "dayjs";
 import { startCase } from "lodash-es";
 import React, { lazy, useCallback, useEffect, useMemo, useState } from "react";
@@ -12,7 +17,7 @@ import { collections, records, review_changes, snapshots } from "../api";
 import { Field } from "../components/form/Field";
 import Link from "../components/Link";
 
-const EditableDataTable = lazy(() => import("../components/EditableDataTable"))
+const EditableDataTable = lazy(() => import("../components/EditableDataTable"));
 
 const defaultValues = {
   needs_review: true,
@@ -119,8 +124,8 @@ const ReviewChangesForm = React.memo(function ({ setFilter, publishDate }) {
           highlightDirty={false}
           label=""
           disabled={getValues("changes_since") === "published"}
-        // size={{ xs: 6 }}
-        // sx={{ width: 1 / 2 }}
+          // size={{ xs: 6 }}
+          // sx={{ width: 1 / 2 }}
         />
       </Grid>
       <Grid size={7}>
@@ -137,7 +142,7 @@ const ReviewChangesForm = React.memo(function ({ setFilter, publishDate }) {
           // sx={{ width: 2 / 3 }}
           // size={6}
 
-        // sx={{ flex: "1 1 auto" }}
+          // sx={{ flex: "1 1 auto" }}
         />
       </Grid>
       <Grid size="auto">
@@ -326,7 +331,7 @@ function ReviewChanges() {
           setFilter={setFilter}
           // fetchValues={fetchValues}
           publishDate={publishDate}
-        // setPublishDa]}
+          // setPublishDa]}
         />,
       ]}
       noPaper

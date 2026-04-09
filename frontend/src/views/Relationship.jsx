@@ -1,4 +1,7 @@
-import { Grid, Paper, Stack, Typography } from "@mui/material";
+import Grid from "@mui/material/Grid";
+import Paper from "@mui/material/Paper";
+import Stack from "@mui/material/Stack";
+import Typography from "@mui/material/Typography";
 import React, { useEffect, useState } from "react";
 
 import { relationships } from "../api";

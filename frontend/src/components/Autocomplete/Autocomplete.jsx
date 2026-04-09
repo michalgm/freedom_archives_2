@@ -1,4 +1,11 @@
-import { Button, Dialog, DialogActions, DialogContent, DialogTitle, Grid, MenuItem, Tooltip } from "@mui/material";
+import Button from "@mui/material/Button";
+import Dialog from "@mui/material/Dialog";
+import DialogActions from "@mui/material/DialogActions";
+import DialogContent from "@mui/material/DialogContent";
+import DialogTitle from "@mui/material/DialogTitle";
+import Grid from "@mui/material/Grid";
+import MenuItem from "@mui/material/MenuItem";
+import Tooltip from "@mui/material/Tooltip";
 import { memo, useCallback, useMemo, useState } from "react";
 import { AutocompleteElement, FormProvider, useForm, useFormContext } from "react-hook-form-mui";
 import { useAutocompleteOptions } from "src/components/Autocomplete/useAutoCompleteOptions";
@@ -11,18 +18,15 @@ import searchTypes from "./searchTypes"; // Move it out of main file
 
 const emptyArray = [];
 
-
 const Wrapper = ({ showTooltip, currentValue, labelField, getOptionById, children }) => {
   if (!showTooltip) return <>{children}</>;
   const currentOption = getOptionById(currentValue) || currentValue;
   return (
     <Tooltip title={currentOption && currentOption[labelField]} arrow>
-      <span>
-        {children}
-      </span>
+      <span>{children}</span>
     </Tooltip>
   );
-}
+};
 
 export const NewListItemDialog = ({ label, service, handleClose, value, createParams }) => {
   // const [listItem, setListItem] = useState({});
@@ -280,7 +284,12 @@ const Autocomplete = ({
 
   return (
     <>
-      <Wrapper showTooltip={showTooltip} currentValue={currentValue} labelField={labelField} getOptionById={getOptionById}>
+      <Wrapper
+        showTooltip={showTooltip}
+        currentValue={currentValue}
+        labelField={labelField}
+        getOptionById={getOptionById}
+      >
         <AutocompleteElement
           name={name}
           label={label}

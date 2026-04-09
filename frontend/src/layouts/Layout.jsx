@@ -1,17 +1,18 @@
-import { AccountCircle } from "@mui/icons-material";
-import {
-  AppBar,
-  Box,
-  Container,
-  Divider,
-  Icon,
-  IconButton,
-  ListItemIcon,
-  Menu,
-  MenuItem,
-  Stack,
-  Toolbar,
-} from "@mui/material";
+import AccountCircle from "@mui/icons-material/AccountCircle";
+import AppBar from "@mui/material/AppBar";
+import Box from "@mui/material/Box";
+import Container from "@mui/material/Container";
+import Divider from "@mui/material/Divider";
+import Icon from "@mui/material/Icon";
+import IconButton from "@mui/material/IconButton";
+import ListItemIcon from "@mui/material/ListItemIcon";
+import Menu from "@mui/material/Menu";
+import MenuItem from "@mui/material/MenuItem";
+import Stack from "@mui/material/Stack";
+import Toolbar from "@mui/material/Toolbar";
+import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
+import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
+import { ConfirmProvider } from "material-ui-confirm";
 import React, { useEffect, useState } from "react";
 import { Outlet, useLocation } from "react-router";
 import { useAppStore, useAuth } from "src/stores";
@@ -30,13 +31,27 @@ const QuickSearch = React.lazy(() => import("../components/QuickSearch"));
 const DRAWERWIDTH = 256;
 
 export default function Layout() {
+  return (
+    <LocalizationProvider dateAdapter={AdapterDayjs}>
+      <ConfirmProvider defaultOptions={{ confirmationButtonProps: { variant: "contained" } }}>
+        <LayoutInner />
+      </ConfirmProvider>
+    </LocalizationProvider>
+  );
+}
+
+function LayoutInner() {
   const { isAuthenticated } = useAuth();
-  const style = React.useMemo(() => isAuthenticated
-    ? {}
-    : {
-      marginLeft: 0,
-      width: "100%",
-    }, [isAuthenticated]);
+  const style = React.useMemo(
+    () =>
+      isAuthenticated
+        ? {}
+        : {
+            marginLeft: 0,
+            width: "100%",
+          },
+    [isAuthenticated],
+  );
 
   logger.log("Layout RENDER");
   return (
@@ -106,57 +121,55 @@ export function Logout() {
     app.logout();
   };
 
-  return isAuthenticated
-    ? (
-      <div className="logout">
-        <IconButton
-          aria-controls={open ? "basic-menu" : undefined}
-          aria-haspopup="true"
-          aria-expanded={open ? "true" : undefined}
-          onClick={handleClick}
-          color="inherit"
-          sx={{ backgroundColor: "primary.light", width: 30, height: 30 }}
-        >
-          <AccountCircle />
-        </IconButton>
-        <Menu
-          id="basic-menu"
-          anchorEl={anchorEl}
-          open={open}
-          onClose={handleClose}
-          slotProps={{
-            list: {
-              "aria-labelledby": "basic-button",
-            },
-          }}
-        >
-          <MenuItem sx={{ pointerEvents: "none", color: "text.primary", fontWeight: "bold" }}>{user.full_name}</MenuItem>
-          <Divider />
-          <MenuItem onClick={changePassword}>
-            <ListItemIcon>
-              <Icon>password</Icon>
-            </ListItemIcon>
-              Change Password
-          </MenuItem>
-          <MenuItem onClick={logout}>
-            <ListItemIcon>
-              <Icon>logout</Icon>
-            </ListItemIcon>
-              Logout
-          </MenuItem>
-        </Menu>
-        <ChangePassword open={openChangePassword} handleClose={() => setOpenChangePassword(false)} user={user} />
-      </div>
-    )
-    : (
-      ""
-    );
+  return isAuthenticated ? (
+    <div className="logout">
+      <IconButton
+        aria-controls={open ? "basic-menu" : undefined}
+        aria-haspopup="true"
+        aria-expanded={open ? "true" : undefined}
+        onClick={handleClick}
+        color="inherit"
+        sx={{ backgroundColor: "primary.light", width: 30, height: 30 }}
+      >
+        <AccountCircle />
+      </IconButton>
+      <Menu
+        id="basic-menu"
+        anchorEl={anchorEl}
+        open={open}
+        onClose={handleClose}
+        slotProps={{
+          list: {
+            "aria-labelledby": "basic-button",
+          },
+        }}
+      >
+        <MenuItem sx={{ pointerEvents: "none", color: "text.primary", fontWeight: "bold" }}>{user.full_name}</MenuItem>
+        <Divider />
+        <MenuItem onClick={changePassword}>
+          <ListItemIcon>
+            <Icon>password</Icon>
+          </ListItemIcon>
+          Change Password
+        </MenuItem>
+        <MenuItem onClick={logout}>
+          <ListItemIcon>
+            <Icon>logout</Icon>
+          </ListItemIcon>
+          Logout
+        </MenuItem>
+      </Menu>
+      <ChangePassword open={openChangePassword} handleClose={() => setOpenChangePassword(false)} user={user} />
+    </div>
+  ) : (
+    ""
+  );
 }
 
 function NavBar() {
   const { isAuthenticated } = useAuth();
   return (
-    <AppBar color="primary" position="fixed" elevation={0} sx={{ zIndex: theme => theme.zIndex.drawer + 1 }}>
+    <AppBar color="primary" position="fixed" elevation={0} sx={{ zIndex: (theme) => theme.zIndex.drawer + 1 }}>
       <Toolbar className="topnav" variant="dense" sx={{ gap: 1 }}>
         <Breadcrumbs />
         {isAuthenticated && <QuickSearch />}
@@ -167,12 +180,12 @@ function NavBar() {
 }
 
 export function Main() {
-  const loading = useAppStore(state => state.loading);
+  const loading = useAppStore((state) => state.loading);
 
   const loadingStyle = loading
     ? {
-      opacity: 0.6,
-    }
+        opacity: 0.6,
+      }
     : {};
   // logger.log("Main RENDER", location);
 

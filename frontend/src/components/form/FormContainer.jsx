@@ -1,4 +1,6 @@
-import { Box, Grid, Stack } from "@mui/material";
+import Box from "@mui/material/Box";
+import Grid from "@mui/material/Grid";
+import Stack from "@mui/material/Stack";
 import { get } from "lodash-es";
 import Loading from "src/components/Loading/Loading";
 import { useContainerWidth } from "src/lib/AppContext";
@@ -114,7 +116,7 @@ const FormContainer = ({
                     <Grid container sx={{ alignItems: "start" }} size={12}>
                       {columns.map((fieldSet, columnIndex) => (
                         // eslint-disable-next-line react/no-array-index-key
-                        (<Grid key={columnIndex} container size={12 / columnCount}>
+                        <Grid key={columnIndex} container size={12 / columnCount}>
                           {fieldSet.map(([key, options = {}], index) => (
                             <Grid key={key} size={12}>
                               <Field
@@ -126,7 +128,7 @@ const FormContainer = ({
                               />
                             </Grid>
                           ))}
-                        </Grid>)
+                        </Grid>
                       ))}
                       <Grid container size={12}>
                         {fullSpan.map(([key, options = {}], index) => (

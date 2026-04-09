@@ -1,5 +1,5 @@
 import { ThemeProvider } from "@emotion/react";
-import { Button } from "@mui/material";
+import Button from "@mui/material/Button";
 import { LocalizationProvider } from "@mui/x-date-pickers";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import dayjs from "dayjs";
@@ -37,7 +37,7 @@ export default {
               mediaTypeField: { id: "PDF", label: "PDF" },
               autocomplete: { id: "option1", label: "Option 1" },
             }}
-            onSubmit={() => { }}
+            onSubmit={() => {}}
           >
             <Story />
             <Button type="submit">Submit</Button>
@@ -186,7 +186,7 @@ export const FieldWithError = (args) => {
   const CustomField = (props) => {
     const context = {
       errors: { textField: "This field has an error" },
-      setFieldValue: () => { },
+      setFieldValue: () => {},
     };
 
     return <Field error={true} required {...props} context={context} />;

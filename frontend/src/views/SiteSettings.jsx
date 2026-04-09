@@ -1,4 +1,5 @@
-import { FormLabel, Grid } from "@mui/material";
+import FormLabel from "@mui/material/FormLabel";
+import Grid from "@mui/material/Grid";
 import { BaseForm } from "src/components/form/BaseForm";
 import { formatLabel } from "src/components/form/schemaUtils";
 import { useAuth } from "src/stores";
