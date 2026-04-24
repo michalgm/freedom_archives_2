@@ -1,8 +1,3 @@
-import BrokenImage from "@mui/icons-material/BrokenImage";
-import Avatar from "@mui/material/Avatar";
-import ListItemAvatar from "@mui/material/ListItemAvatar";
-import ListItemText from "@mui/material/ListItemText";
-import Typography from "@mui/material/Typography";
 import { cloneDeep } from "lodash-es";
 import { useCallback } from "react";
 
@@ -63,48 +58,8 @@ export function Collections({ embedded, itemAction, filter, forcedFilter, useSto
     [forcedFilter],
   );
 
-  const renderItem = (collection) => {
-    return (
-      <>
-        <ListItemAvatar>
-          {collection.thumbnail ? (
-            <img
-              src={`https://search.freedomarchives.org/${collection.thumbnail}`}
-              alt={`${collection.title} Thumbnail`}
-              width={40}
-            />
-          ) : (
-            <Avatar>
-              <BrokenImage />
-            </Avatar>
-          )}
-        </ListItemAvatar>
-        <ListItemText
-          primary={collection.title}
-          secondary={
-            <>
-              <Typography variant="subtitle2" gutterBottom>
-                Parent Collection: {collection.parent.title}
-              </Typography>
-              <Typography
-                style={{ maxHeight: 100, overflowX: "auto" }}
-                variant="body2"
-                dangerouslySetInnerHTML={{
-                  __html: collection.description,
-                }}
-              ></Typography>
-            </>
-          }
-          slotProps={{
-            secondary: { component: "div" },
-          }}
-        ></ListItemText>
-      </>
-    );
-  };
   return (
     <Manage
-      renderItem={renderItem}
       defaultFilter={filter || {}}
       createQuery={createQuery}
       filterTypes={filter_types}
