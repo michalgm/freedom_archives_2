@@ -104,6 +104,7 @@ const eslintConfig = [
       "linebreak-style": ["error", "unix"],
       semi: ["error", "always"],
       "no-undef": "warn",
+      "no-unused-vars": "off",
     },
   },
   {
