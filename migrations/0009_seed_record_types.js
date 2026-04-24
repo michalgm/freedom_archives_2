@@ -1,5 +1,6 @@
 export const up = async function (knex) {
   await knex.raw(`SET LOCAL search_path = 'freedom_archives';`);
+  await knex.raw(`SET LOCAL statement_timeout = 0;`);
   await knex.raw(`
 
 INSERT INTO freedom_archives.format_record_types VALUES (2293, 'Audio');
