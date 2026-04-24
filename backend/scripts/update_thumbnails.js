@@ -17,20 +17,20 @@ function printProgress(progress) {
 
 const types = {
   records: {
-    path: 'media[0].url',
+    path: "media[0].url",
     query: {
       primary_media_thumbnail: { $ne: "" },
-      $select: ['record_id', 'primary_media_thumbnail', 'media'],
+      $select: ["record_id", "primary_media_thumbnail", "media"],
       // record_id: 39214,
-      $sort: { 'record_id': -1 },
-      primary_media_media_type: { $in: ['Video', 'Image', 'PDF'] },
+      $sort: { record_id: -1 },
+      record_type: { $in: ["Video", "Image", "Document"] },
     },
   },
   collections: {
-    path: 'thumbnail',
+    path: "thumbnail",
     query: {
       thumbnail: { $ne: "" },
-      $select: ['collection_id', 'thumbnail'],
+      $select: ["collection_id", "thumbnail"],
     },
   },
 };

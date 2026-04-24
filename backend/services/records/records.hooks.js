@@ -98,9 +98,7 @@ const prepData = async (context) => {
     // remove calculated fields
     Object.keys(data).forEach((key) => {
       if (
-        ["call_numbers", "formats", "qualitys", "generations", "media_types", "siblings", "relationships"].includes(
-          key,
-        ) ||
+        ["call_numbers", "formats", "qualitys", "generations", "siblings", "relationships"].includes(key) ||
         key.match("_search")
       ) {
         delete data[key];
@@ -173,9 +171,9 @@ const updateRelations = async (context) => {
         if (media.delete) {
           return app.service("api/media").remove(media.media_id, params);
         } else if (media.media_id) {
-          if (media.url === "") {
-            media.media_type = "";
-          }
+          // if (media.url === "") {
+          //   media.media_type = "";
+          // }
           updated_media = await app.service("api/media").patch(media.media_id, { record_id: id, ...media }, params);
         } else {
           delete media.media_id;

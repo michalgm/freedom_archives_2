@@ -53,45 +53,49 @@ const lookupFilters = async (context) => {
   const baseQuery = params.knex || context.service.createQuery(params);
   const recordsQuery = baseQuery.clone().clearSelect().clearOrder().from("public_search.records").select("record_id");
   // const aggregatedDataQuery = baseQuery.clone().clearSelect().clearOrder().select().unionAll([
-  const aggregatedDataQuery = context.service.getModel()
-    .unionAll([
-      Model.select(Model.raw("li.type::text || '_ids' AS type, li.item::text AS item, li.list_item_id"))
-        .count()
-        .from("public_search.records_to_list_items AS r")
-        .join("public_search.list_items AS li", "r.list_item_id", "li.list_item_id")
-        .joinRaw("INNER JOIN filtered_records f ON r.record_id = f.record_id")
-        .whereIn("li.type", ["keyword", "subject", "author"])
-        .groupBy("li.type", "li.item", "li.list_item_id"),
-      Model.select(Model.raw("'year' AS type, year::text AS item, 0 as list_item_id"))
-        .count()
-        .from("public_search.records_view AS r")
-        .joinRaw("INNER JOIN filtered_records f ON r.record_id = f.record_id")
-        .whereNotNull("year")
-        .groupBy("year"),
-      Model.select(Model.raw("'title' AS type, title::text, 0"))
-        .count()
-        .from("public_search.records_view AS r")
-        .joinRaw("INNER JOIN filtered_records f ON r.record_id = f.record_id")
-        .groupBy("title")
-        .havingRaw("COUNT(*) > 1"),
-      Model.select(Model.raw("'collection_id' AS type, collection_title::text, collection_id"))
-        .count()
-        .from("public_search.records_view AS r")
-        .joinRaw("INNER JOIN filtered_records f ON r.record_id = f.record_id")
-        .groupBy("collection_id", "collection_title"),
-      Model.select(Model.raw("'media_type' AS type, media_type::text, 0"))
-        .count()
-        .from("public_search.records_view AS r")
-        .joinRaw("INNER JOIN filtered_records f ON r.record_id = f.record_id")
-        .whereNot("media_type", "")
-        .groupBy("media_type"),
-      Model.select(Model.raw("'format' AS type, format::text, 0"))
-        .count()
-        .from("public_search.records_view AS r")
-        .joinRaw("INNER JOIN filtered_records f ON r.record_id = f.record_id")
-        .whereNot("format", "")
-        .groupBy("format"),
-    ], true);
+  const aggregatedDataQuery = context.service
+    .getModel()
+    .unionAll(
+      [
+        Model.select(Model.raw("li.type::text || '_ids' AS type, li.item::text AS item, li.list_item_id"))
+          .count()
+          .from("public_search.records_to_list_items AS r")
+          .join("public_search.list_items AS li", "r.list_item_id", "li.list_item_id")
+          .joinRaw("INNER JOIN filtered_records f ON r.record_id = f.record_id")
+          .whereIn("li.type", ["keyword", "subject", "author"])
+          .groupBy("li.type", "li.item", "li.list_item_id"),
+        Model.select(Model.raw("'year' AS type, year::text AS item, 0 as list_item_id"))
+          .count()
+          .from("public_search.records_view AS r")
+          .joinRaw("INNER JOIN filtered_records f ON r.record_id = f.record_id")
+          .whereNotNull("year")
+          .groupBy("year"),
+        Model.select(Model.raw("'title' AS type, title::text, 0"))
+          .count()
+          .from("public_search.records_view AS r")
+          .joinRaw("INNER JOIN filtered_records f ON r.record_id = f.record_id")
+          .groupBy("title")
+          .havingRaw("COUNT(*) > 1"),
+        Model.select(Model.raw("'collection_id' AS type, collection_title::text, collection_id"))
+          .count()
+          .from("public_search.records_view AS r")
+          .joinRaw("INNER JOIN filtered_records f ON r.record_id = f.record_id")
+          .groupBy("collection_id", "collection_title"),
+        Model.select(Model.raw("'record_type' AS type, record_type::text, 0"))
+          .count()
+          .from("public_search.records_view AS r")
+          .joinRaw("INNER JOIN filtered_records f ON r.record_id = f.record_id")
+          .whereNot("record_type", "")
+          .groupBy("record_type"),
+        Model.select(Model.raw("'format' AS type, format::text, 0"))
+          .count()
+          .from("public_search.records_view AS r")
+          .joinRaw("INNER JOIN filtered_records f ON r.record_id = f.record_id")
+          .whereNot("format", "")
+          .groupBy("format"),
+      ],
+      true,
+    );
 
   const query = Model.with("filtered_records", recordsQuery)
     .with("aggregated_data", aggregatedDataQuery)

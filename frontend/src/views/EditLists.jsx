@@ -16,11 +16,11 @@ import { FormContainer } from "react-hook-form-mui";
 import { Field } from "src/components/form/Field";
 import Notifications from "src/components/Notifications";
 import Show from "src/components/Show";
-import { ITEM_TYPES } from "src/config/constants";
+import { ITEM_TYPES, RECORD_TYPES } from "src/config/constants";
 import { useAddNotification } from "src/stores";
 import { checkUnique } from "src/utils";
 
-import { list_items, list_items_lookup } from "../api";
+import { list_items_lookup, list_items } from "../api";
 
 const EditableDataTable = lazy(() => import("../components/EditableDataTable"));
 
@@ -35,7 +35,6 @@ const prepareItem = (item) => {
   delete prepared.collections_count;
   return prepared;
 };
-
 const columns = [
   {
     field: "item",
@@ -63,6 +62,21 @@ const columns = [
     field: "description",
     flex: 2,
     editable: true,
+  },
+  {
+    field: "record_type",
+    flex: 1,
+    editable: true,
+    type: "singleSelect",
+    valueOptions: RECORD_TYPES,
+    preProcessEditCellProps: async (params) => {
+      const hasError = params.row.type === "format" && !RECORD_TYPES.includes(params.props.value);
+      const result = {
+        ...params.props,
+        error: hasError ? `Formats must have a valid Record Type` : null,
+      };
+      return result;
+    },
   },
   {
     field: "media_count",
@@ -106,23 +120,21 @@ function EditLists() {
   const fetchValues = useCallback(async () => {
     setLoading(true);
     const $ilike = `%${filter.replace(/ /g, "%")}%`;
-    const { field = "item", sort = "asc" } = order || {};
+    const { field = "item", sort = "asc" } = order?.[0] || {};
     const $sort = { [field || "item"]: sort === "desc" ? 0 : 1 };
     if (field !== "item") {
       $sort.item = sort === "desc" ? 0 : 1;
     }
+    const fields = ["list_item_id", "item", "type", "description", "media_count", "records_count", "collections_count"];
+
+    if (type === "format") {
+      fields.push("record_type");
+    }
+
     const values = await list_items_lookup.find({
       query: {
         type,
-        $select: [
-          "list_item_id",
-          "item",
-          "type",
-          "description",
-          "media_count",
-          "records_count",
-          "collections_count",
-        ],
+        $select: fields,
         $limit: pagination.limit,
         $skip: pagination.skip,
         item: { $ilike },
@@ -188,6 +200,7 @@ function EditLists() {
             records_count: Boolean(ITEM_TYPES[type].records),
             collections_count: Boolean(ITEM_TYPES[type].collections),
             media_count: Boolean(ITEM_TYPES[type].media),
+            record_type: type === "format",
           }}
           sortModel={order}
           sortingOrder={["desc", "asc"]}

@@ -216,15 +216,9 @@ function MediaItem({ media, index, actions }) {
             </Link>
           )}
         </TableCell>
-        <TableCell>{media.media_type}</TableCell>
-        <TableCell colSpan={5}>
+        <TableCell colSpan={6}>
           <Field ro={!edit} label="URL" name={`media.${index}.url`} />
         </TableCell>
-        {/* <TableCell colSpan={2}>
-      <pre>
-          {JSON.stringify(media, null, ' ')}
-      </pre>
-      </TableCell> */}
       </TableRow>
     </React.Fragment>
   );
@@ -347,7 +341,7 @@ function RecordParent() {
   );
 }
 
-function UpdateThumbnailButton() {
+function UpdateThumbnailButton({ setThumbnailSince }) {
   const {
     reset,
     formContext: { getValues },
@@ -368,7 +362,8 @@ function UpdateThumbnailButton() {
     const res = await records.patch(record_id, { media: [{ url, media_id }] });
     await reset(res);
     addNotification({ message: "Thumbnail updated" });
-  }, [addNotification, media, record_id, reset]);
+    setThumbnailSince(new Date().toISOString());
+  }, [addNotification, media, record_id, reset, setThumbnailSince]);
 
   return (
     <Tooltip title={thumbnailAvailable ? "" : "No thumbnail available - first media item must have a URL"}>
@@ -397,6 +392,7 @@ export function Record({ id /*  embedded = false */ }) {
   id ??= paramId;
   const navigate = useNavigate();
   const newRecord = id === "new";
+  const [thumbnailSince, setThumbnailSince] = React.useState(null);
 
   const setTitle = useTitle();
   const onCreate = useCallback(
@@ -462,8 +458,8 @@ export function Record({ id /*  embedded = false */ }) {
                             alignItems={"center"}
                           >
                             <Show unless={newRecord}>
-                              <Thumbnail item={record} width={100} />
-                              <UpdateThumbnailButton />
+                              <Thumbnail item={record} width={100} since={thumbnailSince} />
+                              <UpdateThumbnailButton setThumbnailSince={setThumbnailSince} />
                             </Show>
                           </Grid>
                         }

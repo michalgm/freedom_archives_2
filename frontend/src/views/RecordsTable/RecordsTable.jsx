@@ -2,13 +2,14 @@ import Box from "@mui/material/Box";
 import Link from "@mui/material/Link";
 import Paper from "@mui/material/Paper";
 import Stack from "@mui/material/Stack";
+import { useGridApiRef } from "@mui/x-data-grid";
 import { startCase } from "lodash-es";
 import { lazy, useCallback, useEffect, useState } from "react";
 import { services } from "src/api";
 import { BaseForm } from "src/components/form/BaseForm";
 import { Field } from "src/components/form/Field";
 
-const useGridApiRef = lazy(() => import("@mui/x-data-grid").then((module) => ({ default: module.useGridApiRef })));
+const DataGrid = lazy(() => import("@mui/x-data-grid").then((module) => ({ default: module.DataGrid })));
 
 const columnWidths = {
   title: 500,
@@ -31,7 +32,7 @@ const columnWidths = {
   format_item: 67,
   quality_item: 66,
   no_copies: 65,
-  media_type: 95,
+  record_type: 95,
   url: 50,
   date_created: 176,
   creator_name: 152,
@@ -69,7 +70,7 @@ const columns = [
   { field: "format_item", _skipSelect: true },
   { field: "quality_item", _skipSelect: true },
   { field: "no_copies", headerName: "Copies", _skipSelect: true },
-  { field: "media_type", headerName: "Media Type", _skipSelect: true },
+  { field: "record_type", headerName: "Record Type", _skipSelect: true },
 
   {
     field: "url",
@@ -95,14 +96,13 @@ const columns = [
   maxWidth: "500",
 }));
 
-const DataGrid = lazy(() => import("@mui/x-data-grid").then((module) => ({ default: module.DataGrid })));
 const getRowClassName = (params) => (params.indexRelativeToCurrentPage % 2 === 0 ? "even" : "odd");
 
 const processRecordsToRows = (data) => {
   return data.reduce((acc, item) => {
     const { media, ...record } = item;
     media.map((media) => {
-      const { call_number, generation_item, format_item, quality_item, no_copies, media_type, media_id, url } = media;
+      const { call_number, generation_item, format_item, quality_item, no_copies, record_type, media_id, url } = media;
 
       const row = {
         ...record,
@@ -111,7 +111,7 @@ const processRecordsToRows = (data) => {
         format_item,
         quality_item,
         no_copies,
-        media_type,
+        record_type,
         url,
         date_created: new Date(record.date_created),
         date_modified: new Date(record.date_modified),

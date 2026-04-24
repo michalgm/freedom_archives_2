@@ -85,7 +85,7 @@ CREATE TABLE IF NOT EXISTS records (
     has_digital boolean,
     date_modified timestamptz,
     date date,
-    media_type text,
+    record_type text,
     format text,
     url text,
     thumbnail text,
@@ -141,10 +141,10 @@ CREATE INDEX IF NOT EXISTS records_has_digital_idx ON records (archive_id, has_d
 CREATE INDEX IF NOT EXISTS records_keyword_ids_idx ON records USING gin (keyword_ids);
 
 --
--- Name: records_media_type_idx; Type: INDEX; Schema: -; Owner: -
+-- Name: records_record_type_idx; Type: INDEX; Schema: -; Owner: -
 --
 
-CREATE INDEX IF NOT EXISTS records_media_type_idx ON records (archive_id, media_type);
+CREATE INDEX IF NOT EXISTS records_record_type_idx ON records (archive_id, record_type);
 
 --
 -- Name: records_producer_ids_idx; Type: INDEX; Schema: -; Owner: -
@@ -214,7 +214,7 @@ CREATE OR REPLACE VIEW records_view AS
     r.has_digital,
     r.date_modified,
     r.date,
-    r.media_type,
+    r.record_type,
     r.format,
     r.url,
     r.thumbnail,

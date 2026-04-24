@@ -24,7 +24,6 @@ describe("records media create/remove", () => {
         media: [
           {
             url: "",
-            media_type: "",
           },
         ],
       },

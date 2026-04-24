@@ -26,6 +26,7 @@ import {
 } from "react-hook-form-mui";
 import FileUpload from "src/components/form/FileUpload";
 import { formatLabel } from "src/components/form/schemaUtils";
+import { RECORD_TYPES } from "src/config/constants";
 
 import Autocomplete from "../Autocomplete/Autocomplete";
 import DateStringField from "../DateStringField";
@@ -61,7 +62,7 @@ const selectOptions = {
       label: k + 1900 + "",
     })),
   ],
-  media_types: ["Audio", "Webpage", "Image", "Video", "PDF"].map((id) => ({
+  record_type: RECORD_TYPES.map((id) => ({
     id,
     label: id,
   })),

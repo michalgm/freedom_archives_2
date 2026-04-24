@@ -92,7 +92,7 @@ const MediaCard = ({ media }) => {
           <Typography variant="caption" color="textSecondary">
             Format
           </Typography>
-          <Typography variant="body2">{media.format_item?.item || media.media_type || "—"}</Typography>
+          <Typography variant="body2">{media.format_item?.item || "—"}</Typography>
         </Grid>
 
         {/* Quality */}

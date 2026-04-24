@@ -1,6 +1,6 @@
 import { KnexService } from "@feathersjs/knex";
 
-class ValueLookup extends KnexService {
+class ListItemsLookup extends KnexService {
   constructor(options) {
     super({
       ...options,
@@ -16,5 +16,5 @@ export default (function (app) {
     paginate: app.get("paginate"),
   };
   // Initialize our service with any options it requires
-  app.use("/api/list_items_lookup", new ValueLookup(options));
+  app.use("/api/list_items_lookup", new ListItemsLookup(options));
 });

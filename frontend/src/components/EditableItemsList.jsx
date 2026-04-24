@@ -295,8 +295,8 @@ export function Item({
   return (
     <ListItem {...props} dense={dense} disablePadding alignItems="flex-start">
       <Container {...list_item_props}>
-        <ListItemAvatar style={{ minWidth: dense ? 35 : null }}>
-          <Thumbnail item={item} width={dense ? 20 : 40} />
+        <ListItemAvatar style={{ minWidth: dense ? 35 : 65 }}>
+          <Thumbnail item={item} width={dense ? 20 : 50} />
         </ListItemAvatar>
         <ListItemText
           disableTypography

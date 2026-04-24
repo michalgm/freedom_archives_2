@@ -103,7 +103,8 @@ function QuickSearch() {
               "collection",
               "date_modified",
               "thumbnail",
-              "primary_media_media_type",
+              "record_type",
+              "has_digital",
             ],
           });
         } else {

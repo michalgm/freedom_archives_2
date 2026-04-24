@@ -22,7 +22,8 @@ export const recordSelectFields = [
   "formats",
   "qualitys",
   "generations",
-  "media_types",
+  "record_type",
+  "has_digital",
   "is_hidden",
   "needs_review",
   "fact_number",
@@ -72,3 +73,5 @@ export const ITEM_TYPES = {
   format: { description: true, media: true },
   quality: { description: true, media: true },
 };
+
+export const RECORD_TYPES = ["Audio", "Video", "Image", "Website", "Document", "Other"];

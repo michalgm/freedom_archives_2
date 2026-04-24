@@ -90,7 +90,7 @@ export function ItemLink({ item, children, ...props }) {
   const url = item.collection_id ? `/collections/${item.collection_id}` : item.url || item.primary_media_url;
   const target = item.collection_id ? "_self" : "_blank";
   if (!url) return children;
-  // const onClick = ['Audio', 'Video'].includes(item.media_type) && setCurrentRecord ? (e) => {
+  // const onClick = ['Audio', 'Video'].includes(item.record_type) && setCurrentRecord ? (e) => {
   //   e.preventDefault();
   //   setCurrentRecord(item);
   // } : undefined;
@@ -146,7 +146,7 @@ export function ItemCard({ item, expand = false, url, dense = false, setCurrentR
         body,
         details: detailChips,
         header: title,
-        media: <Thumbnail item={item} width={dense ? 50 : 75} />,
+        media: <Thumbnail item={item} width={dense ? 75 : 100} />,
         actions,
         isOverflowing,
         dense,

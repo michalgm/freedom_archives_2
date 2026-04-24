@@ -143,30 +143,30 @@ const updateThumbnail = async (context) => {
       }
     }
     if (type === 'records') {
-      let media_type = '';
+      let media_type = "";
       for (const [key, value] of Object.entries(thumbnailApis)) {
         if (url.match(key)) {
           args.url = await value(url);
-          media_type = 'Video';
+          media_type = "Video";
           break;
         }
       }
       if (!media_type) {
-        const ext = url.split('.').pop().replace(/\?.*/g, '').toLowerCase();
-        media_type = MEDIA_TYPES[ext] || 'Webpage';
+        const ext = url.split(".").pop().replace(/\?.*/g, "").toLowerCase();
+        media_type = MEDIA_TYPES[ext] || "Webpage";
         // if (!MEDIA_TYPES[ext]) {
         //   console.log(`  - Inferred media type for ${url} as ${media_type} from file extension .${ext}`);
         // }
       }
-      if (['Video', 'Image', 'PDF'].includes(media_type)) {
+      if (["Video", "Image", "PDF"].includes(media_type)) {
         await writeThumbnailsFromUrl(args);
       }
 
-      if (method === 'create') {
-        relation_data.media[0].media_type = media_type;
-      } else {
-        await context.app.service('api/media')._patch(relation_data.media[0].media_id, { media_type }, params);
-      }
+      // if (method === 'create') {
+      //   relation_data.media[0].media_type = media_type;
+      // } else {
+      //   await context.app.service('api/media')._patch(relation_data.media[0].media_id, { media_type }, params);
+      // }
     }
   }
   return context;

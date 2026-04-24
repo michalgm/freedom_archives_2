@@ -7,7 +7,14 @@ import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
 import Stack from "@mui/material/Stack";
 import Tooltip from "@mui/material/Tooltip";
-import { useGridApiRef, DataGrid, GridActionsCellItem, GridEditInputCell, GridToolbar } from "@mui/x-data-grid";
+import {
+  useGridApiRef,
+  DataGrid,
+  GridActionsCellItem,
+  GridEditInputCell,
+  GridToolbar,
+  getGridDefaultColumnTypes,
+} from "@mui/x-data-grid";
 import { merge, omit, startCase } from "lodash-es";
 import { useConfirm } from "material-ui-confirm";
 import { useCallback, useEffect, useMemo, useState } from "react";
@@ -16,6 +23,8 @@ import { useAddNotification } from "src/stores";
 import { diffShallow } from "src/utils";
 
 import * as API from "../api";
+
+const defaultColumnTypes = getGridDefaultColumnTypes();
 
 const AddButton = ({ itemType, addItem }) => {
   return (
@@ -26,7 +35,9 @@ const AddButton = ({ itemType, addItem }) => {
 };
 
 function RenderInputCell(props) {
-  const { error } = props;
+  const { error, colDef } = props;
+  const DefaultEditCell = defaultColumnTypes[colDef.type]?.renderEditCell ?? GridEditInputCell;
+
   return (
     <Tooltip
       open={!!error}
@@ -38,12 +49,25 @@ function RenderInputCell(props) {
         arrow: { sx: { color: "error.main", left: "50% !important", transform: "translateX(-50%) !important" } },
       }}
     >
-      <Box sx={{ width: "100%" }}>
-        <GridEditInputCell {...props} />
+      <Box sx={{ display: "inline-flex", alignItems: "center", width: "100%" }}>
+        <DefaultEditCell {...props} />
       </Box>
     </Tooltip>
   );
 }
+
+const validateRow =
+  (model, field) =>
+  ({ props }) => {
+    let error = false;
+    const schema = schemas[`${model}DataSchema`];
+    const result = schema.pick({ [field]: true }).safeParse({ [field]: props.value });
+    if (!result.success) {
+      error = parseError(field)(result.error.issues[0]);
+    }
+    return { ...props, error };
+  };
+
 
 const emptyFunction = () => {};
 const emptyArray = [];
@@ -84,6 +108,9 @@ export const EditableDataTable = ({
     (newRow = {}) => {
       if (localRows[0]?.[idField] === -1) {
         setLocalRows((rows) => rows.slice(1));
+        if (newRow[idField] > -1) {
+          setLocalRows((rows) => [newRow, ...rows]);
+        }
       } else if (newRow.delete) {
         setLocalRows((rows) => rows.filter((row) => row[idField] !== newRow[idField]));
       }
@@ -93,54 +120,38 @@ export const EditableDataTable = ({
     [idField, localRows],
   );
 
-  const validateRow = useCallback(
-    (field) =>
-      ({ props, hasChanged }) => {
-        const schema = schemas[`${model}DataSchema`];
-        let error = false;
-        if (schema && hasChanged) {
-          const result = schema.pick({ [field]: true }).safeParse({ [field]: props.value });
-          if (!result.success) {
-            error = parseError(field)(result.error.issues[0]);
-          }
-        }
-        return { ...props, error };
-      },
-    [model],
-  );
-
   const processRowUpdate = useCallback(
     async (newRow, oldRow) => {
       const name = getItemName(newRow);
       const id = newRow[idField];
       const action = newRow.delete ? "Delete" : id === -1 ? "Create" : "Update";
-      try {
-        const { confirmed } = await confirm({
-          title: `${action} ${itemType.toLowerCase()}?`,
-          description: `Are you sure you want to ${action.toLowerCase()} the ${itemType.toLowerCase()} "${name}"?`,
-          confirmationButtonProps: {
-            variant: "contained",
-          },
-        });
-        if (confirmed) {
-          // const prepared = diffShallow(newRow, oldRow);
-          const data = newRow;
-          if (newRow.delete) {
-            await API[model].remove(id);
-          } else if (id === -1) {
-            newRow = await API[model].create(omit(data, [idField]));
-            onNew(newRow);
-          } else {
-            newRow = await API[model].patch(id, diffShallow(data, oldRow));
-          }
-          addNotification({ message: `${itemType} "${name}" ${action.toLowerCase()}d!` });
-          await onUpdate(newRow);
-        } else {
-          newRow = oldRow;
-        }
-      } catch (_err) {
-        newRow = oldRow;
-      }
+       try {
+         const { confirmed } = await confirm({
+           title: `${action} ${itemType.toLowerCase()}?`,
+           description: `Are you sure you want to ${action.toLowerCase()} the ${itemType.toLowerCase()} "${name}"?`,
+           confirmationButtonProps: {
+             variant: "contained",
+           },
+         });
+         if (confirmed) {
+           // const prepared = diffShallow(newRow, oldRow);
+           const data = newRow;
+           if (newRow.delete) {
+             await API[model].remove(id);
+           } else if (id === -1) {
+             newRow = await API[model].create(omit(data, [idField]));
+             onNew(newRow);
+           } else {
+             newRow = await API[model].patch(id, diffShallow(data, oldRow));
+           }
+           addNotification({ message: `${itemType} "${name}" ${action.toLowerCase()}d!` });
+           await onUpdate(newRow);
+         } else {
+           newRow = oldRow;
+         }
+       } catch (_err) {
+         newRow = oldRow;
+       }
       resetEdit(newRow);
       return newRow;
     },
@@ -155,10 +166,24 @@ export const EditableDataTable = ({
   );
 
   const updateRow = useCallback(
-    (id, action = "edit") => {
+    async (id, action = "edit") => {
       if (action === "edit") {
         apiRef.current.startRowEditMode({ id, fieldToFocus });
         setEditRow(id);
+      } else if (action === "save") {
+        const updatedRow = apiRef.current.getRowWithUpdatedValues(id);
+        await Promise.all(
+          columns
+            .filter((col) => col.editable)
+            .map((col) =>
+              apiRef.current.setEditCellValue({
+                id,
+                field: col.field,
+                value: updatedRow[col.field],
+              }),
+            ),
+        );
+        apiRef.current.stopRowEditMode({ id });
       } else {
         apiRef.current.stopRowEditMode({ id, ignoreModifications: action === "cancel" });
         if (action === "cancel") {
@@ -166,7 +191,7 @@ export const EditableDataTable = ({
         }
       }
     },
-    [apiRef, resetEdit, fieldToFocus],
+    [apiRef, fieldToFocus, columns, resetEdit],
   );
 
   const addItem = useCallback(() => {
@@ -218,10 +243,14 @@ export const EditableDataTable = ({
     const updateColumns = columns.map((column) => {
       const { flex, ...rest } = column;
       rest.headerName = rest.headerName || startCase(rest.field);
-      rest.preProcessEditCellProps = validateRow(rest.field);
-      if (column.preProcessEditCellProps) {
-        rest.renderEditCell = RenderInputCell;
-      }
+      rest.preProcessEditCellProps = async (params) => {
+        const validation = await validateRow(model, rest.field)(params);
+        if (validation?.error) {
+          return validation;
+        }
+        return (await column.preProcessEditCellProps?.(params)) ?? validation;
+      };
+      rest.renderEditCell = RenderInputCell;
       if (!autosizeColumns) {
         rest.flex = flex;
         return rest;
@@ -255,8 +284,8 @@ export const EditableDataTable = ({
     updateRow,
     deleteRow,
     apiRef,
-    validateRow,
     autosizeColumns,
+    model,
   ]);
 
   useEffect(() => {

@@ -91,13 +91,13 @@ const queries = {
 SELECT
   record_id,
   title,
-  media_types
+  record_type
 FROM
   _unified_records
 WHERE
   has_digital=TRUE
-  AND media_types&&ARRAY['Video', 'PDF', 'Image']
-  AND record_id NOT IN (${[...thumbnails].join(','), -1})
+  AND record_type IN ('Video', 'PDF', 'Image')
+  AND record_id NOT IN (${([...thumbnails].join(","), -1)})
 ORDER BY
   record_id
       `;

@@ -1,6 +1,11 @@
 import zod from "zod";
 
+import { RECORD_TYPES } from "../../frontend/src/config/constants.js";
+
 const z = zod;
+
+export const recordTypeEnum = z.enum(RECORD_TYPES);
+
 
 const callNumberSuffixSchema = z.union([
   z.string().regex(/^[\d.]{1,5}([A-Z]| +R[\d])?$/, {
@@ -31,6 +36,7 @@ const list_itemsSchema = z.object({
   item: z.string().min(1),
   description: z.string().nullable().optional(),
   merge_target_id: z.number().nullable().optional(),
+  record_type: recordTypeEnum.nullable().optional(),
 });
 
 const usersSchema = z.object({
@@ -50,38 +56,6 @@ const usersSchema = z.object({
   email: z.string().nullable().optional(),
   full_name: z.string().nullable().optional(),
 });
-// .and(
-//   z.object({}).superRefine(({ password, username }, ctx) => {
-//     if (password) {
-//       if (password.length < 8) {
-//         ctx.addIssue({
-//           path: ["password"],
-//           code: z.ZodIssueCode.too_small,
-//           error: "Password must be at least 8 characters",
-//           minimum: 8,
-//           type: "string",
-//           inclusive: true,
-//         });
-//       }
-
-//       if (password === username) {
-//         ctx.addIssue({
-//           path: ["password"],
-//           code: z.ZodIssueCode.custom,
-//           error: "Password cannot be the same as username",
-//         });
-//       }
-
-//       if (/^[A-Za-z0-9]+$/.test(password)) {
-//         ctx.addIssue({
-//           path: ["password"],
-//           code: z.ZodIssueCode.custom,
-//           error: "Password must contain at least one special character",
-//         });
-//       }
-//     }
-//   })
-// );
 
 const common_modification_fields = {
   date_created: z.iso.datetime().nullable().optional(),
@@ -105,14 +79,20 @@ const mediaSchema = z.object({
   no_copies: z.number().min(1).nullable().optional().default(1).describe("Copies Count"),
   quality_id: z.number().nullable().optional(),
   generation_id: z.number().nullable().optional(),
-  url: z.union([z.url({
-    protocol: /^https?$/,
-    hostname: z.regexes.domain,
-    error: "Must be a valid URL",
-  }), z.literal(""), z.null()]).nullable().optional(),
+  url: z
+    .union([
+      z.url({
+        protocol: /^https?$/,
+        hostname: z.regexes.domain,
+        error: "Must be a valid URL",
+      }),
+      z.literal(""),
+      z.null(),
+    ])
+    .nullable()
+    .optional(),
   // url: z.string().url().nullable(),
   thumbnail: z.string().nullable().optional(),
-  media_type: z.enum(["Audio", "Webpage", "Image", "Video", "PDF"]),
   call_number_item: list_itemsSchema.nullable().optional().describe("Call Number"),
   generation_item: list_itemsSchema.nullable().optional().describe("Generation"),
   format_item: list_itemsSchema.describe("Format"),
@@ -203,7 +183,7 @@ const recordsSchema = z.object({
   primary_media_thumbnail: z.string().nullable().optional(),
   primary_media_format_id: z.number().nullable().optional(),
   primary_media_format_text: z.string().nullable().optional(),
-  primary_media_media_type: z.string().nullable().optional(),
+  record_type: recordTypeEnum.nullable().optional(),
   collection: z.lazy(() => embeddedCollectionSchema),
   children: z
     .array(z.lazy(() => embeddedRecordSchema))
@@ -307,7 +287,7 @@ const embeddedRecordSchema = recordsSchema
     primary_media_thumbnail: true,
     primary_media_format_id: true,
     primary_media_format_text: true,
-    primary_media_media_type: true,
+    record_type: true,
     collection: z.lazy(() => embeddedCollectionSchema),
   })
   .extend({ record_id: z.number(), delete: z.boolean().optional() });

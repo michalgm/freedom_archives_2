@@ -24,14 +24,20 @@ export default (function (app) {
       id,
       app,
       data,
+      result,
       params: {
         user,
         transaction: { trx },
       },
     } = context;
-    if (!id) {
-      await app.service("api/records").patch(data.record_id, {}, { user, transaction: { trx } });
-    }
+
+    const recordIds = id ? [result].flat().map((r) => r.record_id) : [data?.record_id];
+
+    await Promise.all(
+      recordIds
+        .filter(Boolean)
+        .map((recordId) => app.service("api/records").patch(recordId, {}, { user, transaction: { trx } })),
+    );
   };
 
   const cleanupMeta = (context) => {

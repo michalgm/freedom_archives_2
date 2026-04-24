@@ -141,7 +141,7 @@ export const usePublicSearch = (
           "program",
           "call_number",
           "vol_number",
-          "media_type",
+          "record_type",
           "url",
         ],
         $limit: pageSize,
@@ -162,7 +162,7 @@ export const usePublicSearch = (
       const combinedSearch = merge({}, searchFilters, search);
       filterTypes.forEach((type) => {
         if (combinedSearch[type]) {
-          if (["year", "title", "format", "media_type"].includes(type)) {
+          if (["year", "title", "format", "record_type"].includes(type)) {
             query[type] = combinedSearch[type][0];
           } else if (type === "collection_id") {
             query[type] = { $in: combinedSearch[type] };

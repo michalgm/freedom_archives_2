@@ -61,7 +61,7 @@ async function fetchCollection({ params }) {
       "program",
       "call_number",
       "vol_number",
-      "media_type",
+      "record_type",
       "url",
     ],
     $limit: PAGE_SIZE,

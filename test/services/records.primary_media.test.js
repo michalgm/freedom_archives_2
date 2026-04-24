@@ -25,10 +25,7 @@ describe("records primary_media_id behavior", () => {
         {
           title,
           collection_id: TEST_COLLECTION_ID,
-          media: [
-            { url: "", media_type: "" },
-            { url: "", media_type: "" },
-          ],
+          media: [{ url: "" }, { url: "" }],
         },
         params,
       );
@@ -102,10 +99,7 @@ describe("records primary_media_id behavior", () => {
         {
           title,
           collection_id: TEST_COLLECTION_ID,
-          media: [
-            { url: "", media_type: "" },
-            { url: "", media_type: "" },
-          ],
+          media: [{ url: "" }, { url: "" }],
         },
         params,
       );
@@ -181,7 +175,7 @@ describe("records primary_media_id behavior", () => {
         {
           title,
           collection_id: TEST_COLLECTION_ID,
-          media: [{ url: "", media_type: "" }],
+          media: [{ url: "" }],
         },
         params,
       );

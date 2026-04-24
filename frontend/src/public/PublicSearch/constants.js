@@ -4,7 +4,7 @@ export const INITIAL_FILTER_DISPLAY_COUNT = 5;
 
 export const FILTER_TYPE_LABELS = {
   collection_id: "collection",
-  media_type: "media_type",
+  record_type: "record_type",
   format: "source_format",
   year: "year",
   title: "title",

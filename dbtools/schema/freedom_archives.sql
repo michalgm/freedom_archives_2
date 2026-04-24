@@ -166,7 +166,6 @@ CREATE TABLE IF NOT EXISTS _unified_records (
     formats integer[],
     qualitys integer[],
     generations integer[],
-    media_types text[],
     authors jsonb,
     publishers jsonb,
     subjects jsonb,
@@ -187,7 +186,7 @@ CREATE TABLE IF NOT EXISTS _unified_records (
     primary_media_thumbnail TEXT,
     primary_media_format_id INTEGER,
     primary_media_format_text TEXT,
-    primary_media_media_type TEXT,
+    record_type TEXT,
     collection json,
     children json[],
     siblings json[],
@@ -264,6 +263,14 @@ CREATE INDEX IF NOT EXISTS records_search_text_index ON _unified_records USING g
 --
 
 CREATE INDEX IF NOT EXISTS records_subjects_search ON _unified_records USING gin (subjects_search);
+
+
+--
+-- Name: records_record_type; Type: INDEX; Schema: -; Owner: -
+--
+
+CREATE INDEX IF NOT EXISTS records_record_type ON _unified_records (record_type);
+
 
 --
 -- Name: records_title; Type: INDEX; Schema: -; Owner: -
@@ -380,6 +387,22 @@ CREATE INDEX IF NOT EXISTS list_items_search_text_trgm_idx ON list_items USING g
 --
 
 CREATE UNIQUE INDEX IF NOT EXISTS list_items_type_idx ON list_items (type, item, archive_id);
+
+CREATE TYPE record_type AS ENUM (
+    'Audio',
+    'Video',
+    'Image',
+    'Website',
+    'Document',
+    'Other'
+);
+
+CREATE TABLE format_record_types (
+  list_item_id INTEGER,
+  record_type record_type,
+  CONSTRAINT format_record_types_pkey PRIMARY KEY (list_item_id),
+  CONSTRAINT format_record_types_list_item_fkey FOREIGN KEY (list_item_id) REFERENCES freedom_archives.list_items (list_item_id) ON DELETE CASCADE
+);
 
 --
 -- Name: settings; Type: TABLE; Schema: -; Owner: -
@@ -500,7 +523,7 @@ CREATE TABLE IF NOT EXISTS records_snapshots (
     has_digital boolean,
     date_modified timestamptz,
     date date,
-    media_type text,
+    record_type text,
     format text,
     url text,
     thumbnail text,
@@ -744,7 +767,6 @@ CREATE TABLE IF NOT EXISTS media (
     generation_id integer,
     url text DEFAULT '' NOT NULL,
     thumbnail text,
-    media_type text DEFAULT '' NOT NULL,
     creator_user_id integer,
     contributor_user_id integer,
     date_created timestamptz,
@@ -784,12 +806,6 @@ CREATE INDEX IF NOT EXISTS media_format ON media (format_id);
 --
 
 CREATE INDEX IF NOT EXISTS media_generation ON media (generation_id);
-
---
--- Name: media_media_type; Type: INDEX; Schema: -; Owner: -
---
-
-CREATE INDEX IF NOT EXISTS media_media_type ON media (media_type);
 
 --
 -- Name: media_quality; Type: INDEX; Schema: -; Owner: -
@@ -876,7 +892,8 @@ CREATE OR REPLACE VIEW list_items_lookup AS
     li.description,
     count(DISTINCT r.record_id) AS records_count,
     0 AS collections_count,
-    0 AS media_count
+    0 AS media_count,
+    NULL AS record_type
    FROM list_items li
      LEFT JOIN records_to_list_items r ON li.list_item_id = r.list_item_id
   WHERE li.type = 'author'::text
@@ -890,7 +907,8 @@ UNION ALL
     li.description,
     count(DISTINCT r.record_id) AS records_count,
     count(DISTINCT c.collection_id) AS collections_count,
-    0 AS media_count
+    0 AS media_count,
+    NULL AS record_type
    FROM list_items li
      LEFT JOIN records_to_list_items r ON li.list_item_id = r.list_item_id
      LEFT JOIN collections_to_list_items c ON li.list_item_id = c.list_item_id
@@ -905,7 +923,8 @@ UNION ALL
     li.description,
     count(DISTINCT r.record_id) AS records_count,
     0 AS collections_count,
-    0 AS media_count
+    0 AS media_count,
+    NULL AS record_type
    FROM list_items li
      LEFT JOIN records_to_list_items r ON li.list_item_id = r.list_item_id
   WHERE li.type = 'producer'::text
@@ -919,7 +938,8 @@ UNION ALL
     li.description,
     count(DISTINCT r.record_id) AS records_count,
     count(DISTINCT c.collection_id) AS collections_count,
-    0 AS media_count
+    0 AS media_count,
+    NULL AS record_type
    FROM list_items li
      LEFT JOIN records_to_list_items r ON li.list_item_id = r.list_item_id
      LEFT JOIN collections_to_list_items c ON li.list_item_id = c.list_item_id
@@ -934,7 +954,8 @@ UNION ALL
     li.description,
     count(DISTINCT r.record_id) AS records_count,
     0 AS collections_count,
-    0 AS media_count
+    0 AS media_count,
+    NULL AS record_type
    FROM list_items li
      LEFT JOIN records r ON li.list_item_id = r.program_id
   WHERE li.type = 'program'::text
@@ -948,7 +969,8 @@ UNION ALL
     li.description,
     count(DISTINCT r.record_id) AS records_count,
     count(DISTINCT c.collection_id) AS collections_count,
-    0 AS media_count
+    0 AS media_count,
+    NULL AS record_type
    FROM list_items li
      LEFT JOIN records_to_list_items r ON li.list_item_id = r.list_item_id
      LEFT JOIN collections_to_list_items c ON li.list_item_id = c.list_item_id
@@ -963,11 +985,13 @@ UNION ALL
     li.description,
     0 AS records_count,
     0 AS collections_count,
-    count(DISTINCT i.media_id) AS media_count
+    count(DISTINCT i.media_id) AS media_count,
+    frt.record_type::TEXT as record_type
    FROM list_items li
      LEFT JOIN media i ON li.list_item_id = i.format_id
+     LEFT JOIN format_record_types frt ON li.list_item_id = frt.list_item_id
   WHERE li.type = 'format'::text
-  GROUP BY li.list_item_id
+  GROUP BY li.list_item_id, frt.record_type
 UNION ALL
  SELECT li.list_item_id,
     li.item,
@@ -977,7 +1001,8 @@ UNION ALL
     li.description,
     0 AS records_count,
     0 AS collections_count,
-    count(DISTINCT i.media_id) AS media_count
+    count(DISTINCT i.media_id) AS media_count,
+    NULL AS record_type
    FROM list_items li
      LEFT JOIN media i ON li.list_item_id = i.quality_id
   WHERE li.type = 'quality'::text
@@ -991,7 +1016,8 @@ UNION ALL
     li.description,
     0 AS records_count,
     0 AS collections_count,
-    count(DISTINCT i.media_id) AS media_count
+    count(DISTINCT i.media_id) AS media_count,
+    NULL AS record_type
    FROM list_items li
      LEFT JOIN media i ON li.list_item_id = i.generation_id
   WHERE li.type = 'generation'::text
@@ -1005,7 +1031,8 @@ UNION ALL
     li.description,
     0 AS records_count,
     count(DISTINCT c.collection_id) AS collections_count,
-    count(DISTINCT i.media_id) AS media_count
+    count(DISTINCT i.media_id) AS media_count,
+    NULL AS record_type
    FROM list_items li
      LEFT JOIN collections c ON li.list_item_id = c.call_number_id
      LEFT JOIN media i ON li.list_item_id = i.call_number_id
@@ -1028,7 +1055,6 @@ CREATE OR REPLACE VIEW media_view AS
     a.generation_id,
     a.url,
     a.thumbnail,
-    a.media_type,
     a.creator_user_id,
     a.contributor_user_id,
     a.date_created,
@@ -1079,7 +1105,6 @@ CREATE OR REPLACE VIEW record_media_view AS
     array_agg(DISTINCT format_id) FILTER (WHERE format_id IS NOT NULL) AS formats,
     array_agg(DISTINCT quality_id) FILTER (WHERE quality_id IS NOT NULL) AS qualitys,
     array_agg(DISTINCT generation_id) FILTER (WHERE generation_id IS NOT NULL) AS generations,
-    array_agg(DISTINCT media_type) FILTER (WHERE media_type IS NOT NULL) AS media_types,
     string_agg(DISTINCT (format_item->'item')::text, ' ## '::text) FILTER (WHERE format_item IS NOT NULL) AS formats_text
    FROM media_view a
   GROUP BY record_id;
@@ -1095,13 +1120,14 @@ CREATE OR REPLACE VIEW record_summaries AS
     primary_media.thumbnail AS primary_media_thumbnail,
     primary_media.format_id AS primary_media_format_id,
     list_items.item AS primary_media_format_text,
-    primary_media.media_type AS primary_media_media_type,
+    frt.record_type::TEXT AS record_type,
     COALESCE(( SELECT row_to_json(c.*) AS row_to_json
            FROM collection_summaries c
           WHERE a.collection_id = c.collection_id), '{}'::json) AS collection
    FROM records a
      LEFT JOIN media primary_media ON a.primary_media_id = primary_media.media_id
-     LEFT JOIN list_items ON primary_media.format_id = list_items.list_item_id AND list_items.type = 'format'::text;
+     LEFT JOIN list_items ON primary_media.format_id = list_items.list_item_id AND list_items.type = 'format'::text
+     LEFT JOIN format_record_types frt ON primary_media.format_id = frt.list_item_id;
 
 --
 -- Name: records_list_items_view; Type: VIEW; Schema: -; Owner: -
@@ -1162,17 +1188,19 @@ CREATE OR REPLACE VIEW unified_collections AS
     subjects.items_search AS subjects_search,
     keywords.items_search AS keywords_search,
     publishers.items_search AS publishers_search,
-    array_to_json(ARRAY( SELECT json_build_object('record_id', b.record_id, 'title', b.title, 'parent_record_id', b.parent_record_id, 'primary_media_thumbnail', primary_media.thumbnail, 'primary_media_format_id', primary_media.format_id, 'primary_media_format_text', list_items.item, 'primary_media_media_type', primary_media.media_type) AS json_build_object
+    array_to_json(ARRAY( SELECT json_build_object('record_id', b.record_id, 'title', b.title, 'parent_record_id', b.parent_record_id, 'primary_media_thumbnail', primary_media.thumbnail, 'primary_media_format_id', primary_media.format_id, 'primary_media_format_text', list_items.item, 'record_type', frt.record_type) AS json_build_object
            FROM records b
              LEFT JOIN media primary_media ON b.primary_media_id = primary_media.media_id
              LEFT JOIN list_items ON primary_media.format_id = list_items.list_item_id AND list_items.type = 'format'::text
+             LEFT JOIN format_record_types frt ON primary_media.format_id = frt.list_item_id
           WHERE a.collection_id = b.collection_id
           ORDER BY b.title)) AS child_records,
-    array_to_json(ARRAY( SELECT json_build_object('record_id', b.record_id, 'title', b.title, 'parent_record_id', b.parent_record_id, 'primary_media_thumbnail', primary_media.thumbnail, 'primary_media_format_id', primary_media.format_id, 'primary_media_format_text', list_items.item, 'primary_media_media_type', primary_media.media_type, 'primary_media_url', primary_media.url, 'label', f.label, 'record_order', f.record_order) AS json_build_object
+    array_to_json(ARRAY( SELECT json_build_object('record_id', b.record_id, 'title', b.title, 'parent_record_id', b.parent_record_id, 'primary_media_thumbnail', primary_media.thumbnail, 'primary_media_format_id', primary_media.format_id, 'primary_media_format_text', list_items.item, 'record_type', frt.record_type, 'primary_media_url', primary_media.url, 'label', f.label, 'record_order', f.record_order) AS json_build_object
            FROM records b
              LEFT JOIN featured_records f ON b.record_id = f.record_id
              LEFT JOIN media primary_media ON b.primary_media_id = primary_media.media_id
              LEFT JOIN list_items ON primary_media.format_id = list_items.list_item_id AND list_items.type = 'format'::text
+             LEFT JOIN format_record_types frt ON primary_media.format_id = frt.list_item_id
           WHERE a.collection_id = f.collection_id
           ORDER BY f.record_order, b.title)) AS featured_records,
     (
@@ -1318,7 +1346,6 @@ CREATE OR REPLACE VIEW unified_records AS
     media.formats,
     media.qualitys,
     media.generations,
-    media.media_types,
     COALESCE(authors.items, '[]'::jsonb) AS authors,
     COALESCE(publishers.items, '[]'::jsonb) AS publishers,
     COALESCE(subjects.items, '[]'::jsonb) AS subjects,
@@ -1367,7 +1394,7 @@ CREATE OR REPLACE VIEW unified_records AS
     b.primary_media_thumbnail,
     b.primary_media_format_id,
     b.primary_media_format_text,
-    b.primary_media_media_type,
+    frt.record_type::TEXT AS record_type,
     b.collection,
     children.children,
     siblings.siblings,
@@ -1398,6 +1425,7 @@ CREATE OR REPLACE VIEW unified_records AS
      LEFT JOIN list_items program_lookup ON a.program_id = program_lookup.list_item_id
      LEFT JOIN record_media_view media USING (record_id)
      LEFT JOIN media primary_media ON a.primary_media_id = primary_media.media_id
+     LEFT JOIN format_record_types frt ON primary_media.format_id = frt.list_item_id
      LEFT JOIN users contributor ON a.contributor_user_id = contributor.user_id
      LEFT JOIN users creator ON a.creator_user_id = creator.user_id
      LEFT JOIN records_list_items_view authors ON authors.type = 'author'::text AND authors.record_id = a.record_id
@@ -1474,7 +1502,7 @@ CREATE OR REPLACE VIEW unified_search_view AS
     unified_records.fulltext,
     unified_records.call_numbers,
     array_to_string(unified_records.call_numbers, ' '::text) AS call_number_text,
-    unified_records.primary_media_media_type,
+    unified_records.record_type,
     unified_records.has_digital,
     NULL::text AS thumbnail
    FROM _unified_records AS unified_records
@@ -1492,7 +1520,7 @@ UNION ALL
             ELSE ARRAY[]::text[]
         END AS call_numbers,
     unified_collections.call_number AS call_number_text,
-    NULL::text AS primary_media_media_type,
+    NULL::text AS record_type,
     true AS has_digital,
     unified_collections.thumbnail
    FROM _unified_collections AS unified_collections;
@@ -1690,4 +1718,3 @@ CREATE INDEX IF NOT EXISTS duplicate_list_items_id_1_idx
 
 -- CREATE INDEX IF NOT EXISTS duplicate_records_title_similarity_idx 
 --   ON duplicate_records (title_1, similarity_score DESC);
-

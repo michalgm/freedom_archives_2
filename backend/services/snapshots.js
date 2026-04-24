@@ -34,7 +34,6 @@ SELECT
   r.has_digital,
   r.date_modified,
   r.date,
-  i.media_type AS media_type,
   r.primary_media_format_text AS FORMAT,
   i.url AS url,
   i.thumbnail AS thumbnail,
@@ -74,7 +73,8 @@ SELECT
   r.collection_id,
   r.fulltext,
   r.search_text,
-  r.ancestor_collection_ids
+  r.ancestor_collection_ids,
+  r.record_type AS record_type
 FROM
   _unified_records r
   JOIN _unified_collections c USING (collection_id)
@@ -82,6 +82,7 @@ FROM
 WHERE
   r.is_hidden=FALSE
   AND r.needs_review=FALSE
+  AND r.record_type != 'Other'
   AND ${collections_filter}
   `;
 

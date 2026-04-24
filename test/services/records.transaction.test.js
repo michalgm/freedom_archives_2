@@ -47,7 +47,7 @@ describe("records transactional behavior", () => {
         {
           title: recordTitle,
           collection_id: 1000,
-          media: [{ url: failingUrl, media_type: "" }],
+          media: [{ url: failingUrl }],
         },
         params,
       ),
