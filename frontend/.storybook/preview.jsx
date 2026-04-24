@@ -32,6 +32,9 @@ const preview = {
     msw: {
       handlers,
     },
+    docs: {
+      toc: true, // 👈 Enables the table of contents
+    },
   },
   loaders: [mswLoader],
   decorators: [
