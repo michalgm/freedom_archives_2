@@ -155,7 +155,7 @@ function buildWhere(qb, { idField, idValue, fuzzyTerm, useIdCheck = true, useFuz
         this.whereRaw("id_check.exists = false");
       }
       this.whereRaw("fulltext @@ ts_query.query");
-      if (useFuzzy && idValue == null) {
+      if (useFuzzy && !includeId) {
         this.orWhereRaw("search_text %> ?", [fuzzyTerm]);
       }
     });
@@ -165,9 +165,11 @@ function buildWhere(qb, { idField, idValue, fuzzyTerm, useIdCheck = true, useFuz
 // Usage in rankedSearch:
 export const rankedSearch = async (context) => {
   const { query = {} } = context.params;
+  const { id: idField, name: tableName } = context.service.getOptions({});
   const isPublic = context.path.includes("/public/");
   const isQuoted = /".+"/.test(query.$fullText || "");
-  const useIdCheck = !isPublic;
+  const useIdCheck =
+    !isPublic && ["_unified_records", "_unified_collections", "unified_search_view"].includes(tableName);
   const useFuzzy = !isPublic && !isQuoted;
   const language = "english";
 
@@ -188,7 +190,6 @@ export const rankedSearch = async (context) => {
 
   const fuzzyTerm = searchTerm.replace(/["'()]/g, "");
   const knex = context.app.get("postgresqlClient");
-  const { id: idField, name: tableName } = context.service.getOptions({});
 
   const regex = await getCallNumberRegex(knex);
   const termIsCallNumber = await detectCallNumber(searchTerm, regex);
