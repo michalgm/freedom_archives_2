@@ -22,6 +22,7 @@ export default defineConfig({
     ],
     hookTimeout: 30000,
     testTimeout: 10000,
+    silent: 'passed-only'
   },
   resolve: {
     alias: {
