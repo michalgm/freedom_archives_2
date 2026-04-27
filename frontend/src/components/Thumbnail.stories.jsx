@@ -40,9 +40,9 @@ const Records = ({ label, item, ...props }) =>
 
 const sized = ({ item, ...props }) => (
   <>
-    <Thumbnail item={item} width={75} {...props} />
+    {/* <Thumbnail item={item} width={75} {...props} /> */}
     <Thumbnail item={item} width={100} {...props} />
-    <Thumbnail item={item} width={250} {...props} />
+    {/* <Thumbnail item={item} width={250} {...props} /> */}
   </>
 );
 
