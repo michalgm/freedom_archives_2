@@ -216,6 +216,12 @@ const Autocomplete = ({
           value = props.multiple ? value.map((v) => getOptionById(v)?.[idField]) : getOptionById(value)?.[idField];
         }
       }
+      if (props.multiple && Array.isArray(value)) {
+        value = value.filter((item) => (returnFullObject ? item?.[idField] : item) !== "new");
+      } else if (!props.multiple && (returnFullObject ? value?.[idField] : value) === "new") {
+        value = null;
+      }
+
       customOnChange && customOnChange(value);
 
       if (clearOnSelect) {
@@ -323,9 +329,12 @@ const Autocomplete = ({
 
               if (option?.[idField] === "new") {
                 setCustomValue(option.searchTerm);
-                return value.slice(0, -1);
+                value = value.slice(0, -1);
               }
-              return value;
+              if (!staticOptions && !(fetchAll && options?.length)) {
+                fetchOptions("");
+              }
+              return [...new Set(value.filter((item) => (getOptionById(item) ?? item)?.[idField] !== "new"))];
             },
           }}
         />
@@ -334,9 +343,7 @@ const Autocomplete = ({
         handleClose={(result) => {
           setCustomValue(null);
           if (result) {
-            const updatedValue = props.multiple
-              ? [...getValues(name).filter((v) => v !== "new" && v?.[idField] !== "new"), result]
-              : result;
+            const updatedValue = props.multiple ? [...getValues(name), result] : result;
             setValue(name, updatedValue, { shouldValidate: true, shouldDirty: true, shouldTouch: true });
           }
         }}
