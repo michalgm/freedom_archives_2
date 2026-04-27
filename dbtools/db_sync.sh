@@ -1,5 +1,7 @@
 #!/bin/bash
 
+set -e 
+
 DEST_ENV=${1:-"stage"}
 
 source ./read_pg_config.sh production
