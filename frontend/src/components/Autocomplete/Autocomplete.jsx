@@ -68,7 +68,7 @@ const NewListItemForm = ({ label, service, value, createParams, cancel, handleCl
         },
       });
       if (data.length) {
-        return `A ${label} named "${item}" already exists`;
+        return `A ${label.toLowerCase()} named "${item}" already exists`;
       }
     },
     [label, createParams],
@@ -84,7 +84,7 @@ const NewListItemForm = ({ label, service, value, createParams, cancel, handleCl
     <FormProvider {...methods}>
       <form onSubmit={handleSubmitWithoutPropagation} autoComplete="off" noValidate>
         <Grid size={12} sx={{ width: 300 }}>
-          <DialogTitle id="form-dialog-title">Create a new {label}</DialogTitle>
+          <DialogTitle id="form-dialog-title">Create a new {label.toLowerCase()}</DialogTitle>
           <DialogContent>
             <FieldRow>
               <Field
@@ -140,7 +140,7 @@ const Autocomplete = ({
   inputRef,
   ...props
 }) => {
-  const typeLabel = useMemo(() => (label || "").replace(/s$/, ""), [label]);
+  const typeLabel = useMemo(() => (label || "").replace(/s$/, "").toLowerCase(), [label]);
   const {
     helperText: _helperText,
     inputProps: _inputProps,
