@@ -33,7 +33,7 @@ function Authentication() {
       error: {
         all: (context) => {
           if (context.error && context.error.name === "NotAuthenticated") {
-            displayError(context.error.message);
+            displayError(context.error);
             // setError(context.error.message);
 
             logout();
@@ -41,7 +41,7 @@ function Authentication() {
           } else {
             console.error(`Error in ${context.path} calling ${context.method} method`, context.error);
             if (!context.params.noDispatchError) {
-              displayError(context.error.message);
+              displayError(context.error);
               // setError(context.error.message);
               // dispatch("ERROR", { error: context.error.message });
             }

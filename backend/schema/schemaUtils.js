@@ -23,6 +23,7 @@ export const getOrdinal = (n) => {
 export const parseError = (name, _label) => (error) => {
   // Handle null/undefined
   const label = formatLabel(_label, name);
+  const labelIdentifier = label ? `${label}: ` : "";
   // console.log('PARSE ERROR', { name, label, _label, error });
 
   if (!error) {
@@ -31,7 +32,7 @@ export const parseError = (name, _label) => (error) => {
 
   // Handle string errors
   if (typeof error === "string") {
-    return `${label}: ${error}`;
+    return `${labelIdentifier}${error}`;
   }
 
   // Extract message from various error structures
@@ -55,7 +56,7 @@ export const parseError = (name, _label) => (error) => {
   if (message === "Invalid") {
     return `${label} is not valid`;
   }
-  return `${label}: ${message}`;
+  return `${labelIdentifier}${message}`;
 };
 
 export function isEmptyValue(value) {

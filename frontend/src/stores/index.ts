@@ -4,21 +4,13 @@ import { useCallback, useMemo } from "react";
 import useAppStore from "src/stores/appStore";
 import { queryStores, createQueryStore } from "src/stores/queryStore";
 import useSessionStore from "src/stores/sessionStore";
-
-const errorMessages = {
-  "jwt expired": "Your session has expired. Please log in again.",
-};
+import { parseError } from "src/utils/parseError";
 
 export {
   useAppStore,
   useSessionStore,
   queryStores,
   createQueryStore,
-};
-
-const parseError = (error: string | Error): string => {
-  const message = typeof error === "string" ? error : error.message || error.toString();
-  return errorMessages?.[message as keyof typeof errorMessages] || message;
 };
 
 export const useAuth = () => {
@@ -74,8 +66,9 @@ export const useAddNotification = () => {
 export const useDisplayError = () => {
   const displayNotification = useAppStore(state => state.addNotification);
 
-  return useCallback((error: string | Error) => {
-    const message = parseError(error)
+  return useCallback((error: unknown, prefix?: string) => {
+    const parsed = parseError(error);
+    const message = prefix ? `${prefix}: ${parsed}` : parsed;
     displayNotification({ severity: "error", message });
   }, [displayNotification]);
 };

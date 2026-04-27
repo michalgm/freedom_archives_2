@@ -217,7 +217,7 @@ function useFormManager({
         onUpdate && (await onUpdate(processed));
       } catch (error) {
         console.error(error);
-        displayError(`Error updating ${serviceDisplayName}: ${error}`);
+        displayError(error, `Error updating ${serviceDisplayName}`);
       }
       setLoading((l) => ({ ...l, update: false }));
     },
@@ -234,7 +234,7 @@ function useFormManager({
         onCreate && (await onCreate(processed));
       } catch (error) {
         console.error(error);
-        displayError(`Error creating ${serviceDisplayName}: ${error}`);
+        displayError(error, `Error creating ${serviceDisplayName}`);
       }
       setLoading((l) => ({ ...l, create: false }));
     },
@@ -251,7 +251,7 @@ function useFormManager({
         onDelete && (await onDelete(processed));
       } catch (error) {
         console.error(error);
-        displayError(`Error deleting ${serviceDisplayName}: ${error}`);
+        displayError(error, `Error deleting ${serviceDisplayName}`);
       }
       setLoading((l) => ({ ...l, delete: false }));
     },

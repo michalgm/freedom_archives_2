@@ -114,7 +114,7 @@ export function useAutocompleteOptions({
       });
       mergeFetchedData(data);
     } catch (e) {
-      displayError({ severity: "error", message: `Failed to load ${typeLabel}: ${e.message}` });
+      displayError(e, `Failed to load ${typeLabel}`);
     } finally {
       setLoading(false);
     }
@@ -170,7 +170,7 @@ export function useAutocompleteOptions({
 
         mergeFetchedData(data);
       } catch (e) {
-        displayError({ severity: "error", message: e.message });
+        displayError(e);
       } finally {
         setLoading(false);
       }
