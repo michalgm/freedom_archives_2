@@ -169,9 +169,40 @@ SET featured_records = (
   )
   FROM jsonb_array_elements(c.featured_records) AS elem
   LEFT JOIN freedom_archives.format_record_types frt
-    ON frt.list_item_id = (elem->>'format_id')::int
+    ON frt.list_item_id = (elem->>'primary_media_format_id')::int
 )
 WHERE featured_records IS NOT NULL;`);
+
+  await knex.raw(`UPDATE public_search.config c
+SET
+  VALUE=VALUE||(
+    SELECT
+      JSONB_BUILD_OBJECT(
+        'featured_records',
+        JSONB_AGG(
+          elem
+          ORDER BY
+            (elem->>'record_order')::INT
+        )
+      )
+    FROM
+      (
+        SELECT
+          elem-'primary_media_media_type'||JSONB_BUILD_OBJECT('record_type', frt.record_type) AS elem
+        FROM
+          (
+            SELECT
+              JSONB_ARRAY_ELEMENTS(VALUE->'featured_records') AS elem
+            FROM
+              public_search.config
+            WHERE
+              setting='topCollection'
+          ) a
+          LEFT JOIN freedom_archives.format_record_types frt ON frt.list_item_id=(elem->>'primary_media_format_id')::INT
+      )
+  )
+WHERE
+  setting='topCollection';`);
 
   await knex.raw(`UPDATE collections_snapshots c
 SET featured_records = (
@@ -182,7 +213,7 @@ SET featured_records = (
   )
   FROM jsonb_array_elements(c.featured_records) AS elem
   LEFT JOIN freedom_archives.format_record_types frt
-    ON frt.list_item_id = (elem->>'format_id')::int
+    ON frt.list_item_id = (elem->>'primary_media_format_id')::int
 )
 WHERE featured_records IS NOT NULL;`);
 

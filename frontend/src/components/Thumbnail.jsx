@@ -110,6 +110,18 @@ export default function Thumbnail({ item, src: _src, width = 75, alt = "", type:
   const recordNeedsIcon = type === "record" && !THUMBNAIL_MEDIA_TYPES.includes(media_type) && !!src;
   const collectionNeedsIcon = type === "collection" && !src;
   const show_icon = !mounted || brokenLink || recordNeedsIcon || collectionNeedsIcon;
+  // console.log({
+  //   item,
+  //   type,
+  //   media_type,
+  //   recordNeedsIcon,
+  //   collectionNeedsIcon,
+  //   show_icon,
+  //   src,
+  //   mounted,
+  //   brokenLink,
+  //   url: item?.url || item?.primary_media_url,
+  // });
 
   if (show_icon) {
     const Icon =
