@@ -15,7 +15,10 @@ function Breadcrumbs() {
   // const { state } = useStateValue();
   const location = useLocation();
 
-  const parts = location.pathname.replace(/^\/admin\//, "").split("/");
+  const parts = location.pathname
+    .replace(/^\/admin\/?/, "")
+    .split("/")
+    .filter(Boolean);
 
   const paths = [
     { link: "/admin/", title: "Freedom Archives Admin" },
@@ -33,6 +36,10 @@ function Breadcrumbs() {
   if (title && parts.length + 1 !== paths.length) {
     paths.push({ link: location.pathname, title });
   }
+  const titleString = paths
+    .filter(({ title }) => Boolean(title))
+    .map(({ title }) => title)
+    .join(" – ");
 
   return (
     <Box
@@ -63,7 +70,7 @@ function Breadcrumbs() {
         },
       }}
     >
-      <title>{paths.map(({ title }) => title).join(" – ")}</title>
+      <title>{titleString}</title>
       <Crumbs separator={<Icon>navigate_next</Icon>}>
         {paths.map(({ link, title }) => {
           return (
