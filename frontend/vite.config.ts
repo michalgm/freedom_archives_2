@@ -80,6 +80,19 @@ export default defineConfig(({ mode }) => ({
     // Use `workspace` field in Vitest < 3.2
     projects: [
       defineProject({
+        resolve: {
+          alias: { src: path.join(dirname, 'src') },
+        },
+        test: {
+          name: 'unit',
+          environment: 'jsdom',
+          globals: true,
+          setupFiles: ['./src/test-setup.js'],
+          include: ['src/**/*.test.{js,jsx,ts,tsx}'],
+          exclude: ['**/*.stories.test.*', 'src/App.test.jsx'],
+        },
+      }),
+      defineProject({
         // extends: true,
         plugins: [
           storybookTest({

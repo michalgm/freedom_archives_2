@@ -1,9 +1,15 @@
 import { describe, it, expect } from "vitest";
 import { parseError } from "../frontend/src/utils/parseError";
+import React from "react";
 
 describe("parseError", () => {
   it("returns a string as-is", () => {
     expect(parseError("something went wrong")).toBe("something went wrong");
+  });
+
+  it("returns a react element as-is", () => {
+    const element = React.createElement("span", null, "Error details");
+    expect(parseError(element)).toBe(element);
   });
 
   it("extracts message from an Error instance", () => {
