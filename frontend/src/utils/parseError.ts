@@ -1,8 +1,12 @@
+import { isValidElement, type ReactNode } from "react";
+
 const errorMessages: Record<string, string> = {
   "jwt expired": "Your session has expired. Please log in again.",
 };
 
-export const parseError = (error: unknown): string => {
+export const parseError = (error: unknown): ReactNode => {
+  if (isValidElement(error)) return error;
+
   let message: string;
   if (typeof error === "string") {
     message = error;

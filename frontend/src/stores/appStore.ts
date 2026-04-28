@@ -1,9 +1,10 @@
+import type { ReactNode } from 'react';
 import { create } from 'zustand';
 
 interface Notification {
     id: string;
     severity?: 'success' | 'info' | 'warning' | 'error';
-    message: string;
+    message: ReactNode;
     timeout?: number;
     keepOnNavigate?: boolean;
 }
