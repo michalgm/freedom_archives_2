@@ -322,8 +322,8 @@ function useFormManager({
       logger.log("TRANSFORMED", transformedInput);
       if (id != null) {
         if (!skipUpdatedCheck) {
-          const { date_modified, contributor_name } = await fetchEntity(id);
-          logger.log("CURRENT", { date_modified, contributor_name });
+          const { date_modified, contributor_name, contributor_username } = await fetchEntity(id);
+          logger.log("CURRENT", { date_modified, contributor_name, contributor_username, retrieveTime });
           const currentTime = dayjs(date_modified);
           // logger.log(currentTime.format(), retrieveTime.format());
           if (currentTime > retrieveTime) {
@@ -332,7 +332,7 @@ function useFormManager({
                 "span",
                 null,
                 "Unable to save your changes. This record was updated by ",
-                React.createElement("b", null, contributor_name),
+                React.createElement("b", null, contributor_name || contributor_username),
                 " on ",
                 React.createElement("b", null, currentTime?.format("LLLL")),
                 " after you began editing. Please refresh the page to view the latest version and manually reapply your changes.",
