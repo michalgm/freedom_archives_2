@@ -92,11 +92,11 @@
     "@eslint/js": "9.39.4",
     "@eslint/json": "^1.1.0",
     "@stylistic/eslint-plugin": "^5.10.0",
-    "@typescript-eslint/eslint-plugin": "^8.59.0",
-    "@typescript-eslint/parser": "^8.59.0",
+    "@typescript-eslint/eslint-plugin": "^8.59.1",
+    "@typescript-eslint/parser": "^8.59.1",
     "@vitest/ui": "^4.1.5",
     "axios": "^1.15.2",
-    "baseline-browser-mapping": "^2.10.23",
+    "baseline-browser-mapping": "^2.10.24",
     "browserslist": "^4.28.2",
     "concurrently": "^9.2.1",
     "eslint": "^9.39.4",
@@ -112,7 +112,7 @@
     "node-gyp": "^12.3.0",
     "nodemon": "^3.1.14",
     "sinon": "^19.0.5",
-    "typescript-eslint": "^8.59.0",
+    "typescript-eslint": "^8.59.1",
     "vitest": "^4.1.5"
   },
   "msw": {
