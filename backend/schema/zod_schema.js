@@ -49,7 +49,7 @@ const usersSchema = z.object({
     .regex(/[^A-Za-z0-9]/, { error: "Password must contain at least one special character" })
     .nullable()
     .optional(),
-  firstname: z.string().nullable().optional(),
+  firstname: z.string(),
   lastname: z.string().nullable().optional(),
   role: z.enum(["staff", "intern", "administrator"]),
   active: z.boolean().default(true),
