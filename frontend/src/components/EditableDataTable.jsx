@@ -172,17 +172,23 @@ export const EditableDataTable = ({
         setEditRow(id);
       } else if (action === "save") {
         const updatedRow = apiRef.current.getRowWithUpdatedValues(id);
-        await Promise.all(
-          columns
-            .filter((col) => col.editable)
-            .map((col) =>
-              apiRef.current.setEditCellValue({
-                id,
-                field: col.field,
-                value: updatedRow[col.field],
+        try {
+          await Promise.allSettled(
+            columns
+              .filter(
+                (col) => col.editable && apiRef.current.isCellEditable(apiRef.current.getCellParams(id, col.field)),
+              )
+              .map(async (col) => {
+                await apiRef.current.setEditCellValue({
+                  id,
+                  field: col.field,
+                  value: updatedRow[col.field],
+                });
               }),
-            ),
-        );
+          );
+        } catch (err) {
+          console.error("Error updating cell values", err);
+        }
         apiRef.current.stopRowEditMode({ id });
       } else {
         apiRef.current.stopRowEditMode({ id, ignoreModifications: action === "cancel" });
